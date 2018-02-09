@@ -71,19 +71,27 @@ control plane.
 For further information on how to design and integrate such accelerators,
 see `ips/hwpe-stream/doc` and https://arxiv.org/abs/1612.05974.
 
-## Getting Started: basic simulation
+## Getting Started
 
+### Prerequisites
+To be able to use the PULPissimo platform, you need to have installed 
+development kit for PULP/PULPissimo. The instructions can be found here:
+https://github.com/pulp-platform/pulp-sdk/blob/master/README.md
+The recommended flow to build the SDK is described in section *SDK build with
+independent dependencies build*.
+
+Please note that you have to set up an account in GitHub and upload your SSH
+public key to install the SDK. You can find detailed instructions on how to do
+that here: https://help.github.com/articles/connecting-to-github-with-ssh/
+
+### Building the RTL simulation platform
 To build the RTL simulation platform, start by getting the latest version of the
 IPs composing the PULP system:
 ```
 ./update-ips
 ```
 This will download all the required IPs, solve dependencies and generate the
-scripts by calling `./generate-scripts`. After that, you have build the software
-development kit for PULP/PULPissimo. The instructions can be found here:
-https://github.com/pulp-platform/pulp-sdk/blob/master/README.md
-The recommended flow to build the SDK is described in section *SDK build with
-independent dependencies build*.
+scripts by calling `./generate-scripts`. 
 
 After having access to the SDK, you can build the simulation platform by doing
 the following:
@@ -95,6 +103,8 @@ make clean lib build opt
 This command builds a version of the simulation platform with no dependencies on
 external models for peripherals. See below (Proprietary verification IPs) for
 details on how to plug in some models of real SPI, I2C, I2S peripherals.
+
+### Downloading and running tests
 Finally, you can download and run the tests; for that you can checkout the
 following repositories:
 
@@ -174,8 +184,7 @@ important to know:
 - By default, the IPs will be collected from GitHub using HTTPS. This makes it
   possible for everyone to clone them without first uploading an SSH key to
   GitHub. However, for development it is often easier to use SSH instead,
-  particularly
-  if you want to push changes back.
+  particularly if you want to push changes back.
   To enable this, just replace `https://github.com` with `git@github.com` in the
   `ipstools_cfg.py` configuration file in the root of this repository.
 
