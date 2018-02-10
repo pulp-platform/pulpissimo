@@ -165,8 +165,9 @@ repository is structured as follows:
 The RTL platform has the following requirements:
 - Relatively recent Linux-based operating system; we tested *Ubuntu 16.04* and
   *CentOS 7*.
-- ModelSim in reasonably recent version (we tested it with version 10.6b)
-- Python 3.4
+- ModelSim in reasonably recent version (we tested it with version *10.6b*).
+- Python 3.4, with the `pyyaml` module installed (you can get that with
+  `pip3 install pyyaml`).
 - The SDK has its own dependencies, listed in
   https://github.com/pulp-platform/pulp-sdk/blob/master/README.md
 
@@ -180,7 +181,8 @@ important to know:
 - Do not assume that the `master` branch of an arbitrary IP is stable; many
   internal IPs could include unstable changes at a certain point of their
   history. Conversely, in top-level platforms (`pulpissimo`, `pulp`) we always
-  refer to *stable* versions of the IPs.
+  use *stable* versions of the IPs. Therefore, you should be able to use the
+  `master` branch of `pulpissimo` safely.
 - By default, the IPs will be collected from GitHub using HTTPS. This makes it
   possible for everyone to clone them without first uploading an SSH key to
   GitHub. However, for development it is often easier to use SSH instead,

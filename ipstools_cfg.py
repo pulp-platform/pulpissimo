@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Francesco Conti <f.conti@unibo.it>
 #
 # Copyright (C) 2016-2018 ETH Zurich, University of Bologna.
