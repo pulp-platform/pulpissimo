@@ -12,6 +12,7 @@ execute("mkdir -p sim/vcompile/rtl")
 execute("rm -rf sim/vcompile/rtl/*")
 execute("mkdir -p sim/vcompile/tb")
 execute("rm -rf sim/vcompile/tb/*")
+execute("mkdir -p fpga/tcl")
 
 # creates an IPApproX database
 ipdb = ipstools.IPDatabase(rtl_dir='rtl', ips_dir='ips', vsim_dir='sim', load_cache=True)
@@ -27,6 +28,15 @@ ipdb.generate_vsim_tcl("sim/tcl_files/config/vsim_rtl.tcl", source='rtl')
 # generate script to compile all IPs for ModelSim/QuestaSim
 ipdb.generate_makefile("sim/vcompile/ips.mk")
 ipdb.generate_makefile("sim/vcompile/rtl.mk", source='rtl')
+
+# generate FPGA scripts
+ipdb.export_vivado(script_path="fpga/tcl/ips_src_files.tcl")
+ipdb.generate_vivado_add_files("fpga/tcl/ips_add_files.tcl")
+ipdb.generate_vivado_inc_dirs("fpga/tcl/ips_inc_dirs.tcl")
+
+ipdb.export_vivado(script_path="fpga/tcl/rtl_src_files.tcl", source='rtl')
+ipdb.generate_vivado_add_files("fpga/tcl/rtl_add_files.tcl", source='rtl')
+ipdb.generate_vivado_inc_dirs("fpga/tcl/rtl_inc_dirs.tcl", source='rtl')
 
 print(tcolors.OK + "Generated new scripts for IPs!" + tcolors.ENDC)
 
