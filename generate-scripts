@@ -28,5 +28,6 @@ ipdb.generate_vsim_tcl("sim/tcl_files/config/vsim_rtl.tcl", source='rtl')
 ipdb.generate_makefile("sim/vcompile/ips.mk")
 ipdb.generate_makefile("sim/vcompile/rtl.mk", source='rtl')
 
-print tcolors.OK + "Generated new scripts for IPs!" + tcolors.ENDC
+print(tcolors.OK + "Generated new scripts for IPs!" + tcolors.ENDC)
+
 
