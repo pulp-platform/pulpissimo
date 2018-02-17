@@ -36,8 +36,8 @@ quietly set design_libs "\
 set sdkLib ""
 
 if {[info exists ::env(PULP_SDK_HOME)]} {
-  if {[file exists $::env(PULP_SDK_HOME)/install/ws/lib/libdpimodels]} {
-    set sdkLib "-sv_lib $::env(PULP_SDK_HOME)/install/ws/lib/libdpimodels $sdkLib"
+  if {[file exists $::env(PULP_SDK_HOME)/install/ws/lib/libpulpdpi.so]} {
+    set sdkLib "-sv_lib $::env(PULP_SDK_HOME)/install/ws/lib/libpulpdpi $sdkLib"
   }
 }
 

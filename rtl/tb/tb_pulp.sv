@@ -22,7 +22,13 @@ timeprecision 1ps;
 `define EXIT_FAIL     1
 `define EXIT_ERROR   -1
 
+
+
+
+
 module tb_pulp;
+
+   parameter CONFIG_FILE = "NONE";
 
    /* simulation platform parameters */
 
@@ -170,6 +176,23 @@ module tb_pulp;
 
    wire w_bootsel;
 
+   QSPI     qspi_0  ();
+   QSPI_CS  qspi_0_csn_0  ();
+   QSPI_CS  qspi_0_csn_1  ();
+
+   assign w_spi_master_sdio0 = qspi_0.data_0_out;
+   assign qspi_0.data_0_in = w_spi_master_sdio0;
+   assign w_spi_master_sdio1 = qspi_0.data_1_out;
+   assign qspi_0.data_1_in = w_spi_master_sdio1;
+   assign w_spi_master_sdio2 = qspi_0.data_2_out;
+   assign qspi_0.data_2_in = w_spi_master_sdio2;
+   assign w_spi_master_sdio3 = qspi_0.data_3_out;
+   assign qspi_0.data_3_in = w_spi_master_sdio3;
+   assign qspi_0.sck = w_spi_master_sck;
+   assign qspi_0_csn_0.csn = w_spi_master_csn0;
+   assign qspi_0_csn_1.csn = w_spi_master_csn1;
+
+
    /* DPI interfaces */
    I2S i2s[0:1] (
       {
@@ -254,6 +277,7 @@ module tb_pulp;
          );
       end
    endgenerate
+
 
    /* SPI flash model (not open-source, from Spansion) */
    generate
@@ -445,6 +469,14 @@ module tb_pulp;
    /* testbench driver process */
    initial
       begin
+
+         if (CONFIG_FILE != "NONE") begin
+            dpi_models::periph_wrapper i_spim_wrapper = new;
+            tb_driver::tb_driver i_tb_driver = new;
+
+            i_tb_driver.register_qspim_itf(0, qspi_0, {qspi_0_csn_0, qspi_0_csn_1});
+            i_tb_driver.build_from_json(CONFIG_FILE);
+         end
 
          force tb_pulp.i_dut.pad_frame_i.padinst_reset_n.O = 1'b0;
 
