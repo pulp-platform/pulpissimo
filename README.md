@@ -108,13 +108,12 @@ details on how to plug in some models of real SPI, I2C, I2S peripherals.
 Finally, you can download and run the tests; for that you can checkout the
 following repositories:
 
-Runtime tests: https://github.com/pulp-platform/pulp-tests/rt-tests
-Core tests: https://github.com/pulp-platform/riscv_tests
+Runtime tests: https://github.com/pulp-platform/pulp-rt-examples
 
 Now you can change directory to your favourite test e.g.: for an hello world
 test, run
 ```
-cd rt-tests/rt/quick/hello
+cd pulp-rt-examples/hello
 make clean all run
 ```
 The open-source simulation platform relies on JTAG to emulate preloading of the
