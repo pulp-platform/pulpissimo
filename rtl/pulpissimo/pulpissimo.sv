@@ -10,32 +10,11 @@
 
 module pulpissimo
 #(
-  parameter CORE_TYPE   = 0,
-            // 0 for RISCY, 1 for ZERORISCY, 2 for MICRORISCY
-  parameter USE_FPU     = 1
+  parameter CORE_TYPE   = 0, // 0 for RISCY, 1 for ZERORISCY, 2 for MICRORISCY
+  parameter USE_FPU     = 1,
+  parameter USE_HWPE    = 1
 )
 (
-`ifdef PULP_FPGA_EMUL
-   input  logic       zynq_safen_spim_i, // if 1, use SPI master to Zynq and not safe domain
-   input  logic       zynq_safen_uart_i, // if 1, use UART to Zynq and not safe domain
-   // signals for the interposer between safe domain and soc domain in FPGA emulator
-   output logic       zynq2soc_spim_sck_o,
-   output logic       zynq2soc_spim_csn_o,
-   output logic       zynq2soc_spim_sdo0_o,
-   output logic       zynq2soc_spim_sdo1_o,
-   output logic       zynq2soc_spim_sdo2_o,
-   output logic       zynq2soc_spim_sdo3_o,
-   input  logic       zynq2soc_spim_sdi0_i,
-   input  logic       zynq2soc_spim_sdi1_i,
-   input  logic       zynq2soc_spim_sdi2_i,
-   input  logic       zynq2soc_spim_sdi3_i,
-   output logic       zynq2soc_uart_tx_o,
-   input  logic       zynq2soc_uart_rx_i,
-   input  logic       zynq_clk_i,
-   input  logic       zynq_soc_clk_i,
-   input  logic       zynq_cluster_clk_i,
-   input  logic       zynq_rst_n_i,
-`endif
 
    inout  wire        pad_spim_sdio0,
    inout  wire        pad_spim_sdio1,
@@ -267,11 +246,6 @@ module pulpissimo
   logic                        s_uart_tx;
   logic                        s_uart_rx;
 
-`ifdef PULP_FPGA_EMUL
-  logic                        s_safe2soc_uart_tx;
-  logic                        s_safe2soc_uart_rx;
-`endif
-
   logic                        s_i2c0_scl_out;
   logic                        s_i2c0_scl_in;
   logic                        s_i2c0_scl_oe;
@@ -306,20 +280,6 @@ module pulpissimo
   logic                        s_spi_master0_sdo2;
   logic                        s_spi_master0_sdo3;
   logic [1:0]                  s_spi_master0_mode;
-
-`ifdef PULP_FPGA_EMUL
-  logic                        s_safe2soc_spi_master0_csn0;
-  logic                        s_safe2soc_spi_master0_csn1;
-  logic                        s_safe2soc_spi_master0_sck;
-  logic                        s_safe2soc_spi_master0_sdi0;
-  logic                        s_safe2soc_spi_master0_sdi1;
-  logic                        s_safe2soc_spi_master0_sdi2;
-  logic                        s_safe2soc_spi_master0_sdi3;
-  logic                        s_safe2soc_spi_master0_sdo0;
-  logic                        s_safe2soc_spi_master0_sdo1;
-  logic                        s_safe2soc_spi_master0_sdo2;
-  logic                        s_safe2soc_spi_master0_sdo3;
-`endif
 
   logic                        s_spi_master1_csn0;
   logic                        s_spi_master1_csn1;
@@ -390,11 +350,8 @@ module pulpissimo
   pad_frame pad_frame_i
   (
         .pad_cfg_i             ( s_pad_cfg              ),
-
-`ifndef PULP_FPGA_EMUL
         .ref_clk_o             ( s_ref_clk              ),
         .rstn_o                ( s_rstn                 ),
-`endif
         .jtag_tdo_i            ( s_jtag_tdo             ),
         .jtag_tck_o            ( s_jtag_tck             ),
         .jtag_tdi_o            ( s_jtag_tdi             ),
@@ -595,13 +552,8 @@ module pulpissimo
         .gpio_dir_i                 ( s_gpio_dir                  ),
         .gpio_cfg_i                 ( s_gpio_cfg                  ),
 
-`ifdef PULP_FPGA_EMUL
-        .uart_tx_i                  ( s_safe2soc_uart_tx          ),
-        .uart_rx_o                  ( s_safe2soc_uart_rx          ),
-`else
         .uart_tx_i                  ( s_uart_tx                   ),
         .uart_rx_o                  ( s_uart_rx                   ),
-`endif
 
         .i2c0_scl_out_i             ( s_i2c0_scl_out              ),
         .i2c0_scl_in_o              ( s_i2c0_scl_in               ),
@@ -628,20 +580,6 @@ module pulpissimo
         .i2s_ws1_out_i              ( s_i2s_ws1_out               ),
         .i2s_mode1_out_i            ( s_i2s_mode1_out             ),
 
-`ifdef PULP_FPGA_EMUL
-        .spi_master0_csn0_i         ( s_safe2soc_spi_master0_csn0 ),
-        .spi_master0_csn1_i         ( s_safe2soc_spi_master0_csn1 ),
-        .spi_master0_sck_i          ( s_safe2soc_spi_master0_sck  ),
-        .spi_master0_sdi0_o         ( s_safe2soc_spi_master0_sdi0 ),
-        .spi_master0_sdi1_o         ( s_safe2soc_spi_master0_sdi1 ),
-        .spi_master0_sdi2_o         ( s_safe2soc_spi_master0_sdi2 ),
-        .spi_master0_sdi3_o         ( s_safe2soc_spi_master0_sdi3 ),
-        .spi_master0_sdo0_i         ( s_safe2soc_spi_master0_sdo0 ),
-        .spi_master0_sdo1_i         ( s_safe2soc_spi_master0_sdo1 ),
-        .spi_master0_sdo2_i         ( s_safe2soc_spi_master0_sdo2 ),
-        .spi_master0_sdo3_i         ( s_safe2soc_spi_master0_sdo3 ),
-        .spi_master0_mode_i         ( s_safe2soc_spi_master0_mode ),
-`else
         .spi_master0_csn0_i         ( s_spi_master0_csn0          ),
         .spi_master0_csn1_i         ( s_spi_master0_csn1          ),
         .spi_master0_sck_i          ( s_spi_master0_sck           ),
@@ -654,7 +592,6 @@ module pulpissimo
         .spi_master0_sdo2_i         ( s_spi_master0_sdo2          ),
         .spi_master0_sdo3_i         ( s_spi_master0_sdo3          ),
         .spi_master0_mode_i         ( s_spi_master0_mode          ),
-`endif
         .spi_master1_csn0_i         ( 1'b1                        ),
         .spi_master1_csn1_i         ( 1'b1                        ),
         .spi_master1_sck_i          ( 1'b0                        ),
@@ -797,6 +734,7 @@ module pulpissimo
    soc_domain #(
       .CORE_TYPE          ( CORE_TYPE                ),
       .USE_FPU            ( USE_FPU                  ),
+      .USE_HWPE           ( USE_HWPE                 ),
       .AXI_ADDR_WIDTH     ( AXI_ADDR_WIDTH           ),
       .AXI_DATA_IN_WIDTH  ( AXI_DATA_WIDTH           ),
       .AXI_DATA_OUT_WIDTH ( AXI_DATA_WIDTH           ),
@@ -814,10 +752,6 @@ module pulpissimo
         .test_clk_i                   ( s_test_clk                       ),
 
         .rstn_glob_i                  ( s_rstn_por                       ),
-    `ifdef PULP_FPGA_EMUL
-        .zynq_soc_clk_i               ( zynq_soc_clk_i                   ),
-        .zynq_cluster_clk_i           ( zynq_cluster_clk_i               ),
-    `endif
 
         .sel_fll_clk_i                ( s_sel_fll_clk                    ),
 
@@ -1039,43 +973,6 @@ assign s_dma_pe_irq_valid               = '0;
 assign s_pf_evt_valid                   = '0;
 assign s_cluster_busy                   = '0;
 assign s_so                             = '0;
-
-`ifdef PULP_FPGA_EMUL
-  assign s_rstn    = zynq_rst_n_i;
-  assign s_ref_clk = zynq_clk_i;
-
-  // uart
-  //+ assign s_safe2soc_uart_tx = (zynq_safen_uart_i == 1'b1) ? zynq2soc_uart_tx_i : s_uart_tx; // safe -> soc
-  //+ assign zynq2soc_uart_rx_o = (zynq_safen_uart_i == 1'b1) ? s_uart_rx : 1'b0; // soc -> safe
-  //+ assign s_uart_rx          = (zynq_safen_uart_i == 1'b0) ? s_safe2soc_uart_rx : 1'b0;
-
-  // connect pulpchip uart pads or zynq uart wrapper
-  // zynq_safen_uart_i ==  0 - enable pulpchip pad connection
-  //                       1 - zynq wrapper connection
-  assign s_safe2soc_uart_tx          = ~zynq_safen_uart_i ? s_uart_tx : 1'b0;
-  assign s_uart_rx                   = ~zynq_safen_uart_i ? s_safe2soc_uart_rx : zynq2soc_uart_rx_i;
-
-  assign zynq2soc_uart_tx_o          = zynq_safen_uart_i ? s_uart_tx : 1'b0;
-
-  // spi master
-  assign zynq2soc_spim_sck_o         = (zynq_safen_spim_i == 1'b1) ? s_spi_master0_sck  : 1'b0;
-  assign zynq2soc_spim_csn_o         = (zynq_safen_spim_i == 1'b1) ? s_spi_master0_csn0 : 1'b0;
-  assign zynq2soc_spim_sdo0_o        = (zynq_safen_spim_i == 1'b1) ? s_spi_master0_sdo0 : 1'b0;
-  assign zynq2soc_spim_sdo1_o        = (zynq_safen_spim_i == 1'b1) ? s_spi_master0_sdo1 : 1'b0;
-  assign zynq2soc_spim_sdo2_o        = (zynq_safen_spim_i == 1'b1) ? s_spi_master0_sdo2 : 1'b0;
-  assign zynq2soc_spim_sdo3_o        = (zynq_safen_spim_i == 1'b1) ? s_spi_master0_sdo3 : 1'b0;
-
-  assign s_safe2soc_spi_master0_sck  = (zynq_safen_spim_i == 1'b0) ? s_spi_master0_sck  : 1'b0;
-  assign s_safe2soc_spi_master0_csn0 = (zynq_safen_spim_i == 1'b0) ? s_spi_master0_csn0 : 1'b0;
-  assign s_safe2soc_spi_master0_sdo0 = (zynq_safen_spim_i == 1'b0) ? s_spi_master0_sdo0 : 1'b0;
-  assign s_safe2soc_spi_master0_sdo1 = (zynq_safen_spim_i == 1'b0) ? s_spi_master0_sdo1 : 1'b0;
-  assign s_safe2soc_spi_master0_sdo2 = (zynq_safen_spim_i == 1'b0) ? s_spi_master0_sdo2 : 1'b0;
-  assign s_safe2soc_spi_master0_sdo3 = (zynq_safen_spim_i == 1'b0) ? s_spi_master0_sdo3 : 1'b0;
-  assign s_spi_master0_sdi0          = (zynq_safen_spim_i == 1'b1) ? zynq2soc_spim_sdi0_i : s_safe2soc_spi_master0_sdi0;
-  assign s_spi_master0_sdi1          = (zynq_safen_spim_i == 1'b1) ? zynq2soc_spim_sdi1_i : s_safe2soc_spi_master0_sdi1;
-  assign s_spi_master0_sdi2          = (zynq_safen_spim_i == 1'b1) ? zynq2soc_spim_sdi2_i : s_safe2soc_spi_master0_sdi2;
-  assign s_spi_master0_sdi3          = (zynq_safen_spim_i == 1'b1) ? zynq2soc_spim_sdi3_i : s_safe2soc_spi_master0_sdi3;
-`endif
 
 endmodule
 

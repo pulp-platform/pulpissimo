@@ -217,6 +217,64 @@ module pad_frame
     pad_functional_pd padinst_i2c0_scl   (.OEN(~oe_i2c0_scl_i  ), .I(out_i2c0_scl_i  ), .O(in_i2c0_scl_o  ), .PAD(pad_i2c0_scl  ), .PEN(~pad_cfg_i[8][0] ) );
 
     pad_functional_pu padinst_reset_n    (.OEN(1'b1            ), .I(                ), .O(rstn_o         ), .PAD(pad_reset_n   ), .PEN(1'b1             ) );
+
+`ifndef PULP_FPGA_EMUL
     pad_functional_pu padinst_ref_clk    (.OEN(1'b1            ), .I(                ), .O(ref_clk_o      ), .PAD(pad_xtal_in   ), .PEN(1'b1             ) );
+`else
+    
+    wire ref_clk_int, ref_clk_pad, ref_clk;
+    wire clk1, clk2, clk3, clk4, clk5, clkfb, lock;
+
+    pad_functional_pu padinst_ref_clk    (.OEN(1'b1            ), .I(                ), .O(ref_clk_pad    ), .PAD(pad_xtal_in   ), .PEN(1'b1             ) );
+    BUFG i_buf ( .O(ref_clk_int), .I(ref_clk_pad) );
+    
+    PLLE2_BASE #(
+        .BANDWIDTH          ( "OPTIMIZED" ),
+        .CLKFBOUT_MULT      ( 2           ),
+        .CLKFBOUT_PHASE     ( 0.0         ),
+        .CLKIN1_PERIOD      ( 10.0        ),
+        .CLKOUT0_DIVIDE     ( 128         ), // 200 MHz / 128 = 1.5625 MHz
+        .CLKOUT1_DIVIDE     ( 1           ),
+        .CLKOUT2_DIVIDE     ( 1           ),
+        .CLKOUT3_DIVIDE     ( 1           ),
+        .CLKOUT4_DIVIDE     ( 1           ),
+        .CLKOUT5_DIVIDE     ( 1           ),
+        .CLKOUT0_DUTY_CYCLE ( 0.5         ),
+        .CLKOUT1_DUTY_CYCLE ( 0.5         ),
+        .CLKOUT2_DUTY_CYCLE ( 0.5         ),
+        .CLKOUT3_DUTY_CYCLE ( 0.5         ),
+        .CLKOUT4_DUTY_CYCLE ( 0.5         ),
+        .CLKOUT5_DUTY_CYCLE ( 0.5         ),
+        .CLKOUT0_PHASE      ( 0.0         ),
+        .CLKOUT1_PHASE      ( 0.0         ),
+        .CLKOUT2_PHASE      ( 0.0         ),
+        .CLKOUT3_PHASE      ( 0.0         ),
+        .CLKOUT4_PHASE      ( 0.0         ),
+        .CLKOUT5_PHASE      ( 0.0         ),
+        .DIVCLK_DIVIDE      ( 48          ), // 1.5625 MHz / 48 = 32.55 kHz
+        .REF_JITTER1        ( 0.0         ),
+        .STARTUP_WAIT       ( "TRUE"      )
+    ) i_pll_pad_inst (
+        .CLKOUT0  ( ref_clk     ),
+        .CLKOUT1  ( clk1        ),
+        .CLKOUT2  ( clk2        ),
+        .CLKOUT3  ( clk3        ),
+        .CLKOUT4  ( clk4        ),
+        .CLKOUT5  ( clk5        ),
+        .CLKFBOUT ( clkfb       ),
+        .LOCKED   ( lock        ),
+        .CLKIN1   ( ref_clk_int ),
+        .PWRDWN   ( 1'b0        ),
+        .RST      ( ~rstn_o     ),
+        .CLKFBIN  ( clkfb       )
+    );
+
+    BUFGCE i_bufgce (
+       .O  ( ref_clk_o ),
+       .CE ( lock      ),
+       .I  ( ref_clk   )
+    );
+    
+`endif
 
 endmodule // pad_frame

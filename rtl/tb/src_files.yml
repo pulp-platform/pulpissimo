@@ -1,4 +1,7 @@
 tb:
+  targets: [
+    rtl
+  ]
   files: [
     jtag_pkg.sv,
     dbg_pkg.sv,
