@@ -126,6 +126,14 @@ make conf gui=1
 ```
 before starting the simulation.
 
+If you want to save a (compressed) VCD for further examination, type
+```
+make conf vsim/script=export_run.tcl
+```
+before starting the simulation. You will find the VCD in
+`build/<SRC_FILE_NAME>/pulpissimo/export.vcd.gz` where 
+`<SRC_FILE_NAME>` is the name of the C source of the test.
+
 ## Proprietary verification IPs
 The full simulation platform can take advantage of a few models of commercial
 SPI, I2C, I2S peripherals to attach to the open-source PULP simulation platform.
