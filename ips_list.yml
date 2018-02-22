@@ -20,6 +20,6 @@
 
 pulp_soc:
   commit: master
-  server: git@github.com
+  server: https://github.com
   group:  pulp-platform
 
