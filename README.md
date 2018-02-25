@@ -1,6 +1,8 @@
 # PULPissimo
 
-![](doc/pulpissimo_archi.png?raw=true)
+<center>
+  <a href="url"><img src="doc/pulpissimo_archi.png?raw=true" align="center" width="600px" ></a>
+</center>
 
 PULPissimo is the microcontroller architecture of the more recent PULP chips,
 part of the ongoing "PULP platform" collaboration between ETH Zurich and the
