@@ -38,7 +38,7 @@ def execute_out(cmd, silent=False):
 if os.path.exists("ipstools") and os.path.isdir("ipstools"):
     cwd = os.getcwd()
     os.chdir("ipstools")
-    #execute("git pull", silent=True)
+    execute("git pull", silent=True)
     os.chdir(cwd)
     import ipstools
 else:

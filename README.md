@@ -1,5 +1,7 @@
 # PULPissimo
 
+![](doc/pulpissimo_archi.png)
+
 PULPissimo is the microcontroller architecture of the more recent PULP chips,
 part of the ongoing "PULP platform" collaboration between ETH Zurich and the
 University of Bologna - started in 2013.
@@ -74,7 +76,7 @@ see `ips/hwpe-stream/doc` and https://arxiv.org/abs/1612.05974.
 ## Getting Started
 
 ### Prerequisites
-To be able to use the PULPissimo platform, you need to have installed 
+To be able to use the PULPissimo platform, you need to have installed the software
 development kit for PULP/PULPissimo. The instructions can be found here:
 https://github.com/pulp-platform/pulp-sdk/blob/master/README.md
 The recommended flow to build the SDK is described in section *SDK build with
@@ -126,6 +128,14 @@ make conf gui=1
 ```
 before starting the simulation.
 
+If you want to save a (compressed) VCD for further examination, type
+```
+make conf vsim/script=export_run.tcl
+```
+before starting the simulation. You will find the VCD in
+`build/<SRC_FILE_NAME>/pulpissimo/export.vcd.gz` where 
+`<SRC_FILE_NAME>` is the name of the C source of the test.
+
 ## Proprietary verification IPs
 The full simulation platform can take advantage of a few models of commercial
 SPI, I2C, I2S peripherals to attach to the open-source PULP simulation platform.
@@ -164,7 +174,8 @@ repository is structured as follows:
 The RTL platform has the following requirements:
 - Relatively recent Linux-based operating system; we tested *Ubuntu 16.04* and
   *CentOS 7*.
-- ModelSim in reasonably recent version (we tested it with version *10.6b*).
+- Mentor ModelSim in reasonably recent version (we tested it with version *10.6b*
+-- the free version provided by Altera is only partially working, see issue #12).
 - Python 3.4, with the `pyyaml` module installed (you can get that with
   `pip3 install pyyaml`).
 - The SDK has its own dependencies, listed in
