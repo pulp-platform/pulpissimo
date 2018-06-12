@@ -411,7 +411,7 @@ package dbg_pkg;
 
    class dbg_if_soc_t;
 
-      jtag_pkg::JTAG_reg #(.size(256), .instr({jtag_pkg::JTAG_SOC_AXIREG, jtag_pkg::JTAG_SOC_BYPASS})) jtag_soc_dbg;
+      jtag_pkg::JTAG_reg #(.size(256), .instr(jtag_pkg::JTAG_SOC_AXIREG)) jtag_soc_dbg;
       logic s_tdo;
 
       task init(

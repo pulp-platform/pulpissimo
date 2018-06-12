@@ -500,6 +500,23 @@ module tb_pulp;
             );
             #5us;
 
+            jtag_pkg::jtag_bypass_test(
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+            #5us;
+            
+            jtag_pkg::jtag_get_idcode(
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+            #5us;
             if(LOAD_L2 == "JTAG") begin
                $display("[TB] %t - Virtually removing ROM as JTAG boot was selected in testbench", $realtime);
                for(int i=0; i<2048; i++)
@@ -556,6 +573,20 @@ module tb_pulp;
             $display("[SOC_CLK] %t - SOC_CLK Ready", $realtime);
 
             dbg_if_soc.init(s_tck, s_tms, s_trstn, s_tdi);
+
+            #50us;
+            dbg_if_soc.write32(32'h1A1040A0, 1, 32'hABBAABBA, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+            #50us;
+            dbg_if_soc.read32(32'h1A1040A0, 1, jtag_data, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+            #50us;
+            if(jtag_data[0] != 32'hABBAABBA)
+               $display("[JTAG] R/W of reg failed: %h != %h",jtag_data[0],32'hABBAABBA);
+            else
+               $display("[JTAG] R/W of reg succeeded");
+            dbg_if_soc.write32(32'h1A1040A0, 1, 32'h0, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+
+
             if(LOAD_L2 == "JTAG") begin
                $display("[TB] %t - Loading L2", $realtime);
                dbg_if_soc.write32(32'h1A104008, 1, 32'h0, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
