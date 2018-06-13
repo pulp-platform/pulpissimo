@@ -23,3 +23,7 @@ pulp_soc:
   server: https://github.com
   group:  pulp-platform
 
+tbtools:
+  commit: master
+  server: https://github.com
+  group:  pulp-platform
