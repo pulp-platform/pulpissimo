@@ -42,8 +42,8 @@ package jtag_pkg;
    parameter logic [3:0]  JTAG_CLUSTER_BYPASS         = 4'b1111;
    parameter int unsigned JTAG_CLUSTER_IDCODE_WIDTH   = 32;
 
-   parameter int unsigned JTAG_IDCODE_WIDTH = JTAG_CLUSTER_IDCODE_WIDTH+JTAG_SOC_IDCODE_WIDTH;
-   parameter int unsigned JTAG_INSTR_WIDTH  = JTAG_CLUSTER_INSTR_WIDTH+JTAG_SOC_INSTR_WIDTH;
+   parameter int unsigned JTAG_IDCODE_WIDTH = JTAG_SOC_IDCODE_WIDTH;
+   parameter int unsigned JTAG_INSTR_WIDTH  = JTAG_SOC_INSTR_WIDTH;
 
    task automatic jtag_wait_halfperiod(input int cycles);
       #(50000*cycles);
@@ -164,8 +164,8 @@ package jtag_pkg;
       );
          s_trstn = 1'b1;
          s_tms   = 1'b0;
-         for(int i=0; i<(JTAG_CLUSTER_INSTR_WIDTH+JTAG_SOC_INSTR_WIDTH); i=i+1) begin
-            if (i==(JTAG_CLUSTER_INSTR_WIDTH+JTAG_SOC_INSTR_WIDTH-1))
+         for(int i=0; i<JTAG_SOC_INSTR_WIDTH; i=i+1) begin
+            if (i==(JTAG_SOC_INSTR_WIDTH-1))
                  s_tms = 1'b1;
             s_tdi = instr[i];
             jtag_clock(1, s_tck);
@@ -268,11 +268,11 @@ package jtag_pkg;
       ref logic s_tdi,
       ref logic s_tdo
    );
-      automatic JTAG_reg #(.size(JTAG_IDCODE_WIDTH), .instr({JTAG_SOC_IDCODE,JTAG_CLUSTER_IDCODE})) jtag_idcode = new;
-      logic [63:0] s_idcode;
+      automatic JTAG_reg #(.size(JTAG_IDCODE_WIDTH), .instr(JTAG_SOC_IDCODE)) jtag_idcode = new;
+      logic [31:0] s_idcode;
       jtag_idcode.setIR(s_tck, s_tms, s_trstn, s_tdi);
       jtag_idcode.shift('0, s_idcode, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-      $display("JTAG: Tap0 ID: %h Tap1 ID: %h",s_idcode[63:32],s_idcode[31:0]);
+      $display("JTAG: Tap ID: %h",s_idcode[31:0]);
    endtask
 
    task automatic jtag_bypass_test(
@@ -282,19 +282,19 @@ package jtag_pkg;
       ref logic s_tdi,
       ref logic s_tdo
    );
-      automatic JTAG_reg #(.size(258), .instr({JTAG_SOC_BYPASS,JTAG_CLUSTER_BYPASS})) jtag_bypass = new;
-                logic [257:0] result_data;
-      automatic logic [257:0] test_data = {2'b0,32'hDEADBEEF, 32'h0BADF00D, 32'h01234567, 32'h89ABCDEF,
+      automatic JTAG_reg #(.size(255), .instr(JTAG_SOC_BYPASS)) jtag_bypass = new;
+                logic [255:0] result_data;
+      automatic logic [255:0] test_data = {     32'hDEADBEEF, 32'h0BADF00D, 32'h01234567, 32'h89ABCDEF,
                                                 32'hAAAABBBB, 32'hCCCCDDDD, 32'hEEEEFFFF, 32'h00001111};
       jtag_bypass.setIR(s_tck, s_tms, s_trstn, s_tdi);
       jtag_bypass.shift(test_data, result_data, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-      if (test_data[255:0] == result_data[257:2])
+      if (test_data[253:0] == result_data[254:1])
          $display("JTAG: Bypass Test Passed");
       else
       begin
          $display("JTAG: Bypass Test Failed");
          $display("JTAG:   LSB WORD TEST = %h",test_data[31:0]);
-         $display("JTAG:   LSB WORD RES  = %h",result_data[33:2]);
+         $display("JTAG:   LSB WORD RES  = %h",result_data[32:1]);
       end
    endtask
 
@@ -306,7 +306,7 @@ package jtag_pkg;
          ref logic s_trstn,
          ref logic s_tdi
       );
-         JTAG_reg #(.size(256), .instr({JTAG_SOC_CONFREG, JTAG_CLUSTER_BYPASS})) jtag_soc_dbg = new;
+         JTAG_reg #(.size(256), .instr(JTAG_SOC_CONFREG)) jtag_soc_dbg = new;
          jtag_soc_dbg.setIR(s_tck, s_tms, s_trstn, s_tdi);
          $display("[test_mode_if] %t - Init", $realtime);
       endtask
@@ -319,7 +319,7 @@ package jtag_pkg;
          ref logic s_tdi,
          ref logic s_tdo
       );
-         JTAG_reg #(.size(256), .instr({JTAG_SOC_CONFREG, JTAG_CLUSTER_BYPASS})) jtag_soc_dbg = new;
+         JTAG_reg #(.size(256), .instr(JTAG_SOC_CONFREG)) jtag_soc_dbg = new;
          logic [255:0] dataout;
          jtag_soc_dbg.start_shift(s_tck, s_tms, s_trstn, s_tdi);
          jtag_soc_dbg.shift_nbits(22, confreg, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
