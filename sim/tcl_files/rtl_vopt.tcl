@@ -25,7 +25,7 @@ set VSIM_RTL_LIBS [regsub -all -- "-L " $VSIM_RTL_LIBS $sub_str]
 
 if {[info exists ::env(VSIM_PATH)]} {
     #eval exec >@stdout vopt +acc=mnpr -o vopt_tb tb_pulp -floatparameters+tb_pulp -Ldir $::env(VSIM_PATH)/modelsim_libs $VSIM_IP_LIBS $VSIM_RTL_LIBS -work work  
-    eval exec >@stdout vopt +acc=mnpr -o vopt_tb tb_pulp -floatparameters+tb_pulp  $VSIM_IP_LIBS $VSIM_RTL_LIBS -work work 
+    eval exec >@stdout vopt -debugdb -fsmdebug +acc=mnpr -o vopt_tb tb_pulp -floatparameters+tb_pulp  $VSIM_IP_LIBS $VSIM_RTL_LIBS -work work 
 } else {
     eval exec >@stdout vopt +acc=mnpr -o vopt_pulp_chip pulp_chip $VSIM_IP_LIBS $VSIM_RTL_LIBS -work pulpissimo_lib
 }
