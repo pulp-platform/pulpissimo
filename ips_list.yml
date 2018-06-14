@@ -19,7 +19,7 @@
 #
 
 pulp_soc:
-  commit: master
+  commit: trace_debugger_dev
   server: https://github.com
   group:  pulp-platform
 
