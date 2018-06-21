@@ -35,11 +35,6 @@ module safe_domain
         input  logic             jtag_tdi_i           ,
         output logic             jtag_tdo_o           ,
 
-        output logic             soc_tck_o            ,
-        output logic             soc_trstn_o          ,
-        output logic             soc_tms_o            ,
-        output logic             soc_tdi_o            ,
-
         output logic             jtag_shift_dr_o      ,
         output logic             jtag_update_dr_o     ,
         output logic             jtag_capture_dr_o    ,
@@ -457,12 +452,6 @@ module safe_domain
         .tms_i                   ( jtag_tms_i             ),
         .td_i                    ( jtag_tdi_i             ),
         .td_o                    ( jtag_tdo_o             ),
-
-        .soc_tck_o               ( soc_tck_o              ),
-        .soc_trstn_o             ( soc_trstn_o            ),
-        .soc_tms_o               ( soc_tms_o              ),
-        .soc_tdi_o               ( soc_tdi_o              ),
-        .soc_tdo_i               ( axireg_tdo_i           ),
 
         .test_clk_i              ( s_test_clk             ),
         .test_rstn_i             ( s_rstn_sync            ),
