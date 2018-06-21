@@ -3,7 +3,7 @@
 \pulpissimo features a lightweight event and interrupt controller which supports
 vectorized interrupts and events of up to 32 lines.
 It contains a FIFO of events from the peripherals or SW events.
-When an interrupt is ready and it is enabled (not masked), the unit sends the 5bit ID to the core and the interrupt request line is raised up. If the core takes the interrupt, it replies with the ID of the interrupt taken and the acknoledge signal. The communication between the interrupt controller and the core is completly asynchronous.
+When an interrupt is ready and it is enabled (not masked), the unit sends the 5bit ID to the core and the interrupt request line is raised up. If the core takes the interrupt, it replies with the ID of the interrupt taken and the acknowledge signal. The communication between the interrupt controller and the core is completly asynchronous.
 Note that the interrupt controller can change the interrupt ID anytime but it must rely
 on the ID sent by the core to know which interrupt has been taken.
 This is an important feature that covers the situation where a higher priority interrupt request prevent another one that has been already sent to the core.
@@ -50,7 +50,7 @@ Depending on the core state and core interrupt enable, the interrupt can be acce
   \end{bytefield}
 }{
   \regItem{Bit 31:0}{MASK}{
-    This register contains the MASK (interrupt eneble) for each of the 32 interrupts or events. Writing to 0x1A10\_9004 sets the bits of the MASK register selected. Writing to 0x1A10\_9008 clears the bits of the MASK register selected.
+    This register contains the MASK (interrupt enable) for each of the 32 interrupts or events. Writing to 0x1A10\_9004 sets the bits of the MASK register selected. Writing to 0x1A10\_9008 clears the bits of the MASK register selected.
   }
 }
 
@@ -138,7 +138,7 @@ Depending on the core state and core interrupt enable, the interrupt can be acce
   \end{bytefield}
 }{
   \regItem{Bit 31:0}{ACK}{
-    This register contains the ACK (interrupt eneble) for each of the 32 interrupts or events. Writing to 0x1A10\_901C sets the bits of the ACK register selected. Writing to 0x1A10\_9020 clears the bits of the ACK register selected.
+    This register contains the ACK (interrupt enable) for each of the 32 interrupts or events. Writing to 0x1A10\_901C sets the bits of the ACK register selected. Writing to 0x1A10\_9020 clears the bits of the ACK register selected.
   }
 }
 
@@ -151,6 +151,6 @@ Depending on the core state and core interrupt enable, the interrupt can be acce
   \end{bytefield}
 }{
   \regItem{Bit 31-0}{FIFO\_DATA}{Fifo Content.\\
-    This is a read-only register that contain the firts valid value of the FIFO.
+    This is a read-only register that contain the first valid value of the FIFO.
   }
 }
