@@ -189,7 +189,7 @@ module tb_pulp;
          QSPI_CS  qspi_0_csn_0  ();
          QSPI_CS  qspi_0_csn_1  ();
 
-         assign s_rst_dpi_n   = ctrl.reset;
+         assign s_rst_dpi_n   = ~ctrl.reset;
 
          assign w_bridge_tck   = jtag.tck;
          assign w_bridge_tdi   = jtag.tdi;
@@ -213,7 +213,7 @@ module tb_pulp;
          initial
          begin
 
-            tb_driver::tb_driver i_tb_driver = new;
+            automatic tb_driver::tb_driver i_tb_driver = new;
 
             i_tb_driver.register_qspim_itf(0, qspi_0, {qspi_0_csn_0, qspi_0_csn_1});
             i_tb_driver.register_jtag_itf(0, jtag);
