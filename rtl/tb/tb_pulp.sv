@@ -22,13 +22,7 @@ timeprecision 1ps;
 `define EXIT_FAIL     1
 `define EXIT_ERROR   -1
 
-
-
-
-
 module tb_pulp;
-
-   parameter CONFIG_FILE = "NONE";
 
    /* simulation platform parameters */
 
@@ -53,10 +47,10 @@ module tb_pulp;
    parameter  ENABLE_DPI = 0;
 
    // enable DPI-based peripherals
-   parameter  ENABLE_DEV_DPI = 0;
+   parameter  ENABLE_DEV_DPI = 1;
 
    // enable DPI-based debug bridge
-   parameter  ENABLE_EXTERNAL_DRIVER = 0;
+   parameter  ENABLE_DEBUG_BRIDGE = 0;
 
    // UART baud rate in bps
    parameter  BAUDRATE = 625000;
@@ -107,7 +101,6 @@ module tb_pulp;
    // the w_/s_ prefixes are used to mean wire/tri-type and logic-type (respectively)
 
    logic                 s_rst_n = 1'b0;
-   logic                 s_rst_dpi_n;
    wire                  w_rst_n;
 
    logic                 s_clk_ref;
@@ -177,69 +170,49 @@ module tb_pulp;
 
    wire w_bootsel;
 
+   /* DPI interfaces */
+   I2S i2s[0:1] (
+      {
+         { w_i2s0_sdi, w_i2s0_ws, w_i2s0_sck },
+         { w_i2s1_sdi, w_i2s0_ws, w_i2s0_sck }
+      }
+   );
+   CPI cpi[0:0] (
+      { { w_cam_pclk, w_cam_hsync, w_cam_vsync, w_cam_data[0], w_cam_data[1], w_cam_data[2], w_cam_data[3], w_cam_data[4], w_cam_data[5], w_cam_data[6], w_cam_data[7] } }
+   );
+   GPIO gpio[0:31] (
+      {
+         { w_spi_master_sdio0 }, { w_spi_master_sdio1 }, { w_spi_master_sdio2 }, { w_spi_master_sdio3 },
+         { w_spi_master_csn0  }, { w_spi_master_csn1  }, { w_spi_master_sck   }, { w_uart_rx          },
+         { w_uart_tx          }, { w_cam_pclk       }, { w_cam_hsync      }, { w_cam_data[0]    },
+         { w_cam_data[1]    }, { w_cam_data[2]    }, { w_cam_data[3]    }, { w_cam_data[4]    },
+         { w_cam_data[5]    }, { w_cam_data[6]    }, { w_cam_data[7]    }, { w_cam_vsync      },
+         { s_hyper_ckn      }, { s_hyper_ck       }, { s_hyper_dq0      }, { s_hyper_dq1      },
+         { s_hyper_dq2      }, { s_hyper_dq3      }, { w_i2c0_sda       }, { w_i2c0_scl       },
+         { w_i2s0_sck       }, { w_i2s0_ws        }, { w_i2s0_sdi       }, { w_i2s1_sdi       }
+      }
+   );
+   JTAG jtag[0:0] (
+      { { w_bridge_tdo, w_bridge_trstn, w_bridge_tms, w_bridge_tdi, w_bridge_tck } }
+   );
 
-   generate 
-      if (CONFIG_FILE != "NONE") begin
-
-         CTRL     ctrl();
-
-         JTAG     jtag();
-
-         QSPI     qspi_0  ();
-         QSPI_CS  qspi_0_csn_0  ();
-         QSPI_CS  qspi_0_csn_1  ();
-
-         assign s_rst_dpi_n   = ~ctrl.reset;
-
-         assign w_bridge_tck   = jtag.tck;
-         assign w_bridge_tdi   = jtag.tdi;
-         assign w_bridge_tms   = jtag.tms;
-         assign w_bridge_trstn = jtag.trst;
-         assign jtag.tdo       = w_bridge_tdo;
-
-
-         assign w_spi_master_sdio0 = qspi_0.data_0_out;
-         assign qspi_0.data_0_in = w_spi_master_sdio0;
-         assign w_spi_master_sdio1 = qspi_0.data_1_out;
-         assign qspi_0.data_1_in = w_spi_master_sdio1;
-         assign w_spi_master_sdio2 = qspi_0.data_2_out;
-         assign qspi_0.data_2_in = w_spi_master_sdio2;
-         assign w_spi_master_sdio3 = qspi_0.data_3_out;
-         assign qspi_0.data_3_in = w_spi_master_sdio3;
-         assign qspi_0.sck = w_spi_master_sck;
-         assign qspi_0_csn_0.csn = w_spi_master_csn0;
-         assign qspi_0_csn_1.csn = w_spi_master_csn1;
-      
-         initial
-         begin
-
-            automatic tb_driver::tb_driver i_tb_driver = new;
-
-            i_tb_driver.register_qspim_itf(0, qspi_0, {qspi_0_csn_0, qspi_0_csn_1});
-            i_tb_driver.register_jtag_itf(0, jtag);
-            i_tb_driver.register_ctrl_itf(0, ctrl);
-            i_tb_driver.build_from_json(CONFIG_FILE);
-
-         end
-
-      end
-
-   endgenerate
-
-
+   if (!ENABLE_DEV_DPI) begin
+      bufif0 (weak1,weak0) (w_i2c0_sda,1'b1,1'b0);
+      bufif0 (weak1,weak0) (w_i2c0_scl,1'b1,1'b0);
+   end
 
    pullup sda1_pullup_i (w_i2c1_sda);
    pullup scl1_pullup_i (w_i2c1_scl);
 
-   assign w_rst_n   = (ENABLE_EXTERNAL_DRIVER == 1) ? s_rst_dpi_n : s_rst_n;
+   assign w_rst_n   = s_rst_n;
    assign w_clk_ref = s_clk_ref;
 
    assign s_cam_valid = 1'b0;
 
-   assign w_trstn      = (ENABLE_EXTERNAL_DRIVER == 1) ? w_bridge_trstn : s_trstn;
-   assign w_tck        = (ENABLE_EXTERNAL_DRIVER == 1) ? w_bridge_tck   : s_tck;
-   assign w_tdi        = (ENABLE_EXTERNAL_DRIVER == 1) ? w_bridge_tdi   : s_tdi;
-   assign w_tms        = (ENABLE_EXTERNAL_DRIVER == 1) ? w_bridge_tms   : s_tms;
+   assign w_trstn      = (jtag_mux == JTAG_DPI) ? s_vpi_trstn : (jtag_mux == JTAG_BRIDGE) ? w_bridge_trstn : s_trstn;
+   assign w_tck        = (jtag_mux == JTAG_DPI) ? s_vpi_tck   : (jtag_mux == JTAG_BRIDGE) ? w_bridge_tck   : s_tck;
+   assign w_tdi        = (jtag_mux == JTAG_DPI) ? s_vpi_tdi   : (jtag_mux == JTAG_BRIDGE) ? w_bridge_tdi   : s_tdi;
+   assign w_tms        = (jtag_mux == JTAG_DPI) ? s_vpi_tms   : (jtag_mux == JTAG_BRIDGE) ? w_bridge_tms   : s_tms;
    assign s_tdo        = w_tdo;
    assign w_bridge_tdo = w_tdo;
 
@@ -263,6 +236,24 @@ module tb_pulp;
       end
    endgenerate
 
+   /* DPI */
+   generate
+      if(ENABLE_DEV_DPI == 1) begin: dev_dpi
+         dev_dpi #(
+            .N_I2S_CHANNELS  ( 2  ),
+            .N_CPI_CHANNELS  ( 1  ),
+            .N_GPIO_CHANNELS ( 32 ),
+            .N_JTAG_CHANNELS ( 1  )
+         ) i_dev_dpi (
+            .en_i  ( dev_dpi_en ),
+            .i2s   ( i2s        ),
+            .cpi   ( cpi        ),
+            .gpio  ( gpio       ),
+            .jtag  ( jtag       ),
+            .reset ( s_rst_n    )
+         );
+      end
+   endgenerate
 
    /* SPI flash model (not open-source, from Spansion) */
    generate
@@ -457,12 +448,14 @@ module tb_pulp;
 
          force tb_pulp.i_dut.pad_frame_i.padinst_reset_n.O = 1'b0;
 
-         if (ENABLE_EXTERNAL_DRIVER == 0) begin
+         // force fetch enable to 0 when doing JTAG preload (not particularly clean, but works)
+         if(LOAD_L2 == "JTAG")
+            force tb_pulp.i_dut.soc_domain_i.pulp_soc_i.soc_peripherals_i.apb_soc_ctrl_i.r_fetchen = '0;
 
-            // force fetch enable to 0 when doing JTAG preload (not particularly clean,   but works)
-            if(LOAD_L2 == "JTAG")
-               force tb_pulp.i_dut.soc_domain_i.pulp_soc_i.soc_peripherals_i.apb_soc_ctrl_i.r_fetchen = '0;
-
+         if (ENABLE_DEBUG_BRIDGE) begin
+            jtag_mux = JTAG_BRIDGE;
+         end
+         else begin
             if (USE_FLL)
                $display("[TB] %t - Using FLL", $realtime);
             else
@@ -479,17 +472,16 @@ module tb_pulp;
                s_mode_select = 1'b0;
 
             $readmemh("./vectors/stim.txt", stimuli);  // read in the stimuli vectors  == address_value
-
          end
 
          $display("[TB] %t - Asserting hard reset", $realtime);
 
          #1ns
 
-         release tb_pulp.i_dut.pad_frame_i.padinst_reset_n.O;
+            release tb_pulp.i_dut.pad_frame_i.padinst_reset_n.O;
          uart_tb_rx_en   = 1'b1; // enable uart rx in testbench
 
-         if (ENABLE_EXTERNAL_DRIVER == 0) begin
+         if (ENABLE_DEBUG_BRIDGE == 0) begin
 
             automatic jtag_pkg::test_mode_if_t test_mode_if = new;
             automatic dbg_pkg::dbg_if_soc_t dbg_if_soc = new;
@@ -643,7 +635,7 @@ module tb_pulp;
             $stop;
 
          end
-         else begin // ENABLE_EXTERNAL_DRIVER != 0
+         else begin // ENABLE_DEBUG_BRIDGE != 0
             #1us
                dev_dpi_en <= 1;
          end

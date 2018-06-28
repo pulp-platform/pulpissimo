@@ -13,7 +13,7 @@ proc color {foreground text} {
 if {[catch {
   info exists $::env(VSIM_PATH)
 }]} {
-  puts [concat [color 1 "ERROR"] ": VSIM_PATH should be defined before building the RTL platform."]
+  puts [concat [color 1 "ERROR"] ": You should have the PULP SDK in your path before building the RTL platform."]
   exit 1
 }
 eval exec vlib $::env(VSIM_PATH)/modelsim_libs/tb_lib
