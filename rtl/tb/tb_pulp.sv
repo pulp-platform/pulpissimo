@@ -21,7 +21,7 @@ timeprecision 1ps;
 `define EXIT_SUCCESS  0
 `define EXIT_FAIL     1
 `define EXIT_ERROR   -1
-
+//`define USE_DPI      1
 
 
 
@@ -178,6 +178,7 @@ module tb_pulp;
    wire w_bootsel;
 
 
+   `ifdef USE_DPI
    generate 
       if (CONFIG_FILE != "NONE") begin
 
@@ -224,6 +225,7 @@ module tb_pulp;
       end
 
    endgenerate
+   `endif
 
 
 
