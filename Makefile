@@ -54,7 +54,7 @@ sdk:
 	fi; \
 	cd pulp-sdk; \
 	git checkout 2a9867f18414ca81981b205aea61160b9414aa4b; \
-	. configs/vega.sh; \
+	. configs/pulpissimo.sh; \
 	. configs/platform-rtl.sh; \
 	make distclean; \
 	make deps; \
