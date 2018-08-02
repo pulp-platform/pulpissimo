@@ -1,4 +1,3 @@
-
 SHELL=bash
 
 PKG_DIR ?= $(PWD)/install
