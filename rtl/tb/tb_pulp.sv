@@ -183,10 +183,9 @@ module tb_pulp;
       if (CONFIG_FILE != "NONE") begin
 
          CTRL     ctrl();
-
          JTAG     jtag();
-
          UART     uart();
+         CPI      cpi();
 
          QSPI     qspi_0  ();
          QSPI_CS  qspi_0_csn [1:0]  ();
@@ -214,6 +213,18 @@ module tb_pulp;
          assign qspi_0_csn[0].csn = w_spi_master_csn0;
          assign qspi_0_csn[1].csn = w_spi_master_csn1;
       
+         assign w_cam_pclk = cpi.pclk;
+         assign w_cam_hsync = cpi.href;
+         assign w_cam_vsync = cpi.vsync;
+         assign w_cam_data[0] = cpi.data[0];
+         assign w_cam_data[1] = cpi.data[1];
+         assign w_cam_data[2] = cpi.data[2];
+         assign w_cam_data[3] = cpi.data[3];
+         assign w_cam_data[4] = cpi.data[4];
+         assign w_cam_data[5] = cpi.data[5];
+         assign w_cam_data[6] = cpi.data[6];
+         assign w_cam_data[7] = cpi.data[7];
+
          initial
          begin
 
@@ -222,6 +233,7 @@ module tb_pulp;
             i_tb_driver.register_qspim_itf(0, qspi_0, qspi_0_csn);
             i_tb_driver.register_uart_itf(0, uart);
             i_tb_driver.register_jtag_itf(0, jtag);
+            i_tb_driver.register_cpi_itf(0, cpi);
             i_tb_driver.register_ctrl_itf(0, ctrl);
             i_tb_driver.build_from_json(CONFIG_FILE);
 
@@ -271,7 +283,6 @@ module tb_pulp;
       end
    endgenerate
 
-
    /* SPI flash model (not open-source, from Spansion) */
    generate
       if(USE_S25FS256S_MODEL == 1) begin
@@ -305,7 +316,7 @@ module tb_pulp;
       );
    end
 
-   if (!ENABLE_DEV_DPI) begin
+   if (!ENABLE_DEV_DPI && CONFIG_FILE == "NONE") begin
 
       /* CPI verification IP */
       if (!USE_SDVT_CPI) begin
