@@ -188,7 +188,7 @@ module tb_pulp;
          CPI      cpi();
 
          QSPI     qspi_0  ();
-         QSPI_CS  qspi_0_csn [1:0]  ();
+         QSPI_CS  qspi_0_csn [0:1]  ();
 
          assign s_rst_dpi_n   = ~ctrl.reset;
 
@@ -229,6 +229,11 @@ module tb_pulp;
          begin
 
             automatic tb_driver::tb_driver i_tb_driver = new;
+
+            qspi_0.data_0_out = 'bz;
+            qspi_0.data_1_out = 'bz;
+            qspi_0.data_2_out = 'bz;
+            qspi_0.data_3_out = 'bz;
 
             i_tb_driver.register_qspim_itf(0, qspi_0, qspi_0_csn);
             i_tb_driver.register_uart_itf(0, uart);
