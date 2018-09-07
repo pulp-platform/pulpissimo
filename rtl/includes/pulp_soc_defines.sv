@@ -127,4 +127,6 @@
 
 /* Interfaces have been moved to pulp_interfaces.sv. Sorry :) */
 
+// Trace debugger, uncomment to enable/instantiate it
+`define TRACE_DEBUGGER
 `endif
