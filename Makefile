@@ -48,21 +48,27 @@ install: $(INSTALL_HEADERS)
 vopt:
 	export VOPT_FLOW=1 && cd $(VSIM_PATH) && vsim -64 -c -do "source tcl_files/config/vsim.tcl; quit"
 
-all: checkout build install vopt
+sdk:
+	if [ ! -e pulp-sdk ]; then \
+	  git clone https://github.com/pulp-platform/pulp-sdk.git; \
+	fi; \
+	cd pulp-sdk; \
+	git checkout 2a9867f18414ca81981b205aea61160b9414aa4b; \
+	. configs/pulpissimo.sh; \
+	. configs/platform-rtl.sh; \
+	make distclean; \
+	make deps; \
+	make MODULES="--g runtime --m sdk_install" all env;
+
+
+all: checkout build install vopt sdk
 
 test-checkout:
-	./update-tests
+	cd pulp-sdk; \
+	source init.sh; \
+	source sourceme.sh; \
+	plpbuild --p tests checkout
 
-test:
-	source setup/sdk.sh && cd pulp-sdk && source init.sh && \
-	  plpbuild --p tests test --threads 32 --db \
-	    --db-info=$(CURDIR)/db_info.txt --stdout --branch=$(BRANCH) \
-	    --env=quentin_validation --commit=`git rev-parse HEAD`
-
-	source setup/sdk.sh && cd pulp-sdk && source init.sh && \
-	  plpdb tests --build=`cat $(CURDIR)/db_info.txt | grep tests.build.id= | sed s/tests.build.id=//` \
-	    --mail="Quentin regression report" --xls=report.xlsx --branch $(BRANCH) \
-	    --config=$$PULP_CURRENT_CONFIG --url=$(BUILD_URL) \
-	    --author-email=`git show -s --pretty=%ae` --env=quentin_validation && \
-	  plpdb check_reg --build=`cat $(CURDIR)/db_info.txt | grep tests.build.id= | sed s/tests.build.id=//` \
-	    --branch master --config=$$PULP_CURRENT_CONFIG --env=quentin_validation
+test:        
+	source pulp-sdk/sourceme.sh && cd pulp-sdk && source init.sh && \
+          plpbuild --p tests test --threads 16 --stdout

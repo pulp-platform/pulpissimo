@@ -35,12 +35,6 @@ quietly set design_libs "\
 
 set sdkLib ""
 
-if {[info exists ::env(PULP_SDK_HOME)]} {
-  if {[file exists $::env(PULP_SDK_HOME)/install/ws/lib/libpulpdpi.so]} {
-    set sdkLib "-sv_lib $::env(PULP_SDK_HOME)/install/ws/lib/libpulpdpi $sdkLib"
-  }
-}
-
 if {[info exists ::env(PULP_SIMCHECKER)]} {
   set sdkLib "-sv_lib $::env(PULP_SDK_HOME)/install/ws/lib/libri5cyv2sim $sdkLib"
 }

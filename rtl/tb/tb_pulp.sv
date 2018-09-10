@@ -21,7 +21,7 @@ timeprecision 1ps;
 `define EXIT_SUCCESS  0
 `define EXIT_FAIL     1
 `define EXIT_ERROR   -1
-
+//`define USE_DPI      1
 
 
 
@@ -178,6 +178,7 @@ module tb_pulp;
    wire w_bootsel;
 
 
+   `ifdef USE_DPI
    generate 
       if (CONFIG_FILE != "NONE") begin
 
@@ -186,10 +187,9 @@ module tb_pulp;
          JTAG     jtag();
 
          QSPI     qspi_0  ();
-         QSPI_CS  qspi_0_csn_0  ();
-         QSPI_CS  qspi_0_csn_1  ();
+         QSPI_CS  qspi_0_csn [1:0]  ();
 
-         assign s_rst_dpi_n   = ctrl.reset;
+         assign s_rst_dpi_n   = ~ctrl.reset;
 
          assign w_bridge_tck   = jtag.tck;
          assign w_bridge_tdi   = jtag.tdi;
@@ -207,15 +207,15 @@ module tb_pulp;
          assign w_spi_master_sdio3 = qspi_0.data_3_out;
          assign qspi_0.data_3_in = w_spi_master_sdio3;
          assign qspi_0.sck = w_spi_master_sck;
-         assign qspi_0_csn_0.csn = w_spi_master_csn0;
-         assign qspi_0_csn_1.csn = w_spi_master_csn1;
+         assign qspi_0_csn[0].csn = w_spi_master_csn0;
+         assign qspi_0_csn[1].csn = w_spi_master_csn1;
       
          initial
          begin
 
-            tb_driver::tb_driver i_tb_driver = new;
+            automatic tb_driver::tb_driver i_tb_driver = new;
 
-            i_tb_driver.register_qspim_itf(0, qspi_0, {qspi_0_csn_0, qspi_0_csn_1});
+            i_tb_driver.register_qspim_itf(0, qspi_0, qspi_0_csn);
             i_tb_driver.register_jtag_itf(0, jtag);
             i_tb_driver.register_ctrl_itf(0, ctrl);
             i_tb_driver.build_from_json(CONFIG_FILE);
@@ -225,6 +225,7 @@ module tb_pulp;
       end
 
    endgenerate
+   `endif
 
 
 

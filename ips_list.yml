@@ -24,6 +24,6 @@ pulp_soc:
   group:  pulp-platform
 
 tbtools:
-  commit: 27ed9d291fb75c052f2e4d0df86be3604f25b6e7
+  commit: 06a31a41b90981ee5066e6559b7570c6e9d0edfe
   server: https://github.com
   group:  pulp-platform
