@@ -49,6 +49,8 @@ module tb_pulp;
    // how L2 is loaded. valid values are "JTAG" or "STANDALONE", the latter works only when USE_S25FS256S_MODEL is 1
    parameter  LOAD_L2 = "JTAG";
 
+   parameter  EXEC_TEST = "";
+
    // enable DPI-based JTAG
    parameter  ENABLE_DPI = 0;
 
@@ -102,6 +104,9 @@ module tb_pulp;
    logic jtag_enable;
 
    int                   exit_status = `EXIT_ERROR; // modelsim exit code, will be overwritten when successfull
+
+   jtag_pkg::test_mode_if_t test_mode_if = new;
+   dbg_pkg::dbg_if_soc_t    dbg_if_soc = new;
 
    /* system wires */
    // the w_/s_ prefixes are used to mean wire/tri-type and logic-type (respectively)
@@ -179,7 +184,7 @@ module tb_pulp;
 
 
    `ifdef USE_DPI
-   generate 
+   generate
       if (CONFIG_FILE != "NONE") begin
 
          CTRL     ctrl();
@@ -209,7 +214,7 @@ module tb_pulp;
          assign qspi_0.sck = w_spi_master_sck;
          assign qspi_0_csn[0].csn = w_spi_master_csn0;
          assign qspi_0_csn[1].csn = w_spi_master_csn1;
-      
+
          initial
          begin
 
@@ -492,8 +497,8 @@ module tb_pulp;
 
          if (ENABLE_EXTERNAL_DRIVER == 0) begin
 
-            automatic jtag_pkg::test_mode_if_t test_mode_if = new;
-            automatic dbg_pkg::dbg_if_soc_t dbg_if_soc = new;
+            //test_mode_if = new;
+            //dbg_if_soc   = new;
 
             jtag_pkg::jtag_reset(
                s_tck,
@@ -517,7 +522,7 @@ module tb_pulp;
                s_tdo
             );
             #5us;
-            
+
             jtag_pkg::jtag_get_idcode(
                s_tck,
                s_tms,
@@ -628,6 +633,12 @@ module tb_pulp;
 
             jtag_data[0] = 0;
 
+            if(EXEC_TEST == "JTAG_DEBUG") begin
+               $display("[TEST JTAG_DEBUG]",);
+               #1000us
+               debug_tests();
+            end
+
             // wait for end of computation signal
             $display("[TB] %t - Waiting for end of computation", $realtime);
             while(jtag_data[0][31] == 0) begin
@@ -719,5 +730,7 @@ module tb_pulp;
             is_Read[index]  = 0;
          end
       end
+
+      `include "tb_jtag_debug.sv"
 
 endmodule // tb_pulp
