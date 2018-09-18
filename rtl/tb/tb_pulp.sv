@@ -49,6 +49,8 @@ module tb_pulp;
    // how L2 is loaded. valid values are "JTAG" or "STANDALONE", the latter works only when USE_S25FS256S_MODEL is 1
    parameter  LOAD_L2 = "JTAG";
 
+   parameter  EXEC_TEST = "";
+
    // enable DPI-based JTAG
    parameter  ENABLE_DPI = 0;
 
@@ -102,6 +104,9 @@ module tb_pulp;
    logic jtag_enable;
 
    int                   exit_status = `EXIT_ERROR; // modelsim exit code, will be overwritten when successfull
+
+   jtag_pkg::test_mode_if_t test_mode_if = new;
+   dbg_pkg::dbg_if_soc_t    dbg_if_soc = new;
 
    /* system wires */
    // the w_/s_ prefixes are used to mean wire/tri-type and logic-type (respectively)
@@ -179,15 +184,16 @@ module tb_pulp;
 
 
    `ifdef USE_DPI
-   generate 
+   generate
       if (CONFIG_FILE != "NONE") begin
 
          CTRL     ctrl();
-
          JTAG     jtag();
+         UART     uart();
+         CPI      cpi();
 
          QSPI     qspi_0  ();
-         QSPI_CS  qspi_0_csn [1:0]  ();
+         QSPI_CS  qspi_0_csn [0:1]  ();
 
          assign s_rst_dpi_n   = ~ctrl.reset;
 
@@ -197,6 +203,8 @@ module tb_pulp;
          assign w_bridge_trstn = jtag.trst;
          assign jtag.tdo       = w_bridge_tdo;
 
+         assign w_uart_tx      = uart.tx;
+         assign uart.rx        = w_uart_rx;
 
          assign w_spi_master_sdio0 = qspi_0.data_0_out;
          assign qspi_0.data_0_in = w_spi_master_sdio0;
@@ -209,14 +217,32 @@ module tb_pulp;
          assign qspi_0.sck = w_spi_master_sck;
          assign qspi_0_csn[0].csn = w_spi_master_csn0;
          assign qspi_0_csn[1].csn = w_spi_master_csn1;
-      
+         assign w_cam_pclk = cpi.pclk;
+         assign w_cam_hsync = cpi.href;
+         assign w_cam_vsync = cpi.vsync;
+         assign w_cam_data[0] = cpi.data[0];
+         assign w_cam_data[1] = cpi.data[1];
+         assign w_cam_data[2] = cpi.data[2];
+         assign w_cam_data[3] = cpi.data[3];
+         assign w_cam_data[4] = cpi.data[4];
+         assign w_cam_data[5] = cpi.data[5];
+         assign w_cam_data[6] = cpi.data[6];
+         assign w_cam_data[7] = cpi.data[7];
+
          initial
          begin
 
             automatic tb_driver::tb_driver i_tb_driver = new;
 
+            qspi_0.data_0_out = 'bz;
+            qspi_0.data_1_out = 'bz;
+            qspi_0.data_2_out = 'bz;
+            qspi_0.data_3_out = 'bz;
+
             i_tb_driver.register_qspim_itf(0, qspi_0, qspi_0_csn);
+            i_tb_driver.register_uart_itf(0, uart);
             i_tb_driver.register_jtag_itf(0, jtag);
+            i_tb_driver.register_cpi_itf(0, cpi);
             i_tb_driver.register_ctrl_itf(0, ctrl);
             i_tb_driver.build_from_json(CONFIG_FILE);
 
@@ -244,7 +270,9 @@ module tb_pulp;
    assign s_tdo        = w_tdo;
    assign w_bridge_tdo = w_tdo;
 
-   assign w_uart_tx = w_uart_rx;
+   if (CONFIG_FILE == "NONE") begin
+      assign w_uart_tx = w_uart_rx;
+   end
    assign w_bootsel = 1'b0;
 
    /* JTAG DPI-based verification IP */
@@ -263,7 +291,6 @@ module tb_pulp;
          );
       end
    endgenerate
-
 
    /* SPI flash model (not open-source, from Spansion) */
    generate
@@ -286,17 +313,19 @@ module tb_pulp;
       end
    endgenerate
 
-   /* UART receiver */
-   uart_tb_rx #(
-      .BAUD_RATE ( BAUDRATE   ),
-      .PARITY_EN ( 0          )
-   ) i_rx_mod (
-      .rx        ( w_uart_rx       ),
-      .rx_en     ( uart_tb_rx_en ),
-      .word_done (               )
-   );
+   if (CONFIG_FILE == "NONE") begin
+      /* UART receiver */
+      uart_tb_rx #(
+         .BAUD_RATE ( BAUDRATE   ),
+         .PARITY_EN ( 0          )
+      ) i_rx_mod (
+         .rx        ( w_uart_rx       ),
+         .rx_en     ( uart_tb_rx_en ),
+         .word_done (               )
+      );
+   end
 
-   if (!ENABLE_DEV_DPI) begin
+   if (!ENABLE_DEV_DPI && CONFIG_FILE == "NONE") begin
 
       /* CPI verification IP */
       if (!USE_SDVT_CPI) begin
@@ -492,8 +521,8 @@ module tb_pulp;
 
          if (ENABLE_EXTERNAL_DRIVER == 0) begin
 
-            automatic jtag_pkg::test_mode_if_t test_mode_if = new;
-            automatic dbg_pkg::dbg_if_soc_t dbg_if_soc = new;
+            //test_mode_if = new;
+            //dbg_if_soc   = new;
 
             jtag_pkg::jtag_reset(
                s_tck,
@@ -517,7 +546,7 @@ module tb_pulp;
                s_tdo
             );
             #5us;
-            
+
             jtag_pkg::jtag_get_idcode(
                s_tck,
                s_tms,
@@ -628,6 +657,12 @@ module tb_pulp;
 
             jtag_data[0] = 0;
 
+            if(EXEC_TEST == "JTAG_DEBUG") begin
+               $display("[TEST JTAG_DEBUG]",);
+               #1000us
+               debug_tests();
+            end
+
             // wait for end of computation signal
             $display("[TB] %t - Waiting for end of computation", $realtime);
             while(jtag_data[0][31] == 0) begin
@@ -719,5 +754,7 @@ module tb_pulp;
             is_Read[index]  = 0;
          end
       end
+
+      `include "tb_jtag_debug.sv"
 
 endmodule // tb_pulp
