@@ -22,4 +22,7 @@ pulp_soc:
   commit: master
   server: https://github.com
   group:  pulp-platform
-
+udma/udma_link:
+  commit: master
+  server: git@iis-git.ee.ethz.ch
+  group:  weiwei.liao

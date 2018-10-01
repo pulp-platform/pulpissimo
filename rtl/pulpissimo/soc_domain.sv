@@ -69,6 +69,10 @@ module soc_domain #(
     output logic                             uart_tx_o,
     input  logic                             uart_rx_i,
 
+    output logic                             link_tx_o,
+    input  logic                             link_rx_i,
+
+ 
     input  logic                             cam_clk_i,
     input  logic [7:0]                       cam_data_i,
     input  logic                             cam_hsync_i,

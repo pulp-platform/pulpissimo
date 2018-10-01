@@ -31,11 +31,17 @@ module pulpissimo
    input  logic       zynq2soc_spim_sdi3_i,
    output logic       zynq2soc_uart_tx_o,
    input  logic       zynq2soc_uart_rx_i,
+
+
+  
    input  logic       zynq_clk_i,
    input  logic       zynq_soc_clk_i,
    input  logic       zynq_cluster_clk_i,
    input  logic       zynq_rst_n_i,
 `endif
+   
+   output  logic       link_tx_o,
+   input  logic       link_rx_i,
 
    inout  wire        pad_spim_sdio0,
    inout  wire        pad_spim_sdio1,
@@ -47,6 +53,9 @@ module pulpissimo
 
    inout  wire        pad_uart_rx,
    inout  wire        pad_uart_tx,
+
+
+ 
 
    inout  wire        pad_cam_pclk,
    inout  wire        pad_cam_hsync,
@@ -123,6 +132,9 @@ module pulpissimo
   logic s_out_spim_sck   ;
   logic s_out_uart_rx    ;
   logic s_out_uart_tx    ;
+
+
+
   logic s_out_cam_pclk   ;
   logic s_out_cam_hsync  ;
   logic s_out_cam_data0  ;
@@ -156,6 +168,9 @@ module pulpissimo
   logic s_in_spim_sck    ;
   logic s_in_uart_rx     ;
   logic s_in_uart_tx     ;
+
+ 
+
   logic s_in_cam_pclk    ;
   logic s_in_cam_hsync   ;
   logic s_in_cam_data0   ;
@@ -189,6 +204,9 @@ module pulpissimo
   logic s_oe_spim_sck    ;
   logic s_oe_uart_rx     ;
   logic s_oe_uart_tx     ;
+
+
+
   logic s_oe_cam_pclk    ;
   logic s_oe_cam_hsync   ;
   logic s_oe_cam_data0   ;
@@ -267,6 +285,8 @@ module pulpissimo
   logic                        s_uart_tx;
   logic                        s_uart_rx;
 
+
+ 
 `ifdef PULP_FPGA_EMUL
   logic                        s_safe2soc_uart_tx;
   logic                        s_safe2soc_uart_rx;
@@ -434,6 +454,8 @@ module pulpissimo
         .oe_uart_rx_i          ( s_oe_uart_rx           ),
         .oe_uart_tx_i          ( s_oe_uart_tx           ),
 
+      
+
         .out_spim_sdio0_i      ( s_out_spim_sdio0       ),
         .out_spim_sdio1_i      ( s_out_spim_sdio1       ),
         .out_spim_sdio2_i      ( s_out_spim_sdio2       ),
@@ -466,6 +488,8 @@ module pulpissimo
         .out_i2c0_scl_i        ( s_out_i2c0_scl         ),
         .out_uart_rx_i         ( s_out_uart_rx          ),
         .out_uart_tx_i         ( s_out_uart_tx          ),
+
+        
 
         .in_spim_sdio0_o       ( s_in_spim_sdio0        ),
         .in_spim_sdio1_o       ( s_in_spim_sdio1        ),
@@ -500,6 +524,9 @@ module pulpissimo
         .in_uart_rx_o          ( s_in_uart_rx           ),
         .in_uart_tx_o          ( s_in_uart_tx           ),
 
+     
+
+
         //EXT CHIP to PAD
         .pad_spim_sdio0        ( pad_spim_sdio0         ),
         .pad_spim_sdio1        ( pad_spim_sdio1         ),
@@ -533,6 +560,8 @@ module pulpissimo
         .pad_i2c0_scl          ( pad_i2c0_scl           ),
         .pad_uart_rx           ( pad_uart_rx            ),
         .pad_uart_tx           ( pad_uart_tx            ),
+
+      
 
         .pad_bootsel           ( pad_bootsel            ),
         .pad_reset_n           ( pad_reset_n            ),
@@ -602,6 +631,7 @@ module pulpissimo
         .uart_tx_i                  ( s_uart_tx                   ),
         .uart_rx_o                  ( s_uart_rx                   ),
 `endif
+     
 
         .i2c0_scl_out_i             ( s_i2c0_scl_out              ),
         .i2c0_scl_in_o              ( s_i2c0_scl_in               ),
@@ -698,6 +728,7 @@ module pulpissimo
         .out_uart_rx_o              ( s_out_uart_rx               ),
         .out_uart_tx_o              ( s_out_uart_tx               ),
 
+      
         .out_cam_pclk_o             ( s_out_cam_pclk              ),
         .out_cam_hsync_o            ( s_out_cam_hsync             ),
         .out_cam_data0_o            ( s_out_cam_data0             ),
@@ -734,6 +765,9 @@ module pulpissimo
 
         .in_uart_rx_i               ( s_in_uart_rx                ),
         .in_uart_tx_i               ( s_in_uart_tx                ),
+
+     
+
         .in_cam_pclk_i              ( s_in_cam_pclk               ),
         .in_cam_hsync_i             ( s_in_cam_hsync              ),
         .in_cam_data0_i             ( s_in_cam_data0              ),
@@ -770,6 +804,10 @@ module pulpissimo
 
         .oe_uart_rx_o               ( s_oe_uart_rx                ),
         .oe_uart_tx_o               ( s_oe_uart_tx                ),
+
+       
+
+
         .oe_cam_pclk_o              ( s_oe_cam_pclk               ),
         .oe_cam_hsync_o             ( s_oe_cam_hsync              ),
         .oe_cam_data0_o             ( s_oe_cam_data0              ),
@@ -851,6 +889,10 @@ module pulpissimo
 
         .uart_tx_o                    ( s_uart_tx                        ),
         .uart_rx_i                    ( s_uart_rx                        ),
+
+        .link_tx_o                    ( link_tx_o                         ),
+        .link_rx_i                    ( link_rx_i                         ),
+      
 
         .cam_clk_i                    ( s_cam_pclk                       ),
         .cam_data_i                   ( s_cam_data                       ),

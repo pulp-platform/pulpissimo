@@ -71,6 +71,8 @@ module safe_domain
         input  logic             uart_tx_i            ,
         output logic             uart_rx_o            ,
 
+     
+
         // I2C0
         input  logic             i2c0_scl_out_i       ,
         output logic             i2c0_scl_in_o        ,
@@ -161,6 +163,9 @@ module safe_domain
         output logic             out_sdio_data3_o     ,
         output logic             out_uart_rx_o        ,
         output logic             out_uart_tx_o        ,
+
+       
+
         output logic             out_cam_pclk_o       ,
         output logic             out_cam_hsync_o      ,
         output logic             out_cam_data0_o      ,
@@ -196,6 +201,9 @@ module safe_domain
         input logic              in_sdio_data3_i      ,
         input logic              in_uart_rx_i         ,
         input logic              in_uart_tx_i         ,
+
+      
+
         input logic              in_cam_pclk_i        ,
         input logic              in_cam_hsync_i       ,
         input logic              in_cam_data0_i       ,
@@ -230,6 +238,9 @@ module safe_domain
         output logic             oe_sdio_data3_o      ,
         output logic             oe_uart_rx_o         ,
         output logic             oe_uart_tx_o         ,
+
+    
+
         output logic             oe_cam_pclk_o        ,
         output logic             oe_cam_hsync_o       ,
         output logic             oe_cam_data0_o       ,
@@ -284,6 +295,9 @@ module safe_domain
 
         .uart_tx_i             ( uart_tx_i             ),
         .uart_rx_o             ( uart_rx_o             ),
+
+       
+
 
         .i2c0_scl_out_i        ( i2c0_scl_out_i        ),
         .i2c0_scl_in_o         ( i2c0_scl_in_o         ),
@@ -363,6 +377,8 @@ module safe_domain
         .out_sdio_data3_o      ( out_sdio_data3_o      ),
         .out_uart_rx_o         ( out_uart_rx_o         ),
         .out_uart_tx_o         ( out_uart_tx_o         ),
+
+      
         .out_cam_pclk_o        ( out_cam_pclk_o        ),
         .out_cam_hsync_o       ( out_cam_hsync_o       ),
         .out_cam_data0_o       ( out_cam_data0_o       ),
@@ -396,6 +412,8 @@ module safe_domain
         .in_sdio_data3_i       ( in_sdio_data3_i       ),
         .in_uart_rx_i          ( in_uart_rx_i          ),
         .in_uart_tx_i          ( in_uart_tx_i          ),
+
+       
         .in_cam_pclk_i         ( in_cam_pclk_i         ),
         .in_cam_hsync_i        ( in_cam_hsync_i        ),
         .in_cam_data0_i        ( in_cam_data0_i        ),
@@ -429,6 +447,9 @@ module safe_domain
         .oe_sdio_data3_o       ( oe_sdio_data3_o       ),
         .oe_uart_rx_o          ( oe_uart_rx_o          ),
         .oe_uart_tx_o          ( oe_uart_tx_o          ),
+
+      
+
         .oe_cam_pclk_o         ( oe_cam_pclk_o         ),
         .oe_cam_hsync_o        ( oe_cam_hsync_o        ),
         .oe_cam_data0_o        ( oe_cam_data0_o        ),

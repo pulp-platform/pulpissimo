@@ -125,6 +125,11 @@ module tb_pulp;
    tri                   w_uart_rx;
    tri                   w_uart_tx;
 
+   tri                   w_link_rx;
+   tri                   w_link_tx;
+
+  
+
    wire                  w_cam_pclk;
    wire [7:0]            w_cam_data;
    wire                  w_cam_hsync;
@@ -217,6 +222,10 @@ module tb_pulp;
    assign w_bridge_tdo = w_tdo;
 
    assign w_uart_tx = w_uart_rx;
+
+                          
+   assign w_link_rx= w_link_tx;
+
    assign w_bootsel = 1'b0;
 
    /* JTAG DPI-based verification IP */
@@ -407,6 +416,9 @@ module tb_pulp;
 
       .pad_uart_rx        ( w_uart_tx          ),
       .pad_uart_tx        ( w_uart_rx          ),
+
+       .link_tx_o(   w_link_tx        ),
+       .link_rx_i(    w_link_rx       ),
 
       .pad_cam_pclk       ( w_cam_pclk         ),
       .pad_cam_hsync      ( w_cam_hsync        ),
