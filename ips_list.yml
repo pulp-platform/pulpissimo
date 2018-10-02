@@ -19,7 +19,7 @@
 #
 
 pulp_soc:
-  commit: master
+  commit: serial_link_integration
   server: https://github.com
   group:  pulp-platform
 udma/udma_link:
