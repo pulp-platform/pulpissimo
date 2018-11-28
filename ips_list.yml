@@ -19,7 +19,7 @@
 #
 
 pulp_soc:
-  commit: master
+  commit: tags/pulpissimo-v1.0.1
   server: https://github.com
   group:  pulp-platform
 
