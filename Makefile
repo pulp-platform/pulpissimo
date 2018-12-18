@@ -58,7 +58,7 @@ sdk:
 	  git clone https://github.com/pulp-platform/pulp-sdk.git; \
 	fi; \
 	cd pulp-sdk; \
-	git checkout 2a9867f18414ca81981b205aea61160b9414aa4b; \
+	git checkout 52093849703efffc8c62ef740045a0295b5f779f; \
 	. configs/pulpissimo.sh; \
 	. configs/platform-rtl.sh; \
 	make distclean; \
