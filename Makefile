@@ -59,7 +59,7 @@ sdk:
 	fi; \
 	cd pulp-sdk; \
 	git checkout 52093849703efffc8c62ef740045a0295b5f779f; \
-	. configs/pulpissimo.sh; \
+	. configs/pulpissimo_v2.sh; \
 	. configs/platform-rtl.sh; \
 	make distclean; \
 	make deps; \
