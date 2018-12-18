@@ -48,6 +48,11 @@ install: $(INSTALL_HEADERS)
 vopt:
 	export VOPT_FLOW=1 && cd $(VSIM_PATH) && vsim -64 -c -do "source tcl_files/config/vsim.tcl; quit"
 
+import_bootcode:
+	cd sim/boot && objcopy --srec-len 1 --output-target=srec ${PULP_SDK_HOME}/install/bin/boot-pulpissimo boot-pulpissimo.s19
+	cd sim/boot && s19toboot.py boot-pulpissimo.s19 pulpissimo
+
+
 sdk:
 	if [ ! -e pulp-sdk ]; then \
 	  git clone https://github.com/pulp-platform/pulp-sdk.git; \
