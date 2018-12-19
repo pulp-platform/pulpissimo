@@ -19,7 +19,7 @@
 #
 
 pulp_soc:
-  commit: tb_riscv
+  commit: master
   server: https://github.com
   group:  pulp-platform
 
