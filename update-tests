@@ -7,7 +7,4 @@ fi
 
 cd pulp-sdk
 
-source init.sh
-source setup.sh
-
 plpbuild --p tests checkout

@@ -31,6 +31,7 @@ if {$rvcores ne ""} {
   }
   add wave -group "EX Stage"                                 $rvcores/ex_stage_i/*
   add wave -group "LSU"                                      $rvcores/load_store_unit_i/*
+  add wave -group "PMP"                                      $rvcores/pmp_unit_i/*
   add wave -group "CSR"                                      $rvcores/cs_registers_i/*
   add wave -group "Debug"                                    $rvcores/debug_unit_i/*
 }
