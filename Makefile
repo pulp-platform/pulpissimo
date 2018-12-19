@@ -49,10 +49,8 @@ vopt:
 	export VOPT_FLOW=1 && cd $(VSIM_PATH) && vsim -64 -c -do "source tcl_files/config/vsim.tcl; quit"
 
 import_bootcode:
-	@pushd sim/boot > /dev/null && \
-	objcopy --srec-len 1 --output-target=srec ${PULP_SDK_HOME}/install/bin/boot-pulpissimo boot-pulpissimo.s19 && \
-	s19toboot.py boot-pulpissimo.s19 pulpissimo && \
-	popd >/dev/null
+	cd sim/boot && objcopy --srec-len 1 --output-target=srec ${PULP_SDK_HOME}/install/bin/boot-pulpissimo boot-pulpissimo.s19
+	cd sim/boot && s19toboot.py boot-pulpissimo.s19 pulpissimo
 
 
 sdk:
@@ -60,8 +58,8 @@ sdk:
 	  git clone https://github.com/pulp-platform/pulp-sdk.git; \
 	fi; \
 	cd pulp-sdk; \
-	git checkout 2a9867f18414ca81981b205aea61160b9414aa4b; \
-	. configs/pulpissimo.sh; \
+	git checkout 52093849703efffc8c62ef740045a0295b5f779f; \
+	. configs/pulpissimo_v2.sh; \
 	. configs/platform-rtl.sh; \
 	make distclean; \
 	make deps; \
