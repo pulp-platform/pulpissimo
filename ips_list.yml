@@ -19,7 +19,7 @@
 #
 
 pulp_soc:
-  commit: tmp_fix_issue#56
+  commit: c14f53b0f568546f3d24eeb3db12b2e810a37716
   server: https://github.com
   group:  pulp-platform
 
