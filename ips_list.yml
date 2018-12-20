@@ -19,7 +19,7 @@
 #
 
 pulp_soc:
-  commit: master
+  commit: tmp_fix_issue#56
   server: https://github.com
   group:  pulp-platform
 
