@@ -70,11 +70,12 @@ sdk:
 all: checkout build install vopt sdk
 
 test-checkout:
-	cd pulp-sdk; \
-	source init.sh; \
-	source sourceme.sh; \
-	plpbuild --p tests checkout
+	git submodule update --init
 
-test:        
-	source pulp-sdk/sourceme.sh && cd pulp-sdk && source init.sh && \
-          plpbuild --p tests test --threads 16 --stdout
+test:
+	cd pulp-builder; \
+	. sdk-setup.sh; \
+	. configs/pulpissimo_v2.sh; \
+	. configs/rtl.sh; \
+	cd ..; \
+	plptest --threads 16 --stdout
