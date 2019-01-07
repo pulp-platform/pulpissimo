@@ -77,6 +77,6 @@ test:
 	. sdk-setup.sh; \
 	. configs/pulpissimo_v2.sh; \
 	. configs/rtl.sh; \
-	export PULP_RISCV_GCC_TOOLCHAIN=/usr/pack/pulpsdk-1.0-kgf/artifactory/pulp-sdk-release/pkg/
+	export PULP_RISCV_GCC_TOOLCHAIN=/usr/pack/pulpsdk-1.0-kgf/artifactory/pulp-sdk-release/pkg/pulp_riscv_gcc/1.0.9; \
 	cd ..; \
 	plptest --threads 16 --stdout
