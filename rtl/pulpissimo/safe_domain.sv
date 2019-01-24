@@ -8,6 +8,7 @@
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 
+import dm::*;
 
 `include "pulp_soc_defines.sv"
 
@@ -34,6 +35,9 @@ module safe_domain
         input  logic             jtag_tms_i           ,
         input  logic             jtag_tdi_i           ,
         output logic             jtag_tdo_o           ,
+
+        output logic             ndmreset_o           ,
+        output logic             dm_debug_req_o       ,
 
         output logic             jtag_shift_dr_o      ,
         output logic             jtag_update_dr_o     ,
@@ -445,6 +449,7 @@ module safe_domain
         .*
     );
 
+`ifdef USE_OLD_TAP
     jtag_tap_top jtag_tap_top_i
     (
         .tck_i                   ( jtag_tck_i             ),
@@ -467,6 +472,60 @@ module safe_domain
         .soc_jtag_reg_o          ( soc_jtag_reg_o         ),
         .sel_fll_clk_o           ( sel_fll_clk_o          )
     );
+`else
+
+    logic             jtag_req_valid;
+    logic             debug_req_ready;
+    logic             jtag_resp_ready;
+    logic             jtag_resp_valid;
+    dm::dmi_req_t     jtag_dmi_req;
+    dm::dmi_resp_t    debug_resp;
+    APB_BUS apb_debug_master ();
+    APB_BUS apb_debug_slave  ();
+
+    dmi_jtag i_dmi_jtag (
+        .clk_i            ( clk_i           ),
+        .rst_ni           ( rst_ni          ),
+        .testmode_i       ( 1'b0            ),
+        .dmi_req_o        ( jtag_dmi_req    ),
+        .dmi_req_valid_o  ( jtag_req_valid  ),
+        .dmi_req_ready_i  ( debug_req_ready ),
+        .dmi_resp_i       ( debug_resp      ),
+        .dmi_resp_ready_o ( jtag_resp_ready ),
+        .dmi_resp_valid_i ( jtag_resp_valid ),
+        .dmi_rst_no       (                 ), // not connected
+        .tck_i            ( jtag_tck_i      ),
+        .tms_i            ( jtag_tms_i      ),
+        .trst_ni          ( s_jtag_rstn     ),
+        .td_i             ( jtag_tdi_i      ),
+        .td_o             ( jtag_tdo_o      ),
+        .tdo_oe_o         (                 )
+    );
+
+    dm_top #(
+       // current implementation only supports 1 hart
+       .NrHarts           ( 1                    )
+    ) i_dm_top (
+
+       .clk_i             ( clk_i                ),
+       .rst_ni            ( rst_ni               ), // PoR
+       .testmode_i        ( 1'b0                 ),
+       .ndmreset_o        ( ndmreset_o           ),
+       .dmactive_o        (                      ), // active debug session
+       .debug_req_o       ( dm_debug_req_o       ),
+       .unavailable_i     ( '0                   ),
+       .apb_s_bus         ( apb_debug_master     ),
+       .apb_m_bus         ( apb_debug_slave      ),
+       .dmi_rst_ni        ( rst_ni               ),
+       .dmi_req_valid_i   ( jtag_req_valid       ),
+       .dmi_req_ready_o   ( debug_req_ready      ),
+       .dmi_req_i         ( jtag_dmi_req         ),
+       .dmi_resp_valid_o  ( jtag_resp_valid      ),
+       .dmi_resp_ready_i  ( jtag_resp_ready      ),
+       .dmi_resp_o        ( debug_resp           )
+    );
+
+`endif
 
 `ifndef PULP_FPGA_EMUL
     rstgen i_rstgen
@@ -480,13 +539,13 @@ module safe_domain
 `else
     assign s_rstn_sync = s_rstn;
 `endif
-    
+
     assign slow_clk_o = ref_clk_i;
-    
+
     assign s_rstn          = rst_ni;
     assign s_jtag_rstn     = jtag_trst_ni;
     assign rst_no          = s_rstn;
-    
+
     assign test_clk_o      = 1'b0;
     assign dft_cg_enable_o = 1'b0;
     assign test_mode_o     = 1'b0;

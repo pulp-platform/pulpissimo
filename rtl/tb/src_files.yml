@@ -7,4 +7,5 @@ tb:
     dpi_models/dpi_models.sv,
     tb_driver/tb_driver.sv,
     tb_pulp.sv,
+    SimJTAG.sv,
   ]

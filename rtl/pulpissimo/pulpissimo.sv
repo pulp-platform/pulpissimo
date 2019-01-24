@@ -96,7 +96,7 @@ module pulpissimo
   localparam AXI_USER_WIDTH             = 6;
   localparam AXI_CLUSTER_SOC_STRB_WIDTH = AXI_CLUSTER_SOC_DATA_WIDTH/8;
   localparam AXI_SOC_CLUSTER_STRB_WIDTH = AXI_SOC_CLUSTER_DATA_WIDTH/8;
-  
+
   localparam BUFFER_WIDTH               = 8;
   localparam EVENT_WIDTH                = 8;
 
@@ -567,6 +567,9 @@ module pulpissimo
         .jtag_shift_dr_o            ( s_jtag_shift_dr             ),
         .jtag_update_dr_o           ( s_jtag_update_dr            ),
         .jtag_capture_dr_o          ( s_jtag_capture_dr           ),
+
+        .ndmreset_o                 (                             ),
+        .dm_debug_req_o             (                             ),
 
         .axireg_sel_o               ( s_axireg_sel                ),
         .axireg_tdi_o               ( s_axireg_tdi                ),

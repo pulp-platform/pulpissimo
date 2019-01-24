@@ -182,6 +182,13 @@ module tb_pulp;
 
    wire w_bootsel;
 
+   logic [8:0] jtag_conf_reg, jtag_conf_rego; //22bits but actually only the last 9bits are used
+   localparam BEGIN_L2_INSTR = 32'h1C008080;
+   logic sim_tck;
+   logic sim_tms;
+   logic sim_tdi;
+   logic sim_trstn;
+   logic sim_tdo;
 
    `ifdef USE_DPI
    generate
@@ -263,10 +270,10 @@ module tb_pulp;
 
    assign s_cam_valid = 1'b0;
 
-   assign w_trstn      = (ENABLE_EXTERNAL_DRIVER == 1) ? w_bridge_trstn : s_trstn;
-   assign w_tck        = (ENABLE_EXTERNAL_DRIVER == 1) ? w_bridge_tck   : s_tck;
-   assign w_tdi        = (ENABLE_EXTERNAL_DRIVER == 1) ? w_bridge_tdi   : s_tdi;
-   assign w_tms        = (ENABLE_EXTERNAL_DRIVER == 1) ? w_bridge_tms   : s_tms;
+   assign w_trstn      = (ENABLE_EXTERNAL_DRIVER == 1) ? w_bridge_trstn : (jtag_enable ? sim_trstn    : s_trstn);
+   assign w_tck        = (ENABLE_EXTERNAL_DRIVER == 1) ? w_bridge_tck   : (jtag_enable ? sim_tck      : s_tck);
+   assign w_tdi        = (ENABLE_EXTERNAL_DRIVER == 1) ? w_bridge_tdi   : (jtag_enable ? sim_tdi      : s_tdi);
+   assign w_tms        = (ENABLE_EXTERNAL_DRIVER == 1) ? w_bridge_tms   : (jtag_enable ? sim_tms      : s_tms);
    assign s_tdo        = w_tdo;
    assign w_bridge_tdo = w_tdo;
 
@@ -486,12 +493,11 @@ module tb_pulp;
       begin
 
          force tb_pulp.i_dut.pad_frame_i.padinst_reset_n.O = 1'b0;
-
+         jtag_enable = 1'b0;
          if (ENABLE_EXTERNAL_DRIVER == 0) begin
 
             // force fetch enable to 0 when doing JTAG preload (not particularly clean,   but works)
             if(LOAD_L2 == "JTAG")
-               force tb_pulp.i_dut.soc_domain_i.pulp_soc_i.soc_peripherals_i.apb_soc_ctrl_i.r_fetchen = '0;
 
             if (USE_FLL)
                $display("[TB] %t - Using FLL", $realtime);
@@ -508,7 +514,7 @@ module tb_pulp;
             else
                s_mode_select = 1'b0;
 
-            $readmemh("./vectors/stim.txt", stimuli);  // read in the stimuli vectors  == address_value
+            $readmemh("/usr/scratch/larain5/pschiavo/pulpissimo/pulp-sdk/tests/riscv_tests/testPMP/build/pulpissimo/vectors/stim.txt", stimuli);  // read in the stimuli vectors  == address_value
 
          end
 
@@ -555,12 +561,14 @@ module tb_pulp;
                s_tdo
             );
             #5us;
+/*
             if(LOAD_L2 == "JTAG") begin
                $display("[TB] %t - Virtually removing ROM as JTAG boot was selected in testbench", $realtime);
                for(int i=0; i<2048; i++)
                   tb_pulp.i_dut.soc_domain_i.pulp_soc_i.boot_rom_i.rom_mem_i.MEM[i] = 32'h0;
             end
-
+*/
+/*
             test_mode_if.init(
                s_tck,
                s_tms,
@@ -568,81 +576,55 @@ module tb_pulp;
                s_tdi
             );
 
+            jtag_conf_reg = {USE_FLL ? 1'b0 : 1'b1, 6'b0, LOAD_L2 == "JTAG" ? 2'b11 : 2'b00};
+            $display("[TB] %t - jtag_conf_reg is %x", $realtime, jtag_conf_reg);
+
+
             $display("[TB] %t - Enabling clock out via jtag", $realtime);
-            if (USE_FLL) begin
-               test_mode_if.set_confreg(
-                  22'h000800,
-                  s_tck,
-                  s_tms,
-                  s_trstn,
-                  s_tdi,
-                  s_tdo
-               );
-            end else begin
-               test_mode_if.set_confreg(
-                  22'h200800,
-                  s_tck,
-                  s_tms,
-                  s_trstn,
-                  s_tdi,
-                  s_tdo
-               );
-            end
+            test_mode_if.set_confreg(
+               jtag_conf_reg,
+               jtag_conf_rego,
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+            $display("[TB] %t - jtag_conf_reg is %x and jtag_conf_rego is %x", $realtime, jtag_conf_reg, jtag_conf_rego);
 
             if (ENABLE_DPI == 1)
                begin
                   jtag_mux = JTAG_DPI;
                end
-
+*/
             #50us;
 
             s_rst_n = 1'b1;
             jtag_enable = 1'b0;
 
             $display("[TB] %t - Releasing hard reset", $realtime);
+
+            jtag_enable = 1'b1;
+
             #350us;
 
             jtag_enable = 1'b1;
 
-            wait(tb_pulp.i_dut.soc_domain_i.pulp_soc_i.s_soc_clk == 1);
-            wait(tb_pulp.i_dut.soc_domain_i.pulp_soc_i.s_soc_clk == 0);
-            wait(tb_pulp.i_dut.soc_domain_i.pulp_soc_i.s_soc_clk == 1);
-
-            $display("[SOC_CLK] %t - SOC_CLK Ready", $realtime);
+            #1000000000000us;
+            $display("Too EARLY man %t",$realtime);
 
             dbg_if_soc.init(s_tck, s_tms, s_trstn, s_tdi);
-
-            #50us;
-            dbg_if_soc.write32(32'h1A1040A0, 1, 32'hABBAABBA, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-            #50us;
-            dbg_if_soc.read32(32'h1A1040A0, 1, jtag_data, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-            #50us;
-            if(jtag_data[0] != 32'hABBAABBA)
-               $display("[JTAG] R/W of reg failed: %h != %h",jtag_data[0],32'hABBAABBA);
-            else
-               $display("[JTAG] R/W of reg succeeded");
-            dbg_if_soc.write32(32'h1A1040A0, 1, 32'h0, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-
-
-
-            if(LOAD_L2 == "JTAG") begin
-               $display("[TB] %t - Loading L2", $realtime);
-               dbg_if_soc.write32(32'h1A104008, 1, 32'h0, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-               dbg_if_soc.write32(32'h1A104004, 1, 32'h1c00_8080, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-               release tb_pulp.i_dut.soc_domain_i.pulp_soc_i.soc_peripherals_i.apb_soc_ctrl_i.r_fetchen;
-            end
-
-            #300us;
 
             if(LOAD_L2 == "JTAG") begin
                $display("[TB] %t - Loading L2", $realtime);
                dbg_pkg::jtag_load_L2(num_stim, stimuli, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-            end
-
-            if (LOAD_L2 != "STANDALONE") begin
+               $display("[TB] %t - Setting Boot Address", $realtime);
+               dbg_if_soc.write32(32'h1A104004, 1, BEGIN_L2_INSTR, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
                $display("[TB] %t - Triggering fetch enable", $realtime);
                dbg_if_soc.write32(32'h1A104008, 1, 32'h1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
             end
+
+            #300us;
 
             // Select UART driver/monitor
             if ($value$plusargs("uart_drv_mon=%s", uart_drv_mon_sel)) begin
@@ -685,6 +667,20 @@ module tb_pulp;
          end
 
       end
+
+    SimJTAG i_SimJTAG (
+        .clock                ( w_clk_ref            ),
+        .reset                ( ~s_rst_n             ),
+        .enable               ( jtag_enable          ),
+        .init_done            ( s_rst_n              ),
+        .jtag_TCK             ( sim_tck              ),
+        .jtag_TMS             ( sim_tms              ),
+        .jtag_TDI             ( sim_tdi              ),
+        .jtag_TRSTn           ( sim_trstn            ),
+        .jtag_TDO_data        ( sim_tdo              ),
+        .jtag_TDO_driven      ( 1'b1                 ),
+        .exit                 (                      )
+    );
 
    `ifndef USE_NETLIST
       /* File System access */

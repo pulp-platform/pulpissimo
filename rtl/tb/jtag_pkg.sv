@@ -16,34 +16,36 @@
 
 package jtag_pkg;
 
-   parameter int unsigned JTAG_SOC_INSTR_WIDTH       = 4;
-   parameter logic [3:0]  JTAG_SOC_IDCODE            = 4'b0010;
-   parameter logic [3:0]  JTAG_SOC_AXIREG            = 4'b0100;
-   parameter logic [3:0]  JTAG_SOC_BBMUXREG          = 4'b0101;
-   parameter logic [3:0]  JTAG_SOC_CLKGATEREG        = 4'b0110;
-   parameter logic [3:0]  JTAG_SOC_CONFREG           = 4'b0111;
-   parameter logic [3:0]  JTAG_SOC_TESTMODEREG       = 4'b1000;
-   parameter logic [3:0]  JTAG_SOC_BISTREG           = 4'b1001;
-   parameter logic [3:0]  JTAG_SOC_BYPASS            = 4'b1111;
-   parameter int unsigned JTAG_SOC_IDCODE_WIDTH      = 32;
-   parameter int unsigned JTAG_SOC_AXIREG_WIDTH      = 96;
-   parameter int unsigned JTAG_SOC_BBMUXREG_WIDTH    = 21;
-   parameter int unsigned JTAG_SOC_CLKGATEREG_WIDTH  = 11;
-   parameter int unsigned JTAG_SOC_CONFREG_WIDTH     = 16;
-   parameter int unsigned JTAG_SOC_TESTMODEREG_WIDTH =  4;
-   parameter int unsigned JTAG_SOC_BISTREG_WIDTH     = 20;
+   parameter int unsigned JTAG_SOC_INSTR_WIDTH                                 = 5;
+   parameter logic [JTAG_SOC_INSTR_WIDTH-1:0]  JTAG_SOC_IDCODE                 = 5'b00001;
+   parameter logic [JTAG_SOC_INSTR_WIDTH-1:0]  JTAG_SOC_DTMCSR                 = 5'b10000;
+   parameter logic [JTAG_SOC_INSTR_WIDTH-1:0]  JTAG_SOC_DMIACCESS              = 5'b10001;
+   parameter logic [JTAG_SOC_INSTR_WIDTH-1:0]  JTAG_SOC_AXIREG                 = 5'b00100;
+   parameter logic [JTAG_SOC_INSTR_WIDTH-1:0]  JTAG_SOC_BBMUXREG               = 5'b00101;
+   parameter logic [JTAG_SOC_INSTR_WIDTH-1:0]  JTAG_SOC_CLKGATEREG             = 5'b00110;
+   parameter logic [JTAG_SOC_INSTR_WIDTH-1:0]  JTAG_SOC_CONFREG                = 5'b00111;
+   parameter logic [JTAG_SOC_INSTR_WIDTH-1:0]  JTAG_SOC_TESTMODEREG            = 5'b01000;
+   parameter logic [JTAG_SOC_INSTR_WIDTH-1:0]  JTAG_SOC_BISTREG                = 5'b01001;
+   parameter logic [JTAG_SOC_INSTR_WIDTH-1:0]  JTAG_SOC_BYPASS                 = 5'b11111;
+   parameter int unsigned JTAG_SOC_IDCODE_WIDTH                                = 32;
+   parameter int unsigned JTAG_SOC_AXIREG_WIDTH                                = 96;
+   parameter int unsigned JTAG_SOC_BBMUXREG_WIDTH                              = 21;
+   parameter int unsigned JTAG_SOC_CLKGATEREG_WIDTH                            = 11;
+   parameter int unsigned JTAG_SOC_CONFREG_WIDTH                               = 16;
+   parameter int unsigned JTAG_SOC_TESTMODEREG_WIDTH                           =  4;
+   parameter int unsigned JTAG_SOC_BISTREG_WIDTH                               = 20;
 
-   parameter int unsigned JTAG_CLUSTER_INSTR_WIDTH    = 4;
-   parameter logic [3:0]  JTAG_CLUSTER_IDCODE         = 4'b0010;
-   parameter logic [3:0]  JTAG_CLUSTER_SAMPLE_PRELOAD = 4'b0001;
-   parameter logic [3:0]  JTAG_CLUSTER_EXTEST         = 4'b0000;
-   parameter logic [3:0]  JTAG_CLUSTER_DEBUG          = 4'b1000;
-   parameter logic [3:0]  JTAG_CLUSTER_MBIST          = 4'b1001;
-   parameter logic [3:0]  JTAG_CLUSTER_BYPASS         = 4'b1111;
-   parameter int unsigned JTAG_CLUSTER_IDCODE_WIDTH   = 32;
+   parameter int unsigned JTAG_CLUSTER_INSTR_WIDTH                             = 5;
+   parameter logic [JTAG_CLUSTER_INSTR_WIDTH-1:0]  JTAG_CLUSTER_IDCODE         = 5'b0010;
+   parameter logic [JTAG_CLUSTER_INSTR_WIDTH-1:0]  JTAG_CLUSTER_SAMPLE_PRELOAD = 5'b0001;
+   parameter logic [JTAG_CLUSTER_INSTR_WIDTH-1:0]  JTAG_CLUSTER_EXTEST         = 5'b0000;
+   parameter logic [JTAG_CLUSTER_INSTR_WIDTH-1:0]  JTAG_CLUSTER_DEBUG          = 5'b1000;
+   parameter logic [JTAG_CLUSTER_INSTR_WIDTH-1:0]  JTAG_CLUSTER_MBIST          = 5'b1001;
+   parameter logic [JTAG_CLUSTER_INSTR_WIDTH-1:0]  JTAG_CLUSTER_BYPASS         = 5'b1111;
+   parameter int unsigned JTAG_CLUSTER_IDCODE_WIDTH                            = 32;
 
-   parameter int unsigned JTAG_IDCODE_WIDTH = JTAG_SOC_IDCODE_WIDTH;
-   parameter int unsigned JTAG_INSTR_WIDTH  = JTAG_SOC_INSTR_WIDTH;
+   parameter int unsigned JTAG_IDCODE_WIDTH                                    = JTAG_SOC_IDCODE_WIDTH;
+   parameter int unsigned JTAG_INSTR_WIDTH                                     = JTAG_SOC_INSTR_WIDTH;
 
    task automatic jtag_wait_halfperiod(input int cycles);
       #(50000*cycles);
@@ -88,6 +90,7 @@ package jtag_pkg;
       jtag_clock(5, s_tck); //enter RST
       s_tms   = 1'b0;
       jtag_clock(1, s_tck); // back to IDLE
+      $display("JTAG: SoftReset Done(%t)",$realtime);
 
    endtask
 
@@ -272,7 +275,12 @@ package jtag_pkg;
       logic [31:0] s_idcode;
       jtag_idcode.setIR(s_tck, s_tms, s_trstn, s_tdi);
       jtag_idcode.shift('0, s_idcode, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-      $display("JTAG: Tap ID: %h",s_idcode[31:0]);
+      $display("JTAG: Tap ID: %h (%t)",s_idcode[31:0], $realtime);
+      if(s_idcode[31:0] != 32'h249511C3) begin
+         $display("JTAG: Tap ID Test FAILED (%t)", $realtime);
+      end else begin
+         $display("JTAG: Tap ID Test PASSED (%t)", $realtime);
+      end
    endtask
 
    task automatic jtag_bypass_test(
@@ -289,12 +297,12 @@ package jtag_pkg;
       jtag_bypass.setIR(s_tck, s_tms, s_trstn, s_tdi);
       jtag_bypass.shift(test_data, result_data, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
       if (test_data[253:0] == result_data[254:1])
-         $display("JTAG: Bypass Test Passed");
+         $display("JTAG: Bypass Test Passed (%t)", $realtime);
       else
       begin
          $display("JTAG: Bypass Test Failed");
-         $display("JTAG:   LSB WORD TEST = %h",test_data[31:0]);
-         $display("JTAG:   LSB WORD RES  = %h",result_data[32:1]);
+         $display("JTAG:   LSB WORD TEST = %h (%t)",test_data[31:0], $realtime);
+         $display("JTAG:   LSB WORD RES  = %h (%t)",result_data[32:1], $realtime);
       end
    endtask
 
@@ -312,7 +320,8 @@ package jtag_pkg;
       endtask
 
       task set_confreg(
-         input logic [21:0] confreg,
+         input  logic [8:0] confreg,
+         output logic [8:0] dataout,
          ref logic s_tck,
          ref logic s_tms,
          ref logic s_trstn,
@@ -320,12 +329,31 @@ package jtag_pkg;
          ref logic s_tdo
       );
          JTAG_reg #(.size(256), .instr(JTAG_SOC_CONFREG)) jtag_soc_dbg = new;
-         logic [255:0] dataout;
          jtag_soc_dbg.start_shift(s_tck, s_tms, s_trstn, s_tdi);
-         jtag_soc_dbg.shift_nbits(22, confreg, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         jtag_soc_dbg.shift_nbits(9, confreg, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          jtag_soc_dbg.idle(s_tck, s_tms, s_trstn, s_tdi);
          $display("[test_mode_if] %t - Setting confreg to value %X.", $realtime, confreg);
       endtask
+
+      task get_confreg(
+         input logic [8:0] confreg,
+         output bit  [8:0] rec,
+         ref logic s_tck,
+         ref logic s_tms,
+         ref logic s_trstn,
+         ref logic s_tdi,
+         ref logic s_tdo
+      );
+         logic [255:0] dataout;
+         JTAG_reg #(.size(256), .instr(JTAG_SOC_CONFREG)) jtag_soc_dbg = new;
+         jtag_soc_dbg.start_shift(s_tck, s_tms, s_trstn, s_tdi);
+         jtag_soc_dbg.shift_nbits(9, confreg, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         jtag_soc_dbg.idle(s_tck, s_tms, s_trstn, s_tdi);
+         rec = dataout [8:0];
+         // `DEBUG_MANAGER_INST.printf(STDOUT, 0, $sformatf("%s[TEST_MODE_IF] %s%t - %sGet confreg value = %X%s\n", `ESC_BLUE_BOLD, `ESC_WHITE, $realtime, `ESC_MAGENTA, rec, `ESC_DEFAULT));
+      endtask
+
+
 
    endclass
 
