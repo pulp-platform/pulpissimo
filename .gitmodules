@@ -1,0 +1,18 @@
+[submodule "ml_tests"]
+	path = ml_tests
+	url = git@iis-git.ee.ethz.ch:pulp-tests/ml_tests.git
+[submodule "pulp_tests"]
+	path = pulp_tests
+	url = git@iis-git.ee.ethz.ch:pulp-sw/pulp_tests.git
+[submodule "rt-tests"]
+	path = rt-tests
+	url = git@iis-git.ee.ethz.ch:pulp-tests/rt-tests.git
+[submodule "parallel_bare_tests"]
+	path = parallel_bare_tests
+	url = git@iis-git.ee.ethz.ch:pulp-sw/parallel_bare_tests.git
+[submodule "riscv_tests"]
+	path = riscv_tests
+	url = git@iis-git.ee.ethz.ch:pulp-sw/riscv_tests.git
+[submodule "sequential_bare_tests"]
+	path = sequential_bare_tests
+	url = git@iis-git.ee.ethz.ch:pulp-sw/sequential_bare_tests.git

@@ -52,28 +52,31 @@ import_bootcode:
 	cd sim/boot && objcopy --srec-len 1 --output-target=srec ${PULP_SDK_HOME}/install/bin/boot-pulpissimo boot-pulpissimo.s19
 	cd sim/boot && s19toboot.py boot-pulpissimo.s19 pulpissimo
 
-
+# This target is for continuous integration tests
 sdk:
-	if [ ! -e pulp-sdk ]; then \
-	  git clone https://github.com/pulp-platform/pulp-sdk.git; \
+	if [ ! -e pulp-builder ]; then \
+	  git clone https://github.com/pulp-platform/pulp-builder.git; \
 	fi; \
-	cd pulp-sdk; \
-	git checkout 52093849703efffc8c62ef740045a0295b5f779f; \
+	cd pulp-builder; \
+	git checkout 1c962fff78ca14bbbc45ef4347d1e76bed982d61; \
 	. configs/pulpissimo_v2.sh; \
-	. configs/platform-rtl.sh; \
-	make distclean; \
-	make deps; \
-	make MODULES="--g runtime --m sdk_install" all env;
+	. configs/rtl.sh; \
+	export PULP_RISCV_GCC_TOOLCHAIN=/usr/pack/pulpsdk-1.0-kgf/artifactory/pulp-sdk-release/pkg/pulp_riscv_gcc/1.0.9; \
+	./scripts/update-runtime; \
+	./scripts/clean; \
+	./scripts/build-runtime;
 
 
 all: checkout build install vopt sdk
 
 test-checkout:
-	cd pulp-sdk; \
-	source init.sh; \
-	source sourceme.sh; \
-	plpbuild --p tests checkout
+	git submodule update --init
 
-test:        
-	source pulp-sdk/sourceme.sh && cd pulp-sdk && source init.sh && \
-          plpbuild --p tests test --threads 16 --stdout
+test:
+	cd pulp-builder; \
+	. sdk-setup.sh; \
+	. configs/pulpissimo_v2.sh; \
+	. configs/rtl.sh; \
+	export PULP_RISCV_GCC_TOOLCHAIN=/usr/pack/pulpsdk-1.0-kgf/artifactory/pulp-sdk-release/pkg/pulp_riscv_gcc/1.0.9; \
+	cd ..; \
+	plptest --threads 16 --stdout
