@@ -378,6 +378,9 @@ module pulpissimo
   logic [EVENT_WIDTH-1:0]      s_event_dataasync;
   logic                        s_cluster_irq;
 
+  APB_BUS        apb_debug();
+  XBAR_TCDM_BUS  lint_debug();
+
   //***********************************************************
   //********** PAD FRAME **************************************
   //***********************************************************
@@ -569,7 +572,9 @@ module pulpissimo
         .jtag_capture_dr_o          ( s_jtag_capture_dr           ),
 
         .ndmreset_o                 (                             ),
-        .dm_debug_req_o             (                             ),
+        .dm_debug_req_o             ( dm_debug_req                ),
+        .apb_debug_slave            ( apb_debug                   ),
+        .lint_debug_master          ( lint_debug                  ),
 
         .axireg_sel_o               ( s_axireg_sel                ),
         .axireg_tdi_o               ( s_axireg_tdi                ),
@@ -831,6 +836,9 @@ module pulpissimo
         .jtag_axireg_sel_i            ( s_axireg_sel                     ),
         .jtag_axireg_tdi_i            ( s_axireg_tdi                     ),
         .jtag_axireg_tdo_o            ( s_axireg_tdo                     ),
+        .dm_debug_req_i               (  dm_debug_req                    ),
+        .apb_debug_master             ( apb_debug                        ),
+        .lint_debug_slave             ( lint_debug                       ),
 
         .pad_cfg_o                    ( s_pad_cfg_soc                    ),
         .pad_mux_o                    ( s_pad_mux_soc                    ),

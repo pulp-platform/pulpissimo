@@ -55,6 +55,9 @@ module soc_domain #(
     input  logic                             jtag_shift_dr_i,
     input  logic                             jtag_update_dr_i,
     input  logic                             jtag_capture_dr_i,
+    input  logic                             dm_debug_req_i,
+    APB_BUS.Master                           apb_debug_master,
+    XBAR_TCDM_BUS.Slave                      lint_debug_slave,
 
     input  logic [31:0]                      gpio_in_i,
     output logic [31:0]                      gpio_out_o,

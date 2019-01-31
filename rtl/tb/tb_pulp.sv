@@ -15,8 +15,8 @@
  * Igor Loi <igor.loi@unibo.it>
  */
 
-timeunit 1ps;
-timeprecision 1ps;
+// timeunit 1ps;
+//  1ps;
 
 `define EXIT_SUCCESS  0
 `define EXIT_FAIL     1
@@ -44,7 +44,7 @@ module tb_pulp;
    parameter  USE_I2S_MODEL       = 0;
 
    // period of the external reference clock (32.769kHz)
-   parameter  REF_CLK_PERIOD = 30517ns;
+   parameter  REF_CLK_PERIOD = 200ns;
 
    // how L2 is loaded. valid values are "JTAG" or "STANDALONE", the latter works only when USE_S25FS256S_MODEL is 1
    parameter  LOAD_L2 = "JTAG";
@@ -105,7 +105,8 @@ module tb_pulp;
 
    int                   exit_status = `EXIT_ERROR; // modelsim exit code, will be overwritten when successfull
 
-   jtag_pkg::test_mode_if_t test_mode_if = new;
+   jtag_pkg::test_mode_if_t  test_mode_if = new;
+   jtag_pkg::debug_mode_if_t debug_mode_if = new;
    dbg_pkg::dbg_if_soc_t    dbg_if_soc = new;
 
    /* system wires */
@@ -492,6 +493,10 @@ module tb_pulp;
    initial
       begin
 
+         logic [1:0]  dm_op;
+         logic [31:0] dm_data;
+         logic [6:0]  dm_addr;
+
          force tb_pulp.i_dut.pad_frame_i.padinst_reset_n.O = 1'b0;
          jtag_enable = 1'b0;
          if (ENABLE_EXTERNAL_DRIVER == 0) begin
@@ -561,6 +566,212 @@ module tb_pulp;
                s_tdo
             );
             #5us;
+
+
+            s_rst_n = 1'b1;
+
+            debug_mode_if.init(
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi
+            );
+            #5us;
+
+
+            debug_mode_if.read_dtmcs(
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+            #5us;
+
+
+            debug_mode_if.init_dmi(
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi
+            );
+            #5us;
+
+            debug_mode_if.set_dmi(
+               2'b01, //read
+               7'h11, //DMStatus
+               32'h0, //whatever
+               {dm_addr, dm_data, dm_op},
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+            #5us;
+           $display("PULPissimo Debug version: \
+                 impebreak %x\n \
+                 allhavereset %x\n \
+                 anyhavereset %x\n \
+                 allrunning %x\n \
+                 anyrunning %x\n \
+                 allhalted %x\n \
+                 anyhalted %x\n \
+                 version %x\n \
+              ", dm_data[22], dm_data[19], dm_data[18], dm_data[11], dm_data[10], dm_data[9], dm_data[8], dm_data[3:0]);
+
+
+            debug_mode_if.set_dmi(
+               2'b10, //Write
+               7'h10, //DMControl
+               {1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 10'b0, 10'b0, 2'b0, 1'b0, 1'b0, 1'b0, 1'b1}, //dmactive
+               {dm_addr, dm_data, dm_op},
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+            #5us
+
+            debug_mode_if.set_dmi(
+               2'b01, //read
+               7'h38, //sbcs,
+               32'h0, //whatever
+               {dm_addr, dm_data, dm_op},
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+            #5us;
+           $display("PULPissimo System Bus Access Control and Status: \
+                 sbbusy  %x\n \
+                 sbreadonaddr %x\n \
+                 sbaccess  %x\n \
+                 sbautoincrement  %x\n \
+                 sbreadondata  %x\n \
+                 sberror %x\n \
+                 sbasize %x\n \
+                 sbaccess32 %x\n \
+              ", dm_data[21], dm_data[20], dm_data[19:17], dm_data[16], dm_data[15], dm_data[14:12], dm_data[11:5], dm_data[2]);
+
+            dm_data[20] = 1'b1;
+
+            debug_mode_if.set_dmi(
+               2'b10, //write
+               7'h38, //sbcs,
+               dm_data, //whatever
+               {dm_addr, dm_data, dm_op},
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+            #5us;
+
+            //Read the BootAddress
+            debug_mode_if.set_dmi(
+               2'b10, //write
+               7'h39, //sbaddress0,
+               32'h1A104004, //bootaddress
+               {dm_addr, dm_data, dm_op},
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+            #5us;
+            debug_mode_if.set_dmi(
+               2'b01, //read
+               7'h3C, //sbdata0,
+               32'h0, //whatever
+               {dm_addr, dm_data, dm_op},
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+
+           $display("Debugger read at %x and the value is %x \n
+              ", 32'h1A104004, dm_data);
+
+            debug_mode_if.set_dmi(
+               2'b10, //write
+               7'h3C, //sbdata0,
+               32'h1d008080, //whatever
+               {dm_addr, dm_data, dm_op},
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+
+
+            //Read the BootAddress
+            debug_mode_if.set_dmi(
+               2'b10, //write
+               7'h39, //sbaddress0,
+               32'h1A104004, //bootaddress
+               {dm_addr, dm_data, dm_op},
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+
+            #5us;
+            debug_mode_if.set_dmi(
+               2'b01, //read
+               7'h3C, //sbdata0,
+               32'h0, //whatever
+               {dm_addr, dm_data, dm_op},
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+           $display("Debugger read again at %x and the value is %x \n
+              ", 32'h1A104004, dm_data);
+
+            if(LOAD_L2 == "JTAG") begin
+               $display("[TB] %t - Loading L2", $realtime);
+               debug_mode_if.load_L2(num_stim, stimuli, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+               $display("[TB] %t - Setting Boot Address", $realtime);
+               //dbg_if_soc.write32(32'h1A104004, 1, BEGIN_L2_INSTR, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+               //$display("[TB] %t - Triggering fetch enable", $realtime);
+               //dbg_if_soc.write32(32'h1A104008, 1, 32'h1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+            end
+
+
+            $stop();
+
+
+            //FE and BootAddress
+            force tb_pulp.i_dut.soc_domain_i.pulp_soc_i.soc_peripherals_i.apb_soc_ctrl_i.fc_bootaddr_o = 32'h1A000000;
+            force tb_pulp.i_dut.soc_domain_i.pulp_soc_i.soc_peripherals_i.apb_soc_ctrl_i.fc_fetchen_o  = 1'b1;
+
+            debug_mode_if.set_dmi(
+               2'b10, //Write
+               7'h10, //DMControl
+               {1'b1, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 10'b0, 10'b0, 2'b0, 1'b0, 1'b0, 1'b0, 1'b1},//haltreq
+               {dm_addr, dm_data, dm_op},
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+            #5us;
+
+
 /*
             if(LOAD_L2 == "JTAG") begin
                $display("[TB] %t - Virtually removing ROM as JTAG boot was selected in testbench", $realtime);
@@ -597,7 +808,7 @@ module tb_pulp;
                   jtag_mux = JTAG_DPI;
                end
 */
-            #50us;
+            #50000us;
 
             s_rst_n = 1'b1;
             jtag_enable = 1'b0;
@@ -608,7 +819,7 @@ module tb_pulp;
 
             #350us;
 
-            jtag_enable = 1'b1;
+            //jtag_enable = 1'b1;
 
             #1000000000000us;
             $display("Too EARLY man %t",$realtime);
@@ -667,7 +878,7 @@ module tb_pulp;
          end
 
       end
-
+/*
     SimJTAG i_SimJTAG (
         .clock                ( w_clk_ref            ),
         .reset                ( ~s_rst_n             ),
@@ -681,7 +892,7 @@ module tb_pulp;
         .jtag_TDO_driven      ( 1'b1                 ),
         .exit                 (                      )
     );
-
+*/
    `ifndef USE_NETLIST
       /* File System access */
       logic r_stdout_pready;
