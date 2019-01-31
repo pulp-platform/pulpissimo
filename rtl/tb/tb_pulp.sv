@@ -44,7 +44,7 @@ module tb_pulp;
    parameter  USE_I2S_MODEL       = 0;
 
    // period of the external reference clock (32.769kHz)
-   parameter  REF_CLK_PERIOD = 200ns;
+   parameter  REF_CLK_PERIOD = 20ns;
 
    // how L2 is loaded. valid values are "JTAG" or "STANDALONE", the latter works only when USE_S25FS256S_MODEL is 1
    parameter  LOAD_L2 = "JTAG";
@@ -557,7 +557,7 @@ module tb_pulp;
                s_tdo
             );
             #5us;
-
+            $stop;
             jtag_pkg::jtag_get_idcode(
                s_tck,
                s_tms,
@@ -569,6 +569,7 @@ module tb_pulp;
 
 
             s_rst_n = 1'b1;
+            $display("[TB] %t - Releasing hard reset", $realtime);
 
             debug_mode_if.init(
                s_tck,
@@ -672,113 +673,29 @@ module tb_pulp;
             );
             #5us;
 
-            //Read the BootAddress
-            debug_mode_if.set_dmi(
-               2'b10, //write
-               7'h39, //sbaddress0,
-               32'h1A104004, //bootaddress
-               {dm_addr, dm_data, dm_op},
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi,
-               s_tdo
-            );
-            #5us;
-            debug_mode_if.set_dmi(
-               2'b01, //read
-               7'h3C, //sbdata0,
-               32'h0, //whatever
-               {dm_addr, dm_data, dm_op},
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi,
-               s_tdo
-            );
-
-           $display("Debugger read at %x and the value is %x \n
-              ", 32'h1A104004, dm_data);
-
-            debug_mode_if.set_dmi(
-               2'b10, //write
-               7'h3C, //sbdata0,
-               32'h1d008080, //whatever
-               {dm_addr, dm_data, dm_op},
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi,
-               s_tdo
-            );
-
-
-            //Read the BootAddress
-            debug_mode_if.set_dmi(
-               2'b10, //write
-               7'h39, //sbaddress0,
-               32'h1A104004, //bootaddress
-               {dm_addr, dm_data, dm_op},
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi,
-               s_tdo
-            );
-
-            #5us;
-            debug_mode_if.set_dmi(
-               2'b01, //read
-               7'h3C, //sbdata0,
-               32'h0, //whatever
-               {dm_addr, dm_data, dm_op},
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi,
-               s_tdo
-            );
-           $display("Debugger read again at %x and the value is %x \n
-              ", 32'h1A104004, dm_data);
-
             if(LOAD_L2 == "JTAG") begin
                $display("[TB] %t - Loading L2", $realtime);
                debug_mode_if.load_L2(num_stim, stimuli, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
                $display("[TB] %t - Setting Boot Address", $realtime);
-               //dbg_if_soc.write32(32'h1A104004, 1, BEGIN_L2_INSTR, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-               //$display("[TB] %t - Triggering fetch enable", $realtime);
-               //dbg_if_soc.write32(32'h1A104008, 1, 32'h1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+               debug_mode_if.writeMem(32'h1A104004, BEGIN_L2_INSTR, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+               $display("[TB] %t - Triggering fetch enable", $realtime);
+               debug_mode_if.writeMem(32'h1A104008, 32'h1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
             end
 
 
-            $stop();
+            //debug_mode_if.set_dmi(
+            //   2'b10, //Write
+            //   7'h10, //DMControl
+            //   {1'b1, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 10'b0, 10'b0, 2'b0, 1'b0, 1'b0, 1'b0, 1'b1},//haltreq
+            //   {dm_addr, dm_data, dm_op},
+            //   s_tck,
+            //   s_tms,
+            //   s_trstn,
+            //   s_tdi,
+            //   s_tdo
+            //);
+            //#5us;
 
-
-            //FE and BootAddress
-            force tb_pulp.i_dut.soc_domain_i.pulp_soc_i.soc_peripherals_i.apb_soc_ctrl_i.fc_bootaddr_o = 32'h1A000000;
-            force tb_pulp.i_dut.soc_domain_i.pulp_soc_i.soc_peripherals_i.apb_soc_ctrl_i.fc_fetchen_o  = 1'b1;
-
-            debug_mode_if.set_dmi(
-               2'b10, //Write
-               7'h10, //DMControl
-               {1'b1, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 10'b0, 10'b0, 2'b0, 1'b0, 1'b0, 1'b0, 1'b1},//haltreq
-               {dm_addr, dm_data, dm_op},
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi,
-               s_tdo
-            );
-            #5us;
-
-
-/*
-            if(LOAD_L2 == "JTAG") begin
-               $display("[TB] %t - Virtually removing ROM as JTAG boot was selected in testbench", $realtime);
-               for(int i=0; i<2048; i++)
-                  tb_pulp.i_dut.soc_domain_i.pulp_soc_i.boot_rom_i.rom_mem_i.MEM[i] = 32'h0;
-            end
-*/
 /*
             test_mode_if.init(
                s_tck,
@@ -808,32 +725,6 @@ module tb_pulp;
                   jtag_mux = JTAG_DPI;
                end
 */
-            #50000us;
-
-            s_rst_n = 1'b1;
-            jtag_enable = 1'b0;
-
-            $display("[TB] %t - Releasing hard reset", $realtime);
-
-            jtag_enable = 1'b1;
-
-            #350us;
-
-            //jtag_enable = 1'b1;
-
-            #1000000000000us;
-            $display("Too EARLY man %t",$realtime);
-
-            dbg_if_soc.init(s_tck, s_tms, s_trstn, s_tdi);
-
-            if(LOAD_L2 == "JTAG") begin
-               $display("[TB] %t - Loading L2", $realtime);
-               dbg_pkg::jtag_load_L2(num_stim, stimuli, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-               $display("[TB] %t - Setting Boot Address", $realtime);
-               dbg_if_soc.write32(32'h1A104004, 1, BEGIN_L2_INSTR, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-               $display("[TB] %t - Triggering fetch enable", $realtime);
-               dbg_if_soc.write32(32'h1A104008, 1, 32'h1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-            end
 
             #300us;
 
@@ -858,8 +749,9 @@ module tb_pulp;
 
             // wait for end of computation signal
             $display("[TB] %t - Waiting for end of computation", $realtime);
+
             while(jtag_data[0][31] == 0) begin
-               dbg_if_soc.read32(32'h1A1040A0, 1, jtag_data, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+               debug_mode_if.readMem(32'h1A1040A0, jtag_data[0], s_tck, s_tms, s_trstn, s_tdi, s_tdo);
                #50us;
             end
 

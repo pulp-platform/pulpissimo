@@ -469,9 +469,9 @@ module safe_domain
         .test_clk_i              ( s_test_clk             ),
         .test_rstn_i             ( s_rstn_sync            ),
 
-        .jtag_shift_dr_o         ( jtag_shift_dr_o        ),
-        .jtag_update_dr_o        ( jtag_update_dr_o       ),
-        .jtag_capture_dr_o       ( jtag_capture_dr_o      ),
+        .jtag_shift_dr_o         (                        ),
+        .jtag_update_dr_o        (                        ),
+        .jtag_capture_dr_o       (                        ),
 
         .axireg_sel_o            ( axireg_sel_o           ),
         .dbg_axi_scan_in_o       ( axireg_tdi_o           ),
@@ -511,6 +511,7 @@ module safe_domain
         .exit                 (                     )
     );
 `else
+    logic int_td;
     dmi_jtag i_dmi_jtag (
         .clk_i                ( ref_clk_i           ),
         .rst_ni               ( rst_ni              ),
@@ -526,9 +527,34 @@ module safe_domain
         .tms_i                ( jtag_tms_i          ),
         .trst_ni              ( s_jtag_rstn         ),
         .td_i                 ( jtag_tdi_i          ),
-        .td_o                 ( jtag_tdo_o          ),
+        .td_o                 ( int_td              ),
         .tdo_oe_o             (                     )
     );
+
+    jtag_tap_top jtag_tap_top_i
+    (
+        .tck_i                   ( jtag_tck_i             ),
+        .trst_ni                 ( s_jtag_rstn            ),
+        .tms_i                   ( jtag_tms_i             ),
+        .td_i                    ( int_td                 ),
+        .td_o                    ( jtag_tdo_o             ),
+
+        .test_clk_i              ( s_test_clk             ),
+        .test_rstn_i             ( s_rstn_sync            ),
+
+        .jtag_shift_dr_o         ( jtag_shift_dr_o        ),
+        .jtag_update_dr_o        ( jtag_update_dr_o       ),
+        .jtag_capture_dr_o       ( jtag_capture_dr_o      ),
+
+        .axireg_sel_o            ( axireg_sel_o           ),
+        .dbg_axi_scan_in_o       ( axireg_tdi_o           ),
+        .dbg_axi_scan_out_i      ( axireg_tdo_i           ),
+        .soc_jtag_reg_i          ( soc_jtag_reg_i         ),
+        .soc_jtag_reg_o          ( soc_jtag_reg_o         ),
+        .sel_fll_clk_o           ( sel_fll_clk_o          )
+    );
+
+
 `endif
     dm_top #(
        // current implementation only supports 1 hart

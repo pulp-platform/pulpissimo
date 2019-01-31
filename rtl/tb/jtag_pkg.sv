@@ -175,7 +175,7 @@ package jtag_pkg;
          jtag_clock(1, s_tck);
          // back to Idle : tms sequence 0
          s_tms   = 1'b0;
-         jtag_clock(100, s_tck);
+         jtag_clock(50, s_tck);
       endtask
 
       task jtag_goto_CAPTURE_DR_FROM_UPDATE_DR_GETDATA(
@@ -245,10 +245,6 @@ package jtag_pkg;
 
       endtask
 
-
-
-
-
       task jtag_shift_SHIFT_IR(
          ref logic s_tck,
          ref logic s_tms,
@@ -257,8 +253,8 @@ package jtag_pkg;
       );
          s_trstn = 1'b1;
          s_tms   = 1'b0;
-         for(int i=0; i<JTAG_SOC_INSTR_WIDTH; i=i+1) begin
-            if (i==(JTAG_SOC_INSTR_WIDTH-1))
+         for(int i=0; i<JTAG_SOC_INSTR_WIDTH + JTAG_CLUSTER_INSTR_WIDTH; i=i+1) begin
+            if (i==(JTAG_SOC_INSTR_WIDTH+JTAG_CLUSTER_INSTR_WIDTH-1))
                  s_tms = 1'b1;
             s_tdi = instr[i];
             jtag_clock(1, s_tck);
@@ -380,13 +376,13 @@ package jtag_pkg;
       ref logic s_tdi,
       ref logic s_tdo
    );
-      automatic JTAG_reg #(.size(255), .instr(JTAG_SOC_BYPASS)) jtag_bypass = new;
+      automatic JTAG_reg #(.size(255), .instr({JTAG_SOC_BYPASS, JTAG_SOC_BYPASS})) jtag_bypass = new;
                 logic [255:0] result_data;
       automatic logic [255:0] test_data = {     32'hDEADBEEF, 32'h0BADF00D, 32'h01234567, 32'h89ABCDEF,
                                                 32'hAAAABBBB, 32'hCCCCDDDD, 32'hEEEEFFFF, 32'h00001111};
       jtag_bypass.setIR(s_tck, s_tms, s_trstn, s_tdi);
       jtag_bypass.shift(test_data, result_data, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-      if (test_data[253:0] == result_data[254:1])
+      if (test_data[253:0] == result_data[255:2])
          $display("JTAG: Bypass Test Passed (%t)", $realtime);
       else
       begin
@@ -600,6 +596,95 @@ package jtag_pkg;
          );
       endtask
 
+      task readMem(
+         input  logic [31:0] addr_i,
+         output logic [31:0] data_o,
+         ref    logic s_tck,
+         ref    logic s_tms,
+         ref    logic s_trstn,
+         ref    logic s_tdi,
+         ref    logic s_tdo
+      );
+
+         automatic logic [1:0]         dm_op;
+         automatic logic [31:0]        dm_data;
+         automatic logic [6:0]         dm_addr;
+
+         //NOTE sbreadonaddr must be 1
+
+         //Write the Address
+         this.set_dmi(
+            2'b10,        //write
+            7'h39,        //sbaddress0,
+            addr_i,       //address
+            {dm_addr, dm_data, dm_op},
+            s_tck,
+            s_tms,
+            s_trstn,
+            s_tdi,
+            s_tdo
+         );
+
+         this.set_dmi(
+            2'b01,     //read
+            7'h3C,     //sbdata0,
+            32'h0,     //whatever
+            {dm_addr, dm_data, dm_op},
+            s_tck,
+            s_tms,
+            s_trstn,
+            s_tdi,
+            s_tdo
+         );
+
+         data_o = dm_data;
+
+
+      endtask
+
+      task writeMem(
+         input  logic [31:0] addr_i,
+         input  logic [31:0] data_i,
+         ref    logic s_tck,
+         ref    logic s_tms,
+         ref    logic s_trstn,
+         ref    logic s_tdi,
+         ref    logic s_tdo
+      );
+
+         automatic logic [1:0]         dm_op;
+         automatic logic [31:0]        dm_data;
+         automatic logic [6:0]         dm_addr;
+
+         //NOTE sbreadonaddr must be 1
+
+         //Write the Address
+         this.set_dmi(
+            2'b10,        //write
+            7'h39,        //sbaddress0,
+            addr_i,       //address
+            {dm_addr, dm_data, dm_op},
+            s_tck,
+            s_tms,
+            s_trstn,
+            s_tdi,
+            s_tdo
+         );
+
+         this.set_dmi(
+            2'b10,        //write
+            7'h3C,        //sbdata0,
+            data_i,      //data_i
+            {dm_addr, dm_data, dm_op},
+            s_tck,
+            s_tms,
+            s_trstn,
+            s_tdi,
+            s_tdo
+         );
+
+      endtask
+
 
       task load_L2(
          input int   num_stim,
@@ -624,24 +709,11 @@ package jtag_pkg;
          jtag_data[0]    = stimuli[num_stim][63:0];  // assign data
 
          this.set_sbreadonaddr(1'b0, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-         this.set_sbautoincrement(1'b1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         this.set_sbautoincrement(1'b0, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
          $display("[JTAG] Loading L2 with jtag interface");
 
          spi_addr_old = spi_addr - 32'h8;
-
-         this.set_dmi(
-            2'b10,           //write
-            7'h39,           //sbaddress0,
-            spi_addr[31:0], //bootaddress
-            {dm_addr, dm_data, dm_op},
-            s_tck,
-            s_tms,
-            s_trstn,
-            s_tdi,
-            s_tdo
-         );
-
 
          while (more_stim) begin // loop until we have no more stimuli
 
@@ -667,6 +739,18 @@ package jtag_pkg;
 
                this.set_dmi(
                   2'b10,           //write
+                  7'h39,           //sbaddress0,
+                  spi_addr[31:0], //bootaddress
+                  {dm_addr, dm_data, dm_op},
+                  s_tck,
+                  s_tms,
+                  s_trstn,
+                  s_tdi,
+                  s_tdo
+               );
+
+               this.set_dmi(
+                  2'b10,           //write
                   7'h3C,           //sbdata0,
                   jtag_data[0],    //data
                   {dm_addr, dm_data, dm_op},
@@ -676,18 +760,18 @@ package jtag_pkg;
                   s_tdi,
                   s_tdo
                );
-               $display("[JTAG] Loading L2 - Written %x at %x (%t)", jtag_data[0], spi_addr[31:0], $realtime);
-               //this.set_dmi(
-               //   2'b10,             //write
-               //   7'h39,             //sbaddress0,
-               //   spi_addr[31:0]+4, //bootaddress
-               //   {dm_addr, dm_data, dm_op},
-               //   s_tck,
-               //   s_tms,
-               //   s_trstn,
-               //   s_tdi,
-               //   s_tdo
-               //);
+               //$display("[JTAG] Loading L2 - Written %x at %x (%t)", jtag_data[0], spi_addr[31:0], $realtime);
+               this.set_dmi(
+                  2'b10,             //write
+                  7'h39,             //sbaddress0,
+                  spi_addr[31:0]+4, //bootaddress
+                  {dm_addr, dm_data, dm_op},
+                  s_tck,
+                  s_tms,
+                  s_trstn,
+                  s_tdi,
+                  s_tdo
+               );
 
                this.set_dmi(
                   2'b10,           //write
@@ -700,8 +784,9 @@ package jtag_pkg;
                   s_tdi,
                   s_tdo
                );
-               $display("[JTAG] Loading L2 - Written %x at %x (%t)", jtag_data[1], spi_addr[31:0]+4, $realtime);
             end
+            $display("[JTAG] Loading L2 - Written up to %x (%t)", spi_addr[31:0]+4, $realtime);
+
          end
          this.set_sbreadonaddr(1'b1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          this.set_sbautoincrement(1'b0, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
