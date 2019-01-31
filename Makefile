@@ -69,10 +69,9 @@ sdk:
 all: checkout build install vopt sdk
 
 test-checkout:
-	git submodule update --init
+	./update-tests
 
 test:
-	./update-tests
 	cd pulp-builder; \
 	. sdk-setup.sh; \
 	. configs/pulpissimo.sh; \
