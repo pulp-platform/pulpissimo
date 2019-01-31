@@ -61,8 +61,8 @@ sdk:
 	git checkout a22a38846963b9d5273e2de102eae8e3650e0167; \
 	. configs/pulpissimo.sh; \
 	. configs/rtl.sh; \
-	./scripts/update-runtime; \
 	./scripts/clean; \
+	./scripts/update-runtime; \
 	./scripts/build-runtime;
 
 
@@ -72,10 +72,10 @@ test-checkout:
 	git submodule update --init
 
 test:
+	./update-tests
 	cd pulp-builder; \
 	. sdk-setup.sh; \
-	. configs/pulpissimo_v2.sh; \
+	. configs/pulpissimo.sh; \
 	. configs/rtl.sh; \
-	export PULP_RISCV_GCC_TOOLCHAIN=/usr/pack/pulpsdk-1.0-kgf/artifactory/pulp-sdk-release/pkg/pulp_riscv_gcc/1.0.9; \
 	cd ..; \
 	plptest --threads 16 --stdout
