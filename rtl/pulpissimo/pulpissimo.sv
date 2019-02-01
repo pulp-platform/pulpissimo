@@ -559,30 +559,6 @@ module pulpissimo
         .mode_select_o              ( s_mode_select               ),
         .dft_cg_enable_o            ( s_dft_cg_enable             ),
 
-        .sel_fll_clk_o              ( s_sel_fll_clk               ),
-
-        .jtag_tck_i                 ( s_jtag_tck                  ),
-        .jtag_trst_ni               ( s_jtag_trst                 ),
-        .jtag_tms_i                 ( s_jtag_tms                  ),
-        .jtag_tdi_i                 ( s_jtag_tdi                  ),
-        .jtag_tdo_o                 ( s_jtag_tdo                  ),
-
-        .jtag_shift_dr_o            ( s_jtag_shift_dr             ),
-        .jtag_update_dr_o           ( s_jtag_update_dr            ),
-        .jtag_capture_dr_o          ( s_jtag_capture_dr           ),
-
-        .ndmreset_o                 (                             ),
-        .dm_debug_req_o             ( dm_debug_req                ),
-        .apb_debug_slave            ( apb_debug                   ),
-        .lint_debug_master          ( lint_debug                  ),
-
-        .axireg_sel_o               ( s_axireg_sel                ),
-        .axireg_tdi_o               ( s_axireg_tdi                ),
-        .axireg_tdo_i               ( s_axireg_tdo                ),
-
-        .soc_jtag_reg_i             ( s_soc_jtag_regi             ),
-        .soc_jtag_reg_o             ( s_soc_jtag_rego             ),
-
         .pad_cfg_o                  ( s_pad_cfg                   ),
 
         .pad_cfg_i                  ( s_pad_cfg_soc               ),
@@ -817,28 +793,17 @@ module pulpissimo
         .zynq_cluster_clk_i           ( zynq_cluster_clk_i               ),
     `endif
 
-        .sel_fll_clk_i                ( s_sel_fll_clk                    ),
-
         .mode_select_i                ( s_mode_select                    ),
         .dft_cg_enable_i              ( s_dft_cg_enable                  ),
         .dft_test_mode_i              ( s_test_mode                      ),
-
-        .soc_jtag_reg_o               ( s_soc_jtag_regi                  ),
-        .soc_jtag_reg_i               ( s_soc_jtag_rego                  ),
 
         .boot_l2_i                    ( s_boot_l2                        ),
 
         .jtag_tck_i                   ( s_jtag_tck                       ),
         .jtag_trst_ni                 ( s_jtag_trst                      ),
-        .jtag_shift_dr_i              ( s_jtag_shift_dr                  ),
-        .jtag_update_dr_i             ( s_jtag_update_dr                 ),
-        .jtag_capture_dr_i            ( s_jtag_capture_dr                ),
-        .jtag_axireg_sel_i            ( s_axireg_sel                     ),
-        .jtag_axireg_tdi_i            ( s_axireg_tdi                     ),
-        .jtag_axireg_tdo_o            ( s_axireg_tdo                     ),
-        .dm_debug_req_i               (  dm_debug_req                    ),
-        .apb_debug_master             ( apb_debug                        ),
-        .lint_debug_slave             ( lint_debug                       ),
+        .jtag_tms_i                   ( s_jtag_tms                       ),
+        .jtag_tdi_i                   ( s_jtag_tdi                       ),
+        .jtag_tdo_o                   ( s_jtag_tdo                       ),
 
         .pad_cfg_o                    ( s_pad_cfg_soc                    ),
         .pad_mux_o                    ( s_pad_mux_soc                    ),

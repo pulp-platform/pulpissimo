@@ -7,9 +7,6 @@
 // this License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
-
-import dm::*;
-
 `include "pulp_soc_defines.sv"
 
 module safe_domain
@@ -27,30 +24,6 @@ module safe_domain
         output logic             test_mode_o          ,
         output logic             mode_select_o        ,
         output logic             dft_cg_enable_o      ,
-
-        output logic             sel_fll_clk_o,
-
-        input  logic             jtag_tck_i           ,
-        input  logic             jtag_trst_ni         ,
-        input  logic             jtag_tms_i           ,
-        input  logic             jtag_tdi_i           ,
-        output logic             jtag_tdo_o           ,
-
-        output logic             ndmreset_o           ,
-        output logic             dm_debug_req_o       ,
-        APB_BUS.Slave            apb_debug_slave      ,
-        XBAR_TCDM_BUS.Master     lint_debug_master    ,
-
-        output logic             jtag_shift_dr_o      ,
-        output logic             jtag_update_dr_o     ,
-        output logic             jtag_capture_dr_o    ,
-
-        output logic             axireg_sel_o         ,
-        output logic             axireg_tdi_o         ,
-        input  logic             axireg_tdo_i         ,
-
-        input  logic       [7:0] soc_jtag_reg_i       ,
-        output logic       [7:0] soc_jtag_reg_o       ,
 
         //**********************************************************
         //*** PERIPHERALS SIGNALS **********************************
@@ -256,14 +229,8 @@ module safe_domain
 
     logic        s_rtc_int;
     logic        s_gpio_wake;
-    logic        s_jtag_rstn;
     logic        s_rstn_sync;
     logic        s_rstn;
-
-    logic slave_grant, slave_valid, slave_req , slave_we;
-    logic [31:0] slave_addr, slave_wdata, slave_rdata;
-    logic [3:0]  slave_be;
-    logic lint_debug_master_we;
 
 
     //**********************************************************
@@ -457,184 +424,6 @@ module safe_domain
         .*
     );
 
-`ifdef USE_OLD_TAP
-    jtag_tap_top jtag_tap_top_i
-    (
-        .tck_i                   ( jtag_tck_i             ),
-        .trst_ni                 ( s_jtag_rstn            ),
-        .tms_i                   ( jtag_tms_i             ),
-        .td_i                    ( jtag_tdi_i             ),
-        .td_o                    ( jtag_tdo_o             ),
-
-        .test_clk_i              ( s_test_clk             ),
-        .test_rstn_i             ( s_rstn_sync            ),
-
-        .jtag_shift_dr_o         (                        ),
-        .jtag_update_dr_o        (                        ),
-        .jtag_capture_dr_o       (                        ),
-
-        .axireg_sel_o            ( axireg_sel_o           ),
-        .dbg_axi_scan_in_o       ( axireg_tdi_o           ),
-        .dbg_axi_scan_out_i      ( axireg_tdo_i           ),
-        .soc_jtag_reg_i          ( soc_jtag_reg_i         ),
-        .soc_jtag_reg_o          ( soc_jtag_reg_o         ),
-        .sel_fll_clk_o           ( sel_fll_clk_o          )
-    );
-
-`else
-
-    logic             jtag_req_valid;
-    logic             debug_req_ready;
-    logic             jtag_resp_ready;
-    logic             jtag_resp_valid;
-    dm::dmi_req_t     jtag_dmi_req;
-    dm::dmi_resp_t    debug_resp;
-
-//`define  SIMDTM
-
-`ifdef SIMDTM
-    logic [1:0] debug_req_bits_op;
-    assign jtag_dmi_req.op = dm::dtm_op_t'(debug_req_bits_op);
-
-    SimDTM i_SimDTM (
-        .clk                  ( ref_clk_i           ),
-        .reset                ( ~rst_ni             ),
-        .debug_req_valid      ( jtag_req_valid      ),
-        .debug_req_ready      ( debug_req_ready     ),
-        .debug_req_bits_addr  ( jtag_dmi_req.addr   ),
-        .debug_req_bits_op    ( debug_req_bits_op   ),
-        .debug_req_bits_data  ( jtag_dmi_req.data   ),
-        .debug_resp_valid     ( jtag_resp_valid     ),
-        .debug_resp_ready     ( jtag_resp_ready     ),
-        .debug_resp_bits_resp ( debug_resp.resp     ),
-        .debug_resp_bits_data ( debug_resp.data     ),
-        .exit                 (                     )
-    );
-`else
-    logic int_td;
-    dmi_jtag i_dmi_jtag (
-        .clk_i                ( ref_clk_i           ),
-        .rst_ni               ( rst_ni              ),
-        .testmode_i           ( 1'b0                ),
-        .dmi_req_o            ( jtag_dmi_req        ),
-        .dmi_req_valid_o      ( jtag_req_valid      ),
-        .dmi_req_ready_i      ( debug_req_ready     ),
-        .dmi_resp_i           ( debug_resp          ),
-        .dmi_resp_ready_o     ( jtag_resp_ready     ),
-        .dmi_resp_valid_i     ( jtag_resp_valid     ),
-        .dmi_rst_no           (                     ), // not connected
-        .tck_i                ( jtag_tck_i          ),
-        .tms_i                ( jtag_tms_i          ),
-        .trst_ni              ( s_jtag_rstn         ),
-        .td_i                 ( jtag_tdi_i          ),
-        .td_o                 ( int_td              ),
-        .tdo_oe_o             (                     )
-    );
-
-    jtag_tap_top jtag_tap_top_i
-    (
-        .tck_i                   ( jtag_tck_i             ),
-        .trst_ni                 ( s_jtag_rstn            ),
-        .tms_i                   ( jtag_tms_i             ),
-        .td_i                    ( int_td                 ),
-        .td_o                    ( jtag_tdo_o             ),
-
-        .test_clk_i              ( s_test_clk             ),
-        .test_rstn_i             ( s_rstn_sync            ),
-
-        .jtag_shift_dr_o         ( jtag_shift_dr_o        ),
-        .jtag_update_dr_o        ( jtag_update_dr_o       ),
-        .jtag_capture_dr_o       ( jtag_capture_dr_o      ),
-
-        .axireg_sel_o            ( axireg_sel_o           ),
-        .dbg_axi_scan_in_o       ( axireg_tdi_o           ),
-        .dbg_axi_scan_out_i      ( axireg_tdo_i           ),
-        .soc_jtag_reg_i          ( soc_jtag_reg_i         ),
-        .soc_jtag_reg_o          ( soc_jtag_reg_o         ),
-        .sel_fll_clk_o           ( sel_fll_clk_o          )
-    );
-
-
-`endif
-    dm_top #(
-       // current implementation only supports 1 hart
-       .NrHarts           ( 1                         ),
-       .BusWidth          ( 32                        )
-    ) i_dm_top (
-
-       .clk_i             ( ref_clk_i                 ),
-       .rst_ni            ( rst_ni                    ), // PoR
-       .testmode_i        ( 1'b0                      ),
-       .ndmreset_o        ( ndmreset_o                ),
-       .dmactive_o        (                           ), // active debug session
-       .debug_req_o       ( dm_debug_req_o            ),
-       .unavailable_i     ( '0                        ),
-
-       .slave_req_i       ( slave_req                 ),
-       .slave_we_i        ( slave_we                  ),
-       .slave_addr_i      ( slave_addr                ),
-       .slave_be_i        ( slave_be                  ),
-       .slave_wdata_i     ( slave_wdata               ),
-       .slave_rdata_o     ( slave_rdata               ),
-
-       .master_req_o      ( lint_debug_master.req     ),
-       .master_add_o      ( lint_debug_master.add     ),
-       .master_we_o       ( lint_debug_master_we      ),
-       .master_wdata_o    ( lint_debug_master.wdata   ),
-       .master_be_o       ( lint_debug_master.be      ),
-       .master_gnt_i      ( lint_debug_master.gnt     ),
-       .master_r_valid_i  ( lint_debug_master.r_valid ),
-       .master_r_rdata_i  ( lint_debug_master.r_rdata ),
-
-       .dmi_rst_ni        ( rst_ni                    ),
-       .dmi_req_valid_i   ( jtag_req_valid            ),
-       .dmi_req_ready_o   ( debug_req_ready           ),
-       .dmi_req_i         ( jtag_dmi_req              ),
-       .dmi_resp_valid_o  ( jtag_resp_valid           ),
-       .dmi_resp_ready_i  ( jtag_resp_ready           ),
-       .dmi_resp_o        ( debug_resp                )
-    );
-    assign lint_debug_master.wen = ~lint_debug_master_we;
-
-
-    apb2per #(
-        .PER_ADDR_WIDTH ( 32  ),
-        .APB_ADDR_WIDTH ( 32  )
-    ) apb2per_newdebug_i (
-        .clk_i                ( ref_clk_i               ),
-        .rst_ni               ( rst_ni                  ),
-
-        .PADDR                ( apb_debug_slave.paddr   ),
-        .PWDATA               ( apb_debug_slave.pwdata  ),
-        .PWRITE               ( apb_debug_slave.pwrite  ),
-        .PSEL                 ( apb_debug_slave.psel    ),
-        .PENABLE              ( apb_debug_slave.penable ),
-        .PRDATA               ( apb_debug_slave.prdata  ),
-        .PREADY               ( apb_debug_slave.pready  ),
-        .PSLVERR              ( apb_debug_slave.pslverr ),
-
-        .per_master_req_o     ( slave_req               ),
-        .per_master_add_o     ( slave_addr              ),
-        .per_master_we_o      ( slave_we                ),
-        .per_master_wdata_o   ( slave_wdata             ),
-        .per_master_be_o      ( slave_be                ),
-        .per_master_gnt_i     ( slave_grant             ),
-        .per_master_r_valid_i ( slave_valid             ),
-        .per_master_r_opc_i   ( '0                      ),
-        .per_master_r_rdata_i ( slave_rdata             )
-     );
-
-     assign slave_grant = slave_req;
-     always_ff @(posedge ref_clk_i or negedge rst_ni) begin : apb2per_valid
-         if(~rst_ni) begin
-             slave_valid <= 0;
-         end else begin
-             slave_valid <= slave_grant;
-         end
-     end
-
-
-`endif
 
 `ifndef PULP_FPGA_EMUL
     rstgen i_rstgen
@@ -652,7 +441,6 @@ module safe_domain
     assign slow_clk_o = ref_clk_i;
 
     assign s_rstn          = rst_ni;
-    assign s_jtag_rstn     = jtag_trst_ni;
     assign rst_no          = s_rstn;
 
     assign test_clk_o      = 1'b0;

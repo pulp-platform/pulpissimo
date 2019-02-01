@@ -175,6 +175,7 @@ package jtag_pkg;
          jtag_clock(1, s_tck);
          // back to Idle : tms sequence 0
          s_tms   = 1'b0;
+         //wait a bit
          jtag_clock(50, s_tck);
       endtask
 
@@ -462,12 +463,22 @@ package jtag_pkg;
          jtag_soc_dbg.setIR(s_tck, s_tms, s_trstn, s_tdi);
          $display("[debug_mode_if_t] %t - Init", $realtime);
          this.read_dtmcs(
+               dm_data,
                s_tck,
                s_tms,
                s_trstn,
                s_tdi,
                s_tdo
             );
+         $display("[debug_mode_if] %t - dtmcs %x: \n
+                                        dmihardreset %x \n
+                                        dmireset %x \n
+                                        idle %x \n
+                                        dmistat %x \n
+                                        abits %x \n
+                                        version %x \n",
+                  $realtime, dm_data, dm_data[17], dm_data[16], dm_data[14:12], dm_data[11:10], dm_data[9:4], dm_data[3:0]);
+
          this.init_dmi(
                s_tck,
                s_tms,
@@ -512,6 +523,7 @@ package jtag_pkg;
       endtask
 
       task read_dtmcs(
+         output logic [31:0] dtmcs,
          ref logic s_tck,
          ref logic s_tms,
          ref logic s_trstn,
@@ -519,21 +531,29 @@ package jtag_pkg;
          ref logic s_tdo
       );
          logic [31+1:0] dataout;
-         logic [31:0]   dtmcs;
          JTAG_reg #(.size(32+1), .instr({JTAG_SOC_DTMCSR, JTAG_SOC_BYPASS})) jtag_soc_dbg = new;
          jtag_soc_dbg.start_shift(s_tck, s_tms, s_trstn, s_tdi);
          jtag_soc_dbg.shift_nbits(32+1, '0, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          jtag_soc_dbg.idle(s_tck, s_tms, s_trstn, s_tdi);
          dtmcs = dataout[32:1];
-         $display("[debug_mode_if] %t - dtmcs %x: \n
-                                        dmihardreset %x \n
-                                        dmireset %x \n
-                                        idle %x \n
-                                        dmistat %x \n
-                                        abits %x \n
-                                        version %x \n",
-                  $realtime, dtmcs, dtmcs[17], dtmcs[16], dtmcs[14:12], dtmcs[11:10], dtmcs[9:4], dtmcs[3:0]);
       endtask
+
+      task write_dtmcs(
+         input logic [31:0] dtmcs,
+         ref logic s_tck,
+         ref logic s_tms,
+         ref logic s_trstn,
+         ref logic s_tdi,
+         ref logic s_tdo
+      );
+         logic [31+1:0] dataout;
+         JTAG_reg #(.size(32+1), .instr({JTAG_SOC_DTMCSR, JTAG_SOC_BYPASS})) jtag_soc_dbg = new;
+         jtag_soc_dbg.start_shift(s_tck, s_tms, s_trstn, s_tdi);
+         jtag_soc_dbg.shift_nbits(32+1, {dtmcs, 1'b0}, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         jtag_soc_dbg.idle(s_tck, s_tms, s_trstn, s_tdi);
+
+      endtask
+
 
       task read_sbcs(
          ref logic s_tck,
@@ -591,17 +611,55 @@ package jtag_pkg;
          jtag_soc_dbg.jtag_goto_UPDATE_DR_FROM_SHIFT_DR(s_tck, s_tms, s_trstn, s_tdi);
          jtag_soc_dbg.jtag_goto_CAPTURE_DR_FROM_UPDATE_DR_GETDATA(buffer, s_tck, s_tms, s_trstn, s_tdi,s_tdo);
          buffer_riscv = buffer[DMI_SIZE:1];
-         while(buffer_riscv[1:0] == 2'b11) begin
-            //$display("buffer is set_dmi is %x (OP %x address %x datain %x) (%t)",buffer, buffer[1:0], buffer[8:2], buffer[DMI_SIZE-1:9], $realtime);
-            jtag_soc_dbg.jtag_goto_CAPTURE_DR_FROM_SHIFT_DR_GETDATA(buffer, s_tck, s_tms, s_trstn, s_tdi,s_tdo);
-            buffer_riscv = buffer[DMI_SIZE:1];
-         end
+         //while(buffer_riscv[1:0] == 2'b11) begin
+         //   //$display("buffer is set_dmi is %x (OP %x address %x datain %x) (%t)",buffer, buffer[1:0], buffer[8:2], buffer[DMI_SIZE-1:9], $realtime);
+         //   jtag_soc_dbg.jtag_goto_CAPTURE_DR_FROM_SHIFT_DR_GETDATA(buffer, s_tck, s_tms, s_trstn, s_tdi,s_tdo);
+         //   buffer_riscv = buffer[DMI_SIZE:1];
+         //end
          //$display("dataout is set_dmi is %x (OP %x address %x datain %x) (%t)",buffer, buffer[1:0], buffer[40:34],  buffer[33:2], $realtime);
          data_o[1:0]   = buffer_riscv[1:0];
          data_o[40:34] = buffer_riscv[40:34];
          data_o[33:2]  = buffer_riscv[33:2];
          jtag_soc_dbg.idle(s_tck, s_tms, s_trstn, s_tdi);
 
+      endtask
+
+      task dmi_reset(
+         ref logic s_tck,
+         ref logic s_tms,
+         ref logic s_trstn,
+         ref logic s_tdi,
+         ref logic s_tdo
+      );
+         logic [31:0] buffer;
+         JTAG_reg #(.size(32+1), .instr({JTAG_SOC_DTMCSR, JTAG_SOC_BYPASS})) jtag_soc_dbg = new;
+         jtag_soc_dbg.setIR(s_tck, s_tms, s_trstn, s_tdi);
+         this.read_dtmcs(
+               buffer,
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+         buffer[16] = 1'b1;
+         this.write_dtmcs(
+               buffer,
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+         buffer[16] = 1'b0;
+         this.write_dtmcs(
+               buffer,
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
       endtask
 
       task set_dmactive(
@@ -724,31 +782,53 @@ package jtag_pkg;
 
          //NOTE sbreadonaddr must be 1
 
-         //Write the Address
-         this.set_dmi(
-            2'b10,        //write
-            7'h39,        //sbaddress0,
-            addr_i,       //address
-            {dm_addr, dm_data, dm_op},
-            s_tck,
-            s_tms,
-            s_trstn,
-            s_tdi,
-            s_tdo
-         );
+         dm_op = '1; //error
 
-         this.set_dmi(
-            2'b01,     //read
-            7'h3C,     //sbdata0,
-            32'h0,     //whatever
-            {dm_addr, dm_data, dm_op},
-            s_tck,
-            s_tms,
-            s_trstn,
-            s_tdi,
-            s_tdo
-         );
+         while(dm_op == '1) begin
+            //Write the Address
+            this.set_dmi(
+               2'b10,        //write
+               7'h39,        //sbaddress0,
+               addr_i,       //address
+               {dm_addr, dm_data, dm_op},
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+            //$display("(sbaddress0) dm_addr %x dm_data %x dm_op %x at time %t", dm_addr, dm_data, dm_op, $realtime,);
+            if(dm_op == '1) begin
+               //$display("dmi_reset at time %t",$realtime);
+               this.dmi_reset(s_tck,s_tms,s_trstn,s_tdi,s_tdo);
+               this.init_dmi(s_tck,s_tms,s_trstn,s_tdi);
+            end
 
+         end
+
+         dm_op = '1; //error
+
+         while(dm_op == '1) begin
+
+            this.set_dmi(
+               2'b01,     //read
+               7'h3C,     //sbdata0,
+               32'h0,     //whatever
+               {dm_addr, dm_data, dm_op},
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+            //$display("(sbdata0) dm_addr %x dm_data %x dm_op %x at time %t", dm_addr, dm_data, dm_op, $realtime);
+               if(dm_op == '1) begin
+                  //$display("dmi_reset at time %t",$realtime);
+                  this.dmi_reset(s_tck,s_tms,s_trstn,s_tdi,s_tdo);
+                  this.init_dmi(s_tck,s_tms,s_trstn,s_tdi);
+               end
+
+         end
          data_o = dm_data;
 
 

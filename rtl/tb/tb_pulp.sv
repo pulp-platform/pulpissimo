@@ -44,7 +44,7 @@ module tb_pulp;
    parameter  USE_I2S_MODEL       = 0;
 
    // period of the external reference clock (32.769kHz)
-   parameter  REF_CLK_PERIOD = 20ns;
+   parameter  REF_CLK_PERIOD = 30517ns;
 
    // how L2 is loaded. valid values are "JTAG" or "STANDALONE", the latter works only when USE_S25FS256S_MODEL is 1
    parameter  LOAD_L2 = "JTAG";
@@ -604,7 +604,7 @@ module tb_pulp;
                s_tdi,
                s_tdo
             );
-
+/*
             test_mode_if.init(
                s_tck,
                s_tms,
@@ -629,7 +629,7 @@ module tb_pulp;
             $display("[TB] %t - jtag_conf_reg is %x and jtag_conf_rego is %x", $realtime, jtag_conf_reg, jtag_conf_rego);
 
             $stop;
-
+*/
 
             if(LOAD_L2 == "JTAG") begin
                $display("[TB] %t - Loading L2", $realtime);
@@ -647,7 +647,7 @@ module tb_pulp;
                end
 
 
-            #300us;
+            #500us;
 
             // Select UART driver/monitor
             if ($value$plusargs("uart_drv_mon=%s", uart_drv_mon_sel)) begin

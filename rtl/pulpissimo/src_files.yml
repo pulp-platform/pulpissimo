@@ -1,7 +1,4 @@
 pulpissimo:
-  vlog_opts: [
-    -L riscv_dbg_lib,
-  ]
   incdirs: [
     ../includes,
   ]
