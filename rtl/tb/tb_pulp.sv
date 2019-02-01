@@ -557,7 +557,7 @@ module tb_pulp;
                s_tdo
             );
             #5us;
-            $stop;
+
             jtag_pkg::jtag_get_idcode(
                s_tck,
                s_tms,
@@ -575,128 +575,36 @@ module tb_pulp;
                s_tck,
                s_tms,
                s_trstn,
-               s_tdi
+               s_tdi,
+               s_tdo
             );
-            #5us;
 
-
-            debug_mode_if.read_dtmcs(
+            debug_mode_if.set_dmactive(
+               1'b1,
                s_tck,
                s_tms,
                s_trstn,
                s_tdi,
                s_tdo
             );
-            #5us;
 
-
-            debug_mode_if.init_dmi(
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi
-            );
-            #5us;
-
-            debug_mode_if.set_dmi(
-               2'b01, //read
-               7'h11, //DMStatus
-               32'h0, //whatever
-               {dm_addr, dm_data, dm_op},
+            debug_mode_if.set_sbreadonaddr(
+               1'b1,
                s_tck,
                s_tms,
                s_trstn,
                s_tdi,
                s_tdo
             );
-            #5us;
-           $display("PULPissimo Debug version: \
-                 impebreak %x\n \
-                 allhavereset %x\n \
-                 anyhavereset %x\n \
-                 allrunning %x\n \
-                 anyrunning %x\n \
-                 allhalted %x\n \
-                 anyhalted %x\n \
-                 version %x\n \
-              ", dm_data[22], dm_data[19], dm_data[18], dm_data[11], dm_data[10], dm_data[9], dm_data[8], dm_data[3:0]);
 
-
-            debug_mode_if.set_dmi(
-               2'b10, //Write
-               7'h10, //DMControl
-               {1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 10'b0, 10'b0, 2'b0, 1'b0, 1'b0, 1'b0, 1'b1}, //dmactive
-               {dm_addr, dm_data, dm_op},
+            debug_mode_if.read_sbcs(
                s_tck,
                s_tms,
                s_trstn,
                s_tdi,
                s_tdo
             );
-            #5us
 
-            debug_mode_if.set_dmi(
-               2'b01, //read
-               7'h38, //sbcs,
-               32'h0, //whatever
-               {dm_addr, dm_data, dm_op},
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi,
-               s_tdo
-            );
-            #5us;
-           $display("PULPissimo System Bus Access Control and Status: \
-                 sbbusy  %x\n \
-                 sbreadonaddr %x\n \
-                 sbaccess  %x\n \
-                 sbautoincrement  %x\n \
-                 sbreadondata  %x\n \
-                 sberror %x\n \
-                 sbasize %x\n \
-                 sbaccess32 %x\n \
-              ", dm_data[21], dm_data[20], dm_data[19:17], dm_data[16], dm_data[15], dm_data[14:12], dm_data[11:5], dm_data[2]);
-
-            dm_data[20] = 1'b1;
-
-            debug_mode_if.set_dmi(
-               2'b10, //write
-               7'h38, //sbcs,
-               dm_data, //whatever
-               {dm_addr, dm_data, dm_op},
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi,
-               s_tdo
-            );
-            #5us;
-
-            if(LOAD_L2 == "JTAG") begin
-               $display("[TB] %t - Loading L2", $realtime);
-               debug_mode_if.load_L2(num_stim, stimuli, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-               $display("[TB] %t - Setting Boot Address", $realtime);
-               debug_mode_if.writeMem(32'h1A104004, BEGIN_L2_INSTR, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-               $display("[TB] %t - Triggering fetch enable", $realtime);
-               debug_mode_if.writeMem(32'h1A104008, 32'h1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-            end
-
-
-            //debug_mode_if.set_dmi(
-            //   2'b10, //Write
-            //   7'h10, //DMControl
-            //   {1'b1, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 10'b0, 10'b0, 2'b0, 1'b0, 1'b0, 1'b0, 1'b1},//haltreq
-            //   {dm_addr, dm_data, dm_op},
-            //   s_tck,
-            //   s_tms,
-            //   s_trstn,
-            //   s_tdi,
-            //   s_tdo
-            //);
-            //#5us;
-
-/*
             test_mode_if.init(
                s_tck,
                s_tms,
@@ -720,11 +628,24 @@ module tb_pulp;
             );
             $display("[TB] %t - jtag_conf_reg is %x and jtag_conf_rego is %x", $realtime, jtag_conf_reg, jtag_conf_rego);
 
+            $stop;
+
+
+            if(LOAD_L2 == "JTAG") begin
+               $display("[TB] %t - Loading L2", $realtime);
+               debug_mode_if.load_L2(num_stim, stimuli, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+               $display("[TB] %t - Setting Boot Address", $realtime);
+               debug_mode_if.writeMem(32'h1A104004, BEGIN_L2_INSTR, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+               $display("[TB] %t - Triggering fetch enable", $realtime);
+               debug_mode_if.writeMem(32'h1A104008, 32'h1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+            end
+
+
             if (ENABLE_DPI == 1)
                begin
                   jtag_mux = JTAG_DPI;
                end
-*/
+
 
             #300us;
 

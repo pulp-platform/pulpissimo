@@ -357,12 +357,13 @@ package jtag_pkg;
       ref logic s_tdi,
       ref logic s_tdo
    );
-      automatic JTAG_reg #(.size(JTAG_IDCODE_WIDTH), .instr(JTAG_SOC_IDCODE)) jtag_idcode = new;
-      logic [31:0] s_idcode;
+      automatic JTAG_reg #(.size(JTAG_IDCODE_WIDTH+1), .instr({JTAG_SOC_IDCODE, JTAG_SOC_BYPASS})) jtag_idcode = new;
+      //as we have two tap in Daisy Chain, always one bit more for the bypass
+      logic [31+1:0] s_idcode;
       jtag_idcode.setIR(s_tck, s_tms, s_trstn, s_tdi);
       jtag_idcode.shift('0, s_idcode, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-      $display("JTAG: Tap ID: %h (%t)",s_idcode[31:0], $realtime);
-      if(s_idcode[31:0] != 32'h249511C3) begin
+      $display("JTAG: Tap ID: %h (%t)",s_idcode[32:1], $realtime);
+      if(s_idcode[32:1] != 32'h249511C3) begin
          $display("JTAG: Tap ID Test FAILED (%t)", $realtime);
       end else begin
          $display("JTAG: Tap ID Test PASSED (%t)", $realtime);
@@ -400,7 +401,7 @@ package jtag_pkg;
          ref logic s_trstn,
          ref logic s_tdi
       );
-         JTAG_reg #(.size(256), .instr(JTAG_SOC_CONFREG)) jtag_soc_dbg = new;
+         JTAG_reg #(.size(256), .instr({JTAG_SOC_BYPASS, JTAG_SOC_CONFREG})) jtag_soc_dbg = new;
          jtag_soc_dbg.setIR(s_tck, s_tms, s_trstn, s_tdi);
          $display("[test_mode_if] %t - Init", $realtime);
       endtask
@@ -414,10 +415,12 @@ package jtag_pkg;
          ref logic s_tdi,
          ref logic s_tdo
       );
-         JTAG_reg #(.size(256), .instr(JTAG_SOC_CONFREG)) jtag_soc_dbg = new;
+         logic [8+1:0] confreg_int, dataout_int;
+         JTAG_reg #(.size(256), .instr({JTAG_SOC_BYPASS, JTAG_SOC_CONFREG})) jtag_soc_dbg = new;
          jtag_soc_dbg.start_shift(s_tck, s_tms, s_trstn, s_tdi);
-         jtag_soc_dbg.shift_nbits(9, confreg, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         jtag_soc_dbg.shift_nbits(9, {1'b1, confreg_int}, dataout_int, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          jtag_soc_dbg.idle(s_tck, s_tms, s_trstn, s_tdi);
+         dataout = dataout_int[8:0];
          $display("[test_mode_if] %t - Setting confreg to value %X.", $realtime, confreg);
       endtask
 
@@ -431,7 +434,7 @@ package jtag_pkg;
          ref logic s_tdo
       );
          logic [255:0] dataout;
-         JTAG_reg #(.size(256), .instr(JTAG_SOC_CONFREG)) jtag_soc_dbg = new;
+         JTAG_reg #(.size(256), .instr({JTAG_SOC_BYPASS, JTAG_SOC_CONFREG})) jtag_soc_dbg = new;
          jtag_soc_dbg.start_shift(s_tck, s_tms, s_trstn, s_tdi);
          jtag_soc_dbg.shift_nbits(9, confreg, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          jtag_soc_dbg.idle(s_tck, s_tms, s_trstn, s_tdi);
@@ -447,12 +450,51 @@ package jtag_pkg;
          ref logic s_tck,
          ref logic s_tms,
          ref logic s_trstn,
-         ref logic s_tdi
+         ref logic s_tdi,
+         ref logic s_tdo
       );
+
+          logic [1:0]  dm_op;
+          logic [6:0]  dm_addr;
+          logic [31:0] dm_data;
          //Read Info
-         JTAG_reg #(.size(32), .instr(JTAG_SOC_DTMCSR)) jtag_soc_dbg = new;
+         JTAG_reg #(.size(32+1), .instr({JTAG_SOC_DTMCSR, JTAG_SOC_BYPASS})) jtag_soc_dbg = new;
          jtag_soc_dbg.setIR(s_tck, s_tms, s_trstn, s_tdi);
          $display("[debug_mode_if_t] %t - Init", $realtime);
+         this.read_dtmcs(
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+         this.init_dmi(
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi
+            );
+         this.set_dmi(
+               2'b01, //read
+               7'h11, //DMStatus
+               32'h0, //whatever
+               {dm_addr, dm_data, dm_op},
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+         $display("PULPissimo Debug version: \
+                 impebreak %x\n \
+                 allhavereset %x\n \
+                 anyhavereset %x\n \
+                 allrunning %x\n \
+                 anyrunning %x\n \
+                 allhalted %x\n \
+                 anyhalted %x\n \
+                 version %x\n \
+              ", dm_data[22], dm_data[19], dm_data[18], dm_data[11], dm_data[10], dm_data[9], dm_data[8], dm_data[3:0]);
 
       endtask
 
@@ -463,32 +505,72 @@ package jtag_pkg;
          ref logic s_tdi
       );
          //Read Info
-         JTAG_reg #(.size(32), .instr(JTAG_SOC_DMIACCESS)) jtag_soc_dbg = new;
+         JTAG_reg #(.size(32+1), .instr({JTAG_SOC_DMIACCESS, JTAG_SOC_BYPASS})) jtag_soc_dbg = new;
          jtag_soc_dbg.setIR(s_tck, s_tms, s_trstn, s_tdi);
          $display("[debug_mode_if_t] %t - Init DMI Access", $realtime);
 
       endtask
 
       task read_dtmcs(
-        // output logic [31:0] dataout,
          ref logic s_tck,
          ref logic s_tms,
          ref logic s_trstn,
          ref logic s_tdi,
          ref logic s_tdo
       );
-         logic [31:0] dataout;
-         JTAG_reg #(.size(32), .instr(JTAG_SOC_DTMCSR)) jtag_soc_dbg = new;
+         logic [31+1:0] dataout;
+         logic [31:0]   dtmcs;
+         JTAG_reg #(.size(32+1), .instr({JTAG_SOC_DTMCSR, JTAG_SOC_BYPASS})) jtag_soc_dbg = new;
          jtag_soc_dbg.start_shift(s_tck, s_tms, s_trstn, s_tdi);
-         jtag_soc_dbg.shift_nbits(32, '0, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         jtag_soc_dbg.shift_nbits(32+1, '0, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          jtag_soc_dbg.idle(s_tck, s_tms, s_trstn, s_tdi);
-         $display("[debug_mode_if] %t - Reading dtmcs %X.", $realtime, dataout);
-         jtag_soc_dbg.start_shift(s_tck, s_tms, s_trstn, s_tdi);
-         jtag_soc_dbg.shift_nbits(32, dataout, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-         jtag_soc_dbg.idle(s_tck, s_tms, s_trstn, s_tdi);
+         dtmcs = dataout[32:1];
+         $display("[debug_mode_if] %t - dtmcs %x: \n
+                                        dmihardreset %x \n
+                                        dmireset %x \n
+                                        idle %x \n
+                                        dmistat %x \n
+                                        abits %x \n
+                                        version %x \n",
+                  $realtime, dtmcs, dtmcs[17], dtmcs[16], dtmcs[14:12], dtmcs[11:10], dtmcs[9:4], dtmcs[3:0]);
       endtask
 
+      task read_sbcs(
+         ref logic s_tck,
+         ref logic s_tms,
+         ref logic s_trstn,
+         ref logic s_tdi,
+         ref logic s_tdo
+      );
 
+         automatic logic [1:0]         dm_op;
+         automatic logic [31:0]        dm_data;
+         automatic logic [6:0]         dm_addr;
+
+         this.set_dmi(
+               2'b01, //read
+               7'h38, //sbcs,
+               32'h0, //whatever
+               {dm_addr, dm_data, dm_op},
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+
+           $display("PULPissimo System Bus Access Control and Status: \
+                 sbbusy  %x\n \
+                 sbreadonaddr %x\n \
+                 sbaccess  %x\n \
+                 sbautoincrement  %x\n \
+                 sbreadondata  %x\n \
+                 sberror %x\n \
+                 sbasize %x\n \
+                 sbaccess32 %x\n \
+              ", dm_data[21], dm_data[20], dm_data[19:17], dm_data[16], dm_data[15], dm_data[14:12], dm_data[11:5], dm_data[2]);
+
+      endtask
 
       task set_dmi(
          input  logic [1:0]  op_i,
@@ -501,24 +583,54 @@ package jtag_pkg;
          ref logic s_tdi,
          ref logic s_tdo
       );
-         logic [DMI_SIZE-1:0] buffer;
-         JTAG_reg #(.size(DMI_SIZE), .instr(JTAG_SOC_DMIACCESS)) jtag_soc_dbg = new;
+         logic [DMI_SIZE-1+1:0] buffer;
+         logic [DMI_SIZE-1:0]   buffer_riscv;
+         JTAG_reg #(.size(DMI_SIZE+1), .instr({JTAG_SOC_DMIACCESS, JTAG_SOC_BYPASS})) jtag_soc_dbg = new;
          jtag_soc_dbg.start_shift(s_tck, s_tms, s_trstn, s_tdi);
-         jtag_soc_dbg.shift_nbits(DMI_SIZE, {address_i,data_i,op_i}, buffer, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         jtag_soc_dbg.shift_nbits(DMI_SIZE+1, {address_i,data_i,op_i, 1'b0}, buffer, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          jtag_soc_dbg.jtag_goto_UPDATE_DR_FROM_SHIFT_DR(s_tck, s_tms, s_trstn, s_tdi);
-         //#150us
          jtag_soc_dbg.jtag_goto_CAPTURE_DR_FROM_UPDATE_DR_GETDATA(buffer, s_tck, s_tms, s_trstn, s_tdi,s_tdo);
-         while(buffer[1:0] == 2'b11) begin
+         buffer_riscv = buffer[DMI_SIZE:1];
+         while(buffer_riscv[1:0] == 2'b11) begin
             //$display("buffer is set_dmi is %x (OP %x address %x datain %x) (%t)",buffer, buffer[1:0], buffer[8:2], buffer[DMI_SIZE-1:9], $realtime);
             jtag_soc_dbg.jtag_goto_CAPTURE_DR_FROM_SHIFT_DR_GETDATA(buffer, s_tck, s_tms, s_trstn, s_tdi,s_tdo);
+            buffer_riscv = buffer[DMI_SIZE:1];
          end
          //$display("dataout is set_dmi is %x (OP %x address %x datain %x) (%t)",buffer, buffer[1:0], buffer[40:34],  buffer[33:2], $realtime);
-         data_o[1:0]   = buffer[1:0];
-         data_o[40:34] = buffer[40:34];
-         data_o[33:2]  = buffer[33:2];
+         data_o[1:0]   = buffer_riscv[1:0];
+         data_o[40:34] = buffer_riscv[40:34];
+         data_o[33:2]  = buffer_riscv[33:2];
          jtag_soc_dbg.idle(s_tck, s_tms, s_trstn, s_tdi);
 
       endtask
+
+      task set_dmactive(
+         input logic dmactive,
+         ref   logic s_tck,
+         ref   logic s_tms,
+         ref   logic s_trstn,
+         ref   logic s_tdi,
+         ref   logic s_tdo
+      );
+
+         automatic logic [1:0]         dm_op;
+         automatic logic [31:0]        dm_data;
+         automatic logic [6:0]         dm_addr;
+
+         this.set_dmi(
+               2'b10, //Write
+               7'h10, //DMControl
+               {1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 10'b0, 10'b0, 2'b0, 1'b0, 1'b0, 1'b0, dmactive},
+               {dm_addr, dm_data, dm_op},
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+
+      endtask
+
 
       task set_sbreadonaddr(
          input logic sbreadonaddr,
