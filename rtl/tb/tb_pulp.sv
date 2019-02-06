@@ -467,6 +467,13 @@ module tb_pulp;
       .pad_cam_data7      ( w_cam_data[7]      ),
       .pad_cam_vsync      ( w_cam_vsync        ),
 
+      .pad_sdio_clk       (                    ),
+      .pad_sdio_cmd       (                    ),
+      .pad_sdio_data0     (                    ),
+      .pad_sdio_data1     (                    ),
+      .pad_sdio_data2     (                    ),
+      .pad_sdio_data3     (                    ),
+
       .pad_i2c0_sda       ( w_i2c0_sda         ),
       .pad_i2c0_scl       ( w_i2c0_scl         ),
 
@@ -604,6 +611,21 @@ module tb_pulp;
                s_tdi,
                s_tdo
             );
+
+            $display("[TB] %t - Setting Boot Address", $realtime);
+            debug_mode_if.writeMem(32'h1A104004, BEGIN_L2_INSTR, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+
+            $display("Halting the Core %t",$realtime);
+            debug_mode_if.halt_core(
+               1'b1,
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+
 /*
             test_mode_if.init(
                s_tck,
@@ -631,15 +653,169 @@ module tb_pulp;
             $stop;
 */
 
+            debug_mode_if.read_abstracts(
+               dm_data,
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+            $display("[TB] %t Abstracts is %x (progbufsize %x, busy %x, cmderr %x, datacount %x",$realtime(), dm_data, dm_data[28:24], dm_data[12], dm_data[10:8], dm_data[3:0]);
+
+
+            //write da41de in each register with Abstract Commands
+
+            debug_mode_if.writeArg(
+               0,
+               32'hda41de,
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+
+            $display("[TB] %t Written data0",$realtime());
+
+            for (logic [15:0] regno = 16'h1000; regno < 16'h1020; regno=regno+1) begin
+
+               dm_data = {8'h0, 1'b0, 3'd2, 1'b0, 1'b0, 1'b1, 1'b1, regno};
+
+               debug_mode_if.set_command(
+                  dm_data,
+                  s_tck,
+                  s_tms,
+                  s_trstn,
+                  s_tdi,
+                  s_tdo
+               );
+
+               $display("[TB] %t Access Register at regno %d",$realtime(), regno[4:0]);
+
+            end
+
+            /*
+               Put the address is x1, increase every registers x2-x31 by 2-31  store them to *(x1++)
+            */
+
+               debug_mode_if.writeArg(
+                  0,
+                  BEGIN_L2_INSTR,
+                  s_tck,
+                  s_tms,
+                  s_trstn,
+                  s_tdi,
+                  s_tdo
+               );
+               dm_data = {8'h0, 1'b0, 3'd2, 1'b0, 1'b0, 1'b1, 1'b1, 16'h1001};
+               debug_mode_if.set_command(
+                  dm_data,
+                  s_tck,
+                  s_tms,
+                  s_trstn,
+                  s_tdi,
+                  s_tdo
+               );
+               //here I have the address in x1
+               $display("[TB] %t Address ready in x1",$realtime());
+
+            for (logic [15:0] regno = 16'h1002; regno < 16'h1020; regno=regno+1) begin
+
+               debug_mode_if.writePrgramBuff (
+                  0,
+                  {7'h0, regno[4:0], regno[4:0], 3'b000, regno[4:0], 7'h13 }, // xi = xi + i
+                  s_tck,
+                  s_tms,
+                  s_trstn,
+                  s_tdi,
+                  s_tdo
+               );
+
+               debug_mode_if.writePrgramBuff (
+                  1,
+                  {7'h0, regno[4:0], 5'h1, 1'b0, 2'b10, 5'h0, 7'h23 }, //sw xi, 0(x1)
+                  s_tck,
+                  s_tms,
+                  s_trstn,
+                  s_tdi,
+                  s_tdo
+               );
+
+               debug_mode_if.writePrgramBuff (
+                  2,
+                  {12'h4, 5'h1, 3'b000, 5'h1, 7'h13 }, // x1 = x1 + 4
+                  s_tck,
+                  s_tms,
+                  s_trstn,
+                  s_tdi,
+                  s_tdo
+               );
+
+               debug_mode_if.writePrgramBuff (
+                  3,
+                  {32'h00100073 }, //ebreak
+                  s_tck,
+                  s_tms,
+                  s_trstn,
+                  s_tdi,
+                  s_tdo
+               );
+
+               dm_data = {8'h0, 1'b0, 3'd2, 1'b0, 1'b1, 1'b0, 1'b0, 16'h0};
+
+               debug_mode_if.set_command(
+                  dm_data,
+                  s_tck,
+                  s_tms,
+                  s_trstn,
+                  s_tdi,
+                  s_tdo
+               );
+               $display("[TB] %t Store of the value in reg %d",$realtime(), regno[4:0]);
+            end
+
+            //Now read them from memory + reg number
+            /*
+               mem[i] = da41de + i;
+            */
+
+            for (int incAddr = 0; incAddr < 30; incAddr=incAddr+1) begin
+               debug_mode_if.readMem(BEGIN_L2_INSTR + incAddr*4, dm_data, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+               $display("[TB] %t Read %x from %x",$realtime(), dm_data, BEGIN_L2_INSTR + incAddr*4);
+            end
+
+            $stop;
+
+
+
+            $stop;
             if(LOAD_L2 == "JTAG") begin
                $display("[TB] %t - Loading L2", $realtime);
                debug_mode_if.load_L2(num_stim, stimuli, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-               $display("[TB] %t - Setting Boot Address", $realtime);
-               debug_mode_if.writeMem(32'h1A104004, BEGIN_L2_INSTR, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
                $display("[TB] %t - Triggering fetch enable", $realtime);
                debug_mode_if.writeMem(32'h1A104008, 32'h1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
             end
 
+            //debug_mode_if.whereto(
+            //   1'b1,
+            //   s_tck,
+            //   s_tms,
+            //   s_trstn,
+            //   s_tdi,
+            //   s_tdo
+            //);
+
+
+
+            debug_mode_if.resume_core(
+               1'b1,
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
 
             if (ENABLE_DPI == 1)
                begin

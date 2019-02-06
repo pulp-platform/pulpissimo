@@ -509,6 +509,259 @@ package jtag_pkg;
 
       endtask
 
+
+      task halt_core(
+         input logic haltreq,
+           ref logic s_tck,
+           ref logic s_tms,
+           ref logic s_trstn,
+           ref logic s_tdi,
+           ref logic s_tdo
+      );
+
+          logic [1:0]  dm_op;
+          logic [6:0]  dm_addr;
+          logic [31:0] dm_data;
+
+         this.init_dmi(
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi
+            );
+         this.set_dmi(
+               2'b01, //read
+               7'h10, //DMControl
+               32'h0, //whatever
+               {dm_addr, dm_data, dm_op},
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+
+         //haltreq
+         dm_data[31] = haltreq;
+
+         this.set_dmi(
+               2'b10, //Write
+               7'h10, //DMControl
+               dm_data,
+               {dm_addr, dm_data, dm_op},
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+
+      endtask
+
+      task resume_core(
+         input logic resumereq,
+           ref logic s_tck,
+           ref logic s_tms,
+           ref logic s_trstn,
+           ref logic s_tdi,
+           ref logic s_tdo
+      );
+
+          logic [1:0]  dm_op;
+          logic [6:0]  dm_addr;
+          logic [31:0] dm_data;
+
+         this.init_dmi(
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi
+            );
+         this.set_dmi(
+               2'b01, //read
+               7'h10, //DMControl
+               32'h0, //whatever
+               {dm_addr, dm_data, dm_op},
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+
+         //resumereq
+         dm_data[30] = resumereq;
+
+         this.set_dmi(
+               2'b10, //Write
+               7'h10, //DMControl
+               dm_data,
+               {dm_addr, dm_data, dm_op},
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+
+      endtask
+
+      task writeArg (
+         input logic arg,
+         input logic [31:0] val,
+         ref logic s_tck,
+         ref logic s_tms,
+         ref logic s_trstn,
+         ref logic s_tdi,
+         ref logic s_tdo
+      );
+
+
+          logic [1:0]  dm_op;
+          logic [6:0]  dm_addr;
+          logic [31:0] dm_data;
+
+         dm_addr = arg ? 7'd8 : 7'd4;
+
+         this.set_dmi(
+               2'b10,    //write
+               dm_addr, //data0 or data1
+               val,     //whatever
+               {dm_addr, dm_data, dm_op},
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+      endtask
+
+      task writePrgramBuff (
+         input logic [2:0]  arg,
+         input logic [31:0] val,
+         ref logic s_tck,
+         ref logic s_tms,
+         ref logic s_trstn,
+         ref logic s_tdi,
+         ref logic s_tdo
+      );
+
+
+          logic [1:0]  dm_op;
+          logic [6:0]  dm_addr;
+          logic [31:0] dm_data;
+
+         dm_addr = 7'h20 + arg;
+
+         this.set_dmi(
+               2'b10,    //write
+               dm_addr, //progbuffer_i
+               val,     //whatever
+               {dm_addr, dm_data, dm_op},
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+
+      endtask
+
+      task read_abstracts (
+         output logic [31:0] abstracts,
+         ref logic s_tck,
+         ref logic s_tms,
+         ref logic s_trstn,
+         ref logic s_tdi,
+         ref logic s_tdo
+      );
+
+
+          logic [1:0]  dm_op;
+          logic [6:0]  dm_addr;
+          logic [31:0] dm_data;
+
+         this.set_dmi(
+               2'b01, //read
+               7'h16, //abstracts
+               32'h0, //whatever
+               {dm_addr, dm_data, dm_op},
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+         abstracts = dm_data;
+
+      endtask
+
+      task wait_command (
+         ref logic s_tck,
+         ref logic s_tms,
+         ref logic s_trstn,
+         ref logic s_tdi,
+         ref logic s_tdo
+      );
+
+         automatic logic [1:0]  dm_op;
+         automatic logic [6:0]  dm_addr;
+         automatic logic [31:0] dm_data;
+
+         dm_data = '1;
+
+         while(dm_data[12] == 1'b1)
+         begin
+            this.read_abstracts(
+                  dm_data,
+                  s_tck,
+                  s_tms,
+                  s_trstn,
+                  s_tdi,
+                  s_tdo
+               );
+            #5us;
+         end
+
+      endtask
+
+
+      task set_command (
+         input logic [31:0] command,
+         ref logic s_tck,
+         ref logic s_tms,
+         ref logic s_trstn,
+         ref logic s_tdi,
+         ref logic s_tdo
+      );
+
+
+          logic [1:0]  dm_op;
+          logic [6:0]  dm_addr;
+          logic [31:0] dm_data;
+
+         this.set_dmi(
+               2'b10,   //write
+               7'h17,   //command
+               command, //whatever
+               {dm_addr, dm_data, dm_op},
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+
+         this.wait_command(
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+
+      endtask
+
       task init_dmi(
          ref logic s_tck,
          ref logic s_tms,
@@ -518,7 +771,7 @@ package jtag_pkg;
          //Read Info
          JTAG_reg #(.size(32+1), .instr({JTAG_SOC_DMIACCESS, JTAG_SOC_BYPASS})) jtag_soc_dbg = new;
          jtag_soc_dbg.setIR(s_tck, s_tms, s_trstn, s_tdi);
-         $display("[debug_mode_if_t] %t - Init DMI Access", $realtime);
+//         $display("[debug_mode_if_t] %t - Init DMI Access", $realtime);
 
       endtask
 
