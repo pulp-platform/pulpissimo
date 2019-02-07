@@ -1311,10 +1311,10 @@ package jtag_pkg;
 
          //x10 is kept clean
 
-         //Copy data0 to each register from x2 to x31 but x10 by means of Access Register abstract commands
+         //Copy data0 to each register from x2 to x31 by means of Access Register abstract commands
          for (logic [15:0] regno = 16'h1002; regno < 16'h1020; regno=regno+1) begin
             dm_data = {8'h0, 1'b0, 3'd2, 1'b0, 1'b0, 1'b1, 1'b1, regno};
-            if(regno[4:0]!=5'd10) begin
+
                this.set_command(
                   dm_data,
                   s_tck,
@@ -1323,8 +1323,6 @@ package jtag_pkg;
                   s_tdi,
                   s_tdo
                );
-            end
-
             //$display("[TB] %t Access Register at regno %d",$realtime(), regno[4:0]);
 
          end
@@ -1349,10 +1347,8 @@ package jtag_pkg;
             s_tdo
          );
 
-         //increase every registers x2-x31 by 2-31  store them to *(x1++) but x10
+         //increase every registers x2-x31 by 2-31  store them to *(x1++)
          for (logic [15:0] regno = 16'h1002; regno < 16'h1020; regno=regno+1) begin
-
-            if(regno[4:0]!=5'd10) begin
 
                this.writePrgramBuff (
                   0, //progrbuff0
@@ -1405,28 +1401,17 @@ package jtag_pkg;
                   s_tdo
                );
                //$display("[TB] %t Store of the value in reg %d",$realtime(), regno[4:0]);
-
-            end
          end
 
          //Now read them from memory the previous store values
 
          error = 1'b0;
-         for (int incAddr = 2; incAddr < 10; incAddr=incAddr+1) begin
+         for (int incAddr = 2; incAddr < 32; incAddr=incAddr+1) begin
             this.readMem(address_i + (incAddr-2)*4, dm_data, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
             //$display("[TB] %t Read %x from %x",$realtime(), dm_data, address_i + (incAddr-2)*4);
             if(dm_data != key_word + incAddr) begin
                error = 1'b1;
                $display("[TB - AbstractsCommands_andProgramBuffer] %t Read %x from %x instead of %x",$realtime(), dm_data, address_i + (incAddr-2)*4, key_word + incAddr);
-            end
-         end
-
-         for (int incAddr = 11; incAddr < 32; incAddr=incAddr+1) begin
-            this.readMem(address_i + (incAddr-3)*4, dm_data, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-            //$display("[TB] %t Read %x from %x",$realtime(), dm_data, address_i + (incAddr-3)*4);
-            if(dm_data != key_word + incAddr) begin
-               error = 1'b1;
-               $display("[TB - AbstractsCommands_andProgramBuffer] %t Read %x from %x instead of %x",$realtime(), dm_data, address_i + (incAddr-3)*4, key_word + incAddr);
             end
          end
 
