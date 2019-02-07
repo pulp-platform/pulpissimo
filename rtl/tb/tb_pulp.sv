@@ -664,11 +664,11 @@ module tb_pulp;
             $display("[TB] %t Abstracts is %x (progbufsize %x, busy %x, cmderr %x, datacount %x",$realtime(), dm_data, dm_data[28:24], dm_data[12], dm_data[10:8], dm_data[3:0]);
 
 
-            //write da41de in each register with Abstract Commands
+            //Test Abstract Commands
 
-            debug_mode_if.writeArg(
-               0,
-               32'hda41de,
+            debug_mode_if.testAbstractsCommands_andProgramBuffer(
+               dm_data[0],
+               BEGIN_L2_INSTR,
                s_tck,
                s_tms,
                s_trstn,
@@ -676,120 +676,35 @@ module tb_pulp;
                s_tdo
             );
 
-            $display("[TB] %t Written data0",$realtime());
-
-            for (logic [15:0] regno = 16'h1000; regno < 16'h1020; regno=regno+1) begin
-
-               dm_data = {8'h0, 1'b0, 3'd2, 1'b0, 1'b0, 1'b1, 1'b1, regno};
-
-               debug_mode_if.set_command(
-                  dm_data,
-                  s_tck,
-                  s_tms,
-                  s_trstn,
-                  s_tdi,
-                  s_tdo
-               );
-
-               $display("[TB] %t Access Register at regno %d",$realtime(), regno[4:0]);
-
-            end
-
-            /*
-               Put the address is x1, increase every registers x2-x31 by 2-31  store them to *(x1++)
-            */
-
-               debug_mode_if.writeArg(
-                  0,
-                  BEGIN_L2_INSTR,
-                  s_tck,
-                  s_tms,
-                  s_trstn,
-                  s_tdi,
-                  s_tdo
-               );
-               dm_data = {8'h0, 1'b0, 3'd2, 1'b0, 1'b0, 1'b1, 1'b1, 16'h1001};
-               debug_mode_if.set_command(
-                  dm_data,
-                  s_tck,
-                  s_tms,
-                  s_trstn,
-                  s_tdi,
-                  s_tdo
-               );
-               //here I have the address in x1
-               $display("[TB] %t Address ready in x1",$realtime());
-
-            for (logic [15:0] regno = 16'h1002; regno < 16'h1020; regno=regno+1) begin
-
-               debug_mode_if.writePrgramBuff (
-                  0,
-                  {7'h0, regno[4:0], regno[4:0], 3'b000, regno[4:0], 7'h13 }, // xi = xi + i
-                  s_tck,
-                  s_tms,
-                  s_trstn,
-                  s_tdi,
-                  s_tdo
-               );
-
-               debug_mode_if.writePrgramBuff (
-                  1,
-                  {7'h0, regno[4:0], 5'h1, 1'b0, 2'b10, 5'h0, 7'h23 }, //sw xi, 0(x1)
-                  s_tck,
-                  s_tms,
-                  s_trstn,
-                  s_tdi,
-                  s_tdo
-               );
-
-               debug_mode_if.writePrgramBuff (
-                  2,
-                  {12'h4, 5'h1, 3'b000, 5'h1, 7'h13 }, // x1 = x1 + 4
-                  s_tck,
-                  s_tms,
-                  s_trstn,
-                  s_tdi,
-                  s_tdo
-               );
-
-               debug_mode_if.writePrgramBuff (
-                  3,
-                  {32'h00100073 }, //ebreak
-                  s_tck,
-                  s_tms,
-                  s_trstn,
-                  s_tdi,
-                  s_tdo
-               );
-
-               dm_data = {8'h0, 1'b0, 3'd2, 1'b0, 1'b1, 1'b0, 1'b0, 16'h0};
-
-               debug_mode_if.set_command(
-                  dm_data,
-                  s_tck,
-                  s_tms,
-                  s_trstn,
-                  s_tdi,
-                  s_tdo
-               );
-               $display("[TB] %t Store of the value in reg %d",$realtime(), regno[4:0]);
-            end
-
-            //Now read them from memory + reg number
-            /*
-               mem[i] = da41de + i;
-            */
-
-            for (int incAddr = 0; incAddr < 30; incAddr=incAddr+1) begin
-               debug_mode_if.readMem(BEGIN_L2_INSTR + incAddr*4, dm_data, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-               $display("[TB] %t Read %x from %x",$realtime(), dm_data, BEGIN_L2_INSTR + incAddr*4);
-            end
-
-            $stop;
+            if(dm_data[0])
+               $display("[TB] %t - TEST AbstractsCommands_andProgramBuffer FAILED :(", $realtime);
+            else
+               $display("[TB] %t - TEST AbstractsCommands_andProgramBuffer OK :)", $realtime);
 
 
+            $display("[TB] %t - Write the BootAddress into DPC", $realtime);
+            //write BootAddress in data0
+            debug_mode_if.writeArg(
+               0,
+               BEGIN_L2_INSTR,
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+            dm_data = {8'h0, 1'b0, 3'd2, 1'b0, 1'b0, 1'b1, 1'b1, 16'h7B1};
+            debug_mode_if.set_command(
+               dm_data,
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
 
-            $stop;
+            $display("[TB] %t - Resuming the CORE", $realtime);
+
             if(LOAD_L2 == "JTAG") begin
                $display("[TB] %t - Loading L2", $realtime);
                debug_mode_if.load_L2(num_stim, stimuli, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
@@ -797,17 +712,14 @@ module tb_pulp;
                debug_mode_if.writeMem(32'h1A104008, 32'h1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
             end
 
-            //debug_mode_if.whereto(
-            //   1'b1,
-            //   s_tck,
-            //   s_tms,
-            //   s_trstn,
-            //   s_tdi,
-            //   s_tdo
-            //);
-
-
-
+            debug_mode_if.halt_core(
+               1'b0,
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
             debug_mode_if.resume_core(
                1'b1,
                s_tck,
@@ -816,6 +728,7 @@ module tb_pulp;
                s_tdi,
                s_tdo
             );
+
 
             if (ENABLE_DPI == 1)
                begin

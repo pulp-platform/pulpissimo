@@ -1238,25 +1238,156 @@ package jtag_pkg;
 
       endtask
 
-/*
-      task get_confreg(
-         input logic [8:0] confreg,
-         output bit  [8:0] rec,
+
+      task testAbstractsCommands_andProgramBuffer(
+         output logic error,
+         input logic [31:0] address_i,
          ref logic s_tck,
          ref logic s_tms,
          ref logic s_trstn,
          ref logic s_tdi,
          ref logic s_tdo
       );
-         logic [255:0] dataout;
-         JTAG_reg #(.size(256), .instr(JTAG_SOC_CONFREG)) jtag_soc_dbg = new;
-         jtag_soc_dbg.start_shift(s_tck, s_tms, s_trstn, s_tdi);
-         jtag_soc_dbg.shift_nbits(9, confreg, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-         jtag_soc_dbg.idle(s_tck, s_tms, s_trstn, s_tdi);
-         rec = dataout [8:0];
-         // `DEBUG_MANAGER_INST.printf(STDOUT, 0, $sformatf("%s[TEST_MODE_IF] %s%t - %sGet confreg value = %X%s\n", `ESC_BLUE_BOLD, `ESC_WHITE, $realtime, `ESC_MAGENTA, rec, `ESC_DEFAULT));
+
+         automatic logic [1:0]         dm_op;
+         automatic logic [31:0]        dm_data;
+         automatic logic [6:0]         dm_addr;
+         automatic logic [31:0]        key_word = 32'hda41de;
+
+         //write key_word in data0
+         this.writeArg(
+            0,
+            key_word,
+            s_tck,
+            s_tms,
+            s_trstn,
+            s_tdi,
+            s_tdo
+         );
+
+         //x10 is kept clean
+
+         //Copy data0 to each register from x2 to x31 but x10 by means of Access Register abstract commands
+         for (logic [15:0] regno = 16'h1002; regno < 16'h1020; regno=regno+1) begin
+            dm_data = {8'h0, 1'b0, 3'd2, 1'b0, 1'b0, 1'b1, 1'b1, regno};
+            if(regno[4:0]!=5'd10) begin
+               this.set_command(
+                  dm_data,
+                  s_tck,
+                  s_tms,
+                  s_trstn,
+                  s_tdi,
+                  s_tdo
+               );
+            end
+
+            //$display("[TB] %t Access Register at regno %d",$realtime(), regno[4:0]);
+
+         end
+
+         //Put address_i is x1 by writing it to data0 and then Access Register
+         this.writeArg(
+            0,
+            address_i,
+            s_tck,
+            s_tms,
+            s_trstn,
+            s_tdi,
+            s_tdo
+         );
+         dm_data = {8'h0, 1'b0, 3'd2, 1'b0, 1'b0, 1'b1, 1'b1, 16'h1001};
+         this.set_command(
+            dm_data,
+            s_tck,
+            s_tms,
+            s_trstn,
+            s_tdi,
+            s_tdo
+         );
+
+         //increase every registers x2-x31 by 2-31  store them to *(x1++) but x10
+         for (logic [15:0] regno = 16'h1002; regno < 16'h1020; regno=regno+1) begin
+
+            if(regno[4:0]!=5'd10) begin
+
+               this.writePrgramBuff (
+                  0, //progrbuff0
+                  { 7'h0, regno[4:0], regno[4:0], 3'b000, regno[4:0], 7'h13 }, // addi xi, xi, i
+                  s_tck,
+                  s_tms,
+                  s_trstn,
+                  s_tdi,
+                  s_tdo
+               );
+
+               this.writePrgramBuff (
+                  1, //progrbuff1
+                  { 7'h0, regno[4:0], 5'h1, 1'b0, 2'b10, 5'h0, 7'h23 }, //sw xi, 0(x1)
+                  s_tck,
+                  s_tms,
+                  s_trstn,
+                  s_tdi,
+                  s_tdo
+               );
+
+               this.writePrgramBuff (
+                  2, //progrbuff2
+                  { 12'h4, 5'h1, 3'b000, 5'h1, 7'h13 }, // addi x1, x1, 4
+                  s_tck,
+                  s_tms,
+                  s_trstn,
+                  s_tdi,
+                  s_tdo
+               );
+
+               this.writePrgramBuff (
+                  3, //progrbuff3
+                  { 32'h00100073 }, //ebreak
+                  s_tck,
+                  s_tms,
+                  s_trstn,
+                  s_tdi,
+                  s_tdo
+               );
+               //execute the program buffer
+               dm_data = {8'h0, 1'b0, 3'd2, 1'b0, 1'b1, 1'b0, 1'b0, 16'h0};
+
+               this.set_command(
+                  dm_data,
+                  s_tck,
+                  s_tms,
+                  s_trstn,
+                  s_tdi,
+                  s_tdo
+               );
+               //$display("[TB] %t Store of the value in reg %d",$realtime(), regno[4:0]);
+
+            end
+         end
+
+         //Now read them from memory the previous store values
+
+         error = 1'b0;
+         for (int incAddr = 2; incAddr < 10; incAddr=incAddr+1) begin
+            this.readMem(address_i + (incAddr-2)*4, dm_data, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+            //$display("[TB] %t Read %x from %x",$realtime(), dm_data, address_i + (incAddr-2)*4);
+            if(dm_data != key_word + incAddr) begin
+               error = 1'b1;
+               $display("[TB - AbstractsCommands_andProgramBuffer] %t Read %x from %x instead of %x",$realtime(), dm_data, address_i + (incAddr-2)*4, key_word + incAddr);
+            end
+         end
+
+         for (int incAddr = 11; incAddr < 32; incAddr=incAddr+1) begin
+            this.readMem(address_i + (incAddr-3)*4, dm_data, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+            //$display("[TB] %t Read %x from %x",$realtime(), dm_data, address_i + (incAddr-3)*4);
+            if(dm_data != key_word + incAddr) begin
+               error = 1'b1;
+               $display("[TB - AbstractsCommands_andProgramBuffer] %t Read %x from %x instead of %x",$realtime(), dm_data, address_i + (incAddr-3)*4, key_word + incAddr);
+            end
+         end
+
       endtask
-*/
+
    endclass
 
 
