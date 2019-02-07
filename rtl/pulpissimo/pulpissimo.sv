@@ -96,7 +96,7 @@ module pulpissimo
   localparam AXI_USER_WIDTH             = 6;
   localparam AXI_CLUSTER_SOC_STRB_WIDTH = AXI_CLUSTER_SOC_DATA_WIDTH/8;
   localparam AXI_SOC_CLUSTER_STRB_WIDTH = AXI_SOC_CLUSTER_DATA_WIDTH/8;
-  
+
   localparam BUFFER_WIDTH               = 8;
   localparam EVENT_WIDTH                = 8;
 
@@ -289,6 +289,8 @@ module pulpissimo
   logic                        s_i2s_sck1_out;
   logic                        s_i2s_ws1_out;
   logic [1:0]                  s_i2s_mode1_out;
+  logic                        s_i2s_slave_sck_oe;
+  logic                        s_i2s_slave_ws_oe;
   logic                        s_spi_master0_csn0;
   logic                        s_spi_master0_csn1;
   logic                        s_spi_master0_sck;
@@ -607,16 +609,14 @@ module pulpissimo
         .i2c1_sda_in_o              ( s_i2c1_sda_in               ),
         .i2c1_sda_oe_i              ( s_i2c1_sda_oe               ),
 
-        .i2s_sd0_in_o               ( s_i2s_sd0_in                ),
-        .i2s_sd1_in_o               ( s_i2s_sd1_in                ),
-        .i2s_sck_in_o               ( s_i2s_sck_in                ),
-        .i2s_ws_in_o                ( s_i2s_ws_in                 ),
-        .i2s_sck0_out_i             ( s_i2s_sck0_out              ),
-        .i2s_ws0_out_i              ( s_i2s_ws0_out               ),
-        .i2s_mode0_out_i            ( s_i2s_mode0_out             ),
-        .i2s_sck1_out_i             ( s_i2s_sck1_out              ),
-        .i2s_ws1_out_i              ( s_i2s_ws1_out               ),
-        .i2s_mode1_out_i            ( s_i2s_mode1_out             ),
+        .i2s_slave_sd0_o            ( s_i2s_sd0_in                ),
+        .i2s_slave_sd1_o            ( s_i2s_sd1_in                ),
+        .i2s_slave_ws_o             ( s_i2s_ws_in                 ),
+        .i2s_slave_ws_i             ( s_i2s_ws0_out               ),
+        .i2s_slave_ws_oe            ( s_i2s_slave_ws_oe           ),
+        .i2s_slave_sck_o            ( s_i2s_sck_in                ),
+        .i2s_slave_sck_i            ( s_i2s_sck0_out              ),
+        .i2s_slave_sck_oe           ( s_i2s_slave_sck_oe          ),
 
 `ifdef PULP_FPGA_EMUL
         .spi_master0_csn0_i         ( s_safe2soc_spi_master0_csn0 ),
@@ -864,16 +864,14 @@ module pulpissimo
         .i2c1_sda_o                   ( s_i2c1_sda_out                   ),
         .i2c1_sda_oe_o                ( s_i2c1_sda_oe                    ),
 
-        .i2s_sd0_i                    ( s_i2s_sd0_in                     ),
-        .i2s_sd1_i                    ( s_i2s_sd1_in                     ),
-        .i2s_ws_i                     ( s_i2s_ws_in                      ),
-        .i2s_sck_i                    ( s_i2s_sck_in                     ),
-        .i2s_ws0_o                    ( s_i2s_ws0_out                    ),
-        .i2s_sck0_o                   ( s_i2s_sck0_out                   ),
-        .i2s_mode0_o                  ( s_i2s_mode0_out                  ),
-        .i2s_ws1_o                    ( s_i2s_ws1_out                    ),
-        .i2s_sck1_o                   ( s_i2s_sck1_out                   ),
-        .i2s_mode1_o                  ( s_i2s_mode1_out                  ),
+        .i2s_slave_sd0_i              ( s_i2s_sd0_in                     ),
+        .i2s_slave_sd1_i              ( s_i2s_sd1_in                     ),
+        .i2s_slave_ws_i               ( s_i2s_ws_in                      ),
+        .i2s_slave_ws_o               ( s_i2s_ws0_out                    ),
+        .i2s_slave_ws_oe              ( s_i2s_slave_ws_oe                ),
+        .i2s_slave_sck_i              ( s_i2s_sck_in                     ),
+        .i2s_slave_sck_o              ( s_i2s_sck0_out                   ),
+        .i2s_slave_sck_oe             ( s_i2s_slave_sck_oe               ),
 
         .spi_master0_clk_o            ( s_spi_master0_sck                ),
         .spi_master0_csn0_o           ( s_spi_master0_csn0               ),

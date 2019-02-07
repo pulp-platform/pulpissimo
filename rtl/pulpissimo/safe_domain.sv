@@ -83,16 +83,14 @@ module safe_domain
         input  logic             i2c1_sda_oe_i        ,
 
         // I2S
-        output  logic            i2s_sd0_in_o         ,
-        output  logic            i2s_sd1_in_o         ,
-        output  logic            i2s_sck_in_o         ,
-        output  logic            i2s_ws_in_o          ,
-        input   logic            i2s_sck0_out_i       ,
-        input   logic            i2s_ws0_out_i        ,
-        input   logic [1:0]      i2s_mode0_out_i      ,
-        input   logic            i2s_sck1_out_i       ,
-        input   logic            i2s_ws1_out_i        ,
-        input   logic [1:0]      i2s_mode1_out_i      ,
+        output logic             i2s_slave_sd0_o      ,
+        output logic             i2s_slave_sd1_o      ,
+        output logic             i2s_slave_ws_o       ,
+        input  logic             i2s_slave_ws_i       ,
+        input  logic             i2s_slave_ws_oe      ,
+        output logic             i2s_slave_sck_o      ,
+        input  logic             i2s_slave_sck_i      ,
+        input  logic             i2s_slave_sck_oe     ,
 
         // SPI MASTER
         input  logic             spi_master0_csn0_i   ,
@@ -294,16 +292,14 @@ module safe_domain
         .i2c1_sda_in_o         ( i2c1_sda_in_o         ),
         .i2c1_sda_oe_i         ( i2c1_sda_oe_i         ),
 
-        .i2s_sd0_in_o          ( i2s_sd0_in_o          ),
-        .i2s_sd1_in_o          ( i2s_sd1_in_o          ),
-        .i2s_sck_in_o          ( i2s_sck_in_o          ),
-        .i2s_ws_in_o           ( i2s_ws_in_o           ),
-        .i2s_sck0_out_i        ( i2s_sck0_out_i        ),
-        .i2s_ws0_out_i         ( i2s_ws0_out_i         ),
-        .i2s_mode0_out_i       ( i2s_mode0_out_i       ),
-        .i2s_sck1_out_i        ( i2s_sck1_out_i        ),
-        .i2s_ws1_out_i         ( i2s_ws1_out_i         ),
-        .i2s_mode1_out_i       ( i2s_mode1_out_i       ),
+        .i2s_slave_sd0_o       ( i2s_slave_sd0_o       ),
+        .i2s_slave_sd1_o       ( i2s_slave_sd1_o       ),
+        .i2s_slave_ws_o        ( i2s_slave_ws_o        ),
+        .i2s_slave_ws_i        ( i2s_slave_ws_i        ),
+        .i2s_slave_ws_oe       ( i2s_slave_ws_oe       ),
+        .i2s_slave_sck_o       ( i2s_slave_sck_o       ),
+        .i2s_slave_sck_i       ( i2s_slave_sck_i       ),
+        .i2s_slave_sck_oe      ( i2s_slave_sck_oe      ),
 
         .spi_master0_csn0_i    ( spi_master0_csn0_i    ),
         .spi_master0_csn1_i    ( spi_master0_csn1_i    ),
@@ -480,13 +476,13 @@ module safe_domain
 `else
     assign s_rstn_sync = s_rstn;
 `endif
-    
+
     assign slow_clk_o = ref_clk_i;
-    
+
     assign s_rstn          = rst_ni;
     assign s_jtag_rstn     = jtag_trst_ni;
     assign rst_no          = s_rstn;
-    
+
     assign test_clk_o      = 1'b0;
     assign dft_cg_enable_o = 1'b0;
     assign test_mode_o     = 1'b0;
