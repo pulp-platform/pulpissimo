@@ -503,6 +503,7 @@ module tb_pulp;
          logic [1:0]  dm_op;
          logic [31:0] dm_data;
          logic [6:0]  dm_addr;
+         logic [9:0]  FC_Core_ID = 10'd31;
 
          force tb_pulp.i_dut.pad_frame_i.padinst_reset_n.O = 1'b0;
          jtag_enable = 1'b0;
@@ -588,6 +589,16 @@ module tb_pulp;
 
             debug_mode_if.set_dmactive(
                1'b1,
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+
+            debug_mode_if.set_harsel(
+               10'b0,
+               FC_Core_ID,
                s_tck,
                s_tms,
                s_trstn,

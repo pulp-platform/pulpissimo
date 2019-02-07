@@ -542,7 +542,7 @@ package jtag_pkg;
             );
 
          //haltreq
-         dm_data[31] = haltreq;
+         dm_data[31]    = haltreq;
 
          this.set_dmi(
                2'b10, //Write
@@ -932,6 +932,50 @@ package jtag_pkg;
                2'b10, //Write
                7'h10, //DMControl
                {1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 10'b0, 10'b0, 2'b0, 1'b0, 1'b0, 1'b0, dmactive},
+               {dm_addr, dm_data, dm_op},
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+
+      endtask
+
+      task set_harsel(
+         input logic [9:0] hartselli,
+         input logic [9:0] hartsello,
+         ref   logic s_tck,
+         ref   logic s_tms,
+         ref   logic s_trstn,
+         ref   logic s_tdi,
+         ref   logic s_tdo
+      );
+
+         automatic logic [1:0]         dm_op;
+         automatic logic [31:0]        dm_data;
+         automatic logic [6:0]         dm_addr;
+
+         this.set_dmi(
+               2'b01, //read
+               7'h10, //DMControl
+               32'h0, //whatever
+               {dm_addr, dm_data, dm_op},
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+
+         //haltreq
+         dm_data[25:16] = hartsello;
+         dm_data[15: 6] = hartselli;
+
+         this.set_dmi(
+               2'b10, //Write
+               7'h10, //DMControl
+               dm_data,
                {dm_addr, dm_data, dm_op},
                s_tck,
                s_tms,
