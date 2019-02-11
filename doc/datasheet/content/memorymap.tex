@@ -8,10 +8,6 @@ Please, consult the \udma documentation for the peripherals attached to the \udm
   %\includegraphics[width=0.8\textwidth]{./figures/memory_map}
 
   \begin{bytefield}{24}
-  \begin{rightwordgroup}{L2 Memory}
-  \memsection{0x1C00 0000}{0x1C08 0000}{7}{512kB RAM}
-  \end{rightwordgroup}\\
-  \memsection{}{}{2}{}\\
   \begin{rightwordgroup}{Boot ROM}
   \memsection{0x1A00 0000}{0x01A00 2000}{3}{8kB ROM}
   \end{rightwordgroup}\\
@@ -27,8 +23,11 @@ Please, consult the \udma documentation for the peripherals attached to the \udm
   \memsection{0x1A10 C000}{}{2}{HWPE} \\
   \memsection{0x1A10 F000}{}{2}{Stdout} \\
   \memsection{0x1A11 0000}{}{2}{Debug Unit}
-  \end{rightwordgroup}
-  \\
+  \end{rightwordgroup}  \\
+  \memsection{}{}{2}{}\\
+  \begin{rightwordgroup}{L2 Memory}
+  \memsection{0x1C00 0000}{0x1C08 0000}{7}{512kB RAM}
+  \end{rightwordgroup}\\
   \end{bytefield}
 
   \caption{\pulpissimo memory-map.}

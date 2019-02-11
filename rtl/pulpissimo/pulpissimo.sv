@@ -63,24 +63,19 @@ module pulpissimo
    inout  wire        pad_jtag_tms,
    inout  wire        pad_jtag_trst,
 
-   inout  wire        pad_xtal_in,
-   input  logic       cluster_jtag_tck_i,
-   input  logic       cluster_jtag_tdi_i,
-   output logic       cluster_jtag_tdo_o,
-   input  logic       cluster_jtag_tms_i,
-   input  logic       cluster_jtag_trst_ni
+   inout  wire        pad_xtal_in
   );
 
   localparam AXI_ADDR_WIDTH             = 32;
-  localparam AXI_DATA_WIDTH             = 64;
-  localparam AXI_DATA_SOC_CLUSTER_WIDTH = 32;
-  localparam AXI_ID_CLUSTER_SOC_WIDTH   = 7;
-  localparam AXI_ID_SOC_CLUSTER_WIDTH   = 8;
+  localparam AXI_CLUSTER_SOC_DATA_WIDTH = 64;
+  localparam AXI_SOC_CLUSTER_DATA_WIDTH = 32;
+  localparam AXI_CLUSTER_SOC_ID_WIDTH   = 6;
+  localparam AXI_SOC_CLUSTER_ID_WIDTH   = 4;
 
   localparam AXI_USER_WIDTH             = 6;
-  localparam AXI_STRB_WIDTH             = AXI_DATA_WIDTH/8;
-  localparam AXI_STRB_SOC_CLUSTER_WIDTH = AXI_DATA_SOC_CLUSTER_WIDTH/8;
-
+  localparam AXI_CLUSTER_SOC_STRB_WIDTH = AXI_CLUSTER_SOC_DATA_WIDTH/8;
+  localparam AXI_SOC_CLUSTER_STRB_WIDTH = AXI_SOC_CLUSTER_DATA_WIDTH/8;
+  
   localparam BUFFER_WIDTH               = 8;
   localparam EVENT_WIDTH                = 8;
 
@@ -526,11 +521,6 @@ module pulpissimo
         .jtag_tdi_i                 ( s_jtag_tdi                  ),
         .jtag_tdo_o                 ( s_jtag_tdo                  ),
 
-        .soc_tck_o                  ( s_soc_tck                   ),
-        .soc_trstn_o                ( s_soc_trstn                 ),
-        .soc_tms_o                  ( s_soc_tms                   ),
-        .soc_tdi_o                  ( s_soc_tdi                   ),
-
         .jtag_shift_dr_o            ( s_jtag_shift_dr             ),
         .jtag_update_dr_o           ( s_jtag_update_dr            ),
         .jtag_capture_dr_o          ( s_jtag_capture_dr           ),
@@ -732,19 +722,18 @@ module pulpissimo
 
    // SOC DOMAIN
    soc_domain #(
-      .CORE_TYPE          ( CORE_TYPE                ),
-      .USE_FPU            ( USE_FPU                  ),
-      .USE_HWPE           ( USE_HWPE                 ),
-      .AXI_ADDR_WIDTH     ( AXI_ADDR_WIDTH           ),
-      .AXI_DATA_IN_WIDTH  ( AXI_DATA_WIDTH           ),
-      .AXI_DATA_OUT_WIDTH ( AXI_DATA_WIDTH           ),
-      .AXI_ID_IN_WIDTH    ( AXI_ID_CLUSTER_SOC_WIDTH ),
-      .AXI_ID_OUT_WIDTH   ( AXI_ID_SOC_CLUSTER_WIDTH ),
-      .AXI_USER_WIDTH     ( AXI_USER_WIDTH           ),
-      .AXI_STRB_IN_WIDTH  ( AXI_STRB_WIDTH           ),
-      .AXI_STRB_OUT_WIDTH ( AXI_STRB_WIDTH           ),
-      .BUFFER_WIDTH       ( BUFFER_WIDTH             ),
-      .EVNT_WIDTH         ( EVENT_WIDTH              )
+      .CORE_TYPE          ( CORE_TYPE                  ),
+      .USE_FPU            ( USE_FPU                    ),
+      .AXI_ADDR_WIDTH     ( AXI_ADDR_WIDTH             ),
+      .AXI_DATA_IN_WIDTH  ( AXI_CLUSTER_SOC_DATA_WIDTH ),
+      .AXI_DATA_OUT_WIDTH ( AXI_SOC_CLUSTER_DATA_WIDTH ),
+      .AXI_ID_IN_WIDTH    ( AXI_CLUSTER_SOC_ID_WIDTH   ),
+      .AXI_ID_OUT_WIDTH   ( AXI_SOC_CLUSTER_ID_WIDTH   ),
+      .AXI_USER_WIDTH     ( AXI_USER_WIDTH             ),
+      .AXI_STRB_IN_WIDTH  ( AXI_CLUSTER_SOC_STRB_WIDTH ),
+      .AXI_STRB_OUT_WIDTH ( AXI_SOC_CLUSTER_STRB_WIDTH ),
+      .BUFFER_WIDTH       ( BUFFER_WIDTH               ),
+      .EVNT_WIDTH         ( EVENT_WIDTH                )
    ) soc_domain_i (
 
         .ref_clk_i                    ( s_ref_clk                        ),
@@ -764,10 +753,8 @@ module pulpissimo
 
         .boot_l2_i                    ( s_boot_l2                        ),
 
-        .jtag_tck_i                   ( s_soc_tck                        ),
-        .jtag_trst_ni                 ( s_soc_trstn                      ),
-        .jtag_tms_i                   ( s_soc_tms                        ),
-        .jtag_td_i                    ( s_soc_tdi                        ),
+        .jtag_tck_i                   ( s_jtag_tck                       ),
+        .jtag_trst_ni                 ( s_jtag_trst                      ),
         .jtag_shift_dr_i              ( s_jtag_shift_dr                  ),
         .jtag_update_dr_i             ( s_jtag_update_dr                 ),
         .jtag_capture_dr_i            ( s_jtag_capture_dr                ),

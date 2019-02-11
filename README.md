@@ -1,5 +1,7 @@
 # PULPissimo
 
+![](doc/pulpissimo_archi.png)
+
 PULPissimo is the microcontroller architecture of the more recent PULP chips,
 part of the ongoing "PULP platform" collaboration between ETH Zurich and the
 University of Bologna - started in 2013.
@@ -74,15 +76,21 @@ see `ips/hwpe-stream/doc` and https://arxiv.org/abs/1612.05974.
 ## Getting Started
 
 ### Prerequisites
-To be able to use the PULPissimo platform, you need to have installed 
-development kit for PULP/PULPissimo. The instructions can be found here:
-https://github.com/pulp-platform/pulp-sdk/blob/master/README.md
-The recommended flow to build the SDK is described in section *SDK build with
-independent dependencies build*.
+To be able to use the PULPissimo platform, you need to have installed the software
+development kit for PULP/PULPissimo.
 
-Please note that you have to set up an account in GitHub and upload your SSH
-public key to install the SDK. You can find detailed instructions on how to do
-that here: https://help.github.com/articles/connecting-to-github-with-ssh/
+First install the system dependencies indicated here:
+https://github.com/pulp-platform/pulp-builder/blob/master/README.md
+
+Then execute the following commands:
+```
+git clone https://github.com/pulp-platform/pulp-builder.git
+cd pulp-builder
+source configs/pulpissimo_v2.sh
+./scripts/build-runtime
+source sdk-setup.sh
+source configs/rtl.sh
+```
 
 ### Building the RTL simulation platform
 To build the RTL simulation platform, start by getting the latest version of the
@@ -108,13 +116,12 @@ details on how to plug in some models of real SPI, I2C, I2S peripherals.
 Finally, you can download and run the tests; for that you can checkout the
 following repositories:
 
-Runtime tests: https://github.com/pulp-platform/pulp-tests/rt-tests
-Core tests: https://github.com/pulp-platform/riscv_tests
+Runtime tests: https://github.com/pulp-platform/pulp-rt-examples
 
 Now you can change directory to your favourite test e.g.: for an hello world
 test, run
 ```
-cd rt-tests/rt/quick/hello
+cd pulp-rt-examples/hello
 make clean all run
 ```
 The open-source simulation platform relies on JTAG to emulate preloading of the
@@ -126,6 +133,14 @@ In case you want to see the Modelsim GUI, just type
 make conf gui=1
 ```
 before starting the simulation.
+
+If you want to save a (compressed) VCD for further examination, type
+```
+make conf vsim/script=export_run.tcl
+```
+before starting the simulation. You will find the VCD in
+`build/<SRC_FILE_NAME>/pulpissimo/export.vcd.gz` where 
+`<SRC_FILE_NAME>` is the name of the C source of the test.
 
 ## Proprietary verification IPs
 The full simulation platform can take advantage of a few models of commercial
@@ -165,7 +180,8 @@ repository is structured as follows:
 The RTL platform has the following requirements:
 - Relatively recent Linux-based operating system; we tested *Ubuntu 16.04* and
   *CentOS 7*.
-- ModelSim in reasonably recent version (we tested it with version *10.6b*).
+- Mentor ModelSim in reasonably recent version (we tested it with version *10.6b*
+-- the free version provided by Altera is only partially working, see issue #12).
 - Python 3.4, with the `pyyaml` module installed (you can get that with
   `pip3 install pyyaml`).
 - The SDK has its own dependencies, listed in

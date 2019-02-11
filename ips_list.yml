@@ -19,7 +19,11 @@
 #
 
 pulp_soc:
-  commit: fpga 
-  server: git@github.com
+  commit: fpga
+  server: https://github.com
   group:  pulp-platform
 
+tbtools:
+  commit: master
+  server: https://github.com
+  group:  pulp-platform

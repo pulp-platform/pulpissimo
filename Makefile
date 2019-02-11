@@ -48,21 +48,35 @@ install: $(INSTALL_HEADERS)
 vopt:
 	export VOPT_FLOW=1 && cd $(VSIM_PATH) && vsim -64 -c -do "source tcl_files/config/vsim.tcl; quit"
 
-all: checkout build install vopt
+import_bootcode:
+	cd sim/boot && objcopy --srec-len 1 --output-target=srec ${PULP_SDK_HOME}/install/bin/boot-pulpissimo boot-pulpissimo.s19
+	cd sim/boot && s19toboot.py boot-pulpissimo.s19 pulpissimo
+
+# This target is for continuous integration tests
+sdk:
+	if [ ! -e pulp-builder ]; then \
+	  git clone https://github.com/pulp-platform/pulp-builder.git; \
+	fi; \
+	cd pulp-builder; \
+	git checkout 1c962fff78ca14bbbc45ef4347d1e76bed982d61; \
+	. configs/pulpissimo_v2.sh; \
+	. configs/rtl.sh; \
+	export PULP_RISCV_GCC_TOOLCHAIN=/usr/pack/pulpsdk-1.0-kgf/artifactory/pulp-sdk-release/pkg/pulp_riscv_gcc/1.0.9; \
+	./scripts/update-runtime; \
+	./scripts/clean; \
+	./scripts/build-runtime;
+
+
+all: checkout build install vopt sdk
 
 test-checkout:
-	./update-tests
+	git submodule update --init
 
 test:
-	source setup/sdk.sh && cd pulp-sdk && source init.sh && \
-	  plpbuild --p tests test --threads 32 --db \
-	    --db-info=$(CURDIR)/db_info.txt --stdout --branch=$(BRANCH) \
-	    --env=quentin_validation --commit=`git rev-parse HEAD`
-
-	source setup/sdk.sh && cd pulp-sdk && source init.sh && \
-	  plpdb tests --build=`cat $(CURDIR)/db_info.txt | grep tests.build.id= | sed s/tests.build.id=//` \
-	    --mail="Quentin regression report" --xls=report.xlsx --branch $(BRANCH) \
-	    --config=$$PULP_CURRENT_CONFIG --url=$(BUILD_URL) \
-	    --author-email=`git show -s --pretty=%ae` --env=quentin_validation && \
-	  plpdb check_reg --build=`cat $(CURDIR)/db_info.txt | grep tests.build.id= | sed s/tests.build.id=//` \
-	    --branch master --config=$$PULP_CURRENT_CONFIG --env=quentin_validation
+	cd pulp-builder; \
+	. sdk-setup.sh; \
+	. configs/pulpissimo_v2.sh; \
+	. configs/rtl.sh; \
+	export PULP_RISCV_GCC_TOOLCHAIN=/usr/pack/pulpsdk-1.0-kgf/artifactory/pulp-sdk-release/pkg/pulp_riscv_gcc/1.0.9; \
+	cd ..; \
+	plptest --threads 16 --stdout

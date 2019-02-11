@@ -35,11 +35,6 @@ module safe_domain
         input  logic             jtag_tdi_i           ,
         output logic             jtag_tdo_o           ,
 
-        output logic             soc_tck_o            ,
-        output logic             soc_trstn_o          ,
-        output logic             soc_tms_o            ,
-        output logic             soc_tdi_o            ,
-
         output logic             jtag_shift_dr_o      ,
         output logic             jtag_update_dr_o     ,
         output logic             jtag_capture_dr_o    ,
@@ -458,12 +453,6 @@ module safe_domain
         .td_i                    ( jtag_tdi_i             ),
         .td_o                    ( jtag_tdo_o             ),
 
-        .soc_tck_o               ( soc_tck_o              ),
-        .soc_trstn_o             ( soc_trstn_o            ),
-        .soc_tms_o               ( soc_tms_o              ),
-        .soc_tdi_o               ( soc_tdi_o              ),
-        .soc_tdo_i               ( axireg_tdo_i           ),
-
         .test_clk_i              ( s_test_clk             ),
         .test_rstn_i             ( s_rstn_sync            ),
 
@@ -491,53 +480,13 @@ module safe_domain
 `else
     assign s_rstn_sync = s_rstn;
 `endif
-
-`ifndef PULP_FPGA_EMUL
-
-        logic ref_clk_div8;
-        logic ref_clk_0;
-        logic ref_clk_1;
-        logic ref_clk_2;
-
-        always_ff @(posedge ref_clk_i or negedge rst_ni) begin
-            if(~rst_ni) begin
-                ref_clk_0 <= 1'b0;
-                ref_clk_1 <= 1'b0;
-                ref_clk_2 <= 1'b0;
-            end else begin
-                ref_clk_0 <= ~ref_clk_2;
-                ref_clk_1 <= ref_clk_0;
-                ref_clk_2 <= ref_clk_1;
-            end
-        end
-
-        assign ref_clk_div8 = ref_clk_2;
-
-        pulp_clock_mux2 slow_clk_mux_i
-        (
-            .clk0_i    ( ref_clk_i      ),
-            .clk1_i    ( ref_clk_div8   ),
-            .clk_sel_i ( sel_fll_clk_o  ),
-            .clk_o     ( slow_clk_o     )
-        );
-
-        /*
-            The slow_clk_o is ref_clk_i / 8
-            It is used in case the FLL is broken,
-            ref_clk_i replaces the FLL clock and
-            slow_clk_o replaces the ref_clk_i for
-            timer, and time unit generators
-            (as the clock must be slower)
-        */
-
-`else
-        assign slow_clk_o = ref_clk_i;
-`endif
-
+    
+    assign slow_clk_o = ref_clk_i;
+    
     assign s_rstn          = rst_ni;
     assign s_jtag_rstn     = jtag_trst_ni;
     assign rst_no          = s_rstn;
-
+    
     assign test_clk_o      = 1'b0;
     assign dft_cg_enable_o = 1'b0;
     assign test_mode_o     = 1'b0;
