@@ -215,10 +215,10 @@ module pad_control
    /////////////////////////////////////////////////////////////////////////////////////////////
    // OUTPUT ENABLE
    /////////////////////////////////////////////////////////////////////////////////////////////
-   assign oe_spim_sdio0_o  = (pad_mux_i[0 ] == 2'b00) ? spi_master0_oen0_i  : ((pad_mux_i[0 ] == 2'b01) ? gpio_dir_i[0 ] : ((pad_mux_i[0 ] == 2'b10) ? s_alt2        : s_alt3 ));
-   assign oe_spim_sdio1_o  = (pad_mux_i[1 ] == 2'b00) ? spi_master0_oen1_i  : ((pad_mux_i[1 ] == 2'b01) ? gpio_dir_i[1 ] : ((pad_mux_i[1 ] == 2'b10) ? s_alt2        : s_alt3 ));
-   assign oe_spim_sdio2_o  = (pad_mux_i[2 ] == 2'b00) ? spi_master0_oen2_i  : ((pad_mux_i[2 ] == 2'b01) ? gpio_dir_i[2 ] : ((pad_mux_i[2 ] == 2'b10) ? i2c1_sda_oe_i : s_alt3 ));
-   assign oe_spim_sdio3_o  = (pad_mux_i[3 ] == 2'b00) ? spi_master0_oen3_i  : ((pad_mux_i[3 ] == 2'b01) ? gpio_dir_i[3 ] : ((pad_mux_i[3 ] == 2'b10) ? i2c1_scl_oe_i : s_alt3 ));
+   assign oe_spim_sdio0_o  = (pad_mux_i[0 ] == 2'b00) ? ~spi_master0_oen0_i : ((pad_mux_i[0 ] == 2'b01) ? gpio_dir_i[0 ] : ((pad_mux_i[0 ] == 2'b10) ? s_alt2        : s_alt3 ));
+   assign oe_spim_sdio1_o  = (pad_mux_i[1 ] == 2'b00) ? ~spi_master0_oen1_i : ((pad_mux_i[1 ] == 2'b01) ? gpio_dir_i[1 ] : ((pad_mux_i[1 ] == 2'b10) ? s_alt2        : s_alt3 ));
+   assign oe_spim_sdio2_o  = (pad_mux_i[2 ] == 2'b00) ? ~spi_master0_oen2_i : ((pad_mux_i[2 ] == 2'b01) ? gpio_dir_i[2 ] : ((pad_mux_i[2 ] == 2'b10) ? i2c1_sda_oe_i : s_alt3 ));
+   assign oe_spim_sdio3_o  = (pad_mux_i[3 ] == 2'b00) ? ~spi_master0_oen3_i : ((pad_mux_i[3 ] == 2'b01) ? gpio_dir_i[3 ] : ((pad_mux_i[3 ] == 2'b10) ? i2c1_scl_oe_i : s_alt3 ));
    assign oe_spim_csn0_o   = (pad_mux_i[4 ] == 2'b00) ? 1'b1                : ((pad_mux_i[4 ] == 2'b01) ? gpio_dir_i[4 ] : ((pad_mux_i[4 ] == 2'b10) ? s_alt2        : s_alt3 ));
    assign oe_spim_csn1_o   = (pad_mux_i[5 ] == 2'b00) ? 1'b1                : ((pad_mux_i[5 ] == 2'b01) ? gpio_dir_i[5 ] : ((pad_mux_i[5 ] == 2'b10) ? s_alt2        : s_alt3 ));
    assign oe_spim_sck_o    = (pad_mux_i[6 ] == 2'b00) ? 1'b1                : ((pad_mux_i[6 ] == 2'b01) ? gpio_dir_i[6 ] : ((pad_mux_i[6 ] == 2'b10) ? s_alt2        : s_alt3 ));
