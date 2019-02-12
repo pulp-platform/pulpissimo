@@ -328,13 +328,6 @@ module safe_domain
         .sdio_data_o           ( sdio_data_o           ),
         .sdio_data_oen_i       ( sdio_data_oen_i       ),
 
-        .spi_master1_csn0_i    ( spi_master1_csn0_i    ),
-        .spi_master1_csn1_i    ( spi_master1_csn1_i    ),
-        .spi_master1_sck_i     ( spi_master1_sck_i     ),
-        .spi_master1_sdi_o     ( spi_master1_sdi_o     ),
-        .spi_master1_sdo_i     ( spi_master1_sdo_i     ),
-        .spi_master1_mode_i    ( spi_master1_mode_i    ),
-
         .cam_pclk_o            ( cam_pclk_o            ),
         .cam_data_o            ( cam_data_o            ),
         .cam_hsync_o           ( cam_hsync_o           ),
