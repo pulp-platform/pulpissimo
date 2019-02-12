@@ -60,16 +60,14 @@ module pad_control
         input  logic             i2c1_sda_oe_i        ,
 
         // I2S
-        output  logic            i2s_sd0_in_o         ,
-        output  logic            i2s_sd1_in_o         ,
-        output  logic            i2s_sck_in_o         ,
-        output  logic            i2s_ws_in_o          ,
-        input   logic            i2s_sck0_out_i       ,
-        input   logic            i2s_ws0_out_i        ,
-        input   logic   [1:0]    i2s_mode0_out_i      ,
-        input   logic            i2s_sck1_out_i       ,
-        input   logic            i2s_ws1_out_i        ,
-        input   logic   [1:0]    i2s_mode1_out_i      ,
+        output logic             i2s_slave_sd0_o      ,
+        output logic             i2s_slave_sd1_o      ,
+        output logic             i2s_slave_ws_o       ,
+        input  logic             i2s_slave_ws_i       ,
+        input  logic             i2s_slave_ws_oe      ,
+        output logic             i2s_slave_sck_o      ,
+        input  logic             i2s_slave_sck_i      ,
+        input  logic             i2s_slave_sck_oe     ,
 
         // SPI MASTER
         input  logic             spi_master0_csn0_i   ,
@@ -83,14 +81,10 @@ module pad_control
         input  logic             spi_master0_sdo1_i   ,
         input  logic             spi_master0_sdo2_i   ,
         input  logic             spi_master0_sdo3_i   ,
-        input  logic [1:0]       spi_master0_mode_i   ,
-
-        input  logic             spi_master1_csn0_i   ,
-        input  logic             spi_master1_csn1_i   ,
-        input  logic             spi_master1_sck_i    ,
-        output logic             spi_master1_sdi_o    ,
-        input  logic             spi_master1_sdo_i    ,
-        input  logic [1:0]       spi_master1_mode_i   ,
+        input  logic             spi_master0_oen0_i   ,
+        input  logic             spi_master0_oen1_i   ,
+        input  logic             spi_master0_oen2_i   ,
+        input  logic             spi_master0_oen3_i   ,
 
         // CAMERA INTERFACE
         output logic             cam_pclk_o           ,
@@ -218,22 +212,13 @@ module pad_control
    assign s_alt2 = 1'b0;
    assign s_alt3 = 1'b0;
 
-
-   logic [3:0] s_spi_master0_oe;
-
-   logic       s_i2s0_sck_oe;
-   logic       s_i2s0_ws_oe;
-   logic       s_i2s1_sck_oe;
-   logic       s_i2s1_ws_oe;
-
-
    /////////////////////////////////////////////////////////////////////////////////////////////
    // OUTPUT ENABLE
    /////////////////////////////////////////////////////////////////////////////////////////////
-   assign oe_spim_sdio0_o  = (pad_mux_i[0 ] == 2'b00) ? s_spi_master0_oe[0] : ((pad_mux_i[0 ] == 2'b01) ? gpio_dir_i[0 ] : ((pad_mux_i[0 ] == 2'b10) ? s_alt2        : s_alt3 ));
-   assign oe_spim_sdio1_o  = (pad_mux_i[1 ] == 2'b00) ? s_spi_master0_oe[1] : ((pad_mux_i[1 ] == 2'b01) ? gpio_dir_i[1 ] : ((pad_mux_i[1 ] == 2'b10) ? s_alt2        : s_alt3 ));
-   assign oe_spim_sdio2_o  = (pad_mux_i[2 ] == 2'b00) ? s_spi_master0_oe[2] : ((pad_mux_i[2 ] == 2'b01) ? gpio_dir_i[2 ] : ((pad_mux_i[2 ] == 2'b10) ? i2c1_sda_oe_i : s_alt3 ));
-   assign oe_spim_sdio3_o  = (pad_mux_i[3 ] == 2'b00) ? s_spi_master0_oe[3] : ((pad_mux_i[3 ] == 2'b01) ? gpio_dir_i[3 ] : ((pad_mux_i[3 ] == 2'b10) ? i2c1_scl_oe_i : s_alt3 ));
+   assign oe_spim_sdio0_o  = (pad_mux_i[0 ] == 2'b00) ? ~spi_master0_oen0_i : ((pad_mux_i[0 ] == 2'b01) ? gpio_dir_i[0 ] : ((pad_mux_i[0 ] == 2'b10) ? s_alt2        : s_alt3 ));
+   assign oe_spim_sdio1_o  = (pad_mux_i[1 ] == 2'b00) ? ~spi_master0_oen1_i : ((pad_mux_i[1 ] == 2'b01) ? gpio_dir_i[1 ] : ((pad_mux_i[1 ] == 2'b10) ? s_alt2        : s_alt3 ));
+   assign oe_spim_sdio2_o  = (pad_mux_i[2 ] == 2'b00) ? ~spi_master0_oen2_i : ((pad_mux_i[2 ] == 2'b01) ? gpio_dir_i[2 ] : ((pad_mux_i[2 ] == 2'b10) ? i2c1_sda_oe_i : s_alt3 ));
+   assign oe_spim_sdio3_o  = (pad_mux_i[3 ] == 2'b00) ? ~spi_master0_oen3_i : ((pad_mux_i[3 ] == 2'b01) ? gpio_dir_i[3 ] : ((pad_mux_i[3 ] == 2'b10) ? i2c1_scl_oe_i : s_alt3 ));
    assign oe_spim_csn0_o   = (pad_mux_i[4 ] == 2'b00) ? 1'b1                : ((pad_mux_i[4 ] == 2'b01) ? gpio_dir_i[4 ] : ((pad_mux_i[4 ] == 2'b10) ? s_alt2        : s_alt3 ));
    assign oe_spim_csn1_o   = (pad_mux_i[5 ] == 2'b00) ? 1'b1                : ((pad_mux_i[5 ] == 2'b01) ? gpio_dir_i[5 ] : ((pad_mux_i[5 ] == 2'b10) ? s_alt2        : s_alt3 ));
    assign oe_spim_sck_o    = (pad_mux_i[6 ] == 2'b00) ? 1'b1                : ((pad_mux_i[6 ] == 2'b01) ? gpio_dir_i[6 ] : ((pad_mux_i[6 ] == 2'b10) ? s_alt2        : s_alt3 ));
@@ -258,8 +243,8 @@ module pad_control
    assign oe_sdio_data3_o  = (pad_mux_i[25] == 2'b00) ? ~sdio_data_oen_i[3] : ((pad_mux_i[25] == 2'b01) ? gpio_dir_i[25] : ((pad_mux_i[25] == 2'b10) ? i2c1_scl_oe_i : s_alt3 ));
    assign oe_i2c0_sda_o    = (pad_mux_i[33] == 2'b00) ? i2c0_sda_oe_i       : ((pad_mux_i[33] == 2'b01) ? gpio_dir_i[26] : ((pad_mux_i[33] == 2'b10) ? s_alt2        : s_alt3 ));
    assign oe_i2c0_scl_o    = (pad_mux_i[34] == 2'b00) ? i2c0_scl_oe_i       : ((pad_mux_i[34] == 2'b01) ? gpio_dir_i[27] : ((pad_mux_i[34] == 2'b10) ? s_alt2        : s_alt3 ));
-   assign oe_i2s0_sck_o    = (pad_mux_i[35] == 2'b00) ? s_i2s0_sck_oe       : ((pad_mux_i[35] == 2'b01) ? gpio_dir_i[28] : ((pad_mux_i[35] == 2'b10) ? s_alt2        : s_alt3 ));
-   assign oe_i2s0_ws_o     = (pad_mux_i[36] == 2'b00) ? s_i2s0_ws_oe        : ((pad_mux_i[36] == 2'b01) ? gpio_dir_i[29] : ((pad_mux_i[36] == 2'b10) ? s_alt2        : s_alt3 ));
+   assign oe_i2s0_sck_o    = (pad_mux_i[35] == 2'b00) ? i2s_slave_sck_oe    : ((pad_mux_i[35] == 2'b01) ? gpio_dir_i[28] : ((pad_mux_i[35] == 2'b10) ? s_alt2        : s_alt3 ));
+   assign oe_i2s0_ws_o     = (pad_mux_i[36] == 2'b00) ? i2s_slave_ws_oe     : ((pad_mux_i[36] == 2'b01) ? gpio_dir_i[29] : ((pad_mux_i[36] == 2'b10) ? s_alt2        : s_alt3 ));
    assign oe_i2s0_sdi_o    = (pad_mux_i[37] == 2'b00) ? 1'b0                : ((pad_mux_i[37] == 2'b01) ? gpio_dir_i[30] : ((pad_mux_i[37] == 2'b10) ? s_alt2        : s_alt3 ));
    assign oe_i2s1_sdi_o    = (pad_mux_i[38] == 2'b00) ? 1'b0                : ((pad_mux_i[38] == 2'b01) ? gpio_dir_i[31] : ((pad_mux_i[38] == 2'b10) ? s_alt2        : s_alt3 ));
 
@@ -294,8 +279,8 @@ module pad_control
    assign out_sdio_data3_o = (pad_mux_i[25] == 2'b00) ? sdio_data_i[3]     : ((pad_mux_i[25] == 2'b01) ? gpio_out_i[25] : ((pad_mux_i[25] == 2'b10) ? i2c1_scl_out_i : s_alt3 ));
    assign out_i2c0_sda_o   = (pad_mux_i[33] == 2'b00) ? i2c0_sda_out_i     : ((pad_mux_i[33] == 2'b01) ? gpio_out_i[26] : ((pad_mux_i[33] == 2'b10) ? s_alt2         : s_alt3 ));
    assign out_i2c0_scl_o   = (pad_mux_i[34] == 2'b00) ? i2c0_scl_out_i     : ((pad_mux_i[34] == 2'b01) ? gpio_out_i[27] : ((pad_mux_i[34] == 2'b10) ? s_alt2         : s_alt3 ));
-   assign out_i2s0_sck_o   = (pad_mux_i[35] == 2'b00) ? i2s_sck0_out_i     : ((pad_mux_i[35] == 2'b01) ? gpio_out_i[28] : ((pad_mux_i[35] == 2'b10) ? s_alt2         : s_alt3 ));
-   assign out_i2s0_ws_o    = (pad_mux_i[36] == 2'b00) ? i2s_ws0_out_i      : ((pad_mux_i[36] == 2'b01) ? gpio_out_i[29] : ((pad_mux_i[36] == 2'b10) ? s_alt2         : s_alt3 ));
+   assign out_i2s0_sck_o   = (pad_mux_i[35] == 2'b00) ? i2s_slave_sck_i    : ((pad_mux_i[35] == 2'b01) ? gpio_out_i[28] : ((pad_mux_i[35] == 2'b10) ? s_alt2         : s_alt3 ));
+   assign out_i2s0_ws_o    = (pad_mux_i[36] == 2'b00) ? i2s_slave_ws_i     : ((pad_mux_i[36] == 2'b01) ? gpio_out_i[29] : ((pad_mux_i[36] == 2'b10) ? s_alt2         : s_alt3 ));
    assign out_i2s0_sdi_o   = (pad_mux_i[37] == 2'b00) ? 1'b0               : ((pad_mux_i[37] == 2'b01) ? gpio_out_i[30] : ((pad_mux_i[37] == 2'b10) ? s_alt2         : s_alt3 ));
    assign out_i2s1_sdi_o   = (pad_mux_i[38] == 2'b00) ? 1'b0               : ((pad_mux_i[38] == 2'b01) ? gpio_out_i[31] : ((pad_mux_i[38] == 2'b10) ? s_alt2         : s_alt3 ));
 
@@ -329,97 +314,24 @@ module pad_control
    assign i2c1_sda_in_o = (pad_mux_i[2] == 2'b10) ? in_spim_sdio2_i : (pad_mux_i[7] == 2'b10) ? in_uart_rx_i : (pad_mux_i[24] == 2'b10) ? in_sdio_data2_i: 1'b1 ;
    assign i2c1_scl_in_o = (pad_mux_i[3] == 2'b10) ? in_spim_sdio3_i : (pad_mux_i[8] == 2'b10) ? in_uart_tx_i : (pad_mux_i[25] == 2'b10) ? in_sdio_data3_i: 1'b1 ;
 
-   //    I2S1
-   // I2S1 output enable control for sck and ws
-   always_comb
-   begin
-      case (i2s_mode1_out_i)
-        2'b00: begin
-           s_i2s1_sck_oe = 1'b1;
-           s_i2s1_ws_oe = 1'b1;
-        end
-        2'b01: begin
-           s_i2s1_sck_oe = 1'b1;
-           s_i2s1_ws_oe = 1'b1;
-        end
-        2'b10: begin
-           s_i2s1_sck_oe = 1'b0;
-           s_i2s1_ws_oe = 1'b1;
-        end
-        2'b11: begin
-           s_i2s1_sck_oe = 1'b0;
-           s_i2s1_ws_oe = 1'b0;
-        end
-      endcase
-   end // always_comb begin
-
-   assign i2s_sd1_in_o  = (pad_mux_i[29] == 2'b00) ? in_i2s1_sdi_i : (pad_mux_i[27] == 2'b11) ? in_i2s1_sdi_i : 1'b0;
+   assign i2s_slave_sd1_o  = (pad_mux_i[29] == 2'b00) ? in_i2s1_sdi_i : (pad_mux_i[27] == 2'b11) ? in_i2s1_sdi_i : 1'b0;
 
    //    UART
    assign uart_rx_o     = (pad_mux_i[38] == 2'b00) ? in_uart_rx_i : 1'b1;
 
-   //    SPI MASTER0
-   always_comb
-     begin
-        if (spi_master0_mode_i == `SPI_STD_TX)
-          begin
-             s_spi_master0_oe[0] = 1'b1;
-             s_spi_master0_oe[1] = 1'b0;
-             s_spi_master0_oe[2] = 1'b0;
-             s_spi_master0_oe[3] = 1'b0;
-          end
-        else if (spi_master0_mode_i == `SPI_QUAD_TX)
-          begin
-             s_spi_master0_oe[0] = 1'b1;
-             s_spi_master0_oe[1] = 1'b1;
-             s_spi_master0_oe[2] = 1'b1;
-             s_spi_master0_oe[3] = 1'b1;
-          end
-        else
-          begin
-             s_spi_master0_oe[0] = 1'b0;
-             s_spi_master0_oe[1] = 1'b0;
-             s_spi_master0_oe[2] = 1'b0;
-             s_spi_master0_oe[3] = 1'b0;
-          end
-     end
-
-   assign spi_master0_sdi0_o = (pad_mux_i[33] == 2'b00) ? ((spi_master0_mode_i == `SPI_QUAD_RX) ? in_spim_sdio0_i : in_spim_sdio1_i) : 1'b0; // miso in SSPI from pad_spim0_sdio1
-   assign spi_master0_sdi1_o = (pad_mux_i[34] == 2'b00) ? in_spim_sdio1_i                                                            : 1'b0;
-   assign spi_master0_sdi2_o = (pad_mux_i[35] == 2'b00) ? in_spim_sdio2_i                                                            : 1'b0;
-   assign spi_master0_sdi3_o = (pad_mux_i[36] == 2'b00) ? in_spim_sdio3_i                                                            : 1'b0;
+   assign spi_master0_sdi0_o = (pad_mux_i[33] == 2'b00) ? in_spim_sdio0_i : 1'b0;
+   assign spi_master0_sdi1_o = (pad_mux_i[34] == 2'b00) ? in_spim_sdio1_i : 1'b0;
+   assign spi_master0_sdi2_o = (pad_mux_i[35] == 2'b00) ? in_spim_sdio2_i : 1'b0;
+   assign spi_master0_sdi3_o = (pad_mux_i[36] == 2'b00) ? in_spim_sdio3_i : 1'b0;
 
    //    I2C0
    assign i2c0_sda_in_o      = (pad_mux_i[43] == 2'b00) ? in_i2c0_sda_i : 1'b1;
    assign i2c0_scl_in_o      = (pad_mux_i[44] == 2'b00) ? in_i2c0_scl_i : 1'b1;
 
-   //    I2S0
-   // I2S0 output enable control for sck and ws
-   always_comb
-   begin
-      case (i2s_mode0_out_i)
-        2'b00: begin
-           s_i2s0_sck_oe = 1'b1;
-           s_i2s0_ws_oe = 1'b1;
-        end
-        2'b01: begin
-           s_i2s0_sck_oe = 1'b1;
-           s_i2s0_ws_oe = 1'b1;
-        end
-        2'b10: begin
-           s_i2s0_sck_oe = 1'b0;
-           s_i2s0_ws_oe = 1'b1;
-        end
-        2'b11: begin
-           s_i2s0_sck_oe = 1'b0;
-           s_i2s0_ws_oe = 1'b0;
-        end
-      endcase
-   end
 
-   assign i2s_sck_in_o       = (pad_mux_i[45] == 2'b00) ? in_i2s0_sck_i : 1'b0;
-   assign i2s_ws_in_o        = (pad_mux_i[46] == 2'b00) ? in_i2s0_ws_i  : 1'b0;
-   assign i2s_sd0_in_o       = (pad_mux_i[47] == 2'b00) ? in_i2s0_sdi_i : 1'b0;
+   assign i2s_slave_sck_o       = (pad_mux_i[45] == 2'b00) ? in_i2s0_sck_i : 1'b0;
+   assign i2s_slave_ws_o        = (pad_mux_i[46] == 2'b00) ? in_i2s0_ws_i  : 1'b0;
+   assign i2s_slave_sd0_o       = (pad_mux_i[47] == 2'b00) ? in_i2s0_sdi_i : 1'b0;
 
    //    GPIO
    assign gpio_in_o[0]  = (pad_mux_i[0]  == 2'b01) ? in_spim_sdio0_i : 1'b0 ;
