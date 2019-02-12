@@ -302,7 +302,10 @@ module pulpissimo
   logic                        s_spi_master0_sdo1;
   logic                        s_spi_master0_sdo2;
   logic                        s_spi_master0_sdo3;
-  logic [1:0]                  s_spi_master0_mode;
+  logic                        s_spi_master0_oen0;
+  logic                        s_spi_master0_oen1;
+  logic                        s_spi_master0_oen2;
+  logic                        s_spi_master0_oen3;
 
 `ifdef PULP_FPGA_EMUL
   logic                        s_safe2soc_spi_master0_csn0;
@@ -643,7 +646,11 @@ module pulpissimo
         .spi_master0_sdo1_i         ( s_spi_master0_sdo1          ),
         .spi_master0_sdo2_i         ( s_spi_master0_sdo2          ),
         .spi_master0_sdo3_i         ( s_spi_master0_sdo3          ),
-        .spi_master0_mode_i         ( s_spi_master0_mode          ),
+        .spi_master0_oen0_i         ( s_spi_master0_oen0          ),
+        .spi_master0_oen1_i         ( s_spi_master0_oen1          ),
+        .spi_master0_oen2_i         ( s_spi_master0_oen2          ),
+        .spi_master0_oen3_i         ( s_spi_master0_oen3          ),
+
 `endif
         .spi_master1_csn0_i         ( 1'b1                        ),
         .spi_master1_csn1_i         ( 1'b1                        ),
@@ -876,7 +883,10 @@ module pulpissimo
         .spi_master0_clk_o            ( s_spi_master0_sck                ),
         .spi_master0_csn0_o           ( s_spi_master0_csn0               ),
         .spi_master0_csn1_o           ( s_spi_master0_csn1               ),
-        .spi_master0_mode_o           ( s_spi_master0_mode               ),
+        .spi_master0_oen0_o           ( s_spi_master0_oen0               ),
+        .spi_master0_oen1_o           ( s_spi_master0_oen1               ),
+        .spi_master0_oen2_o           ( s_spi_master0_oen2               ),
+        .spi_master0_oen3_o           ( s_spi_master0_oen3               ),
         .spi_master0_sdo0_o           ( s_spi_master0_sdo0               ),
         .spi_master0_sdo1_o           ( s_spi_master0_sdo1               ),
         .spi_master0_sdo2_o           ( s_spi_master0_sdo2               ),

@@ -104,7 +104,10 @@ module safe_domain
         input  logic             spi_master0_sdo1_i   ,
         input  logic             spi_master0_sdo2_i   ,
         input  logic             spi_master0_sdo3_i   ,
-        input  logic [1:0]       spi_master0_mode_i,
+        input  logic             spi_master0_oen0_i   ,
+        input  logic             spi_master0_oen1_i   ,
+        input  logic             spi_master0_oen2_i   ,
+        input  logic             spi_master0_oen3_i   ,
 
         input  logic             spi_master1_csn0_i   ,
         input  logic             spi_master1_csn1_i   ,
@@ -312,7 +315,10 @@ module safe_domain
         .spi_master0_sdo1_i    ( spi_master0_sdo1_i    ),
         .spi_master0_sdo2_i    ( spi_master0_sdo2_i    ),
         .spi_master0_sdo3_i    ( spi_master0_sdo3_i    ),
-        .spi_master0_mode_i    ( spi_master0_mode_i    ),
+        .spi_master0_oen0_i    ( spi_master0_oen0_i    ),
+        .spi_master0_oen1_i    ( spi_master0_oen1_i    ),
+        .spi_master0_oen2_i    ( spi_master0_oen2_i    ),
+        .spi_master0_oen3_i    ( spi_master0_oen3_i    ),
 
         .sdio_clk_i            ( sdio_clk_i            ),
         .sdio_cmd_i            ( sdio_cmd_i            ),
