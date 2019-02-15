@@ -58,25 +58,23 @@ sdk:
 	  git clone https://github.com/pulp-platform/pulp-builder.git; \
 	fi; \
 	cd pulp-builder; \
-	git checkout 1c962fff78ca14bbbc45ef4347d1e76bed982d61; \
-	. configs/pulpissimo_v2.sh; \
+	git checkout a22a38846963b9d5273e2de102eae8e3650e0167; \
+	. configs/pulpissimo.sh; \
 	. configs/rtl.sh; \
-	export PULP_RISCV_GCC_TOOLCHAIN=/usr/pack/pulpsdk-1.0-kgf/artifactory/pulp-sdk-release/pkg/pulp_riscv_gcc/1.0.9; \
-	./scripts/update-runtime; \
 	./scripts/clean; \
+	./scripts/update-runtime; \
 	./scripts/build-runtime;
 
 
 all: checkout build install vopt sdk
 
 test-checkout:
-	git submodule update --init
+	./update-tests
 
 test:
 	cd pulp-builder; \
 	. sdk-setup.sh; \
-	. configs/pulpissimo_v2.sh; \
+	. configs/pulpissimo.sh; \
 	. configs/rtl.sh; \
-	export PULP_RISCV_GCC_TOOLCHAIN=/usr/pack/pulpsdk-1.0-kgf/artifactory/pulp-sdk-release/pkg/pulp_riscv_gcc/1.0.9; \
 	cd ..; \
 	plptest --threads 16 --stdout
