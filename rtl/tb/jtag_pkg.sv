@@ -556,6 +556,23 @@ package jtag_pkg;
                s_tdo
             );
 
+         //wait the core to be stalled
+         dm_data = '0;
+         while(dm_data[8] == 1'b0) begin //anyhalted
+            this.set_dmi(
+                  2'b01, //read
+                  7'h11, //dmstatus
+                  32'h0, //whatever
+                  {dm_addr, dm_data, dm_op},
+                  s_tck,
+                  s_tms,
+                  s_trstn,
+                  s_tdi,
+                  s_tdo
+               );
+         end
+
+
       endtask
 
       task resume_core(
@@ -1308,8 +1325,6 @@ package jtag_pkg;
             s_tdi,
             s_tdo
          );
-
-         //x10 is kept clean
 
          //Copy data0 to each register from x2 to x31 by means of Access Register abstract commands
          for (logic [15:0] regno = 16'h1002; regno < 16'h1020; regno=regno+1) begin

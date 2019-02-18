@@ -503,7 +503,7 @@ module tb_pulp;
          logic [1:0]  dm_op;
          logic [31:0] dm_data;
          logic [6:0]  dm_addr;
-         logic [9:0]  FC_Core_ID = 10'd31;
+         logic [9:0]  FC_Core_ID = {5'd31,5'd0};
 
          force tb_pulp.i_dut.pad_frame_i.padinst_reset_n.O = 1'b0;
          jtag_enable = 1'b0;
@@ -626,6 +626,12 @@ module tb_pulp;
             $display("[TB] %t - Setting Boot Address", $realtime);
             debug_mode_if.writeMem(32'h1A104004, BEGIN_L2_INSTR, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
+            //Write while(1) to BEGIN_L2_INSTR
+            debug_mode_if.writeMem(BEGIN_L2_INSTR,{25'b0, 7'b1101111}, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+            //Write 1 to Fetch Enable, now the core is stucked to the while(1)
+            $display("[TB] %t - Triggering fetch enable", $realtime);
+            debug_mode_if.writeMem(32'h1A104008, 32'h1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
             $display("Halting the Core %t",$realtime);
             debug_mode_if.halt_core(
@@ -636,6 +642,7 @@ module tb_pulp;
                s_tdi,
                s_tdo
             );
+            $display("Core Halted %t",$realtime);
 
 /*
             test_mode_if.init(
@@ -714,14 +721,15 @@ module tb_pulp;
                s_tdo
             );
 
-            $display("[TB] %t - Resuming the CORE", $realtime);
 
             if(LOAD_L2 == "JTAG") begin
                $display("[TB] %t - Loading L2", $realtime);
                debug_mode_if.load_L2(num_stim, stimuli, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-               $display("[TB] %t - Triggering fetch enable", $realtime);
-               debug_mode_if.writeMem(32'h1A104008, 32'h1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+//               $display("[TB] %t - Triggering fetch enable", $realtime);
+//               debug_mode_if.writeMem(32'h1A104008, 32'h1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
             end
+
+            $display("[TB] %t - Resuming the CORE", $realtime);
 
             debug_mode_if.halt_core(
                1'b0,
