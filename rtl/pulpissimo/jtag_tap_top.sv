@@ -60,13 +60,13 @@ module jtag_tap_top
         .update_dr_o       ( jtag_update_dr_o   ),
         .capture_dr_o      ( jtag_capture_dr_o  ),
 
-        .memory_sel_o      (                    ),
+        .memory_sel_o      ( axireg_sel_o       ),
         .fifo_sel_o        (                    ),
         .confreg_sel_o     ( confreg_sel        ),
 
         .scan_in_o         ( s_scan_i           ),
 
-        .memory_out_i      ( 1'b0               ),
+        .memory_out_i      ( dbg_axi_scan_out_i ),
         .fifo_out_i        ( 1'b0               ),
         .confreg_out_i     ( confscan           )
     );

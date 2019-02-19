@@ -105,9 +105,9 @@ module tb_pulp;
 
    int                   exit_status = `EXIT_ERROR; // modelsim exit code, will be overwritten when successfull
 
-   jtag_pkg::test_mode_if_t  test_mode_if = new;
-   jtag_pkg::debug_mode_if_t debug_mode_if = new;
-   dbg_pkg::dbg_if_soc_t    dbg_if_soc = new;
+   jtag_pkg::test_mode_if_t   test_mode_if = new;
+   jtag_pkg::debug_mode_if_t  debug_mode_if = new;
+   dbg_pkg::dbg_if_soc_t      dbg_if_soc = new;
 
    /* system wires */
    // the w_/s_ prefixes are used to mean wire/tri-type and logic-type (respectively)
@@ -576,8 +576,71 @@ module tb_pulp;
             #5us;
 
 
+
+            test_mode_if.init(
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi
+            );
+
+            jtag_conf_reg = {USE_FLL ? 1'b0 : 1'b1, 6'b0, LOAD_L2 == "JTAG" ? 2'b11 : 2'b00};
+            $display("[TB] %t - Enabling clock out via jtag", $realtime);
+
+            test_mode_if.set_confreg(
+               jtag_conf_reg,
+               jtag_conf_rego,
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+
+            $display("[TB] %t - jtag_conf_reg set to %x", $realtime, jtag_conf_reg);
+
             s_rst_n = 1'b1;
             $display("[TB] %t - Releasing hard reset", $realtime);
+
+            //test if the PULP tap che write to the L2
+            dbg_if_soc.init(
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi
+            );
+
+            $display("[TB] %t - Init PULP TAP", $realtime);
+
+            dbg_if_soc.write32(
+               BEGIN_L2_INSTR,
+               1,
+               32'hABBAABBA,
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+
+            $display("[TB] %t - Write32 PULP TAP", $realtime);
+
+            #50us;
+            dbg_if_soc.read32(
+               BEGIN_L2_INSTR,
+               1,
+               jtag_data,
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+
+           if(jtag_data[0] != 32'hABBAABBA)
+              $display("[JTAG] R/W of L2 failed: %h != %h",jtag_data[0],32'hABBAABBA);
+           else
+              $display("[JTAG] R/W of L2 succeeded");
 
             debug_mode_if.init(
                s_tck,
@@ -643,33 +706,6 @@ module tb_pulp;
                s_tdo
             );
             $display("Core Halted %t",$realtime);
-
-/*
-            test_mode_if.init(
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi
-            );
-
-            jtag_conf_reg = {USE_FLL ? 1'b0 : 1'b1, 6'b0, LOAD_L2 == "JTAG" ? 2'b11 : 2'b00};
-            $display("[TB] %t - jtag_conf_reg is %x", $realtime, jtag_conf_reg);
-
-
-            $display("[TB] %t - Enabling clock out via jtag", $realtime);
-            test_mode_if.set_confreg(
-               jtag_conf_reg,
-               jtag_conf_rego,
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi,
-               s_tdo
-            );
-            $display("[TB] %t - jtag_conf_reg is %x and jtag_conf_rego is %x", $realtime, jtag_conf_reg, jtag_conf_rego);
-
-            $stop;
-*/
 
             debug_mode_if.read_abstracts(
                dm_data,

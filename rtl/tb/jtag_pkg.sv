@@ -22,13 +22,11 @@ package jtag_pkg;
    parameter logic [JTAG_SOC_INSTR_WIDTH-1:0]  JTAG_SOC_DMIACCESS              = 5'b10001;
    parameter logic [JTAG_SOC_INSTR_WIDTH-1:0]  JTAG_SOC_AXIREG                 = 5'b00100;
    parameter logic [JTAG_SOC_INSTR_WIDTH-1:0]  JTAG_SOC_BBMUXREG               = 5'b00101;
-   parameter logic [JTAG_SOC_INSTR_WIDTH-1:0]  JTAG_SOC_CLKGATEREG             = 5'b00110;
-   parameter logic [JTAG_SOC_INSTR_WIDTH-1:0]  JTAG_SOC_CONFREG                = 5'b00111;
+   parameter logic [JTAG_SOC_INSTR_WIDTH-1:0]  JTAG_SOC_CONFREG                = 5'b00110;
    parameter logic [JTAG_SOC_INSTR_WIDTH-1:0]  JTAG_SOC_TESTMODEREG            = 5'b01000;
    parameter logic [JTAG_SOC_INSTR_WIDTH-1:0]  JTAG_SOC_BISTREG                = 5'b01001;
    parameter logic [JTAG_SOC_INSTR_WIDTH-1:0]  JTAG_SOC_BYPASS                 = 5'b11111;
    parameter int unsigned JTAG_SOC_IDCODE_WIDTH                                = 32;
-   parameter int unsigned JTAG_SOC_AXIREG_WIDTH                                = 96;
    parameter int unsigned JTAG_SOC_BBMUXREG_WIDTH                              = 21;
    parameter int unsigned JTAG_SOC_CLKGATEREG_WIDTH                            = 11;
    parameter int unsigned JTAG_SOC_CONFREG_WIDTH                               = 16;
@@ -416,10 +414,13 @@ package jtag_pkg;
          ref logic s_tdi,
          ref logic s_tdo
       );
-         logic [8+1:0] confreg_int, dataout_int;
+         logic [8+1:0] confreg_int, dataout_int; //extra bit for bypass
          JTAG_reg #(.size(256), .instr({JTAG_SOC_BYPASS, JTAG_SOC_CONFREG})) jtag_soc_dbg = new;
+
+         confreg_int = {1'b0, confreg};
+
          jtag_soc_dbg.start_shift(s_tck, s_tms, s_trstn, s_tdi);
-         jtag_soc_dbg.shift_nbits(9, {1'b1, confreg_int}, dataout_int, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         jtag_soc_dbg.shift_nbits(9+1, confreg_int, dataout_int, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          jtag_soc_dbg.idle(s_tck, s_tms, s_trstn, s_tdi);
          dataout = dataout_int[8:0];
          $display("[test_mode_if] %t - Setting confreg to value %X.", $realtime, confreg);
@@ -434,10 +435,10 @@ package jtag_pkg;
          ref logic s_tdi,
          ref logic s_tdo
       );
-         logic [255:0] dataout;
+         logic [8+1:0] dataout; //extra bit for bypass
          JTAG_reg #(.size(256), .instr({JTAG_SOC_BYPASS, JTAG_SOC_CONFREG})) jtag_soc_dbg = new;
          jtag_soc_dbg.start_shift(s_tck, s_tms, s_trstn, s_tdi);
-         jtag_soc_dbg.shift_nbits(9, confreg, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         jtag_soc_dbg.shift_nbits(9+1, confreg, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          jtag_soc_dbg.idle(s_tck, s_tms, s_trstn, s_tdi);
          rec = dataout [8:0];
          // `DEBUG_MANAGER_INST.printf(STDOUT, 0, $sformatf("%s[TEST_MODE_IF] %s%t - %sGet confreg value = %X%s\n", `ESC_BLUE_BOLD, `ESC_WHITE, $realtime, `ESC_MAGENTA, rec, `ESC_DEFAULT));
