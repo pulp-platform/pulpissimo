@@ -33,7 +33,6 @@ if {$rvcores ne ""} {
   add wave -group "Core"  -group "LSU"                                      $rvcores/load_store_unit_i/*
   add wave -group "Core"  -group "PMP"                                      $rvcores/pmp_unit_i/*
   add wave -group "Core"  -group "CSR"                                      $rvcores/cs_registers_i/*
-  add wave -group "Core"  -group "Debug"                                    $rvcores/debug_unit_i/*
 }
 
 configure wave -namecolwidth  250
