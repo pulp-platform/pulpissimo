@@ -86,7 +86,7 @@ Then execute the following commands:
 ```
 git clone https://github.com/pulp-platform/pulp-builder.git
 cd pulp-builder
-git checkout acd740f390bf6f810c17ca6c19457a22713e02f8
+git checkout b3b255b0f653fce950cf730972c8ad07b1be7bf0
 source configs/pulpissimo.sh
 ./scripts/clean
 ./scripts/update-runtime
@@ -152,7 +152,7 @@ Once the RTL platform is installed, the following commands can be executed to in
 ```
 git clone https://github.com/pulp-platform/pulp-builder.git
 cd pulp-builder
-git checkout acd740f390bf6f810c17ca6c19457a22713e02f8
+git checkout b3b255b0f653fce950cf730972c8ad07b1be7bf0
 source configs/pulpissimo.sh
 ./scripts/clean
 ./scripts/build-gvsoc
