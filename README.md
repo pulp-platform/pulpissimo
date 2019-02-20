@@ -86,8 +86,10 @@ Then execute the following commands:
 ```
 git clone https://github.com/pulp-platform/pulp-builder.git
 cd pulp-builder
+git checkout d53b70f709b72ced724c238211ed40667d4d2885
 source configs/pulpissimo.sh
 ./scripts/clean
+./scripts/update-runtime
 ./scripts/build-runtime
 source sdk-setup.sh
 source configs/rtl.sh
