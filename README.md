@@ -86,7 +86,7 @@ Then execute the following commands:
 ```
 git clone https://github.com/pulp-platform/pulp-builder.git
 cd pulp-builder
-git checkout d53b70f709b72ced724c238211ed40667d4d2885
+git checkout acd740f390bf6f810c17ca6c19457a22713e02f8
 source configs/pulpissimo.sh
 ./scripts/clean
 ./scripts/update-runtime
@@ -145,6 +145,29 @@ make run vsim/script=export_run.tcl
 before starting the simulation. You will find the VCD in
 `build/<SRC_FILE_NAME>/pulpissimo/export.vcd.gz` where 
 `<SRC_FILE_NAME>` is the name of the C source of the test.
+
+### Building and using the virtual platform
+
+Once the RTL platform is installed, the following commands can be executed to install and use the virtual platform:
+```
+git clone https://github.com/pulp-platform/pulp-builder.git
+cd pulp-builder
+git checkout acd740f390bf6f810c17ca6c19457a22713e02f8
+source configs/pulpissimo.sh
+./scripts/clean
+./scripts/build-gvsoc
+source sdk-setup.sh
+source configs/gvsoc.sh
+cd ..
+```
+
+Then tests can be compiled and run as for the RTL platform. When switching from one platform to another, it may be needed to regenrate the test configuration with this command:
+```
+make conf
+```
+
+More information is available in the documentation here: pulp-builder/install/doc/vp/index.html
+
 
 ## Proprietary verification IPs
 The full simulation platform can take advantage of a few models of commercial
