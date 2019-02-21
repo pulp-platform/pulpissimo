@@ -514,51 +514,30 @@ package jtag_pkg;
       endtask
 
 
-      task halt_core(
+      task set_haltreq(
          input logic haltreq,
-           ref logic s_tck,
-           ref logic s_tms,
-           ref logic s_trstn,
-           ref logic s_tdi,
-           ref logic s_tdo
+         ref logic   s_tck,
+         ref logic   s_tms,
+         ref logic   s_trstn,
+         ref logic   s_tdi,
+         ref logic   s_tdo
       );
 
-          logic [1:0]  dm_op;
-          logic [6:0]  dm_addr;
-          logic [31:0] dm_data;
+          logic [1:0]     dm_op;
+          logic [6:0]     dm_addr;
+          logic [31:0]    dm_data;
+          dm::dmcontrol_t dmcontrol;
 
-         this.init_dmi(
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi
-            );
-         this.set_dmi(
-               2'b01, //read
-               7'h10, //DMControl
-               32'h0, //whatever
-               {dm_addr, dm_data, dm_op},
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi,
-               s_tdo
-            );
+         this.init_dmi(s_tck, s_tms, s_trstn, s_tdi);
 
-         //haltreq TODO: remove hardcoded
-         dm_data[31]    = haltreq;
+         this.read_debug_reg(dm::DMControl, dmcontrol,
+                             s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
-         this.set_dmi(
-               2'b10, //Write
-               7'h10, //DMControl
-               dm_data,
-               {dm_addr, dm_data, dm_op},
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi,
-               s_tdo
-            );
+         dmcontrol.haltreq = haltreq;
+
+         this.write_debug_reg(dm::DMControl, dmcontrol,
+                              s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
 
          //wait the core to be stalled
          dm_data = '0;
@@ -576,10 +555,9 @@ package jtag_pkg;
                );
          end
 
-
       endtask
 
-      task resume_core(
+      task set_resumereq(
          input logic resumereq,
            ref logic s_tck,
            ref logic s_tms,
@@ -588,42 +566,19 @@ package jtag_pkg;
            ref logic s_tdo
       );
 
-          logic [1:0]  dm_op;
-          logic [6:0]  dm_addr;
-          logic [31:0] dm_data;
+          logic [1:0]     dm_op;
+          logic [6:0]     dm_addr;
+          logic [31:0]    dm_data;
+          dm::dmcontrol_t dmcontrol;
 
-         this.init_dmi(
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi
-            );
-         this.set_dmi(
-               2'b01, //read
-               7'h10, //DMControl
-               32'h0, //whatever
-               {dm_addr, dm_data, dm_op},
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi,
-               s_tdo
-            );
+         this.init_dmi(s_tck, s_tms, s_trstn, s_tdi);
+         this.read_debug_reg(dm::DMControl, dmcontrol,
+                             s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
-         //resumereq
-         dm_data[30] = resumereq;
+         dmcontrol.resumereq = resumereq;
 
-         this.set_dmi(
-               2'b10, //Write
-               7'h10, //DMControl
-               dm_data,
-               {dm_addr, dm_data, dm_op},
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi,
-               s_tdo
-            );
+         this.write_debug_reg(dm::DMControl, dmcontrol,
+                              s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
       endtask
 
@@ -1187,6 +1142,7 @@ package jtag_pkg;
             dmsane    = dmcontrol.resumereq + dmcontrol.hartreset +
                         dmcontrol.ackhavereset + dmcontrol.setresethaltreq +
                         dmcontrol.clrresethaltreq;
+
             assert (dmsane <= 1)
                 else
                     $error("bad write to dmcontrol: only one of the following may be set to 1: resumereq %b,",
@@ -2253,7 +2209,7 @@ package jtag_pkg;
                                     s_trstn, s_tdi, s_tdo);
 
          // make a single step
-         this.resume_core(1'b1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         this.set_resumereq(1'b1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
          this.block_until_any_halt(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          this.read_reg_abstract_cmd(riscv::CSR_DPC, dm_data,
@@ -2273,7 +2229,7 @@ package jtag_pkg;
              end;
 
 
-         this.resume_core(1'b1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         this.set_resumereq(1'b1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          this.read_reg_abstract_cmd(riscv::CSR_DPC, dm_data, s_tck, s_tms,
                                     s_trstn, s_tdi, s_tdo);
          // check if dpc, dcause and flag bits are ok
@@ -2314,7 +2270,7 @@ package jtag_pkg;
              end
 
          // resume core and check flags
-         this.resume_core(1'b1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         this.set_resumereq(1'b1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          this.read_debug_reg(dm::DMStatus, dmstatus,
                              s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          assert(dmstatus.allrunning == 1'b1)
@@ -2324,7 +2280,7 @@ package jtag_pkg;
              end
 
          // halt core and check flags
-         this.halt_core(1'b1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         this.set_haltreq(1'b1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          this.read_debug_reg(dm::DMStatus, dmstatus,
                              s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          assert(dmstatus.allhalted == 1'b1)

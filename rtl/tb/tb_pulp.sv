@@ -709,7 +709,7 @@ module tb_pulp;
                                    s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
             $display("Halting the Core %t",$realtime);
-            debug_mode_if.halt_core(1'b1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+            debug_mode_if.set_haltreq(1'b1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
             $display("Core Halted %t",$realtime);
 
             debug_mode_if.read_abstractcs(dm_data, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
@@ -831,7 +831,7 @@ module tb_pulp;
 
             $display("[TB] %t - Resuming the CORE", $realtime);
 
-            debug_mode_if.halt_core(
+            debug_mode_if.set_haltreq(
                1'b0,
                s_tck,
                s_tms,
@@ -840,7 +840,7 @@ module tb_pulp;
                s_tdo
             );
 
-            debug_mode_if.resume_core(
+            debug_mode_if.set_resumereq(
                1'b1,
                s_tck,
                s_tms,
