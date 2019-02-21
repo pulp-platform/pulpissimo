@@ -471,12 +471,13 @@ package jtag_pkg;
                s_tdi,
                s_tdo
             );
-         $display("[debug_mode_if] %t - dtmcs %x: \n
-                                        dmihardreset %x \n
-                                        dmireset %x \n
-                                        idle %x \n
-                                        dmistat %x \n
-                                        abits %x \n
+          // TODO: constants
+         $display("[debug_mode_if] %t - dtmcs %x: \n \
+                                        dmihardreset %x \n \
+                                        dmireset %x \n \
+                                        idle %x \n \
+                                        dmistat %x \n \
+                                        abits %x \n \
                                         version %x \n",
                   $realtime, dm_data, dm_data[17], dm_data[16], dm_data[14:12], dm_data[11:10], dm_data[9:4], dm_data[3:0]);
 
