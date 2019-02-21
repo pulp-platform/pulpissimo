@@ -722,9 +722,9 @@ package jtag_pkg;
          ref logic s_tdo
       );
 
-         automatic logic [1:0]  dm_op;
-         automatic logic [6:0]  dm_addr;
-         automatic logic [31:0] dm_data;
+         logic [1:0]  dm_op;
+         logic [6:0]  dm_addr;
+         logic [31:0] dm_data;
 
          dm_data = '1;
 
@@ -834,9 +834,9 @@ package jtag_pkg;
          ref logic s_tdo
       );
 
-         automatic logic [1:0]         dm_op;
-         automatic logic [31:0]        dm_data;
-         automatic logic [6:0]         dm_addr;
+         logic [1:0]         dm_op;
+         logic [31:0]        dm_data;
+         logic [6:0]         dm_addr;
 
          this.set_dmi(
                2'b01, //read
@@ -942,9 +942,9 @@ package jtag_pkg;
          ref   logic s_tdo
       );
 
-         automatic logic [1:0]         dm_op;
-         automatic logic [31:0]        dm_data;
-         automatic logic [6:0]         dm_addr;
+         logic [1:0]         dm_op;
+         logic [31:0]        dm_data;
+         logic [6:0]         dm_addr;
 
          this.set_dmi(
                2'b10, //Write
@@ -970,9 +970,9 @@ package jtag_pkg;
          ref   logic s_tdo
       );
 
-         automatic logic [1:0]         dm_op;
-         automatic logic [31:0]        dm_data;
-         automatic logic [6:0]         dm_addr;
+         logic [1:0]         dm_op;
+         logic [31:0]        dm_data;
+         logic [6:0]         dm_addr;
 
          this.set_dmi(
                2'b01, //read
@@ -1014,9 +1014,9 @@ package jtag_pkg;
          ref   logic s_tdo
       );
 
-         automatic logic [1:0]         dm_op;
-         automatic logic [31:0]        dm_data;
-         automatic logic [6:0]         dm_addr;
+         logic [1:0]         dm_op;
+         logic [31:0]        dm_data;
+         logic [6:0]         dm_addr;
 
          this.set_dmi(
             2'b01, //read
@@ -1052,9 +1052,9 @@ package jtag_pkg;
          ref   logic s_tdo
       );
 
-         automatic logic [1:0]         dm_op;
-         automatic logic [31:0]        dm_data;
-         automatic logic [6:0]         dm_addr;
+         logic [1:0]         dm_op;
+         logic [31:0]        dm_data;
+         logic [6:0]         dm_addr;
 
          this.set_dmi(
             2'b01, //read
@@ -1091,9 +1091,9 @@ package jtag_pkg;
          ref    logic s_tdo
       );
 
-         automatic logic [1:0]         dm_op;
-         automatic logic [31:0]        dm_data;
-         automatic logic [6:0]         dm_addr;
+         logic [1:0]         dm_op;
+         logic [31:0]        dm_data;
+         logic [6:0]         dm_addr;
 
          //NOTE sbreadonaddr must be 1
 
@@ -1159,9 +1159,9 @@ package jtag_pkg;
          ref    logic s_tdo
       );
 
-         automatic logic [1:0]         dm_op;
-         automatic logic [31:0]        dm_data;
-         automatic logic [6:0]         dm_addr;
+         logic [1:0]         dm_op;
+         logic [31:0]        dm_data;
+         logic [6:0]         dm_addr;
 
          //NOTE sbreadonaddr must be 1
 
@@ -1203,14 +1203,14 @@ package jtag_pkg;
          ref   logic s_tdo
       );
 
-         automatic logic [1:0][31:0]   jtag_data;
-         automatic logic [31:0]        jtag_addr;
-         automatic logic [31:0]        spi_addr;
-         automatic logic [31:0]        spi_addr_old;
-         automatic logic               more_stim = 1;
-         automatic logic [1:0]         dm_op;
-         automatic logic [31:0]        dm_data;
-         automatic logic [6:0]         dm_addr;
+         logic [1:0][31:0]   jtag_data;
+         logic [31:0]        jtag_addr;
+         logic [31:0]        spi_addr;
+         logic [31:0]        spi_addr_old;
+         logic               more_stim = 1;
+         logic [1:0]         dm_op;
+         logic [31:0]        dm_data;
+         logic [6:0]         dm_addr;
 
          spi_addr        = stimuli[num_stim][95:64]; // assign address
          jtag_data[0]    = stimuli[num_stim][63:0];  // assign data
@@ -1311,10 +1311,10 @@ package jtag_pkg;
          ref logic s_tdo
       );
 
-         automatic logic [1:0]         dm_op;
-         automatic logic [31:0]        dm_data;
-         automatic logic [6:0]         dm_addr;
-         automatic logic [31:0]        key_word = 32'hda41de;
+         logic [1:0]         dm_op;
+         logic [31:0]        dm_data;
+         logic [6:0]         dm_addr;
+         logic [31:0]        key_word = 32'hda41de;
 
          //write key_word in data0
          this.writeArg(
