@@ -154,7 +154,6 @@ git clone https://github.com/pulp-platform/pulp-builder.git
 cd pulp-builder
 git checkout b3b255b0f653fce950cf730972c8ad07b1be7bf0
 source configs/pulpissimo.sh
-./scripts/clean
 ./scripts/build-gvsoc
 source sdk-setup.sh
 source configs/gvsoc.sh
