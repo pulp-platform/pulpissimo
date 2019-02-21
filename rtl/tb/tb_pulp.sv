@@ -16,14 +16,12 @@
  */
 
 // timeunit 1ps;
-//  1ps;
+// timeprecision 1ps;
 
 `define EXIT_SUCCESS  0
 `define EXIT_FAIL     1
 `define EXIT_ERROR   -1
 //`define USE_DPI      1
-
-
 
 
 module tb_pulp;
@@ -496,20 +494,26 @@ module tb_pulp;
 
    tb_clk_gen #( .CLK_PERIOD(REF_CLK_PERIOD) ) i_ref_clk_gen (.clk_o(s_clk_ref) );
 
-   /* testbench driver process */
+    initial begin: timing_format
+        $timeformat(-9, 0, "ns", 9);
+    end: timing_format
+
+   // testbench driver process
    initial
       begin
 
          logic [1:0]  dm_op;
          logic [31:0] dm_data;
          logic [6:0]  dm_addr;
-         logic [9:0]  FC_Core_ID = {5'd31,5'd0};
+         logic        error;
+         automatic logic [9:0]  FC_Core_ID = {5'd31,5'd0};
 
          force tb_pulp.i_dut.pad_frame_i.padinst_reset_n.O = 1'b0;
          jtag_enable = 1'b0;
          if (ENABLE_EXTERNAL_DRIVER == 0) begin
 
-            // force fetch enable to 0 when doing JTAG preload (not particularly clean,   but works)
+            // force fetch enable to 0 when doing JTAG preload (not particularly
+            // clean, but works)
             if(LOAD_L2 == "JTAG")
 
             if (USE_FLL)
@@ -660,6 +664,10 @@ module tb_pulp;
                s_tdo
             );
 
+            $display("[TB] %t - TEST discover harts", $realtime);
+            debug_mode_if.test_discover_harts(dm_data[0],
+                                              s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
             debug_mode_if.set_harsel(
                10'b0,
                FC_Core_ID,
@@ -688,54 +696,109 @@ module tb_pulp;
             );
 
             $display("[TB] %t - Setting Boot Address", $realtime);
-            debug_mode_if.writeMem(32'h1A104004, BEGIN_L2_INSTR, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+            debug_mode_if.writeMem(32'h1A104004, BEGIN_L2_INSTR,
+                                   s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
             //Write while(1) to BEGIN_L2_INSTR
-            debug_mode_if.writeMem(BEGIN_L2_INSTR,{25'b0, 7'b1101111}, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+            debug_mode_if.writeMem(BEGIN_L2_INSTR,{25'b0, 7'b1101111},
+                                   s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
             //Write 1 to Fetch Enable, now the core is stucked to the while(1)
             $display("[TB] %t - Triggering fetch enable", $realtime);
-            debug_mode_if.writeMem(32'h1A104008, 32'h1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+            debug_mode_if.writeMem(32'h1A104008, 32'h1,
+                                   s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
             $display("Halting the Core %t",$realtime);
-            debug_mode_if.halt_core(
-               1'b1,
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi,
-               s_tdo
-            );
+            debug_mode_if.halt_core(1'b1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
             $display("Core Halted %t",$realtime);
 
-            debug_mode_if.read_abstracts(
-               dm_data,
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi,
-               s_tdo
-            );
-            $display("[TB] %t Abstracts is %x (progbufsize %x, busy %x, cmderr %x, datacount %x",$realtime(), dm_data, dm_data[28:24], dm_data[12], dm_data[10:8], dm_data[3:0]);
+            debug_mode_if.read_abstractcs(dm_data, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+            $display("[TB] %t Abstractcs is %x (progbufsize %x, busy %x, cmderr %x, datacount %x)",$realtime(), dm_data, dm_data[28:24], dm_data[12], dm_data[10:8], dm_data[3:0]);
 
+            debug_mode_if.read_debug_reg(dm::AbstractCS, dm_data, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+            $display("[TB] %t Abstractcs (2) is %x (progbufsize %x, busy %x, cmderr %x, datacount %x)",$realtime(), dm_data, dm_data[28:24], dm_data[12], dm_data[10:8], dm_data[3:0]);
 
-            //Test Abstract Commands
+            // for the following tests we need the cpu to be fetching and running
+            $display("[TB] %t - TEST halt resume functionality", $realtime);
+            debug_mode_if.test_halt_resume(error, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
-            debug_mode_if.testAbstractsCommands_andProgramBuffer(
-               dm_data[0],
-               BEGIN_L2_INSTR,
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi,
-               s_tdo
-            );
-
-            if(dm_data[0])
-               $display("[TB] %t - TEST AbstractsCommands_andProgramBuffer FAILED :(", $realtime);
+            $display("[TB] %t - TEST read/write gpr with abstract command", $realtime);
+            debug_mode_if.test_gpr_read_write_abstract(error, s_tck, s_tms,
+                                                       s_trstn, s_tdi, s_tdo);
+            if (error)
+                $display("[TB] %t FAIL", $realtime);
             else
-               $display("[TB] %t - TEST AbstractsCommands_andProgramBuffer OK :)", $realtime);
+                $display("[TB] %t OK", $realtime);
 
+            $display("[TB] %t - TEST read/write gpr with abstract command and proper waiting logic", $realtime);
+            debug_mode_if.test_gpr_read_write_abstract_high_level(error, s_tck, s_tms,
+                                                                  s_trstn, s_tdi, s_tdo);
+            if (error)
+                $display("[TB] %t FAIL", $realtime);
+            else
+                $display("[TB] %t OK", $realtime);
+
+
+            $display("[TB] %t - TEST dumping register values using abstract command", $realtime);
+            debug_mode_if.read_reg_abstract_cmd(riscv::CSR_DCSR, dm_data, s_tck, s_tms,
+                                                s_trstn, s_tdi, s_tdo);
+            $display("[TB] %t dcsr is %x", $realtime, dm_data);
+            debug_mode_if.read_reg_abstract_cmd(riscv::CSR_DPC, dm_data, s_tck, s_tms,
+                                                     s_trstn, s_tdi, s_tdo);
+            $display("[TB] %t dpc is %x", $realtime, dm_data);
+            debug_mode_if.read_reg_abstract_cmd(riscv::CSR_MTVEC, dm_data, s_tck, s_tms,
+                                                     s_trstn, s_tdi, s_tdo);
+            $display("[TB] %t mtvec is %x", $realtime, dm_data);
+            debug_mode_if.read_reg_abstract_cmd(riscv::CSR_MCAUSE, dm_data, s_tck, s_tms,
+                                                     s_trstn, s_tdi, s_tdo);
+            $display("[TB] %t mcause is %x", $realtime, dm_data);
+            debug_mode_if.read_reg_abstract_cmd('h1002, dm_data, s_tck, s_tms,
+                                                     s_trstn, s_tdi, s_tdo);
+            $display("[TB] %t x2 is %x", $realtime, dm_data);
+
+            $display("[TB] %t - TEST abstract commands and program buffer (old)", $realtime);
+            //Test Abstract Commands
+            debug_mode_if.testAbstractsCommands_andProgramBuffer(error, BEGIN_L2_INSTR,
+                                                                 s_tck, s_tms, s_trstn,
+                                                                 s_tdi, s_tdo);
+            if(error)
+               $display("[TB] %t FAIL", $realtime);
+            else
+               $display("[TB] %t OK", $realtime);
+
+            $display("[TB] %t - TEST abstract commands and program buffer", $realtime);
+            debug_mode_if.test_abstract_cmds_prog_buf(error, BEGIN_L2_INSTR,
+                                                      s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+            if(error)
+               $display("[TB] %t FAIL", $realtime);
+            else
+               $display("[TB] %t OK", $realtime);
+
+
+            $display("[TB] %t - TEST read/write dpc" , $realtime);
+            debug_mode_if.test_read_write_dpc(error, s_tck, s_tms,
+                                              s_trstn, s_tdi, s_tdo);
+
+
+            $display("[TB] %t - TEST read/write csr with program buffer (TODO)", $realtime);
+            $display("[TB] %t - TEST dret outside debug mode (TODO)", $realtime);
+
+
+
+            $display("[TB] %t - TEST debug cause values (TODO)", $realtime);
+            $display("[TB] %t - TEST single stepping", $realtime);
+            debug_mode_if.test_single_stepping_abstract_cmd(error, BEGIN_L2_INSTR,
+                                                            s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+            $display("[TB] %t - TEST single stepping edge cases (TODO)", $realtime);
+
+
+            // $display("[TB] %t - TEST wfi in program buffer", $realtime);
+            // debug_mode_if.test_wfi_in_program_buffer(error, s_tck, s_tms,
+            //                                          s_trstn, s_tdi, s_tdo);
+            // $display("[TB] %t OK", $realtime); //otherwise we wouldn't get here
+
+            $display("[TB] %t - TEST halt request during wfi (TODO)", $realtime);
 
             $display("[TB] %t - Write the BootAddress into DPC", $realtime);
             //write BootAddress in data0
@@ -776,6 +839,7 @@ module tb_pulp;
                s_tdi,
                s_tdo
             );
+
             debug_mode_if.resume_core(
                1'b1,
                s_tck,
@@ -923,3 +987,7 @@ module tb_pulp;
       `include "tb_jtag_debug.sv"
 
 endmodule // tb_pulp
+
+// Local Variables:
+// verilog-indent-level: 3
+// End:

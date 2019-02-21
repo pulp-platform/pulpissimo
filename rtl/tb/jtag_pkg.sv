@@ -487,6 +487,7 @@ package jtag_pkg;
                s_trstn,
                s_tdi
             );
+          // TODO: use constants
          this.set_dmi(
                2'b01, //read
                7'h11, //DMStatus
@@ -498,6 +499,7 @@ package jtag_pkg;
                s_tdi,
                s_tdo
             );
+          // TODO: use constants
          $display("PULPissimo Debug version: \
                  impebreak %x\n \
                  allhavereset %x\n \
@@ -543,7 +545,7 @@ package jtag_pkg;
                s_tdo
             );
 
-         //haltreq
+         //haltreq TODO: remove hardcoded
          dm_data[31]    = haltreq;
 
          this.set_dmi(
@@ -625,6 +627,39 @@ package jtag_pkg;
 
       endtask
 
+      task block_until_any_halt(
+         ref logic s_tck,
+         ref logic s_tms,
+         ref logic s_trstn,
+         ref logic s_tdi,
+         ref logic s_tdo
+      );
+
+         logic [1:0]  dm_op;
+         logic [6:0]  dm_addr;
+         logic [31:0] dm_data;
+         dm::dmstatus_t dmstatus;
+
+         dmstatus = '0;
+         dm_data  = '0;
+
+         while(dmstatus.anyhalted == 1'b0) begin //anyhalted
+            this.set_dmi(
+                  2'b01, //read
+                  7'h11, //dmstatus
+                  32'h0, //whatever
+                  {dm_addr, dm_data, dm_op},
+                  s_tck,
+                  s_tms,
+                  s_trstn,
+                  s_tdi,
+                  s_tdo
+            );
+            dmstatus = dm::dmstatus_t'(dm_data);
+         end
+
+      endtask
+
       task writeArg (
          input logic arg,
          input logic [31:0] val,
@@ -686,8 +721,8 @@ package jtag_pkg;
 
       endtask
 
-      task read_abstracts (
-         output logic [31:0] abstracts,
+      task read_abstractcs (
+         output logic [31:0] abstractcs,
          ref logic s_tck,
          ref logic s_tms,
          ref logic s_trstn,
@@ -711,7 +746,7 @@ package jtag_pkg;
                s_tdi,
                s_tdo
             );
-         abstracts = dm_data;
+         abstractcs = dm_data;
 
       endtask
 
@@ -731,7 +766,7 @@ package jtag_pkg;
 
          while(dm_data[12] == 1'b1)
          begin
-            this.read_abstracts(
+            this.read_abstractcs(
                   dm_data,
                   s_tck,
                   s_tms,
@@ -789,6 +824,7 @@ package jtag_pkg;
       );
          //Read Info
          JTAG_reg #(.size(32+1), .instr({JTAG_SOC_DMIACCESS, JTAG_SOC_BYPASS})) jtag_soc_dbg = new;
+         // we should almost never be necessary to scan IR (see ricsv-debug p.71)
          jtag_soc_dbg.setIR(s_tck, s_tms, s_trstn, s_tdi);
 //         $display("[debug_mode_if_t] %t - Init DMI Access", $realtime);
 
@@ -1082,6 +1118,260 @@ package jtag_pkg;
          );
       endtask
 
+      // access (read) debug module register according to riscv-debug p. 71
+      task read_debug_reg(
+         input logic [6:0]   dmi_addr_i,
+         output logic [31:0] data_o,
+         ref logic           s_tck,
+         ref logic           s_tms,
+         ref logic           s_trstn,
+         ref logic           s_tdi,
+         ref logic           s_tdo
+      );
+
+         logic [1:0]         dmi_op;
+         logic [31:0]        dmi_data;
+         logic [6:0]         dmi_addr;
+
+         // TODO: widen wait between Capture-DR and Update-DR when failing
+         do begin
+             this.set_dmi(
+                   2'b01, //read
+                   dmi_addr_i,
+                   32'h0, // don't care
+                   {dmi_addr, dmi_data, dmi_op},
+                   s_tck,
+                   s_tms,
+                   s_trstn,
+                   s_tdi,
+                   s_tdo
+             );
+             if (dmi_op == 2'h2) begin
+                 $display("[TB] %t dmi previous operation failed, not handled", $realtime);
+                 dmi_op = 2'h0; // TODO: for now we just force completion
+             end
+
+             if (dmi_op == 2'h3) begin
+                 $display("[TB] %t retrying debug reg access", $realtime);
+                 this.dmi_reset(s_tck,s_tms,s_trstn,s_tdi,s_tdo);
+             end
+
+         end while (dmi_op != 2'h0);
+
+         data_o = dmi_data;
+      endtask
+
+      // access (write) debug module register according to riscv-debug p. 71
+      task write_debug_reg(
+         input logic [6:0]   dmi_addr_i,
+         input logic [31:0]  dmi_data_i,
+         ref logic           s_tck,
+         ref logic           s_tms,
+         ref logic           s_trstn,
+         ref logic           s_tdi,
+         ref logic           s_tdo
+      );
+
+         logic [1:0]     dmi_op;
+         logic [31:0]    dmi_data;
+         logic [6:0]     dmi_addr;
+         dm::dmcontrol_t dmcontrol;
+         int             dmsane;
+
+         // According to riscv-debug p. 22 we are only allowed to write at most
+         // one bit to resumereq, hartreset, ackhavereset,setresethaltreq and
+         // clrresethaltreq. Others must be 0. This assert is for programming
+         // errors.
+         if(dmi_addr_i == dm::DMControl) begin
+            dmcontrol = dmi_data_i;
+            dmsane    = dmcontrol.resumereq + dmcontrol.hartreset +
+                        dmcontrol.ackhavereset + dmcontrol.setresethaltreq +
+                        dmcontrol.clrresethaltreq;
+            assert (dmsane <= 1)
+                else
+                    $error("bad write to dmcontrol: only one of the following may be set to 1: resumereq %b,",
+                           dmcontrol.resumereq,
+                           "hartreset %b,", dmcontrol.hartreset,
+                           "ackhavereset %b,", dmcontrol.ackhavereset,
+                           "setresethaltreq %b,", dmcontrol.setresethaltreq,
+                           "clrresethaltreq %b", dmcontrol.clrresethaltreq);
+         end
+
+
+         // TODO: widen wait between Capture-DR and Update-DR when failing
+         do begin
+             this.set_dmi(
+                   2'b10, //write
+                   dmi_addr_i,
+                   dmi_data_i,
+                   {dmi_addr, dmi_data, dmi_op},
+                   s_tck,
+                   s_tms,
+                   s_trstn,
+                   s_tdi,
+                   s_tdo
+             );
+             if (dmi_op == 2'h2) begin
+                 $display("[TB] %t dmi previous operation failed, not handled", $realtime);
+                 dmi_op = 2'h0; // TODO: for now we just force completion
+             end
+
+             if (dmi_op == 2'h3) begin
+                 $display("[TB] %t retrying debug reg access", $realtime);
+                 this.dmi_reset(s_tck,s_tms,s_trstn,s_tdi,s_tdo);
+             end
+
+         end while (dmi_op != 2'h0);
+
+      endtask
+
+
+      // access (read) csr, gpr by means of abstract command
+      task read_reg_abstract_cmd(
+         input logic [15:0]  regno_i,
+         output logic [31:0] data_o,
+         ref logic           s_tck,
+         ref logic           s_tms,
+         ref logic           s_trstn,
+         ref logic           s_tdi,
+         ref logic           s_tdo
+      );
+
+         logic [1:0]         dmi_op;
+         logic [31:0]        dmi_data;
+         logic [31:0]        dmi_command;
+         logic [6:0]         dmi_addr;
+
+         // load regno into data0
+         dmi_command = {8'h0, 1'b0, 3'd2, 1'b0, 1'b0, 1'b1, 1'b0, regno_i};
+         this.set_command(
+            dmi_command,
+            s_tck,
+            s_tms,
+            s_trstn,
+            s_tdi,
+            s_tdo
+         );
+
+         this.read_debug_reg(
+            dm::Data0,
+            dmi_data,
+            s_tck,
+            s_tms,
+            s_trstn,
+            s_tdi,
+            s_tdo
+         );
+
+         data_o = dmi_data;
+      endtask
+
+
+      // access (write) csr, gpr by means of abstract command
+      task write_reg_abstract_cmd(
+         input logic [15:0] regno_i,
+         input logic [31:0] data_i,
+         ref logic          s_tck,
+         ref logic          s_tms,
+         ref logic          s_trstn,
+         ref logic          s_tdi,
+         ref logic          s_tdo
+      );
+
+         logic [1:0]         dmi_op;
+         logic [31:0]        dmi_data;
+         logic [31:0]        dmi_command;
+         logic [6:0]         dmi_addr;
+
+         //write data_i into data0
+         this.write_debug_reg(
+             dm::Data0,
+             data_i,
+             s_tck,
+             s_tms,
+             s_trstn,
+             s_tdi,
+             s_tdo
+         );
+
+         // write data0 to regno_i
+         dmi_command = {8'h0, 1'b0, 3'd2, 1'b0, 1'b0, 1'b1, 1'b1, regno_i};
+         this.set_command(
+            dmi_command,
+            s_tck,
+            s_tms,
+            s_trstn,
+            s_tdi,
+            s_tdo
+         );
+
+      endtask
+
+      // Before starting an abstract command, haltreq=resumereq=ackhavereset=0
+      // must be ensured, which is what this task asserts (see debug spec p.11).
+      // We use this to catch programming mistakes, not to test functionality
+      task assert_rdy_for_abstract_cmd(
+         ref logic           s_tck,
+         ref logic           s_tms,
+         ref logic           s_trstn,
+         ref logic           s_tdi,
+         ref logic           s_tdo
+      );
+
+         dm::dmcontrol_t dmcontrol;
+         this.read_debug_reg(dm::DMControl, dmcontrol,
+                             s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+         assert(dmcontrol.haltreq == 1'b0)
+             else $error("haltreq is not zero");
+         assert(dmcontrol.resumereq == 1'b0)
+             else $error("resumereq is not zero");
+         assert(dmcontrol.ackhavereset == 1'b0)
+             else $error("ackhavereset is not zero");
+
+      endtask
+
+      // access csr, gpr by means of program buffer
+      task read_reg_prog_buff(
+         input logic [15:0]  regno_i,
+         output logic [31:0] data_o,
+         ref logic           s_tck,
+         ref logic           s_tms,
+         ref logic           s_trstn,
+         ref logic           s_tdi,
+         ref logic           s_tdo
+      );
+
+         logic [1:0]         dmi_op;
+         logic [31:0]        dmi_data;
+         logic [31:0]        dmi_command;
+         logic [6:0]         dmi_addr;
+
+         // load regno into data0
+         dmi_command = {8'h0, 1'b0, 3'd2, 1'b0, 1'b0, 1'b1, 1'b0, regno_i};
+         this.set_command(
+            dmi_command,
+            s_tck,
+            s_tms,
+            s_trstn,
+            s_tdi,
+            s_tdo
+         );
+
+         this.read_debug_reg(
+            dm::Data0,
+            dmi_data,
+            s_tck,
+            s_tms,
+            s_trstn,
+            s_tdi,
+            s_tdo
+         );
+
+         data_o = dmi_data;
+      endtask
+
+
       task readMem(
          input  logic [31:0] addr_i,
          output logic [31:0] data_o,
@@ -1113,9 +1403,9 @@ package jtag_pkg;
                s_tdi,
                s_tdo
             );
-            //$display("(sbaddress0) dm_addr %x dm_data %x dm_op %x at time %t", dm_addr, dm_data, dm_op, $realtime,);
+            // $display("(sbaddress0) dm_addr %x dm_data %x dm_op %x at time %t", dm_addr, dm_data, dm_op, $realtime,);
             if(dm_op == '1) begin
-               //$display("dmi_reset at time %t",$realtime);
+               $display("dmi_reset at time %t",$realtime);
                this.dmi_reset(s_tck,s_tms,s_trstn,s_tdi,s_tdo);
                this.init_dmi(s_tck,s_tms,s_trstn,s_tdi);
             end
@@ -1137,9 +1427,9 @@ package jtag_pkg;
                s_tdi,
                s_tdo
             );
-            //$display("(sbdata0) dm_addr %x dm_data %x dm_op %x at time %t", dm_addr, dm_data, dm_op, $realtime);
+            // $display("(sbdata0) dm_addr %x dm_data %x dm_op %x at time %t", dm_addr, dm_data, dm_op, $realtime);
                if(dm_op == '1) begin
-                  //$display("dmi_reset at time %t",$realtime);
+                  $display("dmi_reset at time %t",$realtime);
                   this.dmi_reset(s_tck,s_tms,s_trstn,s_tdi,s_tdo);
                   this.init_dmi(s_tck,s_tms,s_trstn,s_tdi);
                end
@@ -1301,6 +1591,274 @@ package jtag_pkg;
 
       endtask
 
+      // discover harts by writting all ones to hartsel and reading it back
+      task test_discover_harts(
+         output logic        error,
+         ref logic           s_tck,
+         ref logic           s_tms,
+         ref logic           s_trstn,
+         ref logic           s_tdi,
+         ref logic           s_tdo
+      );
+
+         logic [1:0]         dmi_op;
+         logic [31:0]        dmi_data;
+         logic [31:0]        dmi_command;
+         logic [6:0]         dmi_addr;
+
+         error = 1'b0;
+
+
+         this.read_debug_reg(
+            dm::DMControl,
+            dmi_data,
+            s_tck,
+            s_tms,
+            s_trstn,
+            s_tdi,
+            s_tdo
+         );
+         dmi_data[25:16] = 10'h3ff;
+         dmi_data[15: 6] = 10'h3ff;
+
+         this.write_debug_reg(
+            dm::DMControl,
+            dmi_data,
+            s_tck,
+            s_tms,
+            s_trstn,
+            s_tdi,
+            s_tdo
+         );
+
+         this.read_debug_reg(
+            dm::DMControl,
+            dmi_data,
+            s_tck,
+            s_tms,
+            s_trstn,
+            s_tdi,
+            s_tdo
+         );
+
+         $display("[TB] %t discovered harts %x",
+                  $realtime, {dmi_data[15:6],dmi_data[25:16]});
+         // TODO: return error by comparing to constant
+      endtask
+
+
+     // access csr, gpr by means of abstract command
+      task test_gpr_read_write_abstract(
+         output logic        error,
+         ref logic           s_tck,
+         ref logic           s_tms,
+         ref logic           s_trstn,
+         ref logic           s_tdi,
+         ref logic           s_tdo
+      );
+
+         logic [1:0]         dmi_op;
+         logic [31:0]        dmi_data;
+         logic [31:0]        dmi_command;
+         logic [6:0]         dmi_addr;
+
+         error = 1'b0;
+
+         //write beefdead into data0
+         this.writeArg(
+            0,
+            32'hbeefdead,
+            s_tck,
+            s_tms,
+            s_trstn,
+            s_tdi,
+            s_tdo
+         );
+
+         //Copy data0 to each register from x2 to x31 (abstract command)
+         for (logic [15:0] regno = 16'h1002; regno < 16'h1020; regno=regno+1) begin
+            dmi_data = {8'h0, 1'b0, 3'd2, 1'b0, 1'b0, 1'b1, 1'b1, regno};
+               this.set_command(
+                  dmi_data,
+                  s_tck,
+                  s_tms,
+                  s_trstn,
+                  s_tdi,
+                  s_tdo
+               );
+         end
+
+         // write ffff_ffff in data0 (some random value so that we can determine
+         // whether we really load something form the gprs into data0 or if its
+         // just the value from before)
+         this.writeArg(
+            0,
+            32'hffff_ffff,
+            s_tck,
+            s_tms,
+            s_trstn,
+            s_tdi,
+            s_tdo
+         );
+
+         for (logic [15:0] regno = 16'h1002; regno < 16'h1020; regno=regno+1) begin
+            dmi_data = {8'h0, 1'b0, 3'd2, 1'b0, 1'b0, 1'b1, 1'b1, regno};
+            this.set_command(
+               dmi_data,
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+               // load regno into data0
+            dmi_command = {8'h0, 1'b0, 3'd2, 1'b0, 1'b0, 1'b1, 1'b0, regno};
+            this.set_command(
+               dmi_command,
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+
+
+            // this command was tested separately to work
+            // get out data0
+            this.set_dmi(
+               2'b01, //read
+               7'h04, //data0
+               32'h0, //whatever
+               {dmi_addr, dmi_data, dmi_op},
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+
+            assert(dmi_data === 'hbeefdead)
+                else begin
+                   $error("expected %x, received %x in gpr %x",
+                          'hbeefdead, dmi_data, regno);
+                   error = 1'b1;
+                end
+         end
+
+      endtask
+
+      // access csr, gpr by means of abstract command in this version we employ
+      // our precise read and write commands which closely follow what is
+      // recommended in the debug spec
+      task test_gpr_read_write_abstract_high_level(
+         output logic        error,
+         ref logic           s_tck,
+         ref logic           s_tms,
+         ref logic           s_trstn,
+         ref logic           s_tdi,
+         ref logic           s_tdo
+      );
+
+         logic [1:0]         dmi_op;
+         logic [31:0]        dmi_data;
+         logic [31:0]        dmi_command;
+         logic [6:0]         dmi_addr;
+
+         error = 1'b0;
+
+         assert_rdy_for_abstract_cmd(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+         //Copy data0 to each register from x2 to x31 (abstract command)
+         for (logic [15:0] regno = 16'h1002; regno < 16'h1020; regno=regno+1) begin
+             this.write_reg_abstract_cmd(
+                 regno,
+                 32'hbeefdead, // TODO: want different values for regs
+                 s_tck,
+                 s_tms,
+                 s_trstn,
+                 s_tdi,
+                 s_tdo
+             );
+
+         end
+
+         // write ffff_ffff in data0 (some random value so that we can determine
+         // whether we really load something form the gprs into data0 or if its
+         // just the value from before)
+         this.write_debug_reg(
+             dm::Data0,
+             32'hffff_ffff,
+             s_tck,
+             s_tms,
+             s_trstn,
+             s_tdi,
+             s_tdo
+         );
+
+         for (logic [15:0] regno = 16'h1002; regno < 16'h1020; regno=regno+1) begin
+            read_reg_abstract_cmd(
+               regno,
+               dmi_data,
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+            assert(dmi_data === 'hbeefdead)
+                else begin
+                   $error("expected %x, received %x in gpr %x",
+                          'hbeefdead, dmi_data, regno);
+                   error = 1'b1;
+                end
+         end
+
+      endtask
+
+
+      task test_wfi_in_program_buffer(
+         output logic error,
+         ref logic s_tck,
+         ref logic s_tms,
+         ref logic s_trstn,
+         ref logic s_tdi,
+         ref logic s_tdo
+      );
+
+         logic [31:0]        dm_data;
+         this.write_debug_reg(
+            dm::ProgBuf0,
+            riscv::wfi(), //wfi
+            s_tck,
+            s_tms,
+            s_trstn,
+            s_tdi,
+            s_tdo
+         );
+
+         this.write_debug_reg(
+            dm::ProgBuf0 + 1, //progrbuff1
+            riscv::ebreak(), //ebreak
+            s_tck,
+            s_tms,
+            s_trstn,
+            s_tdi,
+            s_tdo
+         );
+         //execute the program buffer
+         dm_data = {8'h0, 1'b0, 3'd2, 1'b0, 1'b1, 1'b0, 1'b0, 16'h0};
+
+         this.set_command(
+              dm_data,
+              s_tck,
+              s_tms,
+              s_trstn,
+              s_tdi,
+              s_tdo
+              );
+         error = 1'b0;
+      endtask
+
 
       task testAbstractsCommands_andProgramBuffer(
          output logic error,
@@ -1425,8 +1983,8 @@ package jtag_pkg;
          error = 1'b0;
          for (int incAddr = 2; incAddr < 32; incAddr=incAddr+1) begin
             this.readMem(address_i + (incAddr-2)*4, dm_data, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-            //$display("[TB] %t Read %x from %x",$realtime(), dm_data, address_i + (incAddr-2)*4);
-            if(dm_data != key_word + incAddr) begin
+            // $display("[TB] %t Read %x from %x",$realtime(), dm_data, address_i + (incAddr-2)*4);
+            if(dm_data !== key_word + incAddr) begin
                error = 1'b1;
                $display("[TB - AbstractsCommands_andProgramBuffer] %t Read %x from %x instead of %x",$realtime(), dm_data, address_i + (incAddr-2)*4, key_word + incAddr);
             end
@@ -1434,9 +1992,354 @@ package jtag_pkg;
 
       endtask
 
+
+      task test_abstract_cmds_prog_buf(
+         output logic error,
+         input logic [31:0] address_i,
+         ref logic s_tck,
+         ref logic s_tms,
+         ref logic s_trstn,
+         ref logic s_tdi,
+         ref logic s_tdo
+      );
+
+         logic [1:0]         dm_op;
+         logic [31:0]        dm_data;
+         logic [6:0]         dm_addr;
+         logic [31:0]        key_word = 32'hda41de;
+
+         //write key_word in data0
+         this.write_debug_reg(
+            dm::Data0,
+            key_word,
+            s_tck,
+            s_tms,
+            s_trstn,
+            s_tdi,
+            s_tdo
+         );
+
+         assert_rdy_for_abstract_cmd(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+         //Copy data0 to each register from x2 to x31 by means of Access Register abstract commands
+         for (logic [15:0] regno = 16'h1002; regno < 16'h1020; regno=regno+1) begin
+            dm_data = {8'h0, 1'b0, 3'd2, 1'b0, 1'b0, 1'b1, 1'b1, regno};
+
+               this.set_command(
+                  dm_data,
+                  s_tck,
+                  s_tms,
+                  s_trstn,
+                  s_tdi,
+                  s_tdo
+               );
+            //$display("[TB] %t Access Register at regno %d",$realtime(), regno[4:0]);
+
+         end
+
+         //Put address_i is x1 by writing it to data0 and then Access Register
+         this.write_debug_reg(
+            dm::Data0,
+            address_i,
+            s_tck,
+            s_tms,
+            s_trstn,
+            s_tdi,
+            s_tdo
+         );
+
+         dm_data = {8'h0, 1'b0, 3'd2, 1'b0, 1'b0, 1'b1, 1'b1, 16'h1001};
+         this.set_command(
+            dm_data,
+            s_tck,
+            s_tms,
+            s_trstn,
+            s_tdi,
+            s_tdo
+         );
+
+         //increase every registers x2-x31 by 2-31  store them to *(x1++)
+         for (logic [15:0] regno = 16'h1002; regno < 16'h1020; regno=regno+1) begin
+               this.write_debug_reg(
+                  dm::ProgBuf0,
+                  { 7'h0, regno[4:0], regno[4:0], 3'b000, regno[4:0], 7'h13 }, // addi xi, xi, i
+                  s_tck,
+                  s_tms,
+                  s_trstn,
+                  s_tdi,
+                  s_tdo
+               );
+
+               this.write_debug_reg(
+                  dm::ProgBuf0 + 1,
+                  riscv::store(3'b010, regno[4:0], 5'h1, 12'h0), // sw xi, 0(x1)
+                  //{ 7'h0, regno[4:0], 5'h1, 1'b0, 2'b10, 5'h0, 7'h23 },
+                  s_tck,
+                  s_tms,
+                  s_trstn,
+                  s_tdi,
+                  s_tdo
+               );
+
+               this.write_debug_reg(
+                  dm::ProgBuf0 + 2,
+                  { 12'h4, 5'h1, 3'b000, 5'h1, 7'h13 }, // addi x1, x1, 4
+                  s_tck,
+                  s_tms,
+                  s_trstn,
+                  s_tdi,
+                  s_tdo
+               );
+
+               this.write_debug_reg(
+                  dm::ProgBuf0 + 3,
+                  riscv::ebreak(), //ebreak
+                  s_tck,
+                  s_tms,
+                  s_trstn,
+                  s_tdi,
+                  s_tdo
+               );
+               //execute the program buffer
+               dm_data = {8'h0, 1'b0, 3'd2, 1'b0, 1'b1, 1'b0, 1'b0, 16'h0};
+
+               this.set_command(
+                  dm_data,
+                  s_tck,
+                  s_tms,
+                  s_trstn,
+                  s_tdi,
+                  s_tdo
+               );
+               //$display("[TB] %t Store of the value in reg %d",$realtime(), regno[4:0]);
+         end
+
+         //Now read them from memory the previous store values
+
+         error = 1'b0;
+         for (int incAddr = 2; incAddr < 32; incAddr=incAddr+1) begin
+            this.readMem(address_i + (incAddr-2)*4, dm_data, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+            // $display("[TB] %t Read %x from %x",$realtime(), dm_data, address_i + (incAddr-2)*4);
+            assert(dm_data === key_word + incAddr)
+                else begin
+                   $error("read %x from %x instead of %x",
+                          dm_data, address_i + (incAddr-2)*4, key_word + incAddr);
+                   error = 1'b1;
+                end
+         end
+
+      endtask
+
+
+      task test_read_write_dpc(
+         output logic error,
+         ref logic s_tck,
+         ref logic s_tms,
+         ref logic s_trstn,
+         ref logic s_tdi,
+         ref logic s_tdo
+      );
+
+         logic [1:0]         dm_op;
+         logic [31:0]        dm_data;
+         logic [31:0]        saved;
+         logic [6:0]         dm_addr;
+         logic [31:0]        key_word = 32'hbeefdead;
+
+         error = 1'b0;
+
+         assert_rdy_for_abstract_cmd(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+         this.read_reg_abstract_cmd(
+             riscv::CSR_DPC,
+             saved,
+             s_tck,
+             s_tms,
+             s_trstn,
+             s_tdi,
+             s_tdo
+         );
+
+         this.write_reg_abstract_cmd(
+             riscv::CSR_DPC,
+             key_word,
+             s_tck,
+             s_tms,
+             s_trstn,
+             s_tdi,
+             s_tdo
+         );
+
+         this.read_reg_abstract_cmd(
+             riscv::CSR_DPC,
+             dm_data,
+             s_tck,
+             s_tms,
+             s_trstn,
+             s_tdi,
+             s_tdo
+         );
+
+         assert(key_word === dm_data)
+             else begin
+                $error("read %x instead of %x", dm_data, key_word);
+                error = 1'b1;
+             end;
+
+         this.write_reg_abstract_cmd(
+             riscv::CSR_DPC,
+             saved,
+             s_tck,
+             s_tms,
+             s_trstn,
+             s_tdi,
+             s_tdo
+         );
+
+      endtask
+
+
+      task test_single_stepping_abstract_cmd(
+         output logic error,
+         input logic [31:0] addr_i,
+         ref logic s_tck,
+         ref logic s_tms,
+         ref logic s_trstn,
+         ref logic s_tdi,
+         ref logic s_tdo
+      );
+
+         logic [1:0]         dm_op;
+         logic [31:0]        dm_data;
+         riscv::dcsr_t       dcsr;
+         logic [6:0]         dm_addr;
+
+         error = 1'b0;
+
+
+         // write short program to single step through
+         this.writeMem(addr_i, { 7'h0, 5'b1, 5'b1, 3'b000, 5'b1, 7'h13 },  // addi xi, xi, i
+                       s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         this.writeMem(addr_i + 4, { 7'h0, 5'b1, 5'b1, 3'b000, 5'b1, 7'h13 },  // addi xi, xi, i
+                       s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         this.writeMem(addr_i + 8, { 7'h0, 5'b1, 5'b1, 3'b000, 5'b1, 7'h13 }, // addi xi, xi, i
+                       s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         this.writeMem(addr_i + 12, { 7'h0, 5'b1, 5'b1, 3'b000, 5'b1, 7'h13 }, // addi xi, xi, i
+                       s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         this.writeMem(addr_i + 16, {20'b0, 5'b0, 7'b1101111}, // J zero offset
+                       s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+         assert_rdy_for_abstract_cmd(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+         // set step flag in dcsr
+         this.read_reg_abstract_cmd(riscv::CSR_DCSR, dcsr,
+                                    s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         dcsr.step = 1;
+         this.write_reg_abstract_cmd(riscv::CSR_DCSR, dcsr,
+                                     s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         this.read_reg_abstract_cmd(riscv::CSR_DCSR, dcsr,
+                                    s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         assert(dcsr.step == 1)
+             else begin
+                $error("couldn't enter single stepping mode");
+                error = 1'b1;
+             end;
+
+         // write dpc to addr_i so that we know where we resume
+         this.write_reg_abstract_cmd(riscv::CSR_DPC, addr_i,
+                                     s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+         this.read_reg_abstract_cmd(riscv::CSR_DPC, dm_data, s_tck, s_tms,
+                                    s_trstn, s_tdi, s_tdo);
+
+         // make a single step
+         this.resume_core(1'b1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+         this.block_until_any_halt(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         this.read_reg_abstract_cmd(riscv::CSR_DPC, dm_data,
+                                    s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         // check if dpc, dcause and flag bits are ok
+         assert(addr_i + 4 === dm_data) // did dpc increment?
+             else begin
+                $error("dpc is %x, expected %x", dm_data, addr_i + 4);
+                error = 1'b1;
+             end;
+         this.read_reg_abstract_cmd(riscv::CSR_DCSR, dcsr,
+                                    s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         assert(3'h4 === dcsr.cause) // is cause properly given as "step"?
+             else begin
+                $error("debug cause is %x, expected %x", dcsr.cause, 3'h4);
+                error = 1'b1;
+             end;
+
+
+         this.resume_core(1'b1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         this.read_reg_abstract_cmd(riscv::CSR_DPC, dm_data, s_tck, s_tms,
+                                    s_trstn, s_tdi, s_tdo);
+         // check if dpc, dcause and flag bits are ok
+         assert(addr_i + 8 === dm_data) // did dpc increment?
+             else begin
+                $error("dpc is %x, expected %x", dm_data, addr_i + 4);
+                error = 1'b1;
+             end;
+         this.read_reg_abstract_cmd(riscv::CSR_DCSR, dcsr,
+                                    s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         assert(3'h4 === dcsr.cause) // is cause properly given as "step"?
+             else begin
+                $error("debug cause is %x, expected %x", dcsr.cause, 3'h4);
+                error = 1'b1;
+             end;
+
+      endtask
+
+
+      task test_halt_resume(
+         output logic error,
+         ref logic s_tck,
+         ref logic s_tms,
+         ref logic s_trstn,
+         ref logic s_tdi,
+         ref logic s_tdo
+      );
+         dm::dmstatus_t dmstatus;
+         error = 1'b0;
+
+         // check if our hart is halted
+         this.read_debug_reg(dm::DMStatus, dmstatus,
+                             s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         assert(dmstatus.allhalted == 1'b1)
+             else begin
+                $error("allhalted flag is not set when entering test");
+                error = 1'b1;
+             end
+
+         // resume core and check flags
+         this.resume_core(1'b1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         this.read_debug_reg(dm::DMStatus, dmstatus,
+                             s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         assert(dmstatus.allrunning == 1'b1)
+             else begin
+                $error("allrunning flag is not set after resume request");
+                error = 1'b1;
+             end
+
+         // halt core and check flags
+         this.halt_core(1'b1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         this.read_debug_reg(dm::DMStatus, dmstatus,
+                             s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         assert(dmstatus.allhalted == 1'b1)
+             else begin
+                $error("allhalted flag is not set after halt request");
+                error = 1'b1;
+             end
+
+      endtask
+
+
    endclass
 
-
-
-
 endpackage
+
+// Local Variables:
+// verilog-indent-level: 3
+// End:
