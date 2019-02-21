@@ -527,7 +527,8 @@ module tb_pulp;
             else
                s_mode_select = 1'b0;
 
-            $readmemh("/usr/scratch/larain5/pschiavo/pulpissimo/pulp-sdk/tests/riscv_tests/testPMP/build/pulpissimo/vectors/stim.txt", stimuli);  // read in the stimuli vectors  == address_value
+            // read in the stimuli vectors  == address_value
+            $readmemh("./vectors/stim.txt", stimuli);
 
          end
 
