@@ -709,7 +709,9 @@ module tb_pulp;
                                    s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
             $display("Halting the Core %t",$realtime);
-            debug_mode_if.set_haltreq(1'b1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+            //debug_mode_if.set_haltreq(1'b1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+            debug_mode_if.halt_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
             $display("Core Halted %t",$realtime);
 
             debug_mode_if.read_abstractcs(dm_data, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
@@ -778,6 +780,11 @@ module tb_pulp;
             $display("[TB] %t - TEST read/write dpc" , $realtime);
             debug_mode_if.test_read_write_dpc(error, s_tck, s_tms,
                                               s_trstn, s_tdi, s_tdo);
+            if(error)
+               $display("[TB] %t FAIL", $realtime);
+            else
+               $display("[TB] %t OK", $realtime);
+
 
 
             $display("[TB] %t - TEST read/write csr with program buffer (TODO)", $realtime);
@@ -787,8 +794,8 @@ module tb_pulp;
 
             $display("[TB] %t - TEST debug cause values (TODO)", $realtime);
             $display("[TB] %t - TEST single stepping", $realtime);
-            debug_mode_if.test_single_stepping_abstract_cmd(error, BEGIN_L2_INSTR,
-                                                            s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+            // debug_mode_if.test_single_stepping_abstract_cmd(error, BEGIN_L2_INSTR,
+            //                                                 s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
             $display("[TB] %t - TEST single stepping edge cases (TODO)", $realtime);
 

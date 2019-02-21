@@ -528,8 +528,8 @@ package jtag_pkg;
           logic [31:0]    dm_data;
           dm::dmcontrol_t dmcontrol;
 
+         // TODO: we probably don't need to rescan IR
          this.init_dmi(s_tck, s_tms, s_trstn, s_tdi);
-
          this.read_debug_reg(dm::DMControl, dmcontrol,
                              s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
@@ -559,11 +559,11 @@ package jtag_pkg;
 
       task set_resumereq(
          input logic resumereq,
-           ref logic s_tck,
-           ref logic s_tms,
-           ref logic s_trstn,
-           ref logic s_tdi,
-           ref logic s_tdo
+         ref logic   s_tck,
+         ref logic   s_tms,
+         ref logic   s_trstn,
+         ref logic   s_tdi,
+         ref logic   s_tdo
       );
 
           logic [1:0]     dm_op;
@@ -571,12 +571,83 @@ package jtag_pkg;
           logic [31:0]    dm_data;
           dm::dmcontrol_t dmcontrol;
 
+         // TODO: we probably don't need to rescan IR
          this.init_dmi(s_tck, s_tms, s_trstn, s_tdi);
          this.read_debug_reg(dm::DMControl, dmcontrol,
                              s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
          dmcontrol.resumereq = resumereq;
 
+         this.write_debug_reg(dm::DMControl, dmcontrol,
+                              s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+      endtask
+
+
+      task halt_harts(
+         ref logic   s_tck,
+         ref logic   s_tms,
+         ref logic   s_trstn,
+         ref logic   s_tdi,
+         ref logic   s_tdo
+      );
+
+         dm::dmcontrol_t dmcontrol;
+         dm::dmstatus_t  dmstatus;
+
+         // stop the hart by setting haltreq
+         this.read_debug_reg(dm::DMControl, dmcontrol,
+                             s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+         dmcontrol.haltreq = 1'b1;
+
+         this.write_debug_reg(dm::DMControl, dmcontrol,
+                              s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+         // wait until hart is halted
+         do begin
+            this.read_debug_reg(dm::DMStatus, dmstatus,
+                                s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+         end while(dmstatus.allhalted != 1'b1);
+
+         // clear haltreq
+         dmcontrol.haltreq = 1'b0;
+         this.write_debug_reg(dm::DMControl, dmcontrol,
+                              s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+      endtask
+
+
+      task resume_harts(
+         ref logic s_tck,
+         ref logic s_tms,
+         ref logic s_trstn,
+         ref logic s_tdi,
+         ref logic s_tdo
+      );
+
+         dm::dmcontrol_t dmcontrol;
+         dm::dmstatus_t  dmstatus;
+
+         // resume the hart by setting resumereq
+         this.read_debug_reg(dm::DMControl, dmcontrol,
+                             s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+         dmcontrol.resumereq = 1'b1;
+
+         this.write_debug_reg(dm::DMControl, dmcontrol,
+                              s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+         // wait until hart resumed
+         do begin
+            this.read_debug_reg(dm::DMStatus, dmstatus,
+                                s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+         end while(dmstatus.allresumeack != 1'b1);
+
+         // clear resumereq
+         dmcontrol.resumereq = 1'b0;
          this.write_debug_reg(dm::DMControl, dmcontrol,
                               s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
@@ -2168,10 +2239,19 @@ package jtag_pkg;
          logic [1:0]         dm_op;
          logic [31:0]        dm_data;
          riscv::dcsr_t       dcsr;
+         dm::dmstatus_t      dmstatus;
          logic [6:0]         dm_addr;
 
          error = 1'b0;
 
+        // check if our hart is halted
+         this.read_debug_reg(dm::DMStatus, dmstatus,
+                             s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         assert(dmstatus.allhalted == 1'b1)
+             else begin
+                $error("allhalted flag is not set when entering test");
+                error = 1'b1;
+             end
 
          // write short program to single step through
          this.writeMem(addr_i, { 7'h0, 5'b1, 5'b1, 3'b000, 5'b1, 7'h13 },  // addi xi, xi, i
@@ -2209,7 +2289,7 @@ package jtag_pkg;
                                     s_trstn, s_tdi, s_tdo);
 
          // make a single step
-         this.set_resumereq(1'b1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         this.resume_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
          this.block_until_any_halt(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          this.read_reg_abstract_cmd(riscv::CSR_DPC, dm_data,
@@ -2228,8 +2308,8 @@ package jtag_pkg;
                 error = 1'b1;
              end;
 
+         this.resume_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
-         this.set_resumereq(1'b1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          this.read_reg_abstract_cmd(riscv::CSR_DPC, dm_data, s_tck, s_tms,
                                     s_trstn, s_tdi, s_tdo);
          // check if dpc, dcause and flag bits are ok
@@ -2270,7 +2350,8 @@ package jtag_pkg;
              end
 
          // resume core and check flags
-         this.set_resumereq(1'b1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         this.resume_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
          this.read_debug_reg(dm::DMStatus, dmstatus,
                              s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          assert(dmstatus.allrunning == 1'b1)
@@ -2280,7 +2361,7 @@ package jtag_pkg;
              end
 
          // halt core and check flags
-         this.set_haltreq(1'b1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         this.halt_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          this.read_debug_reg(dm::DMStatus, dmstatus,
                              s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          assert(dmstatus.allhalted == 1'b1)
