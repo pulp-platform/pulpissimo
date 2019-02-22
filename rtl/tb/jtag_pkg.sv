@@ -2288,45 +2288,149 @@ package jtag_pkg;
          this.read_reg_abstract_cmd(riscv::CSR_DPC, dm_data, s_tck, s_tms,
                                     s_trstn, s_tdi, s_tdo);
 
-         // make a single step
-         this.resume_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         for (int i = 1; i < 4; i++) begin
+            // Make a single step. Like openocd we halt the hart manually even
+            // though it might suffice to just check if allhalted is set.
+            this.resume_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+            this.halt_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+            // this.block_until_any_halt(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
-         this.block_until_any_halt(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-         this.read_reg_abstract_cmd(riscv::CSR_DPC, dm_data,
-                                    s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-         // check if dpc, dcause and flag bits are ok
-         assert(addr_i + 4 === dm_data) // did dpc increment?
-             else begin
-                $error("dpc is %x, expected %x", dm_data, addr_i + 4);
-                error = 1'b1;
-             end;
+            this.read_reg_abstract_cmd(riscv::CSR_DPC, dm_data,
+                                       s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+            // check if dpc, dcause and flag bits are ok
+            assert(addr_i + 4*i === dm_data) // did dpc increment?
+                else begin
+                   $error("dpc is %x, expected %x", dm_data, addr_i + 4);
+                   error = 1'b1;
+                end;
+            this.read_reg_abstract_cmd(riscv::CSR_DCSR, dcsr,
+                                       s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+            assert(3'h4 === dcsr.cause) // is cause properly given as "step"?
+                else begin
+                   $error("debug cause is %x, expected %x", dcsr.cause, 3'h4);
+                   error = 1'b1;
+                end;
+         end
+
+         // clear step flag in dcsr
          this.read_reg_abstract_cmd(riscv::CSR_DCSR, dcsr,
                                     s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-         assert(3'h4 === dcsr.cause) // is cause properly given as "step"?
+         dcsr.step = 0;
+         this.write_reg_abstract_cmd(riscv::CSR_DCSR, dcsr,
+                                     s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+
+      endtask
+
+
+      task test_single_stepping_edge_cases(
+         output logic error,
+         input logic [31:0] addr_i,
+         ref logic s_tck,
+         ref logic s_tms,
+         ref logic s_trstn,
+         ref logic s_tdi,
+         ref logic s_tdo
+      );
+
+         logic [1:0]         dm_op;
+         logic [31:0]        dm_data;
+         riscv::dcsr_t       dcsr;
+         dm::dmstatus_t      dmstatus;
+         logic [6:0]         dm_addr;
+         // records the sequence of expected pc changes
+         int                 pc_offsets[];
+
+         error = 1'b0;
+
+        // check if our hart is halted
+         this.read_debug_reg(dm::DMStatus, dmstatus,
+                             s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         assert(dmstatus.allhalted == 1'b1)
              else begin
-                $error("debug cause is %x, expected %x", dcsr.cause, 3'h4);
+                $error("allhalted flag is not set when entering test");
+                error = 1'b1;
+             end
+
+         // write short program to single step through
+         pc_offsets = {4, 8, 16, 20, 24, 28, 32};
+         this.writeMem(addr_i + 0, riscv::nop(),
+                       s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         this.writeMem(addr_i + 4, riscv::nop(),
+                       s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         this.writeMem(addr_i + 8, riscv::branch(5'h0, 5'h0, 3'b0, 12'h4), // branch to + 16
+                       s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         this.writeMem(addr_i + 12, riscv::nop(),
+                       s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         this.writeMem(addr_i + 16, { 7'h0, 5'b1, 5'b1, 3'b000, 5'b1, 7'h13 }, // addi xi, xi, i
+                       s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         this.writeMem(addr_i + 20, { 7'h0, 5'b1, 5'b1, 3'b000, 5'b1, 7'h13 }, // addi xi, xi, i
+                       s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         this.writeMem(addr_i + 24, { 7'h0, 5'b1, 5'b1, 3'b000, 5'b1, 7'h13 }, // addi xi, xi, i
+                       s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         this.writeMem(addr_i + 28, { 7'h0, 5'b1, 5'b1, 3'b000, 5'b1, 7'h13 }, // addi xi, xi, i
+                       s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         this.writeMem(addr_i + 32, {20'b0, 5'b0, 7'b1101111}, // J zero offset
+                       s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+
+         assert_rdy_for_abstract_cmd(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+         // set step flag in dcsr
+         this.read_reg_abstract_cmd(riscv::CSR_DCSR, dcsr,
+                                    s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         dcsr.step = 1;
+         this.write_reg_abstract_cmd(riscv::CSR_DCSR, dcsr,
+                                     s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         this.read_reg_abstract_cmd(riscv::CSR_DCSR, dcsr,
+                                    s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         assert(dcsr.step == 1)
+             else begin
+                $error("couldn't enter single stepping mode");
                 error = 1'b1;
              end;
 
-         this.resume_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         // write dpc to addr_i so that we know where we resume
+         this.write_reg_abstract_cmd(riscv::CSR_DPC, addr_i,
+                                     s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
          this.read_reg_abstract_cmd(riscv::CSR_DPC, dm_data, s_tck, s_tms,
                                     s_trstn, s_tdi, s_tdo);
-         // check if dpc, dcause and flag bits are ok
-         assert(addr_i + 8 === dm_data) // did dpc increment?
-             else begin
-                $error("dpc is %x, expected %x", dm_data, addr_i + 4);
-                error = 1'b1;
-             end;
+
+         for (int i = 0; i < $size(pc_offsets); i++) begin
+            // Make a single step. Like openocd we halt the hart manually even
+            // though it might suffice to just check if allhalted is set.
+            this.resume_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+            this.halt_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+            // this.block_until_any_halt(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+            this.read_reg_abstract_cmd(riscv::CSR_DPC, dm_data,
+                                       s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+            // check if dpc, dcause and flag bits are ok
+            assert(addr_i + pc_offsets[i] === dm_data) // did dpc increment?
+                else begin
+                   $error("dpc is %x, expected %x", dm_data, addr_i + pc_offsets[i]);
+                   error = 1'b1;
+                end;
+            this.read_reg_abstract_cmd(riscv::CSR_DCSR, dcsr,
+                                       s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+            assert(3'h4 === dcsr.cause) // is cause properly given as "step"?
+                else begin
+                   $error("debug cause is %x, expected %x", dcsr.cause, 3'h4);
+                   error = 1'b1;
+                end;
+         end
+
+         // clear step flag in dcsr
          this.read_reg_abstract_cmd(riscv::CSR_DCSR, dcsr,
                                     s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-         assert(3'h4 === dcsr.cause) // is cause properly given as "step"?
-             else begin
-                $error("debug cause is %x, expected %x", dcsr.cause, 3'h4);
-                error = 1'b1;
-             end;
+         dcsr.step = 0;
+         this.write_reg_abstract_cmd(riscv::CSR_DCSR, dcsr,
+                                     s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
 
       endtask
+
 
 
       task test_halt_resume(

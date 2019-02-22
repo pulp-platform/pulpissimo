@@ -790,10 +790,20 @@ module tb_pulp;
 
             $display("[TB] %t - TEST debug cause values (TODO)", $realtime);
             $display("[TB] %t - TEST single stepping", $realtime);
-            // debug_mode_if.test_single_stepping_abstract_cmd(error, BEGIN_L2_INSTR,
-            //                                                 s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+            debug_mode_if.test_single_stepping_abstract_cmd(error, BEGIN_L2_INSTR,
+                                                            s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+            if(error)
+               $display("[TB] %t FAIL", $realtime);
+            else
+               $display("[TB] %t OK", $realtime);
 
-            $display("[TB] %t - TEST single stepping edge cases (TODO)", $realtime);
+            $display("[TB] %t - TEST single stepping edge cases", $realtime);
+            debug_mode_if.test_single_stepping_edge_cases(error, BEGIN_L2_INSTR,
+                                                          s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+            if(error)
+               $display("[TB] %t FAIL", $realtime);
+            else
+               $display("[TB] %t OK", $realtime);
 
 
             // $display("[TB] %t - TEST wfi in program buffer", $realtime);
