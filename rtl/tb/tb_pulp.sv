@@ -837,24 +837,7 @@ module tb_pulp;
             end
 
             $display("[TB] %t - Resuming the CORE", $realtime);
-
-            debug_mode_if.set_haltreq(
-               1'b0,
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi,
-               s_tdo
-            );
-
-            debug_mode_if.set_resumereq(
-               1'b1,
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi,
-               s_tdo
-            );
+            debug_mode_if.resume_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
 
             if (ENABLE_DPI == 1)
