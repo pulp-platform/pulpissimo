@@ -723,10 +723,6 @@ module tb_pulp;
             // for the following tests we need the cpu to be fetching and running
             $display("[TB] %t - TEST halt resume functionality", $realtime);
             debug_mode_if.test_halt_resume(error, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-
-            $display("[TB] %t - TEST read/write gpr with abstract command", $realtime);
-            debug_mode_if.test_gpr_read_write_abstract(error, s_tck, s_tms,
-                                                       s_trstn, s_tdi, s_tdo);
             if (error)
                 $display("[TB] %t FAIL", $realtime);
             else
