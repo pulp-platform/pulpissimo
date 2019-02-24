@@ -806,10 +806,10 @@ module tb_pulp;
                $display("[TB] %t OK", $realtime);
 
 
-            // $display("[TB] %t - TEST wfi in program buffer", $realtime);
-            // debug_mode_if.test_wfi_in_program_buffer(error, s_tck, s_tms,
-            //                                          s_trstn, s_tdi, s_tdo);
-            // $display("[TB] %t OK", $realtime); //otherwise we wouldn't get here
+            $display("[TB] %t - TEST wfi in program buffer", $realtime);
+            debug_mode_if.test_wfi_in_program_buffer(error, s_tck, s_tms,
+                                                     s_trstn, s_tdi, s_tdo);
+            $display("[TB] %t OK", $realtime); //otherwise we wouldn't get here
 
             $display("[TB] %t - TEST halt request during wfi (TODO)", $realtime);
 

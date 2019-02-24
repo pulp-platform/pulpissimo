@@ -2366,7 +2366,7 @@ package jtag_pkg;
                        s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          this.writeMem(addr_i + 20, { 7'h0, 5'b1, 5'b1, 3'b000, 5'b1, 7'h13 }, // addi xi, xi, i
                        s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-         this.writeMem(addr_i + 24, { 7'h0, 5'b1, 5'b1, 3'b000, 5'b1, 7'h13 }, // addi xi, xi, i
+         this.writeMem(addr_i + 24, riscv::wfi(), // step over wfi
                        s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          this.writeMem(addr_i + 28, { 7'h0, 5'b1, 5'b1, 3'b000, 5'b1, 7'h13 }, // addi xi, xi, i
                        s_tck, s_tms, s_trstn, s_tdi, s_tdo);
