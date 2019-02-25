@@ -2432,7 +2432,6 @@ package jtag_pkg;
       endtask
 
 
-
       task test_halt_resume(
          output logic error,
          ref logic s_tck,
@@ -2476,6 +2475,161 @@ package jtag_pkg;
 
       endtask
 
+      task test_debug_cause_values(
+         output logic error,
+         input logic [31:0] addr_i,
+         ref logic s_tck,
+         ref logic s_tms,
+         ref logic s_trstn,
+         ref logic s_tdi,
+         ref logic s_tdo
+      );
+         dm::dmstatus_t dmstatus;
+         riscv::dcsr_t  dcsr;
+
+         error = 1'b0;
+
+
+         // check if our hart is halted
+         this.read_debug_reg(dm::DMStatus, dmstatus,
+                             s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         assert(dmstatus.allhalted == 1'b1)
+             else begin
+                $error("allhalted flag is not set when entering test");
+                error = 1'b1;
+             end
+
+         //Write while(1) to BEGIN_L2_INSTR
+         this.writeMem(addr_i, {25'b0, 7'b1101111},
+                       s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+         // // check if debug cause is haltrequest
+         this.resume_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         this.halt_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         this.read_reg_abstract_cmd(riscv::CSR_DCSR, dcsr,
+                                    s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         assert(dm::CauseRequest === dcsr.cause)
+             else begin
+                $error("debug cause is %x, expected %x", dcsr.cause, dm::CauseRequest);
+                error = 1'b1;
+             end;
+
+         // check if debug request is haltrequest
+         this.read_reg_abstract_cmd(riscv::CSR_DCSR, dcsr,
+                                    s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         dcsr.step = 1;
+         this.write_reg_abstract_cmd(riscv::CSR_DCSR, dcsr,
+                                     s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+         this.resume_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         this.halt_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+         this.read_reg_abstract_cmd(riscv::CSR_DCSR, dcsr,
+                                    s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         assert(dm::CauseSingleStep === dcsr.cause)
+             else begin
+                $error("debug cause is %x, expected %x", dcsr.cause, dm::CauseSingleStep);
+                error = 1'b1;
+             end;
+
+         this.read_reg_abstract_cmd(riscv::CSR_DCSR, dcsr,
+                                    s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         dcsr.step = 0;
+         this.write_reg_abstract_cmd(riscv::CSR_DCSR, dcsr,
+                                     s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+         // check if debug request is breakpoint
+         this.writeMem(addr_i + 0, { 7'h0, 5'b1, 5'b1, 3'b000, 5'b1, 7'h13 }, // addi xi, xi, i
+                       s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         this.writeMem(addr_i + 4, { 7'h0, 5'b1, 5'b1, 3'b000, 5'b1, 7'h13 }, // addi xi, xi, i
+                       s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         this.writeMem(addr_i + 8, riscv::ebreak(),
+                       s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         this.writeMem(addr_i + 12, {20'b0, 5'b0, 7'b1101111}, // J zero offset
+                       s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+         // force ebreak in m-mode to enter debug mode
+         this.read_reg_abstract_cmd(riscv::CSR_DCSR, dcsr,
+                                    s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         dcsr.ebreakm = 1;
+         this.write_reg_abstract_cmd(riscv::CSR_DCSR, dcsr,
+                                     s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         this.resume_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         // TODO: delay here until entering park loop...
+         // check halted?
+
+         this.read_reg_abstract_cmd(riscv::CSR_DCSR, dcsr,
+                                    s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         assert(dm::CauseBreakpoint === dcsr.cause)
+             else begin
+                $error("debug cause is %x, expected %x", dcsr.cause, dm::CauseBreakpoint);
+                error = 1'b1;
+             end;
+
+      endtask
+
+
+      task test_ebreak_in_program_buffer(
+         output logic error,
+         ref logic s_tck,
+         ref logic s_tms,
+         ref logic s_trstn,
+         ref logic s_tdi,
+         ref logic s_tdo
+      );
+
+         logic [31:0]   dm_data;
+         logic [31:0]   dpc_save, dpc;
+         riscv::dcsr_t  dcsr_save, dcsr;
+         dm::dmstatus_t dmstatus;
+
+         error = 1'b0;
+
+         // check if our hart is halted
+         this.read_debug_reg(dm::DMStatus, dmstatus,
+                             s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         assert(dmstatus.allhalted == 1'b1)
+             else begin
+                $error("allhalted flag is not set when entering test");
+                error = 1'b1;
+             end
+
+         // save dpc, dcsr.cause
+         this.read_reg_abstract_cmd(riscv::CSR_DPC, dpc_save, s_tck, s_tms,
+                                    s_trstn, s_tdi, s_tdo);
+
+         this.read_reg_abstract_cmd(riscv::CSR_DCSR, dcsr_save, s_tck, s_tms,
+                                    s_trstn, s_tdi, s_tdo);
+
+         // write to program buffer
+         this.write_debug_reg(dm::ProgBuf0, riscv::nop(),
+                              s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         this.write_debug_reg(dm::ProgBuf0 + 1, riscv::ebreak(),
+                              s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+         //execute the program buffer
+         dm_data = {8'h0, 1'b0, 3'd2, 1'b0, 1'b1, 1'b0, 1'b0, 16'h0};
+         this.set_command(dm_data, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+         // check that dpc and dcsr.cause didn't change
+         this.read_reg_abstract_cmd(riscv::CSR_DPC, dpc, s_tck, s_tms,
+                                    s_trstn, s_tdi, s_tdo);
+
+         this.read_reg_abstract_cmd(riscv::CSR_DCSR, dcsr, s_tck, s_tms,
+                                    s_trstn, s_tdi, s_tdo);
+         assert(dpc == dpc_save)
+             else begin
+                $error("dpc changed from %x to %x", dpc_save, dpc);
+                error = 1'b1;
+             end
+
+         assert(dcsr.cause == dcsr_save.cause)
+             else begin
+                $error("dcsr changed from %x to %x", dcsr.cause, dcsr_save.cause);
+                error = 1'b1;
+             end
+
+      endtask
 
    endclass
 

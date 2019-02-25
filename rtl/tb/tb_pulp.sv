@@ -754,15 +754,15 @@ module tb_pulp;
                                                      s_trstn, s_tdi, s_tdo);
             $display("[TB] %t x2 is %x", $realtime, dm_data);
 
-            $display("[TB] %t - TEST abstract commands and program buffer (old)", $realtime);
-            //Test Abstract Commands
-            debug_mode_if.testAbstractsCommands_andProgramBuffer(error, BEGIN_L2_INSTR,
-                                                                 s_tck, s_tms, s_trstn,
-                                                                 s_tdi, s_tdo);
-            if(error)
-               $display("[TB] %t FAIL", $realtime);
-            else
-               $display("[TB] %t OK", $realtime);
+            // $display("[TB] %t - TEST abstract commands and program buffer (old)", $realtime);
+            // //Test Abstract Commands
+            // debug_mode_if.testAbstractsCommands_andProgramBuffer(error, BEGIN_L2_INSTR,
+            //                                                      s_tck, s_tms, s_trstn,
+            //                                                      s_tdi, s_tdo);
+            // if(error)
+            //    $display("[TB] %t FAIL", $realtime);
+            // else
+            //    $display("[TB] %t OK", $realtime);
 
             $display("[TB] %t - TEST abstract commands and program buffer", $realtime);
             debug_mode_if.test_abstract_cmds_prog_buf(error, BEGIN_L2_INSTR,
@@ -786,9 +786,23 @@ module tb_pulp;
             $display("[TB] %t - TEST read/write csr with program buffer (TODO)", $realtime);
             $display("[TB] %t - TEST dret outside debug mode (TODO)", $realtime);
 
+            $display("[TB] %t - TEST ebreak in program buffer", $realtime);
+            debug_mode_if.test_ebreak_in_program_buffer(error,
+                                                        s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+            if(error)
+               $display("[TB] %t FAIL", $realtime);
+            else
+               $display("[TB] %t OK", $realtime);
 
 
-            $display("[TB] %t - TEST debug cause values (TODO)", $realtime);
+            $display("[TB] %t - TEST debug cause values", $realtime);
+            debug_mode_if.test_debug_cause_values(error, BEGIN_L2_INSTR,
+                                                  s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+            if(error)
+               $display("[TB] %t FAIL", $realtime);
+            else
+               $display("[TB] %t OK", $realtime);
+
             $display("[TB] %t - TEST single stepping", $realtime);
             debug_mode_if.test_single_stepping_abstract_cmd(error, BEGIN_L2_INSTR,
                                                             s_tck, s_tms, s_trstn, s_tdi, s_tdo);
@@ -813,26 +827,9 @@ module tb_pulp;
 
             $display("[TB] %t - TEST halt request during wfi (TODO)", $realtime);
 
-            $display("[TB] %t - Write the BootAddress into DPC", $realtime);
-            //write BootAddress in data0
-            debug_mode_if.writeArg(
-               0,
-               BEGIN_L2_INSTR,
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi,
-               s_tdo
-            );
-            dm_data = {8'h0, 1'b0, 3'd2, 1'b0, 1'b0, 1'b1, 1'b1, 16'h7B1};
-            debug_mode_if.set_command(
-               dm_data,
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi,
-               s_tdo
-            );
+            $display("[TB] %t - Write the boot address into dpc", $realtime);
+            debug_mode_if.write_reg_abstract_cmd(riscv::CSR_DPC, BEGIN_L2_INSTR,
+                                                 s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
 
             if(LOAD_L2 == "JTAG") begin
@@ -846,10 +843,9 @@ module tb_pulp;
             debug_mode_if.resume_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
 
-            if (ENABLE_DPI == 1)
-               begin
-                  jtag_mux = JTAG_DPI;
-               end
+            if (ENABLE_DPI == 1) begin
+               jtag_mux = JTAG_DPI;
+            end
 
 
             #500us;
