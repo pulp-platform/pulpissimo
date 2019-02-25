@@ -2414,9 +2414,9 @@ package jtag_pkg;
                 end;
             this.read_reg_abstract_cmd(riscv::CSR_DCSR, dcsr,
                                        s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-            assert(3'h4 === dcsr.cause) // is cause properly given as "step"?
+            assert(dm::CauseSingleStep === dcsr.cause) // is cause properly given as "step"?
                 else begin
-                   $error("debug cause is %x, expected %x", dcsr.cause, 3'h4);
+                   $error("debug cause is %x, expected %x", dcsr.cause, dm::CauseSingleStep);
                    error = 1'b1;
                 end;
          end
