@@ -362,7 +362,7 @@ package jtag_pkg;
       jtag_idcode.setIR(s_tck, s_tms, s_trstn, s_tdi);
       jtag_idcode.shift('0, s_idcode, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
       $display("JTAG: Tap ID: %h (%t)",s_idcode[32:1], $realtime);
-      if(s_idcode[32:1] != 32'h249511C3) begin
+      if(s_idcode[32:1] !== 32'h249511C3) begin
          $display("JTAG: Tap ID Test FAILED (%t)", $realtime);
       end else begin
          $display("JTAG: Tap ID Test PASSED (%t)", $realtime);
@@ -382,7 +382,7 @@ package jtag_pkg;
                                                 32'hAAAABBBB, 32'hCCCCDDDD, 32'hEEEEFFFF, 32'h00001111};
       jtag_bypass.setIR(s_tck, s_tms, s_trstn, s_tdi);
       jtag_bypass.shift(test_data, result_data, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-      if (test_data[253:0] == result_data[255:2])
+      if (test_data[253:0] === result_data[255:2])
          $display("JTAG: Bypass Test Passed (%t)", $realtime);
       else
       begin
