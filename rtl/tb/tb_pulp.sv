@@ -55,8 +55,11 @@ module tb_pulp;
    // enable DPI-based peripherals
    parameter  ENABLE_DEV_DPI = 0;
 
-   // enable DPI-based debug bridge
+   // enable DPI-based custom debug bridge
    parameter  ENABLE_EXTERNAL_DRIVER = 0;
+
+   // enable DPI-based openocd debug bridge
+   parameter ENABLE_OPENOCD = 0;
 
    // UART baud rate in bps
    parameter  BAUDRATE = 625000;
@@ -99,7 +102,6 @@ module tb_pulp;
 
    logic [255:0][31:0]   jtag_data;
 
-   logic jtag_enable;
 
    int                   exit_status = `EXIT_ERROR; // modelsim exit code, will be overwritten when successfull
 
@@ -176,6 +178,27 @@ module tb_pulp;
    logic                 s_tdo;
    logic                 s_mode_select;
 
+   // jtag openocd bridge signals
+   logic                sim_jtag_tck;
+   logic                sim_jtag_tms;
+   logic                sim_jtag_tdi;
+   logic                sim_jtag_trstn;
+   logic                sim_jtag_tdo;
+   logic [31:0]         sim_jtag_exit;
+   logic                sim_jtag_enable;
+
+   // tmp signals for assignment to wires
+   logic                tmp_rst_n;
+   logic                tmp_clk_ref;
+   logic                tmp_trstn;
+   logic                tmp_tck;
+   logic                tmp_tdi;
+   logic                tmp_tms;
+   logic                tmp_tdo;
+   logic                tmp_bridge_tdo;
+
+
+
    wire w_master_i2s_sck;
    wire w_master_i2s_ws ;
 
@@ -183,11 +206,7 @@ module tb_pulp;
 
    logic [8:0] jtag_conf_reg, jtag_conf_rego; //22bits but actually only the last 9bits are used
    localparam BEGIN_L2_INSTR = 32'h1C008080;
-   logic sim_tck;
-   logic sim_tms;
-   logic sim_tdi;
-   logic sim_trstn;
-   logic sim_tdo;
+
 
    `ifdef USE_DPI
    generate
@@ -264,17 +283,64 @@ module tb_pulp;
    pullup sda1_pullup_i (w_i2c1_sda);
    pullup scl1_pullup_i (w_i2c1_scl);
 
-   assign w_rst_n   = (ENABLE_EXTERNAL_DRIVER == 1) ? s_rst_dpi_n : s_rst_n;
-   assign w_clk_ref = s_clk_ref;
+   always_comb begin
+      sim_jtag_enable = 1'b0;
 
-   assign s_cam_valid = 1'b0;
+      if (ENABLE_EXTERNAL_DRIVER) begin
+         tmp_rst_n      = s_rst_dpi_n;
+         tmp_clk_ref    = s_clk_ref;
+         tmp_trstn      = w_bridge_trstn;
+         tmp_tck        = w_bridge_tck;
+         tmp_tdi        = w_bridge_tdi;
+         tmp_tms        = w_bridge_tms;
+         tmp_tdo        = w_tdo;
+         tmp_bridge_tdo = w_tdo;
 
-   assign w_trstn      = (ENABLE_EXTERNAL_DRIVER == 1) ? w_bridge_trstn : (jtag_enable ? sim_trstn    : s_trstn);
-   assign w_tck        = (ENABLE_EXTERNAL_DRIVER == 1) ? w_bridge_tck   : (jtag_enable ? sim_tck      : s_tck);
-   assign w_tdi        = (ENABLE_EXTERNAL_DRIVER == 1) ? w_bridge_tdi   : (jtag_enable ? sim_tdi      : s_tdi);
-   assign w_tms        = (ENABLE_EXTERNAL_DRIVER == 1) ? w_bridge_tms   : (jtag_enable ? sim_tms      : s_tms);
-   assign s_tdo        = w_tdo;
-   assign w_bridge_tdo = w_tdo;
+      end else if (ENABLE_OPENOCD) begin
+         tmp_rst_n         = s_rst_n;
+         tmp_clk_ref       = s_clk_ref;
+         tmp_trstn         = sim_jtag_trstn;
+         tmp_tck           = sim_jtag_tck;
+         tmp_tdi           = sim_jtag_tdi;
+         tmp_tms           = sim_jtag_tms;
+         tmp_tdo           = w_tdo;
+         tmp_bridge_tdo    = w_tdo;
+         sim_jtag_enable = 1'b1;
+
+      end else begin
+         tmp_rst_n      = s_rst_n;
+         tmp_clk_ref    = s_clk_ref;
+
+         tmp_trstn      = s_trstn;
+         tmp_tck        = s_tck;
+         tmp_tdi        = s_tdi;
+         tmp_tms        = s_tms;
+         tmp_tdo        = w_tdo;
+         tmp_bridge_tdo = w_tdo;
+
+      end
+   end
+
+    assign w_rst_n      = tmp_rst_n;
+    assign w_clk_ref    = tmp_clk_ref;
+    assign s_cam_valid  = 1'b0;
+    assign w_trstn      = tmp_trstn;
+    assign w_tck        = tmp_tck;
+    assign w_tdi        = tmp_tdi;
+    assign w_tms        = tmp_tms;
+    assign s_tdo        = tmp_tdo;
+    assign w_bridge_tdo = tmp_bridge_tdo;
+    assign sim_jtag_tdo = tmp_tdo;
+
+   // assign w_rst_n   = (ENABLE_EXTERNAL_DRIVER == 1) ? s_rst_dpi_n : s_rst_n;
+   // assign w_clk_ref = s_clk_ref;
+
+   // assign w_trstn      = (ENABLE_EXTERNAL_DRIVER == 1) ? w_bridge_trstn : (jtag_enable ? sim_trstn    : s_trstn);
+   // assign w_tck        = (ENABLE_EXTERNAL_DRIVER == 1) ? w_bridge_tck   : (jtag_enable ? sim_tck      : s_tck);
+   // assign w_tdi        = (ENABLE_EXTERNAL_DRIVER == 1) ? w_bridge_tdi   : (jtag_enable ? sim_tdi      : s_tdi);
+   // assign w_tms        = (ENABLE_EXTERNAL_DRIVER == 1) ? w_bridge_tms   : (jtag_enable ? sim_tms      : s_tms);
+   // assign s_tdo        = w_tdo;
+   // assign w_bridge_tdo = w_tdo;
 
    if (CONFIG_FILE == "NONE") begin
       assign w_uart_tx = w_uart_rx;
@@ -436,7 +502,26 @@ module tb_pulp;
 
    end
 
-   /* PULPissimo chip (design under test) */
+    // jtag calls from dpi
+    SimJTAG #(
+        .TICK_DELAY (1)
+    )
+    i_sim_jtag (
+        .clock                ( w_clk_ref            ),
+        .reset                ( ~s_rst_n             ),
+        .enable               ( sim_jtag_enable      ),
+        .init_done            ( s_rst_n              ),
+        .jtag_TCK             ( sim_jtag_tck         ),
+        .jtag_TMS             ( sim_jtag_tms         ),
+        .jtag_TDI             ( sim_jtag_tdi         ),
+        .jtag_TRSTn           ( sim_jtag_trstn       ),
+        .jtag_TDO_data        ( sim_jtag_tdo         ),
+        .jtag_TDO_driven      ( 1'b1                 ),
+        .exit                 ( sim_jtag_exit        )
+    );
+
+
+   // PULPissimo chip (design under test)
    pulpissimo #(
       .CORE_TYPE ( CORE_TYPE ),
       .USE_FPU   ( RISCY_FPU )
@@ -509,8 +594,7 @@ module tb_pulp;
          automatic logic [9:0]  FC_Core_ID = {5'd31,5'd0};
 
          force tb_pulp.i_dut.pad_frame_i.padinst_reset_n.O = 1'b0;
-         jtag_enable = 1'b0;
-         if (ENABLE_EXTERNAL_DRIVER == 0) begin
+         if (ENABLE_EXTERNAL_DRIVER == 0 && ENABLE_OPENOCD == 0) begin
 
             // force fetch enable to 0 when doing JTAG preload (not particularly
             // clean, but works)
@@ -543,7 +627,7 @@ module tb_pulp;
          release tb_pulp.i_dut.pad_frame_i.padinst_reset_n.O;
          uart_tb_rx_en   = 1'b1; // enable uart rx in testbench
 
-         if (ENABLE_EXTERNAL_DRIVER == 0) begin
+         if (ENABLE_EXTERNAL_DRIVER == 0 && ENABLE_OPENOCD == 0) begin
 
             //test_mode_if = new;
             //dbg_if_soc   = new;
@@ -667,9 +751,12 @@ module tb_pulp;
             $display("[TB] %t - TEST discover harts", $realtime);
             debug_mode_if.test_discover_harts(dm_data[0],
                                               s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+            if (error)
+                $display("[TB] %t FAIL", $realtime);
+            else
+                $display("[TB] %t OK", $realtime);
 
-            debug_mode_if.set_harsel(
-               10'b0,
+            debug_mode_if.set_hartsel(
                FC_Core_ID,
                s_tck,
                s_tms,
@@ -885,28 +972,19 @@ module tb_pulp;
 
             $stop;
 
-         end
-         else begin // ENABLE_EXTERNAL_DRIVER != 0
+         end else if (ENABLE_EXTERNAL_DRIVER == 1) begin
             #1us
                dev_dpi_en <= 1;
+         end else begin // ENABLE_OPENOCD == 1
+
+            s_rst_n = 1'b1;
+            $display("[TB] %t - Releasing hard reset", $realtime);
+
          end
 
       end
-/*
-    SimJTAG i_SimJTAG (
-        .clock                ( w_clk_ref            ),
-        .reset                ( ~s_rst_n             ),
-        .enable               ( jtag_enable          ),
-        .init_done            ( s_rst_n              ),
-        .jtag_TCK             ( sim_tck              ),
-        .jtag_TMS             ( sim_tms              ),
-        .jtag_TDI             ( sim_tdi              ),
-        .jtag_TRSTn           ( sim_trstn            ),
-        .jtag_TDO_data        ( sim_tdo              ),
-        .jtag_TDO_driven      ( 1'b1                 ),
-        .exit                 (                      )
-    );
-*/
+
+
    `ifndef USE_NETLIST
       /* File System access */
       logic r_stdout_pready;
