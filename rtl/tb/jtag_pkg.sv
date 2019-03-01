@@ -1023,9 +1023,8 @@ package jtag_pkg;
 
       endtask
 
-      task set_harsel(
-         input logic [9:0] hartselli,
-         input logic [9:0] hartsello,
+      task set_hartsel(
+         input logic [19:0] hartsel,
          ref   logic s_tck,
          ref   logic s_tms,
          ref   logic s_trstn,
@@ -1033,37 +1032,16 @@ package jtag_pkg;
          ref   logic s_tdo
       );
 
-         logic [1:0]         dm_op;
-         logic [31:0]        dm_data;
-         logic [6:0]         dm_addr;
+         dm::dmcontrol_t dmcontrol;
 
-         this.set_dmi(
-               2'b01, //read
-               7'h10, //DMControl
-               32'h0, //whatever
-               {dm_addr, dm_data, dm_op},
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi,
-               s_tdo
-            );
+         this.read_debug_reg(dm::DMControl, dmcontrol,
+                             s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
-         //haltreq
-         dm_data[25:16] = hartsello;
-         dm_data[15: 6] = hartselli;
+         dmcontrol.hartsello = hartsel[9:0];
+         dmcontrol.hartselhi = hartsel[19:10];
 
-         this.set_dmi(
-               2'b10, //Write
-               7'h10, //DMControl
-               dm_data,
-               {dm_addr, dm_data, dm_op},
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi,
-               s_tdo
-            );
+         this.write_debug_reg(dm::DMControl, dmcontrol,
+                              s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
       endtask
 
@@ -1628,49 +1606,49 @@ package jtag_pkg;
          ref logic           s_tdo
       );
 
-         logic [1:0]         dmi_op;
-         logic [31:0]        dmi_data;
-         logic [31:0]        dmi_command;
-         logic [6:0]         dmi_addr;
+         dm::dmcontrol_t dmcontrol;
+         dm::dmstatus_t  dmstatus;
+         int hartcount = 0;
 
          error = 1'b0;
 
+         this.read_debug_reg(dm::DMControl, dmcontrol,
+                             s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         dmcontrol.hartsello = 10'h3ff;
+         dmcontrol.hartselhi = 10'h3ff;
 
-         this.read_debug_reg(
-            dm::DMControl,
-            dmi_data,
-            s_tck,
-            s_tms,
-            s_trstn,
-            s_tdi,
-            s_tdo
-         );
-         dmi_data[25:16] = 10'h3ff;
-         dmi_data[15: 6] = 10'h3ff;
+         this.write_debug_reg(dm::DMControl, dmcontrol,
+                              s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
-         this.write_debug_reg(
-            dm::DMControl,
-            dmi_data,
-            s_tck,
-            s_tms,
-            s_trstn,
-            s_tdi,
-            s_tdo
-         );
+         this.read_debug_reg(dm::DMControl, dmcontrol,
+                             s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
-         this.read_debug_reg(
-            dm::DMControl,
-            dmi_data,
-            s_tck,
-            s_tms,
-            s_trstn,
-            s_tdi,
-            s_tdo
-         );
+         $display("[TB] %t hartsel bits usuable %x",
+                  $realtime, {dmcontrol.hartselhi, dmcontrol.hartsello});
 
-         $display("[TB] %t discovered harts %x",
-                  $realtime, {dmi_data[15:6],dmi_data[25:16]});
-         // TODO: return error by comparing to constant
+         assert({dmcontrol.hartsello}[0] === 1'b1)
+             else $info("test assumes atleast one usuable bit in hartsel");
+
+         for (int i = 0; i < {dmcontrol.hartselhi, dmcontrol.hartsello}; i++) begin
+            set_hartsel(i, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+            this.read_debug_reg(dm::DMStatus, dmstatus,
+                             s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+            if(dmstatus.anynonexistent === 1'b1) // no more harts
+                break;
+
+            if(dmstatus.anyunavail !== 1'b1) // selected hart not here
+                hartcount++;
+
+         end
+
+         assert (hartcount === 1)
+             else begin
+                $error("bad number of available harts in system detected: expected %x, received %x",
+                         1, hartcount);
+                error = 1'b1;
+             end
+
       endtask
 
 
