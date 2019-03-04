@@ -782,30 +782,33 @@ module tb_pulp;
                s_tdo
             );
 
-            $display("[TB] %t - Setting Boot Address", $realtime);
-            debug_mode_if.writeMem(32'h1A104004, BEGIN_L2_INSTR,
-                                   s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+            // Make sure that we get into an infinite loop on BEGIN_L2_INSTR
+            // this is for our test setup
+            $display("[TB] %t - Halting the Core",$realtime);
+            debug_mode_if.halt_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+            $display("[TB] %t - Writing the boot address into dpc", $realtime);
+            debug_mode_if.write_reg_abstract_cmd(riscv::CSR_DPC, BEGIN_L2_INSTR,
+                                                 s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
             //Write while(1) to BEGIN_L2_INSTR
             debug_mode_if.writeMem(BEGIN_L2_INSTR,{25'b0, 7'b1101111},
                                    s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
-            //Write 1 to Fetch Enable, now the core is stucked to the while(1)
-            $display("[TB] %t - Triggering fetch enable", $realtime);
-            debug_mode_if.writeMem(32'h1A104008, 32'h1,
-                                   s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+            $display("[TB] %t - Resuming the CORE", $realtime);
+            debug_mode_if.resume_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
-            $display("Halting the Core %t",$realtime);
-            //debug_mode_if.set_haltreq(1'b1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+            // //Write 1 to Fetch Enable, now the core is stucked to the while(1)
+            // we start off with fetch_enable = 1, don't need to do that
+            // $display("[TB] %t - Triggering fetch enable", $realtime);
+            // debug_mode_if.writeMem(32'h1A104008, 32'h1,
+            //                        s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+            $display("[TB] %t - Halting the Core", $realtime);
             debug_mode_if.halt_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
-            $display("Core Halted %t",$realtime);
-
-            debug_mode_if.read_abstractcs(dm_data, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-            $display("[TB] %t Abstractcs is %x (progbufsize %x, busy %x, cmderr %x, datacount %x)",$realtime(), dm_data, dm_data[28:24], dm_data[12], dm_data[10:8], dm_data[3:0]);
-
             debug_mode_if.read_debug_reg(dm::AbstractCS, dm_data, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-            $display("[TB] %t Abstractcs (2) is %x (progbufsize %x, busy %x, cmderr %x, datacount %x)",$realtime(), dm_data, dm_data[28:24], dm_data[12], dm_data[10:8], dm_data[3:0]);
+            $display("[TB] %t Abstractcs is %x (progbufsize %x, busy %x, cmderr %x, datacount %x)",$realtime(), dm_data, dm_data[28:24], dm_data[12], dm_data[10:8], dm_data[3:0]);
 
             // for the following tests we need the cpu to be fetching and running
             $display("[TB] %t - TEST halt resume functionality", $realtime);
@@ -913,6 +916,7 @@ module tb_pulp;
             $display("[TB] %t OK", $realtime); //otherwise we wouldn't get here
 
             $display("[TB] %t - TEST halt request during wfi (TODO)", $realtime);
+
 
             $display("[TB] %t - Write the boot address into dpc", $realtime);
             debug_mode_if.write_reg_abstract_cmd(riscv::CSR_DPC, BEGIN_L2_INSTR,
