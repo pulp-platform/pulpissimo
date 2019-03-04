@@ -2544,6 +2544,13 @@ package jtag_pkg;
                 error = 1'b1;
              end;
 
+         this.read_reg_abstract_cmd(riscv::CSR_DCSR, dcsr,
+                                    s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         dcsr.ebreakm = 0;
+         this.write_reg_abstract_cmd(riscv::CSR_DCSR, dcsr,
+                                     s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+
       endtask
 
 
