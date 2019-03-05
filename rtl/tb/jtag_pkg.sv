@@ -776,6 +776,7 @@ package jtag_pkg;
 
       endtask
 
+      // wait for abstract command to finish, no error checking
       task wait_command (
          ref logic s_tck,
          ref logic s_tms,
@@ -784,25 +785,12 @@ package jtag_pkg;
          ref logic s_tdo
       );
 
-         logic [1:0]  dm_op;
-         logic [6:0]  dm_addr;
-         logic [31:0] dm_data;
+         dm::abstractcs_t abstractcs;
 
-         dm_data = '1;
-
-         while(dm_data[12] == 1'b1)
-         begin
-            this.read_abstractcs(
-                  dm_data,
-                  s_tck,
-                  s_tms,
-                  s_trstn,
-                  s_tdi,
-                  s_tdo
-               );
-            #5us;
-         end
-
+         do begin
+            this.read_debug_reg(dm::AbstractCS, abstractcs,
+                                s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         end while(abstractcs.busy == 1'b1);
       endtask
 
 
