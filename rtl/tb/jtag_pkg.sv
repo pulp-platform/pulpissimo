@@ -2442,6 +2442,50 @@ package jtag_pkg;
 
       endtask
 
+      task test_bad_aarsize (
+         output logic error,
+         ref logic s_tck,
+         ref logic s_tms,
+         ref logic s_trstn,
+         ref logic s_tdi,
+         ref logic s_tdo
+      );
+         // assert busy == 0 and cmderr != 0,1
+         logic [1:0] dm_op;
+         logic [6:0] dm_addr;
+         logic [31:0] dm_data;
+         dm::abstractcs_t abstractcs;
+         dm::ac_ar_cmd_t command;
+
+         // abstract command with aarsize = 3
+         command     = '{default:0, aarsize:3'd3, postexec:1'b0,
+                         transfer:1'b1, write:1'b0, regno:16'h1002};
+
+         this.set_dmi(
+               2'b10,   //write
+               dm::Command,
+               {8'h0, command},
+               {dm_addr, dm_data, dm_op},
+               s_tck,
+               s_tms,
+               s_trstn,
+               s_tdi,
+               s_tdo
+            );
+
+         do begin
+            this.read_debug_reg(dm::AbstractCS, abstractcs,
+                                s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         end while(abstractcs.busy == 1'b1);
+
+         assert(abstractcs.busy == 1'b0 && abstractcs.cmderr == dm::CmdErrNotSupported)
+             else begin
+                $error("Abstract cmd with 64 bit is signaled as supported");
+                error = 1'b1;
+             end
+
+      endtask
+
    endclass
 
 endpackage
