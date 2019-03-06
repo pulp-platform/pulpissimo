@@ -749,6 +749,7 @@ package jtag_pkg;
 
       // wait for abstract command to finish, no error checking
       task wait_command (
+         input logic [31:0] command,
          ref logic s_tck,
          ref logic s_tms,
          ref logic s_trstn,
@@ -758,10 +759,33 @@ package jtag_pkg;
 
          dm::abstractcs_t abstractcs;
 
+         // wait until we get a result
          do begin
             this.read_debug_reg(dm::AbstractCS, abstractcs,
                                 s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          end while(abstractcs.busy == 1'b1);
+
+         assert(abstractcs.cmderr == dm::CmdErrNone)
+             else $error("Access to register %x failed with error %x",
+                         command[15:0],
+                         abstractcs.cmderr);
+
+         // if we got an error we need to clear it for the following accesses
+         if (abstractcs.cmderr != dm::CmdErrNone) begin
+            abstractcs = '{default:0, cmderr:abstractcs.cmderr};
+            this.write_debug_reg(dm::AbstractCS, abstractcs,
+                                 s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+
+            this.read_debug_reg(dm::AbstractCS, abstractcs,
+                             s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+            assert(abstractcs.cmderr == dm::CmdErrNone)
+                else begin
+                   $error("cmderr bit didn't get cleared");
+                end
+         end
+
       endtask
 
 
@@ -792,6 +816,7 @@ package jtag_pkg;
             );
 
          this.wait_command(
+               command,
                s_tck,
                s_tms,
                s_trstn,
@@ -2481,6 +2506,23 @@ package jtag_pkg;
          assert(abstractcs.busy == 1'b0 && abstractcs.cmderr == dm::CmdErrNotSupported)
              else begin
                 $error("Abstract cmd with 64 bit is signaled as supported");
+                error = 1'b1;
+             end
+
+         // try to clear the error bit
+         abstractcs        = 0;
+         abstractcs.cmderr = dm::CmdErrNotSupported;
+
+         this.write_debug_reg(dm::AbstractCS, abstractcs,
+                              s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+         // test if it really got cleared
+         this.read_debug_reg(dm::AbstractCS, abstractcs,
+                             s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+         assert(abstractcs.cmderr == dm::CmdErrNone)
+             else begin
+                $error("cmderr bit didn't get cleared");
                 error = 1'b1;
              end
 
