@@ -872,6 +872,10 @@ module tb_pulp;
                $display("[TB] %t OK", $realtime);
 
 
+            $display("[TB] %t - TEST read/write csr" , $realtime);
+            debug_mode_if.test_read_write_csr(error, s_tck, s_tms,
+                                              s_trstn, s_tdi, s_tdo);
+
 
             $display("[TB] %t - TEST read/write csr with program buffer (TODO)", $realtime);
             $display("[TB] %t - TEST dret outside debug mode (TODO)", $realtime);

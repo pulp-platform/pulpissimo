@@ -2528,6 +2528,34 @@ package jtag_pkg;
 
       endtask
 
+
+      task test_read_write_csr (
+         output logic error,
+         ref logic s_tck,
+         ref logic s_tms,
+         ref logic s_trstn,
+         ref logic s_tdi,
+         ref logic s_tdo
+      );
+
+         dm::abstractcs_t abstractcs;
+         logic [31:0]  regs [];
+         logic [31:0] contents;
+
+
+         regs = {riscv::CSR_DPC, riscv::CSR_MSTATUS, riscv::CSR_MISA};
+
+         for (int i = 0; i < $size(regs); i++) begin
+            this.read_reg_abstract_cmd(regs[i], contents, s_tck, s_tms,
+                                       s_trstn, s_tdi, s_tdo);
+
+            this.read_reg_abstract_cmd(riscv::CSR_MISA, contents, s_tck, s_tms,
+                                       s_trstn, s_tdi, s_tdo);
+
+         end
+
+
+      endtask
    endclass
 
 endpackage
