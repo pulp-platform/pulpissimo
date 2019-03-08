@@ -844,15 +844,16 @@ module tb_pulp;
                                                      s_trstn, s_tdi, s_tdo);
             $display("[TB] %t x2 is %x", $realtime, dm_data);
 
-            // $display("[TB] %t - TEST abstract commands and program buffer (old)", $realtime);
-            // //Test Abstract Commands
-            // debug_mode_if.testAbstractsCommands_andProgramBuffer(error, BEGIN_L2_INSTR,
-            //                                                      s_tck, s_tms, s_trstn,
-            //                                                      s_tdi, s_tdo);
-            // if(error)
-            //    $display("[TB] %t FAIL", $realtime);
-            // else
-            //    $display("[TB] %t OK", $realtime);
+
+            // currently results in in illegal instruction because it makes a 64
+            // bit load
+            $display("[TB] %t - TEST bad abstract command (aarsize > 2)", $realtime);
+            debug_mode_if.test_bad_aarsize (error, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+            if(error)
+               $display("[TB] %t FAIL", $realtime);
+            else
+               $display("[TB] %t OK", $realtime);
+
 
             $display("[TB] %t - TEST abstract commands and program buffer", $realtime);
             debug_mode_if.test_abstract_cmds_prog_buf(error, BEGIN_L2_INSTR,
