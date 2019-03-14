@@ -1,5 +1,6 @@
 tb:
   files: [
+    riscv_pkg.sv,
     jtag_pkg.sv,
     dbg_pkg.sv,
     tb_clk_gen.sv,
