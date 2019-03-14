@@ -661,28 +661,12 @@ package jtag_pkg;
          ref logic s_tdo
       );
 
-         logic [1:0]  dm_op;
-         logic [6:0]  dm_addr;
-         logic [31:0] dm_data;
          dm::dmstatus_t dmstatus;
 
-         dmstatus = '0;
-         dm_data  = '0;
-
-         while(dmstatus.anyhalted == 1'b0) begin //anyhalted
-            this.set_dmi(
-                  2'b01, //read
-                  7'h11, //dmstatus
-                  32'h0, //whatever
-                  {dm_addr, dm_data, dm_op},
-                  s_tck,
-                  s_tms,
-                  s_trstn,
-                  s_tdi,
-                  s_tdo
-            );
-            dmstatus = dm::dmstatus_t'(dm_data);
-         end
+         do begin
+            this.read_debug_reg(dm::DMStatus, dmstatus,
+                                s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         end while(dmstatus.anyhalted == 1'b0);
 
       endtask
 
@@ -2351,7 +2335,8 @@ package jtag_pkg;
                                      s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
          this.resume_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-         this.halt_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         this.block_until_any_halt(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         //this.halt_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
          this.read_reg_abstract_cmd(riscv::CSR_DCSR, dcsr,
                                     s_tck, s_tms, s_trstn, s_tdi, s_tdo);
