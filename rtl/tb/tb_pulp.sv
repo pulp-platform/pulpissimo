@@ -749,7 +749,7 @@ module tb_pulp;
             );
 
             $display("[TB] %t - TEST discover harts", $realtime);
-            debug_mode_if.test_discover_harts(dm_data[0],
+            debug_mode_if.test_discover_harts(error,
                                               s_tck, s_tms, s_trstn, s_tdi, s_tdo);
             if (error)
                 $display("[TB] %t FAIL", $realtime);
