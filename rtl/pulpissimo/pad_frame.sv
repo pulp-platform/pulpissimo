@@ -20,6 +20,8 @@ module pad_frame
         // RESET SIGNALS
         output logic            rstn_o           ,
 
+        output logic            bootsel_o        ,
+
         // JTAG SIGNALS
         output logic            jtag_tck_o       ,
         output logic            jtag_tdi_o       ,
@@ -218,5 +220,7 @@ module pad_frame
 
     pad_functional_pu padinst_reset_n    (.OEN(1'b1            ), .I(                ), .O(rstn_o         ), .PAD(pad_reset_n   ), .PEN(1'b1             ) );
     pad_functional_pu padinst_ref_clk    (.OEN(1'b1            ), .I(                ), .O(ref_clk_o      ), .PAD(pad_xtal_in   ), .PEN(1'b1             ) );
+
+    pad_functional_pu padinst_bootsel    (.OEN(1'b1            ), .I(                ), .O(bootsel_o      ), .PAD(pad_bootsel   ), .PEN(1'b1             ) );
 
 endmodule // pad_frame

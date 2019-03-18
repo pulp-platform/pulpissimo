@@ -221,6 +221,8 @@ module pulpissimo
   logic s_jtag_tms       ;
   logic s_jtag_trst      ;
 
+  logic             s_bootsel;
+
   //***********************************************************
   //********** SOC TO SAFE DOMAINS SIGNALS ********************
   //***********************************************************
@@ -394,7 +396,8 @@ module pulpissimo
 `ifndef PULP_FPGA_EMUL
         .ref_clk_o             ( s_ref_clk              ),
         .rstn_o                ( s_rstn                 ),
-`endif
+`endif        
+        .bootsel_o             ( s_bootsel              ),   
         .jtag_tdo_i            ( s_jtag_tdo             ),
         .jtag_tck_o            ( s_jtag_tck             ),
         .jtag_tdi_o            ( s_jtag_tdi             ),
@@ -826,6 +829,7 @@ module pulpissimo
         .soc_jtag_reg_i               ( s_soc_jtag_rego                  ),
 
         .boot_l2_i                    ( s_boot_l2                        ),
+        .bootsel_i                    ( s_bootsel                        ),
 
         .jtag_tck_i                   ( s_jtag_tck                       ),
         .jtag_trst_ni                 ( s_jtag_trst                      ),
