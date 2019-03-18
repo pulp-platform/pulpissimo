@@ -502,6 +502,7 @@ module pulpissimo
         .in_i2c0_scl_o         ( s_in_i2c0_scl          ),
         .in_uart_rx_o          ( s_in_uart_rx           ),
         .in_uart_tx_o          ( s_in_uart_tx           ),
+        .bootsel_o             ( s_boot_l2              ),
 
         //EXT CHIP to PAD
         .pad_spim_sdio0        ( pad_spim_sdio0         ),
@@ -770,7 +771,6 @@ module pulpissimo
         .oe_i2s0_sdi_o              ( s_oe_i2s0_sdi               ),
         .oe_i2s1_sdi_o              ( s_oe_i2s1_sdi               ),
 
-        .boot_l2_o                  ( s_boot_l2                   ),
         .*
    );
 

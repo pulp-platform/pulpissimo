@@ -221,9 +221,7 @@ module safe_domain
         output logic             oe_i2s0_sck_o        ,
         output logic             oe_i2s0_ws_o         ,
         output logic             oe_i2s0_sdi_o        ,
-        output logic             oe_i2s1_sdi_o        ,
-
-        output logic             boot_l2_o
+        output logic             oe_i2s1_sdi_o
     );
 
     logic        s_test_clk;
