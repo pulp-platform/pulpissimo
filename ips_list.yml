@@ -19,7 +19,7 @@
 #
 
 pulp_soc:
-  commit: e015bdd6f7e07f6397a3d837bf904dfdc69b7e74
+  commit: arnold_new_udma
   server: https://github.com
   group:  pulp-platform
 

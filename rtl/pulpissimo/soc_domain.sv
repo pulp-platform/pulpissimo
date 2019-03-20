@@ -283,6 +283,7 @@ module soc_domain #(
         .zynq_soc_clk_i               ( zynq_soc_clk_i               ),
         .zynq_per_clk_i               ( zynq_per_clk_i               ),
         `endif
+        .bootsel_i                    ( boot_l2_i                    ),
         .*
     );
 
