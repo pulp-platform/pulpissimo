@@ -47,8 +47,6 @@ module tb_pulp;
    // how L2 is loaded. valid values are "JTAG" or "STANDALONE", the latter works only when USE_S25FS256S_MODEL is 1
    parameter  LOAD_L2 = "JTAG";
 
-   parameter  EXEC_TEST = "";
-
    // enable DPI-based JTAG
    parameter  ENABLE_DPI = 0;
 
@@ -959,12 +957,6 @@ module tb_pulp;
 
             jtag_data[0] = 0;
 
-            if(EXEC_TEST == "JTAG_DEBUG") begin
-               $display("[TEST JTAG_DEBUG]",);
-               #1000us
-               debug_tests();
-            end
-
             // wait for end of computation signal
             $display("[TB] %t - Waiting for end of computation", $realtime);
 
@@ -1063,7 +1055,6 @@ module tb_pulp;
          end
       end
 
-      `include "tb_jtag_debug.sv"
 
 endmodule // tb_pulp
 
