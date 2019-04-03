@@ -456,30 +456,36 @@ package jtag_pkg;
          ref logic s_tdo
       );
 
-          logic [1:0]  dm_op;
-          logic [6:0]  dm_addr;
-          logic [31:0] dm_data;
+          typedef struct packed {
+              logic [31:18] zero1;
+              logic         dmihardreset;
+              logic         dmireset;
+              logic         zero0;
+              logic [14:12] idle;
+              logic [11:10] dmistat;
+              logic [9:4]   abits;
+              logic [3:0]   version;
+          } dtmcs_t;
+
+         dm::dmstatus_t  dmstatus;
+         dtmcs_t dtmcs;
+
          //Read Info
          JTAG_reg #(.size(32+1), .instr({JTAG_SOC_DTMCSR, JTAG_SOC_BYPASS})) jtag_soc_dbg = new;
          jtag_soc_dbg.setIR(s_tck, s_tms, s_trstn, s_tdi);
-         $display("[debug_mode_if_t] %t - Init", $realtime);
-         this.read_dtmcs(
-               dm_data,
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi,
-               s_tdo
-            );
-          // TODO: constants
-         $display("[debug_mode_if] %t - dtmcs %x: \n \
-                                        dmihardreset %x \n \
-                                        dmireset %x \n \
-                                        idle %x \n \
-                                        dmistat %x \n \
-                                        abits %x \n \
-                                        version %x \n",
-                  $realtime, dm_data, dm_data[17], dm_data[16], dm_data[14:12], dm_data[11:10], dm_data[9:4], dm_data[3:0]);
+         $display("[TB] %t - Init", $realtime);
+
+         this.read_dtmcs(dtmcs, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+         $display("[TB] %t - Debug Module dtmcs %x: \n\
+                             dmihardreset %x \n\
+                             dmireset     %x \n\
+                             idle         %x \n\
+                             dmistat      %x \n\
+                             abits        %x \n\
+                             version      %x \n",
+                  $realtime, dtmcs, dtmcs.dmihardreset, dtmcs.dmireset, dtmcs.idle,
+             dtmcs.dmistat, dtmcs.abits, dtmcs.version);
 
          this.init_dmi(
                s_tck,
@@ -487,29 +493,22 @@ package jtag_pkg;
                s_trstn,
                s_tdi
             );
-          // TODO: use constants
-         this.set_dmi(
-               2'b01, //read
-               7'h11, //DMStatus
-               32'h0, //whatever
-               {dm_addr, dm_data, dm_op},
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi,
-               s_tdo
-            );
-          // TODO: use constants
-         $display("PULPissimo Debug version: \
-                 impebreak %x\n \
-                 allhavereset %x\n \
-                 anyhavereset %x\n \
-                 allrunning %x\n \
-                 anyrunning %x\n \
-                 allhalted %x\n \
-                 anyhalted %x\n \
-                 version %x\n \
-              ", dm_data[22], dm_data[19], dm_data[18], dm_data[11], dm_data[10], dm_data[9], dm_data[8], dm_data[3:0]);
+
+         this.read_debug_reg(dm::DMStatus, dmstatus,
+             s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+         $display("[TB] %t - Debug Module Debug Version: \n\
+                 impebreak    %x\n\
+                 allhavereset %x\n\
+                 anyhavereset %x\n\
+                 allrunning   %x\n\
+                 anyrunning   %x\n\
+                 allhalted    %x\n\
+                 anyhalted    %x\n\
+                 version      %x\n\
+              ", $realtime, dmstatus.impebreak, dmstatus.allhavereset, dmstatus.anyhavereset,
+             dmstatus.allrunning, dmstatus.anyrunning, dmstatus.allhalted, dmstatus.anyhalted,
+             dmstatus.version);
 
       endtask
 
@@ -857,7 +856,7 @@ package jtag_pkg;
       endtask
 
 
-      task read_sbcs(
+      task test_read_sbcs(
          ref logic s_tck,
          ref logic s_tms,
          ref logic s_trstn,
@@ -865,32 +864,58 @@ package jtag_pkg;
          ref logic s_tdo
       );
 
-         logic [1:0]         dm_op;
-         logic [31:0]        dm_data;
-         logic [6:0]         dm_addr;
+         dm::sbcs_t sbcs;
 
-         this.set_dmi(
-               2'b01, //read
-               7'h38, //sbcs,
-               32'h0, //whatever
-               {dm_addr, dm_data, dm_op},
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi,
-               s_tdo
-            );
+         this.read_debug_reg(dm::SBCS, sbcs,
+                             s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
-           $display("PULPissimo System Bus Access Control and Status: \
-                 sbbusy  %x\n \
-                 sbreadonaddr %x\n \
-                 sbaccess  %x\n \
-                 sbautoincrement  %x\n \
-                 sbreadondata  %x\n \
-                 sberror %x\n \
-                 sbasize %x\n \
-                 sbaccess32 %x\n \
-              ", dm_data[21], dm_data[20], dm_data[19:17], dm_data[16], dm_data[15], dm_data[14:12], dm_data[11:5], dm_data[2]);
+
+         $display("[TB] %t - Debug Module System Bus Access Control and Status: \n\
+                 sbbusy          %x\n\
+                 sbreadonaddr    %x\n\
+                 sbaccess        %x\n\
+                 sbautoincrement %x\n\
+                 sbreadondata    %x\n\
+                 sberror         %x\n\
+                 sbasize         %x\n\
+                 sbaccess32      %x\
+              ", $realtime, sbcs.sbbusy, sbcs.sbreadonaddr, sbcs.sbaccess, sbcs.sbautoincrement,
+                             sbcs.sbreadondata, sbcs.sberror, sbcs.sbasize, sbcs.sbaccess32);
+
+         assert(sbcs.sbbusy == 1'b0)
+             else $error("sb is busy even though we are idling");
+         assert(sbcs.sberror == 2'b0)
+             else $error("sb is in some error state");
+         assert(sbcs.sbasize == 6'd32)
+             else $error("sbasize is not XLEN=32");
+         assert(sbcs.sbaccess32 == 1'b1)
+             else $error("sbaccess32 is should be supported");
+         assert(sbcs.sbaccess16 == 1'b0)
+             else $error("sbaccess16 is signaled as supported");
+         assert(sbcs.sbaccess8 == 1'b0)
+             else $error("sbaccess8 is signaled as supported");
+
+      endtask
+
+      task test_read_abstractcs(
+         ref logic s_tck,
+         ref logic s_tms,
+         ref logic s_trstn,
+         ref logic s_tdi,
+         ref logic s_tdo
+      );
+
+         dm::abstractcs_t abstractcs;
+
+         read_debug_reg(dm::AbstractCS, abstractcs, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         $display("[TB] %t - Abstractcs is %x (progbufsize %x, busy %x, cmderr %x, datacount %x)",
+                   $realtime, abstractcs, abstractcs.progbufsize, abstractcs.busy,
+                   abstractcs.cmderr, abstractcs.datacount);
+
+         assert(abstractcs.progbufsize == 5'h8)
+             else $error("progbufsize is not 8 (might be ok)");
+         assert(abstractcs.datacount == 4'h2)
+             else $error("datacount is not 2 (might be ok)");
 
       endtask
 
@@ -1023,33 +1048,16 @@ package jtag_pkg;
          ref   logic s_tdo
       );
 
-         logic [1:0]         dm_op;
-         logic [31:0]        dm_data;
-         logic [6:0]         dm_addr;
+         dm::sbcs_t sbcs;
 
-         this.set_dmi(
-            2'b01, //read
-            7'h38, //sbcs,
-            32'h0, //whatever
-            {dm_addr, dm_data, dm_op},
-            s_tck,
-            s_tms,
-            s_trstn,
-            s_tdi,
-            s_tdo
-         );
-         dm_data[20] = sbreadonaddr;
-         this.set_dmi(
-            2'b10, //write
-            7'h38, //sbcs,
-            dm_data, //whatever
-            {dm_addr, dm_data, dm_op},
-            s_tck,
-            s_tms,
-            s_trstn,
-            s_tdi,
-            s_tdo
-         );
+         this.read_debug_reg(dm::SBCS, sbcs,
+                             s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+         sbcs.sbreadonaddr = sbreadonaddr;
+
+         this.write_debug_reg(dm::SBCS, sbcs,
+                              s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
       endtask
 
       task set_sbautoincrement(
@@ -1061,33 +1069,17 @@ package jtag_pkg;
          ref   logic s_tdo
       );
 
-         logic [1:0]         dm_op;
-         logic [31:0]        dm_data;
-         logic [6:0]         dm_addr;
+         dm::sbcs_t sbcs;
 
-         this.set_dmi(
-            2'b01, //read
-            7'h38, //sbcs,
-            32'h0, //whatever
-            {dm_addr, dm_data, dm_op},
-            s_tck,
-            s_tms,
-            s_trstn,
-            s_tdi,
-            s_tdo
-         );
-         dm_data[16] = sbautoincrement;
-         this.set_dmi(
-            2'b10, //write
-            7'h38, //sbcs,
-            dm_data, //whatever
-            {dm_addr, dm_data, dm_op},
-            s_tck,
-            s_tms,
-            s_trstn,
-            s_tdi,
-            s_tdo
-         );
+         this.read_debug_reg(dm::SBCS, sbcs,
+                             s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+         sbcs.sbautoincrement = sbautoincrement;
+
+
+         this.write_debug_reg(dm::SBCS, sbcs,
+                              s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
       endtask
 
       // access (read) debug module register according to riscv-debug p. 71
