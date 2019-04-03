@@ -59,6 +59,9 @@ module tb_pulp;
    // enable DPI-based openocd debug bridge
    parameter ENABLE_OPENOCD = 0;
 
+   // enable Debug Module Tests
+   parameter ENABLE_DM_TESTS = 1;
+
    // UART baud rate in bps
    parameter  BAUDRATE = 625000;
 
@@ -343,6 +346,8 @@ module tb_pulp;
    if (CONFIG_FILE == "NONE") begin
       assign w_uart_tx = w_uart_rx;
    end
+
+   // TODO: this should be set depending on the desired boot mode (JTAG, FLASH)
    assign w_bootsel = 1'b0;
 
    /* JTAG DPI-based verification IP */
@@ -589,7 +594,7 @@ module tb_pulp;
          logic [31:0] dm_data;
          logic [6:0]  dm_addr;
          logic        error;
-         automatic logic [9:0]  FC_Core_ID = {5'd31,5'd0};
+         automatic logic [9:0]  FC_CORE_ID = {5'd31,5'd0};
 
          force tb_pulp.i_dut.pad_frame_i.padinst_reset_n.O = 1'b0;
          if (ENABLE_EXTERNAL_DRIVER == 0 && ENABLE_OPENOCD == 0) begin
@@ -627,62 +632,25 @@ module tb_pulp;
 
          if (ENABLE_EXTERNAL_DRIVER == 0 && ENABLE_OPENOCD == 0) begin
 
-            //test_mode_if = new;
-            //dbg_if_soc   = new;
-
-            jtag_pkg::jtag_reset(
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi
-            );
-            jtag_pkg::jtag_softreset(
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi
-            );
+            // before starting the actual boot procedure we do some light
+            // testing on the jtag link
+            jtag_pkg::jtag_reset(s_tck, s_tms, s_trstn, s_tdi);
+            jtag_pkg::jtag_softreset(s_tck, s_tms, s_trstn, s_tdi);
             #5us;
 
-            jtag_pkg::jtag_bypass_test(
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi,
-               s_tdo
-            );
+            jtag_pkg::jtag_bypass_test(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
             #5us;
 
-            jtag_pkg::jtag_get_idcode(
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi,
-               s_tdo
-            );
+            jtag_pkg::jtag_get_idcode(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
             #5us;
 
-
-
-            test_mode_if.init(
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi
-            );
+            test_mode_if.init(s_tck, s_tms, s_trstn, s_tdi);
 
             jtag_conf_reg = {USE_FLL ? 1'b0 : 1'b1, 6'b0, LOAD_L2 == "JTAG" ? 2'b11 : 2'b00};
             $display("[TB] %t - Enabling clock out via jtag", $realtime);
 
-            test_mode_if.set_confreg(
-               jtag_conf_reg,
-               jtag_conf_rego,
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi,
-               s_tdo
-            );
+            test_mode_if.set_confreg(jtag_conf_reg, jtag_conf_rego,
+                s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
             $display("[TB] %t - jtag_conf_reg set to %x", $realtime, jtag_conf_reg);
 
@@ -690,249 +658,59 @@ module tb_pulp;
             $display("[TB] %t - Releasing hard reset", $realtime);
 
             //test if the PULP tap che write to the L2
-            dbg_if_soc.init(
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi
-            );
+            dbg_if_soc.init(s_tck, s_tms, s_trstn, s_tdi);
 
             $display("[TB] %t - Init PULP TAP", $realtime);
 
-            dbg_if_soc.write32(
-               BEGIN_L2_INSTR,
-               1,
-               32'hABBAABBA,
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi,
-               s_tdo
-            );
+            dbg_if_soc.write32(BEGIN_L2_INSTR, 1, 32'hABBAABBA,
+                s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
             $display("[TB] %t - Write32 PULP TAP", $realtime);
 
             #50us;
-            dbg_if_soc.read32(
-               BEGIN_L2_INSTR,
-               1,
-               jtag_data,
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi,
-               s_tdo
-            );
+            dbg_if_soc.read32(BEGIN_L2_INSTR, 1, jtag_data,
+                s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
-           if(jtag_data[0] != 32'hABBAABBA)
-              $display("[JTAG] R/W of L2 failed: %h != %h",jtag_data[0],32'hABBAABBA);
-           else
-              $display("[JTAG] R/W of L2 succeeded");
-
-            debug_mode_if.init(
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi,
-               s_tdo
-            );
-
-            debug_mode_if.set_dmactive(
-               1'b1,
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi,
-               s_tdo
-            );
-
-            $display("[TB] %t - TEST discover harts", $realtime);
-            debug_mode_if.test_discover_harts(error,
-                                              s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-            if (error)
-                $display("[TB] %t FAIL", $realtime);
+            if(jtag_data[0] != 32'hABBAABBA)
+                $display("[JTAG] R/W test of L2 failed: %h != %h", jtag_data[0], 32'hABBAABBA);
             else
-                $display("[TB] %t OK", $realtime);
+                $display("[JTAG] R/W test of L2 succeeded");
 
-            debug_mode_if.set_hartsel(
-               FC_Core_ID,
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi,
-               s_tdo
-            );
+            // From here on starts the actual jtag booting
 
-            debug_mode_if.set_sbreadonaddr(
-               1'b1,
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi,
-               s_tdo
-            );
+            // Setup debug module and hart, halt hart and set dpc (return point
+            // for boot).
+            // Halting the fc hart transfers control of the program execution to
+            // the debug module. This might take a bit until the debug request
+            // signal is propagated so meanwhile the core is executing stuff
+            // from the bootrom. For jtag booting (what we are doing right now),
+            // bootsel is low so the code that is being executed in said bootrom
+            // is only a busy wait or wfi until the debug unit grabs control.
+            debug_mode_if.init(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
-            debug_mode_if.read_sbcs(
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi,
-               s_tdo
-            );
+            debug_mode_if.set_dmactive(1'b1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
-            // Make sure that we get into an infinite loop on BEGIN_L2_INSTR
-            // this is for our test setup
-            $display("[TB] %t - Halting the Core",$realtime);
-            debug_mode_if.halt_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-
-            $display("[TB] %t - Writing the boot address into dpc", $realtime);
-            debug_mode_if.write_reg_abstract_cmd(riscv::CSR_DPC, BEGIN_L2_INSTR,
-                                                 s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-
-            //Write while(1) to BEGIN_L2_INSTR
-            debug_mode_if.writeMem(BEGIN_L2_INSTR,{25'b0, 7'b1101111},
-                                   s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-
-            $display("[TB] %t - Resuming the CORE", $realtime);
-            debug_mode_if.resume_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-
-            // //Write 1 to Fetch Enable, now the core is stucked to the while(1)
-            // we start off with fetch_enable = 1, don't need to do that
-            // $display("[TB] %t - Triggering fetch enable", $realtime);
-            // debug_mode_if.writeMem(32'h1A104008, 32'h1,
-            //                        s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+            debug_mode_if.set_hartsel(FC_CORE_ID, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
             $display("[TB] %t - Halting the Core", $realtime);
             debug_mode_if.halt_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
-            debug_mode_if.read_debug_reg(dm::AbstractCS, dm_data, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-            $display("[TB] %t Abstractcs is %x (progbufsize %x, busy %x, cmderr %x, datacount %x)",$realtime(), dm_data, dm_data[28:24], dm_data[12], dm_data[10:8], dm_data[3:0]);
-
-            // for the following tests we need the cpu to be fetching and running
-            $display("[TB] %t - TEST halt resume functionality", $realtime);
-            debug_mode_if.test_halt_resume(error, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-            if (error)
-                $display("[TB] %t FAIL", $realtime);
-            else
-                $display("[TB] %t OK", $realtime);
-
-            $display("[TB] %t - TEST read/write gpr with abstract command and proper waiting logic", $realtime);
-            debug_mode_if.test_gpr_read_write_abstract_high_level(error, s_tck, s_tms,
-                                                                  s_trstn, s_tdi, s_tdo);
-            if (error)
-                $display("[TB] %t FAIL", $realtime);
-            else
-                $display("[TB] %t OK", $realtime);
-
-
-            $display("[TB] %t - TEST dumping register values using abstract command", $realtime);
-            debug_mode_if.read_reg_abstract_cmd(riscv::CSR_DCSR, dm_data, s_tck, s_tms,
-                                                s_trstn, s_tdi, s_tdo);
-            $display("[TB] %t dcsr is %x", $realtime, dm_data);
-            debug_mode_if.read_reg_abstract_cmd(riscv::CSR_DPC, dm_data, s_tck, s_tms,
-                                                     s_trstn, s_tdi, s_tdo);
-            $display("[TB] %t dpc is %x", $realtime, dm_data);
-            debug_mode_if.read_reg_abstract_cmd(riscv::CSR_MTVEC, dm_data, s_tck, s_tms,
-                                                     s_trstn, s_tdi, s_tdo);
-            $display("[TB] %t mtvec is %x", $realtime, dm_data);
-            debug_mode_if.read_reg_abstract_cmd(riscv::CSR_MCAUSE, dm_data, s_tck, s_tms,
-                                                     s_trstn, s_tdi, s_tdo);
-            $display("[TB] %t mcause is %x", $realtime, dm_data);
-            debug_mode_if.read_reg_abstract_cmd('h1002, dm_data, s_tck, s_tms,
-                                                     s_trstn, s_tdi, s_tdo);
-            $display("[TB] %t x2 is %x", $realtime, dm_data);
-
-
-            // currently results in in illegal instruction because it makes a 64
-            // bit load
-            $display("[TB] %t - TEST bad abstract command (aarsize > 2)", $realtime);
-            debug_mode_if.test_bad_aarsize (error, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-            if(error)
-               $display("[TB] %t FAIL", $realtime);
-            else
-               $display("[TB] %t OK", $realtime);
-
-
-            $display("[TB] %t - TEST abstract commands and program buffer", $realtime);
-            debug_mode_if.test_abstract_cmds_prog_buf(error, BEGIN_L2_INSTR,
-                                                      s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-            if(error)
-               $display("[TB] %t FAIL", $realtime);
-            else
-               $display("[TB] %t OK", $realtime);
-
-
-            $display("[TB] %t - TEST read/write dpc" , $realtime);
-            debug_mode_if.test_read_write_dpc(error, s_tck, s_tms,
-                                              s_trstn, s_tdi, s_tdo);
-            if(error)
-               $display("[TB] %t FAIL", $realtime);
-            else
-               $display("[TB] %t OK", $realtime);
-
-
-            $display("[TB] %t - TEST read/write csr" , $realtime);
-            debug_mode_if.test_read_write_csr(error, s_tck, s_tms,
-                                              s_trstn, s_tdi, s_tdo);
-
-
-            $display("[TB] %t - TEST read/write csr with program buffer (TODO)", $realtime);
-            $display("[TB] %t - TEST dret outside debug mode (TODO)", $realtime);
-
-            $display("[TB] %t - TEST ebreak in program buffer", $realtime);
-            debug_mode_if.test_ebreak_in_program_buffer(error,
-                                                        s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-            if(error)
-               $display("[TB] %t FAIL", $realtime);
-            else
-               $display("[TB] %t OK", $realtime);
-
-
-            $display("[TB] %t - TEST debug cause values", $realtime);
-            debug_mode_if.test_debug_cause_values(error, BEGIN_L2_INSTR,
-                                                  s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-            if(error)
-               $display("[TB] %t FAIL", $realtime);
-            else
-               $display("[TB] %t OK", $realtime);
-
-            $display("[TB] %t - TEST single stepping", $realtime);
-            debug_mode_if.test_single_stepping_abstract_cmd(error, BEGIN_L2_INSTR,
-                                                            s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-            if(error)
-               $display("[TB] %t FAIL", $realtime);
-            else
-               $display("[TB] %t OK", $realtime);
-
-            $display("[TB] %t - TEST single stepping edge cases", $realtime);
-            debug_mode_if.test_single_stepping_edge_cases(error, BEGIN_L2_INSTR,
-                                                          s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-            if(error)
-               $display("[TB] %t FAIL", $realtime);
-            else
-               $display("[TB] %t OK", $realtime);
-
-
-            $display("[TB] %t - TEST wfi in program buffer", $realtime);
-            debug_mode_if.test_wfi_in_program_buffer(error, s_tck, s_tms,
-                                                     s_trstn, s_tdi, s_tdo);
-            $display("[TB] %t OK", $realtime); //otherwise we wouldn't get here
-
-            $display("[TB] %t - TEST halt request during wfi (TODO)", $realtime);
-
-
-            $display("[TB] %t - Write the boot address into dpc", $realtime);
+            $display("[TB] %t - Writing the boot address into dpc", $realtime);
             debug_mode_if.write_reg_abstract_cmd(riscv::CSR_DPC, BEGIN_L2_INSTR,
-                                                 s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+                s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
+            // long debug module + jtag tests
+            if(ENABLE_DM_TESTS == 1) begin
+               debug_mode_if.run_dm_tests(FC_CORE_ID, BEGIN_L2_INSTR,
+                                        error, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+            end
 
             if(LOAD_L2 == "JTAG") begin
                $display("[TB] %t - Loading L2", $realtime);
                debug_mode_if.load_L2(num_stim, stimuli, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-//               $display("[TB] %t - Triggering fetch enable", $realtime);
-//               debug_mode_if.writeMem(32'h1A104008, 32'h1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
             end
 
+            // we have set dpc and loaded the binary, we can go now
             $display("[TB] %t - Resuming the CORE", $realtime);
             debug_mode_if.resume_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 

@@ -2533,6 +2533,169 @@ package jtag_pkg;
 
 
       endtask
+
+      // This runs all test dm tests there are. For that to work we have to run
+      // these before we load the binary into the L2 since we make ram and
+      // registers dirty. begin_l2_instr contains the boot address which is
+      // required when this tests ends so that the program can properly resume
+      // after this tests are run once the binary is loaded into l2.
+      task run_dm_tests (
+         int          fc_core_id,
+         int          begin_l2_instr, // required to restart booting process
+         output logic error,
+         ref logic    s_tck,
+         ref logic    s_tms,
+         ref logic    s_trstn,
+         ref logic    s_tdi,
+         ref logic    s_tdo
+      );
+          logic [31:0] dm_data;
+
+         // $display("[TB] %t - TEST discover harts", $realtime);
+         // debug_mode_if.test_discover_harts(dm_data[0],
+         //                                   s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         // if (error)
+         //     $display("[TB] %t FAIL", $realtime);
+         // else
+         //     $display("[TB] %t OK", $realtime);
+
+         set_hartsel(fc_core_id, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+         set_sbreadonaddr(1'b1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+         // check if we can read sbcs and some of its entries
+         test_read_sbcs(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+
+         // Make sure that we get into an infinite loop on BEGIN_L2_INSTR
+         // this is for our test setup
+         // Write while(1) to BEGIN_L2_INSTR
+         writeMem(begin_l2_instr, {25'b0, 7'b1101111},
+             s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+         $display("[TB] %t - Resuming the CORE", $realtime);
+         resume_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+         $display("[TB] %t - Halting the Core", $realtime);
+         halt_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+         // simple check whether we can read abstractcs and if progbufsize and
+         // datacount are ok
+         test_read_abstractcs(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+         // for the following tests we need the cpu to be fetching and running
+         $display("[TB] %t - TEST halt resume functionality", $realtime);
+         test_halt_resume(error, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         if (error)
+             $display("[TB] %t FAIL", $realtime);
+         else
+             $display("[TB] %t OK", $realtime);
+
+         $display("[TB] %t - TEST read/write gpr with abstract command and proper waiting logic",
+                  $realtime);
+         test_gpr_read_write_abstract_high_level(error, s_tck, s_tms,
+             s_trstn, s_tdi, s_tdo);
+         if (error)
+             $display("[TB] %t FAIL", $realtime);
+         else
+             $display("[TB] %t OK", $realtime);
+
+         $display("[TB] %t - TEST dumping register values using abstract command", $realtime);
+         read_reg_abstract_cmd(riscv::CSR_DCSR, dm_data, s_tck, s_tms,
+             s_trstn, s_tdi, s_tdo);
+         $display("[TB] %t dcsr is %x", $realtime, dm_data);
+         read_reg_abstract_cmd(riscv::CSR_DPC, dm_data, s_tck, s_tms,
+             s_trstn, s_tdi, s_tdo);
+         $display("[TB] %t dpc is %x", $realtime, dm_data);
+         read_reg_abstract_cmd(riscv::CSR_MTVEC, dm_data, s_tck, s_tms,
+             s_trstn, s_tdi, s_tdo);
+         $display("[TB] %t mtvec is %x", $realtime, dm_data);
+         read_reg_abstract_cmd(riscv::CSR_MCAUSE, dm_data, s_tck, s_tms,
+             s_trstn, s_tdi, s_tdo);
+         $display("[TB] %t mcause is %x", $realtime, dm_data);
+         read_reg_abstract_cmd('h1002, dm_data, s_tck, s_tms,
+             s_trstn, s_tdi, s_tdo);
+         $display("[TB] %t x2 is %x", $realtime, dm_data);
+
+         $display("[TB] %t - TEST bad abstract command (aarsize > 2)", $realtime);
+         test_bad_aarsize (error, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         if(error)
+             $display("[TB] %t FAIL", $realtime);
+         else
+             $display("[TB] %t OK", $realtime);
+
+         $display("[TB] %t - TEST abstract commands and program buffer", $realtime);
+         test_abstract_cmds_prog_buf(error, begin_l2_instr,
+             s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         if(error)
+             $display("[TB] %t FAIL", $realtime);
+         else
+             $display("[TB] %t OK", $realtime);
+
+         $display("[TB] %t - TEST read/write dpc" , $realtime);
+         test_read_write_dpc(error, s_tck, s_tms,
+             s_trstn, s_tdi, s_tdo);
+         if(error)
+             $display("[TB] %t FAIL", $realtime);
+         else
+             $display("[TB] %t OK", $realtime);
+
+         $display("[TB] %t - TEST read/write csr" , $realtime);
+         test_read_write_csr(error, s_tck, s_tms,
+             s_trstn, s_tdi, s_tdo);
+
+         $display("[TB] %t - TEST read/write csr with program buffer (TODO)", $realtime);
+         $display("[TB] %t - TEST dret outside debug mode (TODO)", $realtime);
+
+         $display("[TB] %t - TEST ebreak in program buffer", $realtime);
+         test_ebreak_in_program_buffer(error,
+             s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         if(error)
+             $display("[TB] %t FAIL", $realtime);
+         else
+             $display("[TB] %t OK", $realtime);
+
+
+         $display("[TB] %t - TEST debug cause values", $realtime);
+         test_debug_cause_values(error, begin_l2_instr,
+             s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         if(error)
+             $display("[TB] %t FAIL", $realtime);
+         else
+             $display("[TB] %t OK", $realtime);
+
+         $display("[TB] %t - TEST single stepping", $realtime);
+         test_single_stepping_abstract_cmd(error, begin_l2_instr,
+             s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         if(error)
+             $display("[TB] %t FAIL", $realtime);
+         else
+             $display("[TB] %t OK", $realtime);
+
+         $display("[TB] %t - TEST single stepping edge cases", $realtime);
+         test_single_stepping_edge_cases(error, begin_l2_instr,
+             s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         if(error)
+             $display("[TB] %t FAIL", $realtime);
+         else
+             $display("[TB] %t OK", $realtime);
+
+
+         $display("[TB] %t - TEST wfi in program buffer", $realtime);
+         test_wfi_in_program_buffer(error, s_tck, s_tms,
+             s_trstn, s_tdi, s_tdo);
+         $display("[TB] %t OK", $realtime); //otherwise we wouldn't get here
+
+         $display("[TB] %t - TEST halt request during wfi (TODO)", $realtime);
+
+
+         // allows the jtag booting process to smoothly continue once we leave
+         // this test
+         $display("[TB] %t - Writing the boot address into dpc", $realtime);
+         write_reg_abstract_cmd(riscv::CSR_DPC, begin_l2_instr,
+             s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+      endtask
    endclass
 
 endpackage
