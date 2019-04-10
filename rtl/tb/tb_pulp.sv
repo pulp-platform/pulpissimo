@@ -60,7 +60,7 @@ module tb_pulp;
    parameter ENABLE_OPENOCD = 0;
 
    // enable Debug Module Tests
-   parameter ENABLE_DM_TESTS = 1;
+   parameter ENABLE_DM_TESTS = 0;
 
    // UART baud rate in bps
    parameter  BAUDRATE = 625000;
