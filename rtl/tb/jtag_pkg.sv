@@ -2030,6 +2030,70 @@ package jtag_pkg;
 
       endtask
 
+      task test_wfi_wakeup(
+         output logic error,
+         input logic [31:0] addr_i,
+         ref logic s_tck,
+         ref logic s_tms,
+         ref logic s_trstn,
+         ref logic s_tdi,
+         ref logic s_tdo
+      );
+
+         logic [1:0]         dm_op;
+         logic [31:0]        dm_data;
+         riscv::dcsr_t       dcsr;
+         dm::dmstatus_t      dmstatus;
+         logic [6:0]         dm_addr;
+
+         error = 1'b0;
+
+        // check if our hart is halted
+         this.read_debug_reg(dm::DMStatus, dmstatus,
+                             s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         assert(dmstatus.allhalted == 1'b1)
+             else begin
+                $error("allhalted flag is not set when entering test");
+                error = 1'b1;
+             end
+
+         // write short program to single step through
+         this.writeMem(addr_i, riscv::wfi(),  // wfi
+                       s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         this.writeMem(addr_i + 4, { 7'h0, 5'b1, 5'b1, 3'b000, 5'b1, 7'h13 },  // addi xi, xi, i
+                       s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         this.writeMem(addr_i + 8, { 7'h0, 5'b1, 5'b1, 3'b000, 5'b1, 7'h13 }, // addi xi, xi, i
+                       s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         this.writeMem(addr_i + 12, { 7'h0, 5'b1, 5'b1, 3'b000, 5'b1, 7'h13 }, // addi xi, xi, i
+                       s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         this.writeMem(addr_i + 16, {20'b0, 5'b0, 7'b1101111}, // J zero offset
+                       s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+         assert_rdy_for_abstract_cmd(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+         // write dpc to addr_i so that we know where we resume
+         this.write_reg_abstract_cmd(riscv::CSR_DPC, addr_i,
+                                     s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+         // resume the core
+         this.resume_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+         this.halt_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         // The core should be in the WFI
+
+         this.read_reg_abstract_cmd(riscv::CSR_DPC, dm_data,
+                                    s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+         // check if dpc, dcause and flag bits are ok
+         assert(addr_i + 4 === dm_data) // did dpc increment?
+                else begin
+                   $error("dpc is %x, expected %x", dm_data, addr_i + 4);
+                   error = 1'b1;
+                end;
+            this.read_reg_abstract_cmd(riscv::CSR_DCSR, dcsr,
+                                       s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+      endtask
+
 
       task test_single_stepping_abstract_cmd(
          output logic error,
@@ -2591,6 +2655,14 @@ package jtag_pkg;
          else
              $display("[TB] %t OK", $realtime);
 
+         $display("[TB] %t - TEST wfi wake up logic",$realtime);
+         test_wfi_wakeup(error, begin_l2_instr,
+             s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         $display("[TB] %t OK", $realtime); //otherwise we wouldn't get here
+
+
+
+
          $display("[TB] %t - TEST read/write gpr with abstract command and proper waiting logic",
                   $realtime);
          test_gpr_read_write_abstract_high_level(error, s_tck, s_tms,
@@ -2679,7 +2751,6 @@ package jtag_pkg;
              $display("[TB] %t FAIL", $realtime);
          else
              $display("[TB] %t OK", $realtime);
-
 
          $display("[TB] %t - TEST wfi in program buffer", $realtime);
          test_wfi_in_program_buffer(error, s_tck, s_tms,
