@@ -40,7 +40,7 @@ module soc_domain #(
 
     input  logic                             mode_select_i,
 
-    input logic                              boot_l2_i,
+    input logic                              bootsel_i,
 
     input  logic                             jtag_tck_i,
     input  logic                             jtag_trst_ni,
@@ -275,7 +275,7 @@ module soc_domain #(
         .zynq_soc_clk_i               ( zynq_soc_clk_i               ),
         .zynq_per_clk_i               ( zynq_per_clk_i               ),
         `endif
-        .bootsel_i                    ( boot_l2_i                    ),
+        .boot_l2_i                    ( 1'b0                         ),
         .*
     );
 

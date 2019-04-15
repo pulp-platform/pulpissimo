@@ -383,6 +383,8 @@ module pulpissimo
   logic [EVENT_WIDTH-1:0]      s_event_dataasync;
   logic                        s_cluster_irq;
 
+  logic                        s_bootsel;
+
   APB_BUS        apb_debug();
   XBAR_TCDM_BUS  lint_debug();
 
@@ -502,7 +504,7 @@ module pulpissimo
         .in_i2c0_scl_o         ( s_in_i2c0_scl          ),
         .in_uart_rx_o          ( s_in_uart_rx           ),
         .in_uart_tx_o          ( s_in_uart_tx           ),
-        .bootsel_o             ( s_boot_l2              ),
+        .bootsel_o             ( s_bootsel              ),
 
         //EXT CHIP to PAD
         .pad_spim_sdio0        ( pad_spim_sdio0         ),
@@ -804,7 +806,7 @@ module pulpissimo
         .dft_cg_enable_i              ( s_dft_cg_enable                  ),
         .dft_test_mode_i              ( s_test_mode                      ),
 
-        .boot_l2_i                    ( s_boot_l2                        ),
+        .bootsel_i                    ( s_bootsel                        ),
 
         .jtag_tck_i                   ( s_jtag_tck                       ),
         .jtag_trst_ni                 ( s_jtag_trst                      ),
