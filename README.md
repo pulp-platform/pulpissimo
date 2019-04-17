@@ -86,7 +86,7 @@ Then execute the following commands:
 ```
 git clone https://github.com/pulp-platform/pulp-builder.git
 cd pulp-builder
-git checkout 43e25418bc9590360456ddb97bd29ffb1a6a05e7
+git checkout b3b255b0f653fce950cf730972c8ad07b1be7bf0
 source configs/pulpissimo.sh
 ./scripts/clean
 ./scripts/update-runtime
@@ -103,7 +103,7 @@ IPs composing the PULP system:
 ./update-ips
 ```
 This will download all the required IPs, solve dependencies and generate the
-scripts by calling `./generate-scripts`. 
+scripts by calling `./generate-scripts`.
 
 After having access to the SDK, you can build the simulation platform by doing
 the following:
@@ -143,8 +143,30 @@ If you want to save a (compressed) VCD for further examination, type
 make run vsim/script=export_run.tcl
 ```
 before starting the simulation. You will find the VCD in
-`build/<SRC_FILE_NAME>/pulpissimo/export.vcd.gz` where 
+`build/<SRC_FILE_NAME>/pulpissimo/export.vcd.gz` where
 `<SRC_FILE_NAME>` is the name of the C source of the test.
+
+### Building and using the virtual platform
+
+Once the RTL platform is installed, the following commands can be executed to install and use the virtual platform:
+```
+git clone https://github.com/pulp-platform/pulp-builder.git
+cd pulp-builder
+git checkout b3b255b0f653fce950cf730972c8ad07b1be7bf0
+source configs/pulpissimo.sh
+./scripts/build-gvsoc
+source sdk-setup.sh
+source configs/gvsoc.sh
+cd ..
+```
+
+Then tests can be compiled and run as for the RTL platform. When switching from one platform to another, it may be needed to regenrate the test configuration with this command:
+```
+make conf
+```
+
+More information is available in the documentation here: pulp-builder/install/doc/vp/index.html
+
 
 ## Proprietary verification IPs
 The full simulation platform can take advantage of a few models of commercial
@@ -192,7 +214,7 @@ The RTL platform has the following requirements:
   https://github.com/pulp-platform/pulp-sdk/blob/master/README.md
 
 ## Repository organization
-The PULP and PULPissimo platforms are highly hierarchical and the Git 
+The PULP and PULPissimo platforms are highly hierarchical and the Git
 repositories for the various IPs follow the hierarchy structure to keep maximum
 flexibility.
 Most of the complexity of the IP updating system are hidden behind the

@@ -96,7 +96,7 @@ module pulpissimo
   localparam AXI_USER_WIDTH             = 6;
   localparam AXI_CLUSTER_SOC_STRB_WIDTH = AXI_CLUSTER_SOC_DATA_WIDTH/8;
   localparam AXI_SOC_CLUSTER_STRB_WIDTH = AXI_SOC_CLUSTER_DATA_WIDTH/8;
-  
+
   localparam BUFFER_WIDTH               = 8;
   localparam EVENT_WIDTH                = 8;
 
@@ -289,6 +289,8 @@ module pulpissimo
   logic                        s_i2s_sck1_out;
   logic                        s_i2s_ws1_out;
   logic [1:0]                  s_i2s_mode1_out;
+  logic                        s_i2s_slave_sck_oe;
+  logic                        s_i2s_slave_ws_oe;
   logic                        s_spi_master0_csn0;
   logic                        s_spi_master0_csn1;
   logic                        s_spi_master0_sck;
@@ -300,7 +302,10 @@ module pulpissimo
   logic                        s_spi_master0_sdo1;
   logic                        s_spi_master0_sdo2;
   logic                        s_spi_master0_sdo3;
-  logic [1:0]                  s_spi_master0_mode;
+  logic                        s_spi_master0_oen0;
+  logic                        s_spi_master0_oen1;
+  logic                        s_spi_master0_oen2;
+  logic                        s_spi_master0_oen3;
 
 `ifdef PULP_FPGA_EMUL
   logic                        s_safe2soc_spi_master0_csn0;
@@ -377,6 +382,11 @@ module pulpissimo
   logic [BUFFER_WIDTH-1:0]     s_event_readpointer;
   logic [EVENT_WIDTH-1:0]      s_event_dataasync;
   logic                        s_cluster_irq;
+
+  logic                        s_bootsel;
+
+  APB_BUS        apb_debug();
+  XBAR_TCDM_BUS  lint_debug();
 
   //***********************************************************
   //********** PAD FRAME **************************************
@@ -494,6 +504,7 @@ module pulpissimo
         .in_i2c0_scl_o         ( s_in_i2c0_scl          ),
         .in_uart_rx_o          ( s_in_uart_rx           ),
         .in_uart_tx_o          ( s_in_uart_tx           ),
+        .bootsel_o             ( s_bootsel              ),
 
         //EXT CHIP to PAD
         .pad_spim_sdio0        ( pad_spim_sdio0         ),
@@ -556,25 +567,6 @@ module pulpissimo
         .mode_select_o              ( s_mode_select               ),
         .dft_cg_enable_o            ( s_dft_cg_enable             ),
 
-        .sel_fll_clk_o              ( s_sel_fll_clk               ),
-
-        .jtag_tck_i                 ( s_jtag_tck                  ),
-        .jtag_trst_ni               ( s_jtag_trst                 ),
-        .jtag_tms_i                 ( s_jtag_tms                  ),
-        .jtag_tdi_i                 ( s_jtag_tdi                  ),
-        .jtag_tdo_o                 ( s_jtag_tdo                  ),
-
-        .jtag_shift_dr_o            ( s_jtag_shift_dr             ),
-        .jtag_update_dr_o           ( s_jtag_update_dr            ),
-        .jtag_capture_dr_o          ( s_jtag_capture_dr           ),
-
-        .axireg_sel_o               ( s_axireg_sel                ),
-        .axireg_tdi_o               ( s_axireg_tdi                ),
-        .axireg_tdo_i               ( s_axireg_tdo                ),
-
-        .soc_jtag_reg_i             ( s_soc_jtag_regi             ),
-        .soc_jtag_reg_o             ( s_soc_jtag_rego             ),
-
         .pad_cfg_o                  ( s_pad_cfg                   ),
 
         .pad_cfg_i                  ( s_pad_cfg_soc               ),
@@ -607,16 +599,14 @@ module pulpissimo
         .i2c1_sda_in_o              ( s_i2c1_sda_in               ),
         .i2c1_sda_oe_i              ( s_i2c1_sda_oe               ),
 
-        .i2s_sd0_in_o               ( s_i2s_sd0_in                ),
-        .i2s_sd1_in_o               ( s_i2s_sd1_in                ),
-        .i2s_sck_in_o               ( s_i2s_sck_in                ),
-        .i2s_ws_in_o                ( s_i2s_ws_in                 ),
-        .i2s_sck0_out_i             ( s_i2s_sck0_out              ),
-        .i2s_ws0_out_i              ( s_i2s_ws0_out               ),
-        .i2s_mode0_out_i            ( s_i2s_mode0_out             ),
-        .i2s_sck1_out_i             ( s_i2s_sck1_out              ),
-        .i2s_ws1_out_i              ( s_i2s_ws1_out               ),
-        .i2s_mode1_out_i            ( s_i2s_mode1_out             ),
+        .i2s_slave_sd0_o            ( s_i2s_sd0_in                ),
+        .i2s_slave_sd1_o            ( s_i2s_sd1_in                ),
+        .i2s_slave_ws_o             ( s_i2s_ws_in                 ),
+        .i2s_slave_ws_i             ( s_i2s_ws0_out               ),
+        .i2s_slave_ws_oe            ( s_i2s_slave_ws_oe           ),
+        .i2s_slave_sck_o            ( s_i2s_sck_in                ),
+        .i2s_slave_sck_i            ( s_i2s_sck0_out              ),
+        .i2s_slave_sck_oe           ( s_i2s_slave_sck_oe          ),
 
 `ifdef PULP_FPGA_EMUL
         .spi_master0_csn0_i         ( s_safe2soc_spi_master0_csn0 ),
@@ -643,7 +633,11 @@ module pulpissimo
         .spi_master0_sdo1_i         ( s_spi_master0_sdo1          ),
         .spi_master0_sdo2_i         ( s_spi_master0_sdo2          ),
         .spi_master0_sdo3_i         ( s_spi_master0_sdo3          ),
-        .spi_master0_mode_i         ( s_spi_master0_mode          ),
+        .spi_master0_oen0_i         ( s_spi_master0_oen0          ),
+        .spi_master0_oen1_i         ( s_spi_master0_oen1          ),
+        .spi_master0_oen2_i         ( s_spi_master0_oen2          ),
+        .spi_master0_oen3_i         ( s_spi_master0_oen3          ),
+
 `endif
         .spi_master1_csn0_i         ( 1'b1                        ),
         .spi_master1_csn1_i         ( 1'b1                        ),
@@ -779,7 +773,6 @@ module pulpissimo
         .oe_i2s0_sdi_o              ( s_oe_i2s0_sdi               ),
         .oe_i2s1_sdi_o              ( s_oe_i2s1_sdi               ),
 
-        .boot_l2_o                  ( s_boot_l2                   ),
         .*
    );
 
@@ -809,25 +802,17 @@ module pulpissimo
         .zynq_cluster_clk_i           ( zynq_cluster_clk_i               ),
     `endif
 
-        .sel_fll_clk_i                ( s_sel_fll_clk                    ),
-
         .mode_select_i                ( s_mode_select                    ),
         .dft_cg_enable_i              ( s_dft_cg_enable                  ),
         .dft_test_mode_i              ( s_test_mode                      ),
 
-        .soc_jtag_reg_o               ( s_soc_jtag_regi                  ),
-        .soc_jtag_reg_i               ( s_soc_jtag_rego                  ),
-
-        .boot_l2_i                    ( s_boot_l2                        ),
+        .bootsel_i                    ( s_bootsel                        ),
 
         .jtag_tck_i                   ( s_jtag_tck                       ),
         .jtag_trst_ni                 ( s_jtag_trst                      ),
-        .jtag_shift_dr_i              ( s_jtag_shift_dr                  ),
-        .jtag_update_dr_i             ( s_jtag_update_dr                 ),
-        .jtag_capture_dr_i            ( s_jtag_capture_dr                ),
-        .jtag_axireg_sel_i            ( s_axireg_sel                     ),
-        .jtag_axireg_tdi_i            ( s_axireg_tdi                     ),
-        .jtag_axireg_tdo_o            ( s_axireg_tdo                     ),
+        .jtag_tms_i                   ( s_jtag_tms                       ),
+        .jtag_tdi_i                   ( s_jtag_tdi                       ),
+        .jtag_tdo_o                   ( s_jtag_tdo                       ),
 
         .pad_cfg_o                    ( s_pad_cfg_soc                    ),
         .pad_mux_o                    ( s_pad_mux_soc                    ),
@@ -864,21 +849,22 @@ module pulpissimo
         .i2c1_sda_o                   ( s_i2c1_sda_out                   ),
         .i2c1_sda_oe_o                ( s_i2c1_sda_oe                    ),
 
-        .i2s_sd0_i                    ( s_i2s_sd0_in                     ),
-        .i2s_sd1_i                    ( s_i2s_sd1_in                     ),
-        .i2s_ws_i                     ( s_i2s_ws_in                      ),
-        .i2s_sck_i                    ( s_i2s_sck_in                     ),
-        .i2s_ws0_o                    ( s_i2s_ws0_out                    ),
-        .i2s_sck0_o                   ( s_i2s_sck0_out                   ),
-        .i2s_mode0_o                  ( s_i2s_mode0_out                  ),
-        .i2s_ws1_o                    ( s_i2s_ws1_out                    ),
-        .i2s_sck1_o                   ( s_i2s_sck1_out                   ),
-        .i2s_mode1_o                  ( s_i2s_mode1_out                  ),
+        .i2s_slave_sd0_i              ( s_i2s_sd0_in                     ),
+        .i2s_slave_sd1_i              ( s_i2s_sd1_in                     ),
+        .i2s_slave_ws_i               ( s_i2s_ws_in                      ),
+        .i2s_slave_ws_o               ( s_i2s_ws0_out                    ),
+        .i2s_slave_ws_oe              ( s_i2s_slave_ws_oe                ),
+        .i2s_slave_sck_i              ( s_i2s_sck_in                     ),
+        .i2s_slave_sck_o              ( s_i2s_sck0_out                   ),
+        .i2s_slave_sck_oe             ( s_i2s_slave_sck_oe               ),
 
         .spi_master0_clk_o            ( s_spi_master0_sck                ),
         .spi_master0_csn0_o           ( s_spi_master0_csn0               ),
         .spi_master0_csn1_o           ( s_spi_master0_csn1               ),
-        .spi_master0_mode_o           ( s_spi_master0_mode               ),
+        .spi_master0_oen0_o           ( s_spi_master0_oen0               ),
+        .spi_master0_oen1_o           ( s_spi_master0_oen1               ),
+        .spi_master0_oen2_o           ( s_spi_master0_oen2               ),
+        .spi_master0_oen3_o           ( s_spi_master0_oen3               ),
         .spi_master0_sdo0_o           ( s_spi_master0_sdo0               ),
         .spi_master0_sdo1_o           ( s_spi_master0_sdo1               ),
         .spi_master0_sdo2_o           ( s_spi_master0_sdo2               ),
