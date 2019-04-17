@@ -19,7 +19,7 @@
 #
 
 pulp_soc:
-  commit: dbg_dev
+  commit: master
   server: https://github.com
   group:  pulp-platform
 
