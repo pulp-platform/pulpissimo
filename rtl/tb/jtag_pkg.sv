@@ -2040,11 +2040,9 @@ package jtag_pkg;
          ref logic s_tdo
       );
 
-         logic [1:0]         dm_op;
-         logic [31:0]        dm_data;
+         logic [31:0]        dm_dpc;
          riscv::dcsr_t       dcsr;
          dm::dmstatus_t      dmstatus;
-         logic [6:0]         dm_addr;
 
          error = 1'b0;
 
@@ -2081,17 +2079,20 @@ package jtag_pkg;
          this.halt_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          // The core should be in the WFI
 
-         this.read_reg_abstract_cmd(riscv::CSR_DPC, dm_data,
+         this.read_reg_abstract_cmd(riscv::CSR_DPC, dm_dpc,
                                     s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
          // check if dpc, dcause and flag bits are ok
-         assert(addr_i + 4 === dm_data) // did dpc increment?
+         assert(addr_i + 4 === dm_dpc) // did dpc increment?
                 else begin
-                   $error("dpc is %x, expected %x", dm_data, addr_i + 4);
+                   $error("dpc is %x, expected %x", dm_dpc, addr_i + 4);
                    error = 1'b1;
                 end;
-            this.read_reg_abstract_cmd(riscv::CSR_DCSR, dcsr,
-                                       s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+         // restore dpc to entry point
+         this.write_reg_abstract_cmd(riscv::CSR_DPC, addr_i,
+                                    s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
       endtask
 
 
@@ -2659,9 +2660,6 @@ package jtag_pkg;
          test_wfi_wakeup(error, begin_l2_instr,
              s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          $display("[TB] %t OK", $realtime); //otherwise we wouldn't get here
-
-
-
 
          $display("[TB] %t - TEST read/write gpr with abstract command and proper waiting logic",
                   $realtime);
