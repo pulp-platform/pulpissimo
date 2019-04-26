@@ -1,6 +1,7 @@
 # add fc
 set rvcores [find instances -recursive -bydu riscv_core -nodu]
 set fpuprivate [find instances -recursive -bydu fpu_private]
+set rvpmp [find instances -recursive -bydu riscv_pmp]
 
 if {$rvcores ne ""} {
   set rvprefetch [find instances -recursive -bydu riscv_prefetch_L0_buffer -nodu]
@@ -31,9 +32,10 @@ if {$rvcores ne ""} {
   }
   add wave -group "Core"  -group "EX Stage"                                 $rvcores/ex_stage_i/*
   add wave -group "Core"  -group "LSU"                                      $rvcores/load_store_unit_i/*
-  add wave -group "Core"  -group "PMP"                                      $rvcores/pmp_unit_i/*
+  if {$rvpmp ne ""} {
+    add wave -group "Core"  -group "PMP"                                    $rvcores/RISCY_PMP/pmp_unit_i/*
+  }
   add wave -group "Core"  -group "CSR"                                      $rvcores/cs_registers_i/*
-  add wave -group "Core"  -group "Debug"                                    $rvcores/debug_unit_i/*
 }
 
 configure wave -namecolwidth  250

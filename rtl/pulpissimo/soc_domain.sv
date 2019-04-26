@@ -40,21 +40,13 @@ module soc_domain #(
 
     input  logic                             mode_select_i,
 
-    input  logic                             sel_fll_clk_i,
-
-    input  logic [7:0]                       soc_jtag_reg_i,
-    output logic [7:0]                       soc_jtag_reg_o,
-
-    input logic                              boot_l2_i,
+    input logic                              bootsel_i,
 
     input  logic                             jtag_tck_i,
     input  logic                             jtag_trst_ni,
-    input  logic                             jtag_axireg_tdi_i,
-    output logic                             jtag_axireg_tdo_o,
-    input  logic                             jtag_axireg_sel_i,
-    input  logic                             jtag_shift_dr_i,
-    input  logic                             jtag_update_dr_i,
-    input  logic                             jtag_capture_dr_i,
+    input  logic                             jtag_tms_i,
+    input  logic                             jtag_tdi_i,
+    output logic                             jtag_tdo_o,
 
     input  logic [31:0]                      gpio_in_i,
     output logic [31:0]                      gpio_out_o,
@@ -283,6 +275,7 @@ module soc_domain #(
         .zynq_soc_clk_i               ( zynq_soc_clk_i               ),
         .zynq_per_clk_i               ( zynq_per_clk_i               ),
         `endif
+        .boot_l2_i                    ( 1'b0                         ),
         .*
     );
 

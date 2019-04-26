@@ -31,6 +31,8 @@
 `define USE_L2_MULTIBANK
 `define NB_L2_CHANNELS 4
 
+// JTAG
+`define DMI_JTAG_IDCODE 32'h249511C3
 
 // Hardware Accelerator selection
 `define HWCRYPT
