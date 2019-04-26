@@ -34,9 +34,7 @@ module soc_domain #(
 `endif
 
     input  logic                             rstn_glob_i,
-    
-    input  logic                             bootsel_i,
-        
+
     input  logic                             dft_test_mode_i,
     input  logic                             dft_cg_enable_i,
 
