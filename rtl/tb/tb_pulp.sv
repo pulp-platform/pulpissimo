@@ -180,7 +180,6 @@ module tb_pulp;
    logic                 s_tdi   = 1'b0;
    logic                 s_tms   = 1'b0;
    logic                 s_tdo;
-   logic                 s_mode_select;
 
    // jtag openocd bridge signals
    logic                sim_jtag_tck;
@@ -207,6 +206,8 @@ module tb_pulp;
    wire w_master_i2s_ws ;
 
    wire w_bootsel;
+   logic s_bootsel;
+
 
    logic [8:0] jtag_conf_reg, jtag_conf_rego; //22bits but actually only the last 9bits are used
    localparam BEGIN_L2_INSTR = 32'h1C008080;
@@ -336,22 +337,13 @@ module tb_pulp;
     assign w_bridge_tdo = tmp_bridge_tdo;
     assign sim_jtag_tdo = tmp_tdo;
 
-   // assign w_rst_n   = (ENABLE_EXTERNAL_DRIVER == 1) ? s_rst_dpi_n : s_rst_n;
-   // assign w_clk_ref = s_clk_ref;
-
-   // assign w_trstn      = (ENABLE_EXTERNAL_DRIVER == 1) ? w_bridge_trstn : (jtag_enable ? sim_trstn    : s_trstn);
-   // assign w_tck        = (ENABLE_EXTERNAL_DRIVER == 1) ? w_bridge_tck   : (jtag_enable ? sim_tck      : s_tck);
-   // assign w_tdi        = (ENABLE_EXTERNAL_DRIVER == 1) ? w_bridge_tdi   : (jtag_enable ? sim_tdi      : s_tdi);
-   // assign w_tms        = (ENABLE_EXTERNAL_DRIVER == 1) ? w_bridge_tms   : (jtag_enable ? sim_tms      : s_tms);
-   // assign s_tdo        = w_tdo;
-   // assign w_bridge_tdo = w_tdo;
 
    if (CONFIG_FILE == "NONE") begin
       assign w_uart_tx = w_uart_rx;
    end
 
    // TODO: this should be set depending on the desired boot mode (JTAG, FLASH)
-   assign w_bootsel = 1'b0;
+   assign w_bootsel = s_bootsel;
 
    /* JTAG DPI-based verification IP */
    generate
@@ -601,9 +593,12 @@ module tb_pulp;
 
          if (ENABLE_EXTERNAL_DRIVER == 0 && ENABLE_OPENOCD == 0) begin
 
-            // force fetch enable to 0 when doing JTAG preload (not particularly
-            // clean, but works)
-            if(LOAD_L2 == "JTAG")
+            // determine if we want to load the binary with jtag or from flash
+            if (LOAD_L2 == "STANDALONE")
+               s_bootsel = 1'b1;
+            else if (LOAD_L2 == "JTAG") begin
+               s_bootsel = 1'b0;
+            end
 
             if (USE_FLL)
                $display("[TB] %t - Using FLL", $realtime);
@@ -615,10 +610,6 @@ module tb_pulp;
             else
                $display("[TB] %t - Not using CAM SDVT", $realtime);
 
-            if (LOAD_L2 == "STANDALONE")
-               s_mode_select = 1'b1;
-            else
-               s_mode_select = 1'b0;
 
             // read in the stimuli vectors  == address_value
             $readmemh("./vectors/stim.txt", stimuli);
@@ -626,6 +617,7 @@ module tb_pulp;
          end
 
          $display("[TB] %t - Asserting hard reset", $realtime);
+         s_rst_n = 1'b0;
 
          #1ns
 
@@ -655,8 +647,8 @@ module tb_pulp;
 
             $display("[TB] %t - jtag_conf_reg set to %x", $realtime, jtag_conf_reg);
 
-            s_rst_n = 1'b1;
             $display("[TB] %t - Releasing hard reset", $realtime);
+            s_rst_n = 1'b1;
 
             //test if the PULP tap che write to the L2
             pulp_tap.init(s_tck, s_tms, s_trstn, s_tdi);
@@ -767,6 +759,7 @@ module tb_pulp;
                dev_dpi_en <= 1;
          end else begin // ENABLE_OPENOCD == 1
 
+            s_bootsel = 1'b0;
             s_rst_n = 1'b1;
             $display("[TB] %t - Releasing hard reset", $realtime);
 
