@@ -599,7 +599,6 @@ module tb_pulp;
          logic        error;
          automatic logic [9:0]  FC_CORE_ID = {5'd31,5'd0};
 
-         force tb_pulp.i_dut.pad_frame_i.padinst_reset_n.O = 1'b0;
          if (ENABLE_EXTERNAL_DRIVER == 0 && ENABLE_OPENOCD == 0) begin
 
             // force fetch enable to 0 when doing JTAG preload (not particularly
@@ -630,7 +629,6 @@ module tb_pulp;
 
          #1ns
 
-         release tb_pulp.i_dut.pad_frame_i.padinst_reset_n.O;
          uart_tb_rx_en   = 1'b1; // enable uart rx in testbench
 
          if (ENABLE_EXTERNAL_DRIVER == 0 && ENABLE_OPENOCD == 0) begin
