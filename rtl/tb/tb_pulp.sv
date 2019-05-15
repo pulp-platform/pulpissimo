@@ -591,7 +591,26 @@ module tb_pulp;
          logic        error;
          automatic logic [9:0]  FC_CORE_ID = {5'd31,5'd0};
 
-         if (ENABLE_EXTERNAL_DRIVER == 0 && ENABLE_OPENOCD == 0) begin
+         $display("[TB] %t - Asserting hard reset", $realtime);
+         s_rst_n = 1'b0;
+
+         #1ns
+
+         uart_tb_rx_en  = 1'b1; // enable uart rx in testbench
+
+         if (ENABLE_OPENOCD == 1) begin
+            // Use openocd to interact with the simulation
+            s_bootsel = 1'b0;
+            $display("[TB] %t - Releasing hard reset", $realtime);
+            s_rst_n = 1'b1;
+
+         end else if (ENABLE_EXTERNAL_DRIVER == 1) begin
+            // Use the pulp bridge to interact with the simulation
+            #1us
+               dev_dpi_en <= 1;
+
+         end else begin
+            // Use only the testbench to do the loading and running
 
             // determine if we want to load the binary with jtag or from flash
             if (LOAD_L2 == "STANDALONE")
@@ -600,123 +619,111 @@ module tb_pulp;
                s_bootsel = 1'b0;
             end
 
-            if (USE_FLL)
-               $display("[TB] %t - Using FLL", $realtime);
-            else
-               $display("[TB] %t - Not using FLL", $realtime);
+            if (LOAD_L2 == "JTAG") begin
+               if (USE_FLL)
+                  $display("[TB] %t - Using FLL", $realtime);
+               else
+                  $display("[TB] %t - Not using FLL", $realtime);
 
-            if (USE_SDVT_CPI)
-               $display("[TB] %t - Using CAM SDVT", $realtime);
-            else
-               $display("[TB] %t - Not using CAM SDVT", $realtime);
+               if (USE_SDVT_CPI)
+                  $display("[TB] %t - Using CAM SDVT", $realtime);
+               else
+                  $display("[TB] %t - Not using CAM SDVT", $realtime);
 
 
-            // read in the stimuli vectors  == address_value
-            $readmemh("./vectors/stim.txt", stimuli);
+               // read in the stimuli vectors  == address_value
+               $readmemh("./vectors/stim.txt", stimuli);
 
-         end
+               // before starting the actual boot procedure we do some light
+               // testing on the jtag link
+               jtag_pkg::jtag_reset(s_tck, s_tms, s_trstn, s_tdi);
+               jtag_pkg::jtag_softreset(s_tck, s_tms, s_trstn, s_tdi);
+               #5us;
 
-         $display("[TB] %t - Asserting hard reset", $realtime);
-         s_rst_n = 1'b0;
+               jtag_pkg::jtag_bypass_test(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+               #5us;
 
-         #1ns
+               jtag_pkg::jtag_get_idcode(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+               #5us;
 
-         uart_tb_rx_en   = 1'b1; // enable uart rx in testbench
+               test_mode_if.init(s_tck, s_tms, s_trstn, s_tdi);
 
-         if (ENABLE_EXTERNAL_DRIVER == 0 && ENABLE_OPENOCD == 0) begin
+               jtag_conf_reg = {USE_FLL ? 1'b0 : 1'b1, 6'b0, LOAD_L2 == "JTAG" ? 2'b11 : 2'b00};
+               $display("[TB] %t - Enabling clock out via jtag", $realtime);
 
-            // before starting the actual boot procedure we do some light
-            // testing on the jtag link
-            jtag_pkg::jtag_reset(s_tck, s_tms, s_trstn, s_tdi);
-            jtag_pkg::jtag_softreset(s_tck, s_tms, s_trstn, s_tdi);
-            #5us;
+               test_mode_if.set_confreg(jtag_conf_reg, jtag_conf_rego,
+                   s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
-            jtag_pkg::jtag_bypass_test(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-            #5us;
+               $display("[TB] %t - jtag_conf_reg set to %x", $realtime, jtag_conf_reg);
 
-            jtag_pkg::jtag_get_idcode(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-            #5us;
+               $display("[TB] %t - Releasing hard reset", $realtime);
+               s_rst_n = 1'b1;
 
-            test_mode_if.init(s_tck, s_tms, s_trstn, s_tdi);
+               //test if the PULP tap che write to the L2
+               pulp_tap.init(s_tck, s_tms, s_trstn, s_tdi);
 
-            jtag_conf_reg = {USE_FLL ? 1'b0 : 1'b1, 6'b0, LOAD_L2 == "JTAG" ? 2'b11 : 2'b00};
-            $display("[TB] %t - Enabling clock out via jtag", $realtime);
+               $display("[TB] %t - Init PULP TAP", $realtime);
 
-            test_mode_if.set_confreg(jtag_conf_reg, jtag_conf_rego,
-                s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+               pulp_tap.write32(BEGIN_L2_INSTR, 1, 32'hABBAABBA,
+                   s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
-            $display("[TB] %t - jtag_conf_reg set to %x", $realtime, jtag_conf_reg);
+               $display("[TB] %t - Write32 PULP TAP", $realtime);
 
-            $display("[TB] %t - Releasing hard reset", $realtime);
-            s_rst_n = 1'b1;
+               #50us;
+               pulp_tap.read32(BEGIN_L2_INSTR, 1, jtag_data,
+                   s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
-            //test if the PULP tap che write to the L2
-            pulp_tap.init(s_tck, s_tms, s_trstn, s_tdi);
+               if(jtag_data[0] != 32'hABBAABBA)
+                   $display("[JTAG] R/W test of L2 failed: %h != %h", jtag_data[0], 32'hABBAABBA);
+               else
+                   $display("[JTAG] R/W test of L2 succeeded");
 
-            $display("[TB] %t - Init PULP TAP", $realtime);
+               // From here on starts the actual jtag booting
 
-            pulp_tap.write32(BEGIN_L2_INSTR, 1, 32'hABBAABBA,
-                s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+               // Setup debug module and hart, halt hart and set dpc (return point
+               // for boot).
+               // Halting the fc hart transfers control of the program execution to
+               // the debug module. This might take a bit until the debug request
+               // signal is propagated so meanwhile the core is executing stuff
+               // from the bootrom. For jtag booting (what we are doing right now),
+               // bootsel is low so the code that is being executed in said bootrom
+               // is only a busy wait or wfi until the debug unit grabs control.
+               debug_mode_if.init_dmi_access(s_tck, s_tms, s_trstn, s_tdi);
 
-            $display("[TB] %t - Write32 PULP TAP", $realtime);
+               debug_mode_if.set_dmactive(1'b1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
-            #50us;
-            pulp_tap.read32(BEGIN_L2_INSTR, 1, jtag_data,
-                s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+               debug_mode_if.set_hartsel(FC_CORE_ID, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
-            if(jtag_data[0] != 32'hABBAABBA)
-                $display("[JTAG] R/W test of L2 failed: %h != %h", jtag_data[0], 32'hABBAABBA);
-            else
-                $display("[JTAG] R/W test of L2 succeeded");
+               $display("[TB] %t - Halting the Core", $realtime);
+               debug_mode_if.halt_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
-            // From here on starts the actual jtag booting
+               $display("[TB] %t - Writing the boot address into dpc", $realtime);
+               debug_mode_if.write_reg_abstract_cmd(riscv::CSR_DPC, BEGIN_L2_INSTR,
+                   s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
-            // Setup debug module and hart, halt hart and set dpc (return point
-            // for boot).
-            // Halting the fc hart transfers control of the program execution to
-            // the debug module. This might take a bit until the debug request
-            // signal is propagated so meanwhile the core is executing stuff
-            // from the bootrom. For jtag booting (what we are doing right now),
-            // bootsel is low so the code that is being executed in said bootrom
-            // is only a busy wait or wfi until the debug unit grabs control.
-            debug_mode_if.init_dmi_access(s_tck, s_tms, s_trstn, s_tdi);
+               // long debug module + jtag tests
+               if(ENABLE_DM_TESTS == 1) begin
+                  debug_mode_if.run_dm_tests(FC_CORE_ID, BEGIN_L2_INSTR,
+                                           error, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+               end
 
-            debug_mode_if.set_dmactive(1'b1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-
-            debug_mode_if.set_hartsel(FC_CORE_ID, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-
-            $display("[TB] %t - Halting the Core", $realtime);
-            debug_mode_if.halt_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-
-            $display("[TB] %t - Writing the boot address into dpc", $realtime);
-            debug_mode_if.write_reg_abstract_cmd(riscv::CSR_DPC, BEGIN_L2_INSTR,
-                s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-
-            // long debug module + jtag tests
-            if(ENABLE_DM_TESTS == 1) begin
-               debug_mode_if.run_dm_tests(FC_CORE_ID, BEGIN_L2_INSTR,
-                                        error, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-            end
-
-            if(LOAD_L2 == "JTAG") begin
                $display("[TB] %t - Loading L2", $realtime);
                if (USE_PULP_BUS_ACCESS) begin
                   // use pulp tap to load binary, put debug module in bypass
                   pulp_tap_pkg::load_L2(num_stim, stimuli, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-                  // configure for debug module dmi access again
-                  debug_mode_if.init_dmi_access(s_tck, s_tms, s_trstn, s_tdi);
-                  // enable sb access for subsequent readMem calls
-                  debug_mode_if.set_sbreadonaddr(1'b1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
                end else begin
                   // use debug module to load binary
                   debug_mode_if.load_L2(num_stim, stimuli, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
                end
+
+               // configure for debug module dmi access again
+               debug_mode_if.init_dmi_access(s_tck, s_tms, s_trstn, s_tdi);
+
+               // we have set dpc and loaded the binary, we can go now
+               $display("[TB] %t - Resuming the CORE", $realtime);
+               debug_mode_if.resume_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
             end
-
-            // we have set dpc and loaded the binary, we can go now
-            $display("[TB] %t - Resuming the CORE", $realtime);
-            debug_mode_if.resume_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-
 
             if (ENABLE_DPI == 1) begin
                jtag_mux = JTAG_DPI;
@@ -736,13 +743,16 @@ module tb_pulp;
             // make sure that we can drive the SSPI lines when not in use
             s_padmode_spi_master = SPI_QUAD_RX;
 
-            jtag_data[0] = 0;
+            // enable sb access for subsequent readMem calls
+            debug_mode_if.set_sbreadonaddr(1'b1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
             // wait for end of computation signal
             $display("[TB] %t - Waiting for end of computation", $realtime);
 
+            jtag_data[0] = 0;
             while(jtag_data[0][31] == 0) begin
                debug_mode_if.readMem(32'h1A1040A0, jtag_data[0], s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
                #50us;
             end
 
@@ -754,17 +764,7 @@ module tb_pulp;
 
             $stop;
 
-         end else if (ENABLE_EXTERNAL_DRIVER == 1) begin
-            #1us
-               dev_dpi_en <= 1;
-         end else begin // ENABLE_OPENOCD == 1
-
-            s_bootsel = 1'b0;
-            s_rst_n = 1'b1;
-            $display("[TB] %t - Releasing hard reset", $realtime);
-
          end
-
       end
 
 
