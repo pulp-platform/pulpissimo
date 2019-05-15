@@ -90,7 +90,7 @@ package jtag_pkg;
       jtag_clock(5, s_tck); //enter RST
       s_tms   = 1'b0;
       jtag_clock(1, s_tck); // back to IDLE
-      $display("JTAG: SoftReset Done(%t)",$realtime);
+      $display("[JTAG] SoftReset Done(%t)",$realtime);
 
    endtask
 
@@ -361,11 +361,11 @@ package jtag_pkg;
       logic [31+1:0] s_idcode;
       jtag_idcode.setIR(s_tck, s_tms, s_trstn, s_tdi);
       jtag_idcode.shift('0, s_idcode, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-      $display("JTAG: Tap ID: %h (%t)",s_idcode[32:1], $realtime);
+      $display("[JTAG] Tap ID: %h (%t)",s_idcode[32:1], $realtime);
       if(s_idcode[32:1] !== 32'h249511C3) begin
-         $display("JTAG: Tap ID Test FAILED (%t)", $realtime);
+         $display("[JTAG] Tap ID Test FAILED (%t)", $realtime);
       end else begin
-         $display("JTAG: Tap ID Test PASSED (%t)", $realtime);
+         $display("[JTAG] Tap ID Test PASSED (%t)", $realtime);
       end
    endtask
 
@@ -383,12 +383,12 @@ package jtag_pkg;
       jtag_bypass.setIR(s_tck, s_tms, s_trstn, s_tdi);
       jtag_bypass.shift(test_data, result_data, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
       if (test_data[253:0] === result_data[255:2])
-         $display("JTAG: Bypass Test Passed (%t)", $realtime);
+         $display("[JTAG] Bypass Test Passed (%t)", $realtime);
       else
       begin
-         $display("JTAG: Bypass Test Failed");
-         $display("JTAG:   LSB WORD TEST = %h (%t)",test_data[31:0], $realtime);
-         $display("JTAG:   LSB WORD RES  = %h (%t)",result_data[32:1], $realtime);
+         $display("[JTAG] Bypass Test Failed");
+         $display("[JTAG]   LSB WORD TEST = %h (%t)",test_data[31:0], $realtime);
+         $display("[JTAG]   LSB WORD RES  = %h (%t)",result_data[32:1], $realtime);
       end
    endtask
 
@@ -963,8 +963,8 @@ package jtag_pkg;
          ref logic s_tdo
       );
          logic [31:0] buffer;
-         JTAG_reg #(.size(32+1), .instr({JTAG_SOC_DTMCSR, JTAG_SOC_BYPASS})) jtag_soc_dbg = new;
-         jtag_soc_dbg.setIR(s_tck, s_tms, s_trstn, s_tdi);
+         init_dtmcs(s_tck, s_tms, s_trstn, s_tdi);
+
          this.read_dtmcs(
                buffer,
                s_tck,
@@ -1480,7 +1480,7 @@ package jtag_pkg;
          this.set_sbreadonaddr(1'b0, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          this.set_sbautoincrement(1'b0, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
-         $display("[JTAG] Loading L2 with jtag interface");
+         $display("[JTAG] Loading L2 with debug module jtag interface");
 
          spi_addr_old = spi_addr - 32'h8;
 

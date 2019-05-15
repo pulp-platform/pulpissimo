@@ -577,7 +577,7 @@ package pulp_tap_pkg;
       spi_addr        = stimuli[num_stim][95:64]; // assign address
       jtag_data[0]    = stimuli[num_stim][63:0];  // assign data
 
-      $display("[JTAG] Loading L2 with jtag interface");
+      $display("[JTAG] Loading L2 with pulp tap jtag interface");
       pulp_tap.init(s_tck, s_tms, s_trstn, s_tdi);
 
       spi_addr_old = spi_addr - 32'h8;
