@@ -448,7 +448,19 @@ package jtag_pkg;
 
    class debug_mode_if_t;
 
-      task init(
+
+      task init_dmi_access(
+         ref logic s_tck,
+         ref logic s_tms,
+         ref logic s_trstn,
+         ref logic s_tdi
+      );
+         JTAG_reg #(.size(32+1), .instr({JTAG_SOC_DMIACCESS, JTAG_SOC_BYPASS})) jtag_soc_dbg = new;
+         jtag_soc_dbg.setIR(s_tck, s_tms, s_trstn, s_tdi);
+
+      endtask
+
+      task init_dtmcs(
          ref logic s_tck,
          ref logic s_tms,
          ref logic s_trstn,
@@ -461,7 +473,7 @@ package jtag_pkg;
       endtask
 
 
-      task init_long(
+      task dump_dm_info(
          ref logic s_tck,
          ref logic s_tms,
          ref logic s_trstn,
@@ -483,10 +495,8 @@ package jtag_pkg;
          dm::dmstatus_t  dmstatus;
          dtmcs_t dtmcs;
 
-         //Read Info
-         JTAG_reg #(.size(32+1), .instr({JTAG_SOC_DTMCSR, JTAG_SOC_BYPASS})) jtag_soc_dbg = new;
-         jtag_soc_dbg.setIR(s_tck, s_tms, s_trstn, s_tdi);
          $display("[TB] %t - Init", $realtime);
+         this.init_dtmcs(s_tck, s_tms, s_trstn, s_tdi);
 
          this.read_dtmcs(dtmcs, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
@@ -500,12 +510,7 @@ package jtag_pkg;
                   $realtime, dtmcs, dtmcs.dmihardreset, dtmcs.dmireset, dtmcs.idle,
              dtmcs.dmistat, dtmcs.abits, dtmcs.version);
 
-         this.init_dmi(
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi
-            );
+         this.init_dmi_access(s_tck, s_tms, s_trstn, s_tdi);
 
          this.read_debug_reg(dm::DMStatus, dmstatus,
              s_tck, s_tms, s_trstn, s_tdi, s_tdo);
@@ -541,7 +546,7 @@ package jtag_pkg;
           dm::dmcontrol_t dmcontrol;
 
          // TODO: we probably don't need to rescan IR
-         this.init_dmi(s_tck, s_tms, s_trstn, s_tdi);
+         this.init_dmi_access(s_tck, s_tms, s_trstn, s_tdi);
          this.read_debug_reg(dm::DMControl, dmcontrol,
                              s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
@@ -584,7 +589,7 @@ package jtag_pkg;
           dm::dmcontrol_t dmcontrol;
 
          // TODO: we probably don't need to rescan IR
-         this.init_dmi(s_tck, s_tms, s_trstn, s_tdi);
+         this.init_dmi_access(s_tck, s_tms, s_trstn, s_tdi);
          this.read_debug_reg(dm::DMControl, dmcontrol,
                              s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
@@ -819,20 +824,6 @@ package jtag_pkg;
                s_tdi,
                s_tdo
             );
-
-      endtask
-
-      task init_dmi(
-         ref logic s_tck,
-         ref logic s_tms,
-         ref logic s_trstn,
-         ref logic s_tdi
-      );
-         //Read Info
-         JTAG_reg #(.size(32+1), .instr({JTAG_SOC_DMIACCESS, JTAG_SOC_BYPASS})) jtag_soc_dbg = new;
-         // we should almost never be necessary to scan IR (see ricsv-debug p.71)
-         jtag_soc_dbg.setIR(s_tck, s_tms, s_trstn, s_tdi);
-//         $display("[debug_mode_if_t] %t - Init DMI Access", $realtime);
 
       endtask
 
@@ -1385,7 +1376,7 @@ package jtag_pkg;
             if(dm_op == '1) begin
                $display("dmi_reset at time %t",$realtime);
                this.dmi_reset(s_tck,s_tms,s_trstn,s_tdi,s_tdo);
-               this.init_dmi(s_tck,s_tms,s_trstn,s_tdi);
+               this.init_dmi_access(s_tck,s_tms,s_trstn,s_tdi);
             end
 
          end
@@ -1409,7 +1400,7 @@ package jtag_pkg;
                if(dm_op == '1) begin
                   $display("dmi_reset at time %t",$realtime);
                   this.dmi_reset(s_tck,s_tms,s_trstn,s_tdi,s_tdo);
-                  this.init_dmi(s_tck,s_tms,s_trstn,s_tdi);
+                  this.init_dmi_access(s_tck,s_tms,s_trstn,s_tdi);
                end
 
          end
@@ -2629,6 +2620,8 @@ package jtag_pkg;
       );
           logic [31:0] dm_data;
 
+
+         dump_dm_info(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          // $display("[TB] %t - TEST discover harts", $realtime);
          // debug_mode_if.test_discover_harts(dm_data[0],
          //                                   s_tck, s_tms, s_trstn, s_tdi, s_tdo);

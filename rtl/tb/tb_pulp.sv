@@ -689,7 +689,7 @@ module tb_pulp;
             // from the bootrom. For jtag booting (what we are doing right now),
             // bootsel is low so the code that is being executed in said bootrom
             // is only a busy wait or wfi until the debug unit grabs control.
-            debug_mode_if.init_long(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+            debug_mode_if.init_dmi_access(s_tck, s_tms, s_trstn, s_tdi);
 
             debug_mode_if.set_dmactive(1'b1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
@@ -714,7 +714,7 @@ module tb_pulp;
                   // use pulp tap to load binary, put debug module in bypass
                   dbg_pkg::load_L2(num_stim, stimuli, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
                   // configure for debug module dmi access again
-                  debug_mode_if.init_dmi(s_tck, s_tms, s_trstn, s_tdi);
+                  debug_mode_if.init_dmi_access(s_tck, s_tms, s_trstn, s_tdi);
                   // enable sb access for subsequent readMem calls
                   debug_mode_if.set_sbreadonaddr(1'b1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
                end else begin
