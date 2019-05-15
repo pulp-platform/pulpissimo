@@ -111,7 +111,7 @@ module tb_pulp;
 
    jtag_pkg::test_mode_if_t   test_mode_if = new;
    jtag_pkg::debug_mode_if_t  debug_mode_if = new;
-   dbg_pkg::dbg_if_soc_t      dbg_if_soc = new;
+   pulp_tap_pkg::pulp_tap_if_soc_t pulp_tap = new;
 
    /* system wires */
    // the w_/s_ prefixes are used to mean wire/tri-type and logic-type (respectively)
@@ -661,17 +661,17 @@ module tb_pulp;
             $display("[TB] %t - Releasing hard reset", $realtime);
 
             //test if the PULP tap che write to the L2
-            dbg_if_soc.init(s_tck, s_tms, s_trstn, s_tdi);
+            pulp_tap.init(s_tck, s_tms, s_trstn, s_tdi);
 
             $display("[TB] %t - Init PULP TAP", $realtime);
 
-            dbg_if_soc.write32(BEGIN_L2_INSTR, 1, 32'hABBAABBA,
+            pulp_tap.write32(BEGIN_L2_INSTR, 1, 32'hABBAABBA,
                 s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
             $display("[TB] %t - Write32 PULP TAP", $realtime);
 
             #50us;
-            dbg_if_soc.read32(BEGIN_L2_INSTR, 1, jtag_data,
+            pulp_tap.read32(BEGIN_L2_INSTR, 1, jtag_data,
                 s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
             if(jtag_data[0] != 32'hABBAABBA)
@@ -712,7 +712,7 @@ module tb_pulp;
                $display("[TB] %t - Loading L2", $realtime);
                if (USE_PULP_BUS_ACCESS) begin
                   // use pulp tap to load binary, put debug module in bypass
-                  dbg_pkg::load_L2(num_stim, stimuli, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+                  pulp_tap_pkg::load_L2(num_stim, stimuli, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
                   // configure for debug module dmi access again
                   debug_mode_if.init_dmi_access(s_tck, s_tms, s_trstn, s_tdi);
                   // enable sb access for subsequent readMem calls
