@@ -1122,6 +1122,7 @@ package jtag_pkg;
              if (dmi_op == 2'h3) begin
                  $display("[TB] %t retrying debug reg access", $realtime);
                  this.dmi_reset(s_tck,s_tms,s_trstn,s_tdi,s_tdo);
+                 this.init_dmi_access(s_tck,s_tms,s_trstn,s_tdi);
              end
 
          end while (dmi_op != 2'h0);
@@ -1188,6 +1189,7 @@ package jtag_pkg;
              if (dmi_op == 2'h3) begin
                  $display("[TB] %t retrying debug reg access", $realtime);
                  this.dmi_reset(s_tck,s_tms,s_trstn,s_tdi,s_tdo);
+                 this.init_dmi_access(s_tck,s_tms,s_trstn,s_tdi);
              end
 
          end while (dmi_op != 2'h0);
