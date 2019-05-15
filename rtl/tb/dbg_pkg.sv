@@ -453,9 +453,9 @@ package dbg_pkg;
       );
          logic [255:0] dataout;
          jtag_soc_dbg.start_shift(s_tck, s_tms, s_trstn, s_tdi);
-         jtag_soc_dbg.shift_nbits(6, DBG_MODULE, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         jtag_soc_dbg.shift_nbits(6+1, {1'b0, DBG_MODULE}, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          jtag_soc_dbg.update_and_goto_shift(s_tck, s_tms, s_trstn, s_tdi);
-         jtag_soc_dbg.shift_nbits(53,{DBG_WRITE8, addr, nwords[15:0]}, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         jtag_soc_dbg.shift_nbits(53+1,{1'b0, DBG_WRITE8, addr, nwords[15:0]}, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          jtag_soc_dbg.update_and_goto_shift(s_tck, s_tms, s_trstn, s_tdi);
          jtag_soc_dbg.shift_nbits_noex(9, {data[0], 1'b1}, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          for(int i=1; i<nwords; i++)
@@ -477,9 +477,9 @@ package dbg_pkg;
       );
          logic [255:0] dataout;
          jtag_soc_dbg.start_shift(s_tck, s_tms, s_trstn, s_tdi);
-         jtag_soc_dbg.shift_nbits(6, DBG_MODULE, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         jtag_soc_dbg.shift_nbits(6+1, {1'b0, DBG_MODULE}, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          jtag_soc_dbg.update_and_goto_shift(s_tck, s_tms, s_trstn, s_tdi);
-         jtag_soc_dbg.shift_nbits(53,{DBG_WRITE16, addr, nwords[15:0]}, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         jtag_soc_dbg.shift_nbits(53+1,{1'b0, DBG_WRITE16, addr, nwords[15:0]}, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          jtag_soc_dbg.update_and_goto_shift(s_tck, s_tms, s_trstn, s_tdi);
          jtag_soc_dbg.shift_nbits_noex(17, {data[0], 1'b1}, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          for(int i=1; i<nwords; i++)
@@ -500,15 +500,16 @@ package dbg_pkg;
          ref logic s_tdo
       );
          logic [255:0] dataout;
+
          jtag_soc_dbg.start_shift(s_tck, s_tms, s_trstn, s_tdi);
          jtag_soc_dbg.shift_nbits(6+1, {1'b0, DBG_MODULE}, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          jtag_soc_dbg.update_and_goto_shift(s_tck, s_tms, s_trstn, s_tdi);
          jtag_soc_dbg.shift_nbits(53+1,{1'b0, DBG_WRITE32, addr, nwords[15:0]}, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          jtag_soc_dbg.update_and_goto_shift(s_tck, s_tms, s_trstn, s_tdi);
-         jtag_soc_dbg.shift_nbits_noex(33+1, {1'b0, data[0], 1'b1}, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         jtag_soc_dbg.shift_nbits_noex(33, {data[0], 1'b1}, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          for(int i=1; i<nwords; i++)
-            jtag_soc_dbg.shift_nbits_noex(32+1, {1'b0,data[i]}, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-         jtag_soc_dbg.shift_nbits(34+1, {2'b0, 32'h11111111}, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo); // for now we completely ignore CRC
+            jtag_soc_dbg.shift_nbits_noex(32, data[i], dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         jtag_soc_dbg.shift_nbits(34, {2'b0, 32'h11111111}, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo); // for now we completely ignore CRC
          jtag_soc_dbg.idle(s_tck, s_tms, s_trstn, s_tdi);
          $display("[dbg_if_soc] WRITE32 burst @%h for %d bytes.", addr, nwords*4);
       endtask
@@ -525,9 +526,9 @@ package dbg_pkg;
       );
          logic [255:0] dataout;
          jtag_soc_dbg.start_shift(s_tck, s_tms, s_trstn, s_tdi);
-         jtag_soc_dbg.shift_nbits(6, DBG_MODULE, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         jtag_soc_dbg.shift_nbits(6+1, {1'b0, DBG_MODULE}, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          jtag_soc_dbg.update_and_goto_shift(s_tck, s_tms, s_trstn, s_tdi);
-         jtag_soc_dbg.shift_nbits(53,{DBG_WRITE64, addr, nwords[15:0]}, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         jtag_soc_dbg.shift_nbits(53,{1'b0, DBG_WRITE64, addr, nwords[15:0]}, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          jtag_soc_dbg.update_and_goto_shift(s_tck, s_tms, s_trstn, s_tdi);
          jtag_soc_dbg.shift_nbits_noex(65, {data[0], 1'b1}, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          for(int i=1; i<nwords; i++)
@@ -558,13 +559,13 @@ package dbg_pkg;
            jtag_soc_dbg.shift_nbits_noex(1, 1'b0, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
            if(dataout[0] == 1'b1) break;
          end
-         jtag_soc_dbg.shift_nbits_noex(8+1, {1'b0,8'b0}, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         jtag_soc_dbg.shift_nbits_noex(8, 8'b0, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          data[0] = dataout[7:0];
          for(int i=1; i<nwords; i++) begin
-            jtag_soc_dbg.shift_nbits_noex(8+1, {1'b0,8'b0}, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+            jtag_soc_dbg.shift_nbits_noex(8, 8'b0, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
             data[i] = dataout[7:0];
          end
-         jtag_soc_dbg.shift_nbits(34+1, {1'b0, 2'b0, 32'b0}, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo); // for now we completely ignore CRC
+         jtag_soc_dbg.shift_nbits(34, {2'b0, 32'b0}, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo); // for now we completely ignore CRC
          jtag_soc_dbg.idle(s_tck, s_tms, s_trstn, s_tdi);
          $display("[dbg_if_soc] READ8 burst @%h for %d bytes.", addr, nwords);
       endtask
@@ -581,9 +582,9 @@ package dbg_pkg;
       );
          logic [255:0] dataout;
          jtag_soc_dbg.start_shift(s_tck, s_tms, s_trstn, s_tdi);
-         jtag_soc_dbg.shift_nbits(6, DBG_MODULE, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         jtag_soc_dbg.shift_nbits(6+1, {1'b0, DBG_MODULE}, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          jtag_soc_dbg.update_and_goto_shift(s_tck, s_tms, s_trstn, s_tdi);
-         jtag_soc_dbg.shift_nbits(53,{DBG_READ16, addr, nwords[15:0]}, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         jtag_soc_dbg.shift_nbits(53+1,{1'b0, DBG_READ16, addr, nwords[15:0]}, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          jtag_soc_dbg.update_and_goto_shift(s_tck, s_tms, s_trstn, s_tdi);
          while(1) // wait for a '1' from the AXI module
          begin
@@ -622,13 +623,13 @@ package dbg_pkg;
            jtag_soc_dbg.shift_nbits_noex(1, 1'b0, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
            if(dataout[0] == 1'b1) break;
          end
-         jtag_soc_dbg.shift_nbits_noex(32+1, 33'b0, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         jtag_soc_dbg.shift_nbits_noex(32, 32'b0, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          data[0] = dataout[31:0];
          for(int i=1; i<nwords; i++) begin
-            jtag_soc_dbg.shift_nbits_noex(32+1,{1'b0,32'b0}, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+            jtag_soc_dbg.shift_nbits_noex(32,{32'b0}, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
             data[i] = dataout[31:0];
          end
-         jtag_soc_dbg.shift_nbits(34+1, {1'b0, 2'b0, 32'b0}, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo); // for now we completely ignore CRC
+         jtag_soc_dbg.shift_nbits(34, {2'b0, 32'b0}, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo); // for now we completely ignore CRC
          jtag_soc_dbg.idle(s_tck, s_tms, s_trstn, s_tdi);
          // $display("[dbg_if_soc] READ32 burst @%h for %d bytes.", addr, nwords*4);
       endtask
@@ -645,9 +646,9 @@ package dbg_pkg;
       );
          logic [255:0] dataout;
          jtag_soc_dbg.start_shift(s_tck, s_tms, s_trstn, s_tdi);
-         jtag_soc_dbg.shift_nbits(6, DBG_MODULE, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         jtag_soc_dbg.shift_nbits(6+1, {1'b0, DBG_MODULE}, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          jtag_soc_dbg.update_and_goto_shift(s_tck, s_tms, s_trstn, s_tdi);
-         jtag_soc_dbg.shift_nbits(53,{DBG_READ64, addr, nwords[15:0]}, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+         jtag_soc_dbg.shift_nbits(53+1,{1'b0, DBG_READ64, addr, nwords[15:0]}, dataout, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          jtag_soc_dbg.update_and_goto_shift(s_tck, s_tms, s_trstn, s_tdi);
          while(1) // wait for a '1' from the AXI module
          begin
@@ -699,7 +700,7 @@ package dbg_pkg;
      dbg_if.cpu_write(cpu_id, {16'b0, 6'b1, 5'b0, addr}, 1, tmp, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
    endtask
 
-   task automatic jtag_load_L2(
+   task automatic load_L2(
       input int          num_stim,
       ref   logic [95:0] stimuli [100000:0],
       ref logic s_tck,
@@ -751,6 +752,6 @@ package dbg_pkg;
 
       end
 
-   endtask : jtag_load_L2
+   endtask : load_L2
 
 endpackage

@@ -452,6 +452,19 @@ package jtag_pkg;
          ref logic s_tck,
          ref logic s_tms,
          ref logic s_trstn,
+         ref logic s_tdi
+      );
+
+         JTAG_reg #(.size(32+1), .instr({JTAG_SOC_DTMCSR, JTAG_SOC_BYPASS})) jtag_soc_dbg = new;
+         jtag_soc_dbg.setIR(s_tck, s_tms, s_trstn, s_tdi);
+
+      endtask
+
+
+      task init_long(
+         ref logic s_tck,
+         ref logic s_tms,
+         ref logic s_trstn,
          ref logic s_tdi,
          ref logic s_tdo
       );
