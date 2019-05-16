@@ -28,10 +28,15 @@ module soc_domain #(
     input logic                              slow_clk_i,
     input logic                              test_clk_i,
 
-`ifdef PULP_FPGA_EMUL
-    input  logic                             zynq_soc_clk_i,
-    input  logic                             zynq_per_clk_i,
-`endif
+    `ifdef PULP_FPGA
+    	input logic                          ref_clk_fll_i,
+	`endif
+    
+	//led 
+	`ifdef PULP_FPGA_DEBUG
+		output logic 						clk_soc_led,
+		output logic 						clk_per_led,
+	`endif
 
     input  logic                             rstn_glob_i,
 
@@ -117,6 +122,7 @@ module soc_domain #(
     output logic                       [3:0] sdio_data_oen_o
 
 
+/*
 `ifdef PULP_FPGA_EMUL
  `ifdef TRACE_EXECUTION
    ,
@@ -126,6 +132,7 @@ module soc_domain #(
    output logic [NB_CORES-1:0]               instr_trace_valid_o
  `endif // `ifdef TRACE_EXECUTION
 `endif // `ifdef PULP_FPGA_EMUL
+*/
     ,
     // CLUSTER
     output logic                             cluster_clk_o,
@@ -271,10 +278,6 @@ module soc_domain #(
    pulp_soc_i
    (
 
-        `ifdef PULP_FPGA_EMUL
-        .zynq_soc_clk_i               ( zynq_soc_clk_i               ),
-        .zynq_per_clk_i               ( zynq_per_clk_i               ),
-        `endif
         .boot_l2_i                    ( 1'b0                         ),
         .*
     );

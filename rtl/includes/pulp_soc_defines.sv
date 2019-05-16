@@ -52,7 +52,7 @@
 
 
 // uncomment if FPGA emulator
-// `define PULP_FPGA_EMUL 1
+// `define PULP_FPGA 1
 // uncomment if using Vivado for ulpcluster synthesis
 `define VIVADO
 
@@ -63,7 +63,7 @@
 
 
 
-`ifdef PULP_FPGA_EMUL
+`ifdef PULP_FPGA
   // `undef  FEATURE_ICACHE_STAT
   `define SCM_BASED_ICACHE
 `endif
@@ -99,7 +99,7 @@
 `define RVT 0
 `define LVT 1
 
-`ifndef PULP_FPGA_EMUL
+`ifndef PULP_FPGA
   `define LEVEL_SHIFTER
 `endif
 

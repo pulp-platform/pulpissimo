@@ -16,6 +16,14 @@ module pad_frame
 
         // REF CLOCK
         output logic            ref_clk_o        ,
+        
+        `ifdef PULP_FPGA
+        	output logic        ref_clk_fll_o    ,
+		`endif
+		
+		`ifdef PULP_FPGA_DEBUG
+			output logic        clk_soc_per_led  ,
+		`endif
 
         // RESET SIGNALS
         output logic            rstn_o           ,
@@ -176,6 +184,8 @@ module pad_frame
 
     );
 
+`ifndef PULP_FPGA
+
     pad_functional_pd padinst_sdio_data0 (.OEN(~oe_sdio_data0_i ), .I(out_sdio_data0_i ), .O(in_sdio_data0_o ), .PAD(pad_sdio_data0 ), .PEN(~pad_cfg_i[22][0]) );
     pad_functional_pd padinst_sdio_data1 (.OEN(~oe_sdio_data1_i ), .I(out_sdio_data1_i ), .O(in_sdio_data1_o ), .PAD(pad_sdio_data1 ), .PEN(~pad_cfg_i[23][0]) );
     pad_functional_pd padinst_sdio_data2 (.OEN(~oe_sdio_data2_i ), .I(out_sdio_data2_i ), .O(in_sdio_data2_o ), .PAD(pad_sdio_data2 ), .PEN(~pad_cfg_i[24][0]) );
@@ -223,5 +233,137 @@ module pad_frame
 
     pad_functional_pu padinst_reset_n    (.OEN(1'b1            ), .I(                ), .O(rstn_o         ), .PAD(pad_reset_n   ), .PEN(1'b1             ) );
     pad_functional_pu padinst_ref_clk    (.OEN(1'b1            ), .I(                ), .O(ref_clk_o      ), .PAD(pad_xtal_in   ), .PEN(1'b1             ) );
+
+`else
+
+	//uart:
+		pad_functional_pu padinst_uart_rx    (.OEN(~oe_uart_rx_i   ), .I(out_uart_rx_i   ), .O(in_uart_rx_o   ), .PAD(pad_uart_rx   ), .PEN(~pad_cfg_i[33][0]) );
+		pad_functional_pu padinst_uart_tx    (.OEN(~oe_uart_tx_i   ), .I(out_uart_tx_i   ), .O(in_uart_tx_o   ), .PAD(pad_uart_tx   ), .PEN(~pad_cfg_i[34][0]) );
+    //i2c:
+		pad_functional_pd padinst_i2c0_sda   (.OEN(~oe_i2c0_sda_i  ), .I(out_i2c0_sda_i  ), .O(in_i2c0_sda_o  ), .PAD(pad_i2c0_sda  ), .PEN(~pad_cfg_i[7][0] ) );
+		pad_functional_pd padinst_i2c0_scl   (.OEN(~oe_i2c0_scl_i  ), .I(out_i2c0_scl_i  ), .O(in_i2c0_scl_o  ), .PAD(pad_i2c0_scl  ), .PEN(~pad_cfg_i[8][0] ) );
+
+    //reset:
+		IBUF testbuf_reset
+		(
+		    .O(rstn_o),
+		    .I(pad_reset_n)
+		);
+
+	//jtag:
+	
+		IBUF testbuf_jtag_tck
+		(
+		    .O(jtag_tck_o),
+		    .I(pad_jtag_tck)
+		);
+		
+		IBUF testbuf_jtag_tms
+		(
+		    .O(jtag_tms_o),
+		    .I(pad_jtag_tms)
+		);
+		
+		IBUF testbuf_jtag_tdi
+		(
+		    .O(jtag_tdi_o),
+		    .I(pad_jtag_tdi)
+		);
+		
+		IBUF testbuf_jtag_trst
+		(
+		    .O(jtag_trst_o),
+		    .I(pad_jtag_trst)
+		);
+		
+		OBUF testbuf_jtag_tdo
+		(
+		    .O(pad_jtag_tdo),
+		    .I(jtag_tdo_i)
+		);
+
+	//clk:
+		logic clkfbin;
+    
+		wire ref_clk_int, ref_clk_pad, ref_clk;
+		wire clk1, clk2, clk3, clk4, clk5, clkfb, lock;
+
+		wire ref_clk_fll_o_int;
+    
+
+		BUFG iobuf_i_new (
+		.I ( pad_xtal_in    ),
+		.O ( ref_clk_pad    )
+		);   
+		
+		assign  ref_clk_int = ref_clk_pad;
+		
+		PLLE2_BASE #(
+			.BANDWIDTH          ( "OPTIMIZED" ),
+			.CLKFBOUT_MULT      ( 9           ),
+			.CLKFBOUT_PHASE     ( 0.0         ),
+			.CLKIN1_PERIOD      ( 5.0         ), //clkin is 200MHz--> 5ns
+			.CLKOUT0_DIVIDE     ( 9           ), //100MHz  --> 1/(  200*9/(9*2)  ) 
+
+			.CLKOUT1_DIVIDE     ( 15          ), // 60 MHz --> 1/(  200*9/(15*2)  )
+	
+			.CLKOUT2_DIVIDE     ( 50          ),
+			.CLKOUT3_DIVIDE     ( 50          ),
+			.CLKOUT4_DIVIDE     ( 50          ),
+			.CLKOUT5_DIVIDE     ( 50          ),
+	
+			.CLKOUT0_DUTY_CYCLE ( 0.5         ),
+			.CLKOUT1_DUTY_CYCLE ( 0.5         ),
+			.CLKOUT2_DUTY_CYCLE ( 0.5         ),
+			.CLKOUT3_DUTY_CYCLE ( 0.5         ),
+			.CLKOUT4_DUTY_CYCLE ( 0.5         ),
+			.CLKOUT5_DUTY_CYCLE ( 0.5         ),
+			.CLKOUT0_PHASE      ( 0.0         ),
+			.CLKOUT1_PHASE      ( 0.0         ),
+			.CLKOUT2_PHASE      ( 0.0         ),
+			.CLKOUT3_PHASE      ( 0.0         ),
+			.CLKOUT4_PHASE      ( 0.0         ),
+			.CLKOUT5_PHASE      ( 0.0         ),
+			.DIVCLK_DIVIDE      ( 2           ), // 100 MHz
+			.REF_JITTER1        ( 0.0         ),
+			.STARTUP_WAIT       ( "TRUE"      )
+		) i_pll_pad_inst (
+			.CLKOUT0  ( ref_clk     ),
+			.CLKOUT1  ( clk1        ),
+			.CLKOUT2  ( clk2        ),
+			.CLKOUT3  ( clk3        ),
+			.CLKOUT4  ( clk4        ),
+			.CLKOUT5  ( clk5        ),
+	
+			.CLKFBOUT ( clkfb       ),
+			.LOCKED   ( lock        ),
+			.CLKIN1   ( ref_clk_int ),
+			.PWRDWN   ( 1'b0        ),
+			.RST      ( ~rstn_o     ),
+			.CLKFBIN  ( clkfbin       )
+		);
+
+		// feedback buffer 
+		BUFG clkf_buf(
+		.O (clkfbin),
+		.I (clkfb)
+		);
+
+		assign clk_soc_per_led = ref_clk_o;
+
+		BUFGCE i_bufgce (
+		   .O  ( ref_clk_o ),
+		   .CE ( lock      ),
+		   .I  ( ref_clk   )
+		);
+		
+		BUFGCE i_bufgce_fll (
+		   .O  ( ref_clk_fll_o ),
+		   .CE ( lock          ),
+		   .I  ( clk1          )
+		);		
+		
+`endif
+
 
 endmodule // pad_frame
