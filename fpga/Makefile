@@ -6,7 +6,6 @@ all:
 gui:
 	vivado -mode gui -source tcl/run.tcl &
 
-
 clean:
 	rm -rf ${PROJECT}.xpr
 	rm -rf ${PROJECT}.data
