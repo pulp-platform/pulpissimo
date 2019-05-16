@@ -12,7 +12,7 @@ set_property board_part digilentinc.com:genesys2:part0:1.1 [current_project]
 
 set dircorr [pwd]
 puts $dircorr
-puts ciao
+
 
 set INCLUDE_DIRS [list \
 	../rtl/includes \
@@ -47,7 +47,6 @@ set_property source_mgmt_mode None [current_project]
 # elaborate design
 # CORE_TYPE=0 --> ri5cy
 # CORE_TYPE=1 --> zeroriscy
-#synth_design -rtl -name rtl_1 -verilog_define PULP_FPGA_EMUL=1 -generic CORE_TYPE=0 -generic USE_FPU=0 -generic USE_HWPE=0
 synth_design -rtl -name rtl_1 -verilog_define PULP_FPGA=1 -verilog_define PULP_FPGA_DEBUG=1 -generic CORE_TYPE=0 -generic USE_FPU=0
 
 # run synthesis
