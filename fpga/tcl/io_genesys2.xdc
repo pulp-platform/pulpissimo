@@ -61,3 +61,5 @@ set_property CLOCK_DEDICATED_ROUTE ANY_CMT_COLUMN [get_nets pulpissimo_i/soc_dom
 
 
 set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {xil_jtag_tck_IBUF}]
+
+set_property CLOCK_DEDICATED_ROUTE ANY_CMT_COLUMN [get_nets pulpissimo_i/soc_domain_i/pulp_soc_i/i_clk_rst_gen/clk_mux_fll_per_i/clk_o]
