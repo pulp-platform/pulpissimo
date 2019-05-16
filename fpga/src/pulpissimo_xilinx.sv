@@ -100,6 +100,7 @@ IBUFDS testbuf
 
 
 //led:
+`ifdef PULP_FPGA_DEBUG
 count_clk
     #(
         .REF_V(45000000)
@@ -149,5 +150,6 @@ assign xil_led0 = xil_led0_int;
 assign xil_led1 = xil_led1_int;
 assign xil_led2 = xil_led2_int;
 assign xil_led3 = xil_led3_int;
+`endif
 
 endmodule
