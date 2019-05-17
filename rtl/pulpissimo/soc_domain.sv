@@ -36,21 +36,13 @@ module soc_domain #(
 
     input  logic                             mode_select_i,
 
-    input  logic                             sel_fll_clk_i,
-
-    input  logic [7:0]                       soc_jtag_reg_i,
-    output logic [7:0]                       soc_jtag_reg_o,
-
-    input logic                              boot_l2_i,
+    input logic                              bootsel_i,
 
     input  logic                             jtag_tck_i,
     input  logic                             jtag_trst_ni,
-    input  logic                             jtag_axireg_tdi_i,
-    output logic                             jtag_axireg_tdo_o,
-    input  logic                             jtag_axireg_sel_i,
-    input  logic                             jtag_shift_dr_i,
-    input  logic                             jtag_update_dr_i,
-    input  logic                             jtag_capture_dr_i,
+    input  logic                             jtag_tms_i,
+    input  logic                             jtag_tdi_i,
+    output logic                             jtag_tdo_o,
 
     input  logic [31:0]                      gpio_in_i,
     output logic [31:0]                      gpio_out_o,
@@ -87,21 +79,22 @@ module soc_domain #(
     output logic                             i2c1_sda_o,
     output logic                             i2c1_sda_oe_o,
 
-    input  logic                             i2s_sd0_i,
-    input  logic                             i2s_sd1_i,
-    input  logic                             i2s_sck_i,
-    input  logic                             i2s_ws_i,
-    output logic                             i2s_sck0_o,
-    output logic                             i2s_ws0_o,
-    output logic [1:0]                       i2s_mode0_o,
-    output logic                             i2s_sck1_o,
-    output logic                             i2s_ws1_o,
-    output logic [1:0]                       i2s_mode1_o,
+    input  logic                             i2s_slave_sd0_i,
+    input  logic                             i2s_slave_sd1_i,
+    input  logic                             i2s_slave_ws_i,
+    output logic                             i2s_slave_ws_o,
+    output logic                             i2s_slave_ws_oe,
+    input  logic                             i2s_slave_sck_i,
+    output logic                             i2s_slave_sck_o,
+    output logic                             i2s_slave_sck_oe,
 
     output logic                             spi_master0_clk_o,
     output logic                             spi_master0_csn0_o,
     output logic                             spi_master0_csn1_o,
-    output logic [1:0]                       spi_master0_mode_o,
+    output logic                             spi_master0_oen0_o,
+    output logic                             spi_master0_oen1_o,
+    output logic                             spi_master0_oen2_o,
+    output logic                             spi_master0_oen3_o,
     output logic                             spi_master0_sdo0_o,
     output logic                             spi_master0_sdo1_o,
     output logic                             spi_master0_sdo2_o,
@@ -264,6 +257,12 @@ module soc_domain #(
    )
    pulp_soc_i
    (
+
+        `ifdef PULP_FPGA_EMUL
+        .zynq_soc_clk_i               ( zynq_soc_clk_i               ),
+        .zynq_per_clk_i               ( zynq_per_clk_i               ),
+        `endif
+        .boot_l2_i                    ( 1'b0                         ),
         .*
     );
 

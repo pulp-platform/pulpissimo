@@ -3,6 +3,7 @@ tb:
     rtl
   ]
   files: [
+    riscv_pkg.sv,
     jtag_pkg.sv,
     dbg_pkg.sv,
     tb_clk_gen.sv,
@@ -10,4 +11,9 @@ tb:
     dpi_models/dpi_models.sv,
     tb_driver/tb_driver.sv,
     tb_pulp.sv,
+    SimJTAG.sv,
+    SimDTM.sv,
+  ]
+  vlog_opts : [
+    -L riscv_dbg_lib,
   ]

@@ -7,8 +7,6 @@
 // this License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
-
-
 `include "pulp_soc_defines.sv"
 
 module safe_domain
@@ -26,25 +24,6 @@ module safe_domain
         output logic             test_mode_o          ,
         output logic             mode_select_o        ,
         output logic             dft_cg_enable_o      ,
-
-        output logic             sel_fll_clk_o,
-
-        input  logic             jtag_tck_i           ,
-        input  logic             jtag_trst_ni         ,
-        input  logic             jtag_tms_i           ,
-        input  logic             jtag_tdi_i           ,
-        output logic             jtag_tdo_o           ,
-
-        output logic             jtag_shift_dr_o      ,
-        output logic             jtag_update_dr_o     ,
-        output logic             jtag_capture_dr_o    ,
-
-        output logic             axireg_sel_o         ,
-        output logic             axireg_tdi_o         ,
-        input  logic             axireg_tdo_i         ,
-
-        input  logic       [7:0] soc_jtag_reg_i       ,
-        output logic       [7:0] soc_jtag_reg_o       ,
 
         //**********************************************************
         //*** PERIPHERALS SIGNALS **********************************
@@ -83,16 +62,14 @@ module safe_domain
         input  logic             i2c1_sda_oe_i        ,
 
         // I2S
-        output  logic            i2s_sd0_in_o         ,
-        output  logic            i2s_sd1_in_o         ,
-        output  logic            i2s_sck_in_o         ,
-        output  logic            i2s_ws_in_o          ,
-        input   logic            i2s_sck0_out_i       ,
-        input   logic            i2s_ws0_out_i        ,
-        input   logic [1:0]      i2s_mode0_out_i      ,
-        input   logic            i2s_sck1_out_i       ,
-        input   logic            i2s_ws1_out_i        ,
-        input   logic [1:0]      i2s_mode1_out_i      ,
+        output logic             i2s_slave_sd0_o      ,
+        output logic             i2s_slave_sd1_o      ,
+        output logic             i2s_slave_ws_o       ,
+        input  logic             i2s_slave_ws_i       ,
+        input  logic             i2s_slave_ws_oe      ,
+        output logic             i2s_slave_sck_o      ,
+        input  logic             i2s_slave_sck_i      ,
+        input  logic             i2s_slave_sck_oe     ,
 
         // SPI MASTER
         input  logic             spi_master0_csn0_i   ,
@@ -106,7 +83,10 @@ module safe_domain
         input  logic             spi_master0_sdo1_i   ,
         input  logic             spi_master0_sdo2_i   ,
         input  logic             spi_master0_sdo3_i   ,
-        input  logic [1:0]       spi_master0_mode_i,
+        input  logic             spi_master0_oen0_i   ,
+        input  logic             spi_master0_oen1_i   ,
+        input  logic             spi_master0_oen2_i   ,
+        input  logic             spi_master0_oen3_i   ,
 
         input  logic             spi_master1_csn0_i   ,
         input  logic             spi_master1_csn1_i   ,
@@ -241,18 +221,16 @@ module safe_domain
         output logic             oe_i2s0_sck_o        ,
         output logic             oe_i2s0_ws_o         ,
         output logic             oe_i2s0_sdi_o        ,
-        output logic             oe_i2s1_sdi_o        ,
-
-        output logic             boot_l2_o
+        output logic             oe_i2s1_sdi_o
     );
 
     logic        s_test_clk;
 
     logic        s_rtc_int;
     logic        s_gpio_wake;
-    logic        s_jtag_rstn;
     logic        s_rstn_sync;
     logic        s_rstn;
+
 
     //**********************************************************
     //*** GPIO CONFIGURATIONS **********************************
@@ -294,16 +272,14 @@ module safe_domain
         .i2c1_sda_in_o         ( i2c1_sda_in_o         ),
         .i2c1_sda_oe_i         ( i2c1_sda_oe_i         ),
 
-        .i2s_sd0_in_o          ( i2s_sd0_in_o          ),
-        .i2s_sd1_in_o          ( i2s_sd1_in_o          ),
-        .i2s_sck_in_o          ( i2s_sck_in_o          ),
-        .i2s_ws_in_o           ( i2s_ws_in_o           ),
-        .i2s_sck0_out_i        ( i2s_sck0_out_i        ),
-        .i2s_ws0_out_i         ( i2s_ws0_out_i         ),
-        .i2s_mode0_out_i       ( i2s_mode0_out_i       ),
-        .i2s_sck1_out_i        ( i2s_sck1_out_i        ),
-        .i2s_ws1_out_i         ( i2s_ws1_out_i         ),
-        .i2s_mode1_out_i       ( i2s_mode1_out_i       ),
+        .i2s_slave_sd0_o       ( i2s_slave_sd0_o       ),
+        .i2s_slave_sd1_o       ( i2s_slave_sd1_o       ),
+        .i2s_slave_ws_o        ( i2s_slave_ws_o        ),
+        .i2s_slave_ws_i        ( i2s_slave_ws_i        ),
+        .i2s_slave_ws_oe       ( i2s_slave_ws_oe       ),
+        .i2s_slave_sck_o       ( i2s_slave_sck_o       ),
+        .i2s_slave_sck_i       ( i2s_slave_sck_i       ),
+        .i2s_slave_sck_oe      ( i2s_slave_sck_oe      ),
 
         .spi_master0_csn0_i    ( spi_master0_csn0_i    ),
         .spi_master0_csn1_i    ( spi_master0_csn1_i    ),
@@ -316,7 +292,10 @@ module safe_domain
         .spi_master0_sdo1_i    ( spi_master0_sdo1_i    ),
         .spi_master0_sdo2_i    ( spi_master0_sdo2_i    ),
         .spi_master0_sdo3_i    ( spi_master0_sdo3_i    ),
-        .spi_master0_mode_i    ( spi_master0_mode_i    ),
+        .spi_master0_oen0_i    ( spi_master0_oen0_i    ),
+        .spi_master0_oen1_i    ( spi_master0_oen1_i    ),
+        .spi_master0_oen2_i    ( spi_master0_oen2_i    ),
+        .spi_master0_oen3_i    ( spi_master0_oen3_i    ),
 
         .sdio_clk_i            ( sdio_clk_i            ),
         .sdio_cmd_i            ( sdio_cmd_i            ),
@@ -325,13 +304,6 @@ module safe_domain
         .sdio_data_i           ( sdio_data_i           ),
         .sdio_data_o           ( sdio_data_o           ),
         .sdio_data_oen_i       ( sdio_data_oen_i       ),
-
-        .spi_master1_csn0_i    ( spi_master1_csn0_i    ),
-        .spi_master1_csn1_i    ( spi_master1_csn1_i    ),
-        .spi_master1_sck_i     ( spi_master1_sck_i     ),
-        .spi_master1_sdi_o     ( spi_master1_sdi_o     ),
-        .spi_master1_sdo_i     ( spi_master1_sdo_i     ),
-        .spi_master1_mode_i    ( spi_master1_mode_i    ),
 
         .cam_pclk_o            ( cam_pclk_o            ),
         .cam_data_o            ( cam_data_o            ),
@@ -445,28 +417,6 @@ module safe_domain
         .*
     );
 
-    jtag_tap_top jtag_tap_top_i
-    (
-        .tck_i                   ( jtag_tck_i             ),
-        .trst_ni                 ( s_jtag_rstn            ),
-        .tms_i                   ( jtag_tms_i             ),
-        .td_i                    ( jtag_tdi_i             ),
-        .td_o                    ( jtag_tdo_o             ),
-
-        .test_clk_i              ( s_test_clk             ),
-        .test_rstn_i             ( s_rstn_sync            ),
-
-        .jtag_shift_dr_o         ( jtag_shift_dr_o        ),
-        .jtag_update_dr_o        ( jtag_update_dr_o       ),
-        .jtag_capture_dr_o       ( jtag_capture_dr_o      ),
-
-        .axireg_sel_o            ( axireg_sel_o           ),
-        .dbg_axi_scan_in_o       ( axireg_tdi_o           ),
-        .dbg_axi_scan_out_i      ( axireg_tdo_i           ),
-        .soc_jtag_reg_i          ( soc_jtag_reg_i         ),
-        .soc_jtag_reg_o          ( soc_jtag_reg_o         ),
-        .sel_fll_clk_o           ( sel_fll_clk_o          )
-    );
 
 `ifndef PULP_FPGA_EMUL
     rstgen i_rstgen
@@ -480,13 +430,12 @@ module safe_domain
 `else
     assign s_rstn_sync = s_rstn;
 `endif
-    
+
     assign slow_clk_o = ref_clk_i;
-    
+
     assign s_rstn          = rst_ni;
-    assign s_jtag_rstn     = jtag_trst_ni;
     assign rst_no          = s_rstn;
-    
+
     assign test_clk_o      = 1'b0;
     assign dft_cg_enable_o = 1'b0;
     assign test_mode_o     = 1'b0;
