@@ -195,11 +195,6 @@ module pad_frame
     pad_functional_pd padinst_i2s0_sdi   (.OEN(~oe_i2s0_sdi_i  ), .I(out_i2s0_sdi_i  ), .O(in_i2s0_sdi_o  ), .PAD(pad_i2s0_sdi  ), .PEN(~pad_cfg_i[37][0]) );
     pad_functional_pd padinst_i2s0_sck   (.OEN(~oe_i2s0_sck_i  ), .I(out_i2s0_sck_i  ), .O(in_i2s0_sck_o  ), .PAD(pad_i2s0_sck  ), .PEN(~pad_cfg_i[35][0]) );
 
-    pad_functional_pu padinst_jtag_tck   (.OEN(1'b1            ), .I(                ), .O(jtag_tck_o     ), .PAD(pad_jtag_tck  ), .PEN(1'b1             ) );
-    pad_functional_pu padinst_jtag_tms   (.OEN(1'b1            ), .I(                ), .O(jtag_tms_o     ), .PAD(pad_jtag_tms  ), .PEN(1'b1             ) );
-    pad_functional_pu padinst_jtag_tdi   (.OEN(1'b1            ), .I(                ), .O(jtag_tdi_o     ), .PAD(pad_jtag_tdi  ), .PEN(1'b1             ) );
-    pad_functional_pu padinst_jtag_trstn (.OEN(1'b1            ), .I(                ), .O(jtag_trst_o    ), .PAD(pad_jtag_trst ), .PEN(1'b1             ) );
-    pad_functional_pd padinst_jtag_tdo   (.OEN(1'b0            ), .I(jtag_tdo_i      ), .O(               ), .PAD(pad_jtag_tdo  ), .PEN(1'b1             ) );
 
     pad_functional_pd padinst_cam_pclk   (.OEN(~oe_cam_pclk_i  ), .I(out_cam_pclk_i  ), .O(in_cam_pclk_o  ), .PAD(pad_cam_pclk  ), .PEN(~pad_cfg_i[9][0] ) );
     pad_functional_pd padinst_cam_hsync  (.OEN(~oe_cam_hsync_i ), .I(out_cam_hsync_i ), .O(in_cam_hsync_o ), .PAD(pad_cam_hsync ), .PEN(~pad_cfg_i[10][0]) );
@@ -221,65 +216,26 @@ module pad_frame
 
     pad_functional_pu padinst_bootsel    (.OEN(1'b1            ), .I(                ), .O(bootsel_o      ), .PAD(pad_bootsel   ), .PEN(1'b1             ) );
 
-    pad_functional_pu padinst_reset_n    (.OEN(1'b1            ), .I(                ), .O(rstn_o         ), .PAD(pad_reset_n   ), .PEN(1'b1             ) );
 
 `ifndef PULP_FPGA_EMUL
-    pad_functional_pu padinst_ref_clk    (.OEN(1'b1            ), .I(                ), .O(ref_clk_o      ), .PAD(pad_xtal_in   ), .PEN(1'b1             ) );
+  pad_functional_pu padinst_ref_clk    (.OEN(1'b1            ), .I(                ), .O(ref_clk_o      ), .PAD(pad_xtal_in   ), .PEN(1'b1             ) );
+  pad_functional_pu padinst_reset_n    (.OEN(1'b1            ), .I(                ), .O(rstn_o         ), .PAD(pad_reset_n   ), .PEN(1'b1             ) );
+  pad_functional_pu padinst_jtag_tck   (.OEN(1'b1            ), .I(                ), .O(jtag_tck_o     ), .PAD(pad_jtag_tck  ), .PEN(1'b1             ) );
+  pad_functional_pu padinst_jtag_tms   (.OEN(1'b1            ), .I(                ), .O(jtag_tms_o     ), .PAD(pad_jtag_tms  ), .PEN(1'b1             ) );
+  pad_functional_pu padinst_jtag_tdi   (.OEN(1'b1            ), .I(                ), .O(jtag_tdi_o     ), .PAD(pad_jtag_tdi  ), .PEN(1'b1             ) );
+  pad_functional_pu padinst_jtag_trstn (.OEN(1'b1            ), .I(                ), .O(jtag_trst_o    ), .PAD(pad_jtag_trst ), .PEN(1'b1             ) );
+  pad_functional_pd padinst_jtag_tdo   (.OEN(1'b0            ), .I(jtag_tdo_i      ), .O(               ), .PAD(pad_jtag_tdo  ), .PEN(1'b1             ) );
+
 `else
-    
-    wire ref_clk_int, ref_clk_pad, ref_clk;
-    wire clk1, clk2, clk3, clk4, clk5, clkfb, lock;
+  assign ref_clk_o = pad_xtal_in;
+  assign rstn_o = pad_reset_n;
 
-    pad_functional_pu padinst_ref_clk    (.OEN(1'b1            ), .I(                ), .O(ref_clk_pad    ), .PAD(pad_xtal_in   ), .PEN(1'b1             ) );
-    BUFG i_buf ( .O(ref_clk_int), .I(ref_clk_pad) );
-    
-    PLLE2_BASE #(
-        .BANDWIDTH          ( "OPTIMIZED" ),
-        .CLKFBOUT_MULT      ( 2           ),
-        .CLKFBOUT_PHASE     ( 0.0         ),
-        .CLKIN1_PERIOD      ( 10.0        ),
-        .CLKOUT0_DIVIDE     ( 128         ), // 200 MHz / 128 = 1.5625 MHz
-        .CLKOUT1_DIVIDE     ( 1           ),
-        .CLKOUT2_DIVIDE     ( 1           ),
-        .CLKOUT3_DIVIDE     ( 1           ),
-        .CLKOUT4_DIVIDE     ( 1           ),
-        .CLKOUT5_DIVIDE     ( 1           ),
-        .CLKOUT0_DUTY_CYCLE ( 0.5         ),
-        .CLKOUT1_DUTY_CYCLE ( 0.5         ),
-        .CLKOUT2_DUTY_CYCLE ( 0.5         ),
-        .CLKOUT3_DUTY_CYCLE ( 0.5         ),
-        .CLKOUT4_DUTY_CYCLE ( 0.5         ),
-        .CLKOUT5_DUTY_CYCLE ( 0.5         ),
-        .CLKOUT0_PHASE      ( 0.0         ),
-        .CLKOUT1_PHASE      ( 0.0         ),
-        .CLKOUT2_PHASE      ( 0.0         ),
-        .CLKOUT3_PHASE      ( 0.0         ),
-        .CLKOUT4_PHASE      ( 0.0         ),
-        .CLKOUT5_PHASE      ( 0.0         ),
-        .DIVCLK_DIVIDE      ( 48          ), // 1.5625 MHz / 48 = 32.55 kHz
-        .REF_JITTER1        ( 0.0         ),
-        .STARTUP_WAIT       ( "TRUE"      )
-    ) i_pll_pad_inst (
-        .CLKOUT0  ( ref_clk     ),
-        .CLKOUT1  ( clk1        ),
-        .CLKOUT2  ( clk2        ),
-        .CLKOUT3  ( clk3        ),
-        .CLKOUT4  ( clk4        ),
-        .CLKOUT5  ( clk5        ),
-        .CLKFBOUT ( clkfb       ),
-        .LOCKED   ( lock        ),
-        .CLKIN1   ( ref_clk_int ),
-        .PWRDWN   ( 1'b0        ),
-        .RST      ( ~rstn_o     ),
-        .CLKFBIN  ( clkfb       )
-    );
-
-    BUFGCE i_bufgce (
-       .O  ( ref_clk_o ),
-       .CE ( lock      ),
-       .I  ( ref_clk   )
-    );
-    
+  //JTAG signals
+  assign pad_jtag_tdo = jtag_tdo_i;
+  assign jtag_trst_o = pad_jtag_trst;
+  assign jtag_tms_o = pad_jtag_tms;
+  assign jtag_tck_o = pad_jtag_tck;
+  assign jtag_tdi_o = pad_jtag_tdi;
 `endif
 
 endmodule // pad_frame
