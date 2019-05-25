@@ -90,7 +90,7 @@ package jtag_pkg;
       jtag_clock(5, s_tck); //enter RST
       s_tms   = 1'b0;
       jtag_clock(1, s_tck); // back to IDLE
-      $display("JTAG: SoftReset Done(%t)",$realtime);
+      $display("[JTAG] SoftReset Done(%t)",$realtime);
 
    endtask
 
@@ -361,11 +361,11 @@ package jtag_pkg;
       logic [31+1:0] s_idcode;
       jtag_idcode.setIR(s_tck, s_tms, s_trstn, s_tdi);
       jtag_idcode.shift('0, s_idcode, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-      $display("JTAG: Tap ID: %h (%t)",s_idcode[32:1], $realtime);
+      $display("[JTAG] Tap ID: %h (%t)",s_idcode[32:1], $realtime);
       if(s_idcode[32:1] !== 32'h249511C3) begin
-         $display("JTAG: Tap ID Test FAILED (%t)", $realtime);
+         $display("[JTAG] Tap ID Test FAILED (%t)", $realtime);
       end else begin
-         $display("JTAG: Tap ID Test PASSED (%t)", $realtime);
+         $display("[JTAG] Tap ID Test PASSED (%t)", $realtime);
       end
    endtask
 
@@ -383,12 +383,12 @@ package jtag_pkg;
       jtag_bypass.setIR(s_tck, s_tms, s_trstn, s_tdi);
       jtag_bypass.shift(test_data, result_data, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
       if (test_data[253:0] === result_data[255:2])
-         $display("JTAG: Bypass Test Passed (%t)", $realtime);
+         $display("[JTAG] Bypass Test Passed (%t)", $realtime);
       else
       begin
-         $display("JTAG: Bypass Test Failed");
-         $display("JTAG:   LSB WORD TEST = %h (%t)",test_data[31:0], $realtime);
-         $display("JTAG:   LSB WORD RES  = %h (%t)",result_data[32:1], $realtime);
+         $display("[JTAG] Bypass Test Failed");
+         $display("[JTAG]   LSB WORD TEST = %h (%t)",test_data[31:0], $realtime);
+         $display("[JTAG]   LSB WORD RES  = %h (%t)",result_data[32:1], $realtime);
       end
    endtask
 
@@ -448,7 +448,32 @@ package jtag_pkg;
 
    class debug_mode_if_t;
 
-      task init(
+
+      task init_dmi_access(
+         ref logic s_tck,
+         ref logic s_tms,
+         ref logic s_trstn,
+         ref logic s_tdi
+      );
+         JTAG_reg #(.size(32+1), .instr({JTAG_SOC_DMIACCESS, JTAG_SOC_BYPASS})) jtag_soc_dbg = new;
+         jtag_soc_dbg.setIR(s_tck, s_tms, s_trstn, s_tdi);
+
+      endtask
+
+      task init_dtmcs(
+         ref logic s_tck,
+         ref logic s_tms,
+         ref logic s_trstn,
+         ref logic s_tdi
+      );
+
+         JTAG_reg #(.size(32+1), .instr({JTAG_SOC_DTMCSR, JTAG_SOC_BYPASS})) jtag_soc_dbg = new;
+         jtag_soc_dbg.setIR(s_tck, s_tms, s_trstn, s_tdi);
+
+      endtask
+
+
+      task dump_dm_info(
          ref logic s_tck,
          ref logic s_tms,
          ref logic s_trstn,
@@ -470,10 +495,8 @@ package jtag_pkg;
          dm::dmstatus_t  dmstatus;
          dtmcs_t dtmcs;
 
-         //Read Info
-         JTAG_reg #(.size(32+1), .instr({JTAG_SOC_DTMCSR, JTAG_SOC_BYPASS})) jtag_soc_dbg = new;
-         jtag_soc_dbg.setIR(s_tck, s_tms, s_trstn, s_tdi);
          $display("[TB] %t - Init", $realtime);
+         this.init_dtmcs(s_tck, s_tms, s_trstn, s_tdi);
 
          this.read_dtmcs(dtmcs, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
@@ -487,12 +510,7 @@ package jtag_pkg;
                   $realtime, dtmcs, dtmcs.dmihardreset, dtmcs.dmireset, dtmcs.idle,
              dtmcs.dmistat, dtmcs.abits, dtmcs.version);
 
-         this.init_dmi(
-               s_tck,
-               s_tms,
-               s_trstn,
-               s_tdi
-            );
+         this.init_dmi_access(s_tck, s_tms, s_trstn, s_tdi);
 
          this.read_debug_reg(dm::DMStatus, dmstatus,
              s_tck, s_tms, s_trstn, s_tdi, s_tdo);
@@ -528,7 +546,7 @@ package jtag_pkg;
           dm::dmcontrol_t dmcontrol;
 
          // TODO: we probably don't need to rescan IR
-         this.init_dmi(s_tck, s_tms, s_trstn, s_tdi);
+         this.init_dmi_access(s_tck, s_tms, s_trstn, s_tdi);
          this.read_debug_reg(dm::DMControl, dmcontrol,
                              s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
@@ -571,7 +589,7 @@ package jtag_pkg;
           dm::dmcontrol_t dmcontrol;
 
          // TODO: we probably don't need to rescan IR
-         this.init_dmi(s_tck, s_tms, s_trstn, s_tdi);
+         this.init_dmi_access(s_tck, s_tms, s_trstn, s_tdi);
          this.read_debug_reg(dm::DMControl, dmcontrol,
                              s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
@@ -809,20 +827,6 @@ package jtag_pkg;
 
       endtask
 
-      task init_dmi(
-         ref logic s_tck,
-         ref logic s_tms,
-         ref logic s_trstn,
-         ref logic s_tdi
-      );
-         //Read Info
-         JTAG_reg #(.size(32+1), .instr({JTAG_SOC_DMIACCESS, JTAG_SOC_BYPASS})) jtag_soc_dbg = new;
-         // we should almost never be necessary to scan IR (see ricsv-debug p.71)
-         jtag_soc_dbg.setIR(s_tck, s_tms, s_trstn, s_tdi);
-//         $display("[debug_mode_if_t] %t - Init DMI Access", $realtime);
-
-      endtask
-
       task read_dtmcs(
          output logic [31:0] dtmcs,
          ref logic s_tck,
@@ -959,8 +963,8 @@ package jtag_pkg;
          ref logic s_tdo
       );
          logic [31:0] buffer;
-         JTAG_reg #(.size(32+1), .instr({JTAG_SOC_DTMCSR, JTAG_SOC_BYPASS})) jtag_soc_dbg = new;
-         jtag_soc_dbg.setIR(s_tck, s_tms, s_trstn, s_tdi);
+         init_dtmcs(s_tck, s_tms, s_trstn, s_tdi);
+
          this.read_dtmcs(
                buffer,
                s_tck,
@@ -1118,6 +1122,7 @@ package jtag_pkg;
              if (dmi_op == 2'h3) begin
                  $display("[TB] %t retrying debug reg access", $realtime);
                  this.dmi_reset(s_tck,s_tms,s_trstn,s_tdi,s_tdo);
+                 this.init_dmi_access(s_tck,s_tms,s_trstn,s_tdi);
              end
 
          end while (dmi_op != 2'h0);
@@ -1184,6 +1189,7 @@ package jtag_pkg;
              if (dmi_op == 2'h3) begin
                  $display("[TB] %t retrying debug reg access", $realtime);
                  this.dmi_reset(s_tck,s_tms,s_trstn,s_tdi,s_tdo);
+                 this.init_dmi_access(s_tck,s_tms,s_trstn,s_tdi);
              end
 
          end while (dmi_op != 2'h0);
@@ -1372,7 +1378,7 @@ package jtag_pkg;
             if(dm_op == '1) begin
                $display("dmi_reset at time %t",$realtime);
                this.dmi_reset(s_tck,s_tms,s_trstn,s_tdi,s_tdo);
-               this.init_dmi(s_tck,s_tms,s_trstn,s_tdi);
+               this.init_dmi_access(s_tck,s_tms,s_trstn,s_tdi);
             end
 
          end
@@ -1396,7 +1402,7 @@ package jtag_pkg;
                if(dm_op == '1) begin
                   $display("dmi_reset at time %t",$realtime);
                   this.dmi_reset(s_tck,s_tms,s_trstn,s_tdi,s_tdo);
-                  this.init_dmi(s_tck,s_tms,s_trstn,s_tdi);
+                  this.init_dmi_access(s_tck,s_tms,s_trstn,s_tdi);
                end
 
          end
@@ -1474,7 +1480,7 @@ package jtag_pkg;
          this.set_sbreadonaddr(1'b0, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          this.set_sbautoincrement(1'b0, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
-         $display("[JTAG] Loading L2 with jtag interface");
+         $display("[JTAG] Loading L2 with debug module jtag interface");
 
          spi_addr_old = spi_addr - 32'h8;
 
@@ -2616,6 +2622,8 @@ package jtag_pkg;
       );
           logic [31:0] dm_data;
 
+
+         dump_dm_info(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          // $display("[TB] %t - TEST discover harts", $realtime);
          // debug_mode_if.test_discover_harts(dm_data[0],
          //                                   s_tck, s_tms, s_trstn, s_tdi, s_tdo);
