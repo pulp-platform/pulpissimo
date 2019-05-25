@@ -12,6 +12,8 @@
 *.jou
 *.log
 
+.cxl.*
+
 *_stub.v
 gmon.out
 
