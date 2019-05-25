@@ -576,7 +576,6 @@ module pulpissimo
         .spi_master0_oen2_i         ( s_spi_master0_oen2          ),
         .spi_master0_oen3_i         ( s_spi_master0_oen3          ),
 
-`endif
         .spi_master1_csn0_i         ( 1'b1                        ),
         .spi_master1_csn1_i         ( 1'b1                        ),
         .spi_master1_sck_i          ( 1'b0                        ),
