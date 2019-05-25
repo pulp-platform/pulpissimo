@@ -718,6 +718,7 @@ module pulpissimo
    soc_domain #(
       .CORE_TYPE          ( CORE_TYPE                  ),
       .USE_FPU            ( USE_FPU                    ),
+      .USE_HWPE           ( USE_HWPE                   ),
       .AXI_ADDR_WIDTH     ( AXI_ADDR_WIDTH             ),
       .AXI_DATA_IN_WIDTH  ( AXI_CLUSTER_SOC_DATA_WIDTH ),
       .AXI_DATA_OUT_WIDTH ( AXI_SOC_CLUSTER_DATA_WIDTH ),
