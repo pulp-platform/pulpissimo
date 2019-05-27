@@ -28,13 +28,13 @@ module fpga_interleaved_ram
        input logic                  rst_ni,
        input logic                  csn_i,
        input logic                  wen_i,
-       input logic [2:0]            be_i,
+       input logic [3:0]            be_i,
        input logic [ADDR_WIDTH-1:0] addr_i,
        input logic [31:0]           wdata_i,
-       output logic [31:0]           rdata_o
+       output logic [31:0]          rdata_o
    );
 
-  logic                             wea;
+  logic [3:0]                       wea;
 
   always_comb begin
     if (wen_i == 1'b0) begin
