@@ -40,11 +40,8 @@ set FPGA_RTL rtl
 set FPGA_IPS ips
 
 # remove unneeded files - we have our own wrappers
-#remove_files $IPS/axi/axi_slice_dc/axi_slice_dc_slave_wrap.sv
-#remove_files $IPS/axi/axi_slice_dc/axi_slice_dc_master_wrap.sv
 remove_files $IPS/pulp_soc/rtl/components/axi_slice_dc_slave_wrap.sv
 remove_file $IPS/pulp_soc/rtl/components/axi_slice_dc_master_wrap.sv
-#remove_file $IPS/pulp_soc/rtl/pulp_soc/soc_interconnect_wrap.sv
 
 # Set Verilog Defines.
 set DEFINES "FPGA_TARGET_XILINX=1 PULP_FPGA_EMUL=1 AXI4_XCHECK_OFF=1"
@@ -75,9 +72,7 @@ add_files -norecurse $FPGA_RTL/fpga_clk_gen.sv
 add_files -norecurse $FPGA_RTL/fpga_slow_clk_gen.sv
 add_files -norecurse $FPGA_RTL/fpga_interleaved_ram.sv
 add_files -norecurse $FPGA_RTL/fpga_private_ram.sv
-# add_files -norecurse $FPGA_RTL/axi_slice_dc_slave_wrap.sv
-# add_files -norecurse $FPGA_RTL/axi_slice_dc_master_wrap.sv
-# add_files -norecurse $FPGA_RTL/soc_interconnect_wrap.sv
+add_files -norecurse $FPGA_RTL/fpga_bootrom.sv
 
 # set pulpissimo as top
 set_property top xilinx_pulpissimo [current_fileset]; # 
