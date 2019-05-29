@@ -3,7 +3,7 @@
 all: genesys2  ## Generates the bitstream for all supported boards board
 
 genesys2: ## Generates the bistream for the genesys2 board
-	cd pulpissimo; make all
+	cd pulpissimo-genesys2; make all
 
 help: ## Show this help message
 	@echo "PULPissimo on FPGA"
