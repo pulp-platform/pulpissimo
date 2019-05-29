@@ -23,17 +23,17 @@ set_property board_part $XILINX_BOARD [current_project]
 source tcl/messages.tcl
 
 # set up includes
-source tcl/ips_inc_dirs.tcl
+source ../pulpissimo/tcl/ips_inc_dirs.tcl
 set_property include_dirs $INCLUDE_DIRS [current_fileset]
 set_property include_dirs $INCLUDE_DIRS [current_fileset -simset]
 
 # setup and add IP source files
-source tcl/ips_src_files.tcl
-source tcl/ips_add_files.tcl
+source ../pulpissimo/tcl/ips_src_files.tcl
+source ../pulpissimo/tcl/ips_add_files.tcl
 
 # setup and add RTL source files
-source tcl/rtl_src_files.tcl
-source tcl/rtl_add_files.tcl
+source ../pulpissimo/tcl/rtl_src_files.tcl
+source ../pulpissimo/tcl/rtl_add_files.tcl
 
 # Override IPSApprox default variables
 set FPGA_RTL rtl
@@ -94,7 +94,7 @@ synth_design -rtl -name rtl_1 -sfcu;# sfcu -> run synthesis in single file compi
 
 
 # launch synthesis
-#set_property STEPS.SYNTH_DESIGN.ARGS.FLATTEN_HIERARCHY none [get_runs synth_1]
+set_property STEPS.SYNTH_DESIGN.ARGS.FLATTEN_HIERARCHY none [get_runs synth_1]
 set_property -name {STEPS.SYNTH_DESIGN.ARGS.MORE OPTIONS} -value -sfcu -objects [get_runs synth_1] ;# Use single file compilation unit mode to prevent issues with import pkg::* statements in the codebase
 launch_runs synth_1 -jobs 8
 wait_on_run synth_1
