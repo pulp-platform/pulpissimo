@@ -38,8 +38,8 @@ set_property -dict [eval list CONFIG.PRIM_IN_FREQ {200.000} \
                         CONFIG.CLKOUT2_USED {true} \
                         CONFIG.RESET_TYPE {ACTIVE_LOW} \
                         CONFIG.RESET_PORT {resetn} \
-                        CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {$PER_CLK_FREQ_MHZ} \
-                        CONFIG.CLKOUT2_REQUESTED_OUT_FREQ {$FC_CLK_FREQ_MHZ} \
+                        CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {$FC_CLK_FREQ_MHZ} \
+                        CONFIG.CLKOUT2_REQUESTED_OUT_FREQ {$PER_CLK_FREQ_MHZ} \
                         CONFIG.CLKIN1_JITTER_PS {50.0} \
                        ] [get_ips $ipName]
 
