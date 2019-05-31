@@ -42,6 +42,7 @@ set FPGA_IPS ips
 # remove duplicate incompatible modules
 remove_files $IPS/pulp_soc/rtl/components/axi_slice_dc_slave_wrap.sv
 remove_file $IPS/pulp_soc/rtl/components/axi_slice_dc_master_wrap.sv
+remove_file $IPS/tech_cells_generic/pad_functional_xilinx.sv
 
 # Set Verilog Defines.
 set DEFINES "FPGA_TARGET_XILINX=1 PULP_FPGA_EMUL=1 AXI4_XCHECK_OFF=1"
