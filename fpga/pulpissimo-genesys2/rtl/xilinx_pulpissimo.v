@@ -38,11 +38,6 @@ module xilinx_pulpissimo
    inout wire  led1_o, //Mapped to cam_pclk
    inout wire  led2_o, //Mapped to cam_hsync
    inout wire  led3_o, //Mapped to cam_data0
-   //TODO remove after debug
-   output wire reset_led_o,
-   output wire soc_clk_o,
-   output wire per_clk_o,
-   output wire slow_clk_o,
 
    inout wire  switch0_i, //Mapped to cam_data1
    inout wire  switch1_i, //Mapped to cam_data2
@@ -102,40 +97,6 @@ module xilinx_pulpissimo
      .O(ref_clk)
      );
 
-
-  //We need to instantiate the startupe2 FPGA primitive to control the SPI flash clk
-  //after FPGA configuration
-
-  wire       s_spim_sck;
-
-  // STARTUPE2
-  //   #(
-  //     .PROG_USR("FALSE"), // Activate program event security feature. Requires encrypted bitstreams.
-  //     .SIM_CCLK_FREQ(0.0) // Set the Configuration Clock Frequency(ns) for simulation.
-  //     ) i_startupe2
-  //     (
-  //      .CFGCLK(), // 1-bit output: Configuration main clock output
-  //      .CFGMCLK(), // 1-bit output: Configuration internal oscillator clock output
-  //      .EOS(), // 1-bit output: Active high output signal indicating the End Of Startup.
-  //      .PREQ(), // 1-bit output: PROGRAM request to fabric output
-  //      .CLK(1'b0), // 1-bit input: User start-up clock input
-  //      .GSR(1'b0), // 1-bit input: Global Set/Reset input (GSR cannot be used for the port name)
-  //      .GTS(1'b0), // 1-bit input: Global 3-state input (GTS cannot be used for the port name)
-  //      .KEYCLEARB(1'b1), // 1-bit input: Clear AES Decrypter Key input from Battery-Backed RAM (BBRAM)
-  //      .PACK(1'b0), // 1-bit input: PROGRAM acknowledge input
-  //      .USRCCLKO(s_spim_sck), // 1-bit input: User CCLK input
-  //      .USRCCLKTS(1'b0), // 1-bit input: User CCLK 3-state enable input
-  //      .USRDONEO(1'b1), // 1-bit input: User DONE pin output control
-  //      .USRDONETS(1'b0) // 1-bit input: User DONE 3-state enable output
-  //      );
-
-  //Also assign spi clock and MOSI signal to oled display spi pads
-  assign oled_spim_sck_o = s_spim_sck;
-//  assign oled_spim_mosi_o = pad_spim_sdio0;
-
-
-
-
   pulpissimo
     #(.CORE_TYPE(CORE_TYPE),
       .USE_FPU(USE_FPU),
@@ -148,7 +109,7 @@ module xilinx_pulpissimo
        .pad_spim_sdio3(pad_spim_sdio3),
        .pad_spim_csn0(pad_spim_csn0),
        .pad_spim_csn1(led0_o),
-       .pad_spim_sck(s_spim_sck),
+       .pad_spim_sck(oled_spim_sck_o),
        .pad_uart_rx(pad_uart_rx),
        .pad_uart_tx(pad_uart_tx),
        .pad_cam_pclk(led1_o),
@@ -181,12 +142,7 @@ module xilinx_pulpissimo
        .pad_jtag_tms(pad_jtag_tms),
        .pad_jtag_trst(pad_jtag_trst),
        .pad_xtal_in(ref_clk),
-       .pad_bootsel(),
-       //TODO remove after debug
-       .reset_led_o(reset_led_o),
-       .soc_clk_o(soc_clk_o),
-       .per_clk_o(per_clk_o),
-       .slow_clk_o(slow_clk_o)
+       .pad_bootsel()
        );
 
 endmodule
