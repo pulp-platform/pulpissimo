@@ -39,7 +39,7 @@ source ../pulpissimo/tcl/rtl_add_files.tcl
 set FPGA_RTL rtl
 set FPGA_IPS ips
 
-# remove unneeded files - we have our own wrappers
+# remove duplicate incompatible modules
 remove_files $IPS/pulp_soc/rtl/components/axi_slice_dc_slave_wrap.sv
 remove_file $IPS/pulp_soc/rtl/components/axi_slice_dc_master_wrap.sv
 
@@ -67,15 +67,18 @@ read_ip $FPGA_IPS/xilinx_slow_clk_mngr/ip/xilinx_slow_clk_mngr.xci
 read_ip $FPGA_IPS/xilinx_interleaved_ram/ip/xilinx_interleaved_ram.xci
 read_ip $FPGA_IPS/xilinx_private_ram/ip/xilinx_private_ram.xci
 
-# Add wrappers
+# Add wrappers and xilinx specific techcells
 add_files -norecurse $FPGA_RTL/fpga_clk_gen.sv
 add_files -norecurse $FPGA_RTL/fpga_slow_clk_gen.sv
 add_files -norecurse $FPGA_RTL/fpga_interleaved_ram.sv
 add_files -norecurse $FPGA_RTL/fpga_private_ram.sv
 add_files -norecurse $FPGA_RTL/fpga_bootrom.sv
+add_files -norecurse $FPGA_RTL/pad_functional_xilinx.sv
+add_files -norecurse $FPGA_RTL/pulp_clock_gating_xilinx.sv
+
 
 # set pulpissimo as top
-set_property top xilinx_pulpissimo [current_fileset]; # 
+set_property top xilinx_pulpissimo [current_fileset]; #
 
 # needed only if used in batch mode
 update_compile_order -fileset sources_1
