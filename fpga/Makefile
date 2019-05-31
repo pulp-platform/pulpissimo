@@ -17,5 +17,7 @@ help: ## Show this help message
 	@echo ""
 	@echo "Call make with one of the supported FPGA boards as arguments to generate the bitstream in the corresponding folder. "
 	@echo "E.g. 'make genesys2' to generate the bitstream for the genesys2 board in pulpissimo-genesy2 subdirectory."
+	@echo "By default make invokes 'vivado'  to start Xilinx Vivado. This behaviour can be overriden by setting the make variable 'VIVADO'"
+	@echo "e.g. make genesys2 VIVADO='vivado-2018.3 vivado' for ETH centos machines."
 	@echo ""
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
