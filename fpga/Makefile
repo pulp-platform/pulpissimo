@@ -1,9 +1,16 @@
 .DEFAULT_GOAL:=help
 
-all: genesys2  ## Generates the bitstream for all supported boards board
+all: genesys2  ## Generates the bitstream for all supported boards board.
+
+clean_all: clean_genesys2 ## Removes synthesis output and bitstreams for all boards.
 
 genesys2: ## Generates the bistream for the genesys2 board
 	cd pulpissimo-genesys2; make all
+	cp pulpissimo-genesys2/pulpissimo.runs/impl_1/xilinx_pulpissimo.bit pulpissimo_genesys2.bit
+	@echo "Bitstream generation for genesys2 board finished. The bitstream was copied to ./pulpissimo_genesys2.bit"
+
+clean_genesys2: ## Removes all bitstreams, *.log files and vivado related files (rm -rf vivado*) for the genesys2 board.
+	cd pulpissimo-genesys2; make clean
 
 help: ## Show this help message
 	@echo "PULPissimo on FPGA"
