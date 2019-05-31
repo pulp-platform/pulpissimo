@@ -12,6 +12,8 @@ execute("mkdir -p sim/vcompile/rtl")
 execute("rm -rf sim/vcompile/rtl/*")
 execute("mkdir -p sim/vcompile/tb")
 execute("rm -rf sim/vcompile/tb/*")
+execute("mkdir -p fpga/pulpissimo/tcl")
+execute("rm -rf fpga/pulpissimo/tcl/*")
 
 # creates an IPApproX database
 ipdb = ipstools.IPDatabase(rtl_dir='rtl', ips_dir='ips', vsim_dir='sim', load_cache=True)
