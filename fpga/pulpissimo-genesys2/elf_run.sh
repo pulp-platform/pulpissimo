@@ -1,5 +1,9 @@
 #!/bin/bash
 
+trap "exit" INT TERM
+trap "kill 0" EXIT
+
+
 SCRIPTDIR=$(dirname $0)
 
 #Execute gdb and connect to openocd via pipe
@@ -9,5 +13,3 @@ sleep 3
 minicom -D /dev/ttyUSB0 -b 115200
 
 
-trap "exit" INT TERM
-trap "kill 0" EXIT
