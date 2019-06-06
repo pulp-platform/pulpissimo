@@ -210,16 +210,6 @@ this command create the ELF into the `build/pulpissimo/test/test` file.
 ### GDB and OpenOCD
 
 
-Launch gdb from your pulp_riscv_gcc installation passing the ELF file like:
-
-`riscv32-unknown-elf-gdb PATH_TO_YOUR_ELF_FILE`
-
-In gdb, type:
-
-```
-(gdb) target remote localhost:3333
-```
-
 Please set the OPENOCD enviroment variable to the directory where openocd is installed.
 
 ```
@@ -230,6 +220,16 @@ Launch openocd by passing the configuration file for the genesys2 board with:
 
 ```
 openocd -f pulpissimo/fpga/pulpissimo-genesys2/openocd-genesys2.cfg
+```
+
+Launch gdb from your pulp_riscv_gcc installation passing the ELF file like:
+
+`riscv32-unknown-elf-gdb PATH_TO_YOUR_ELF_FILE`
+
+In gdb, type:
+
+```
+(gdb) target remote localhost:3333
 ```
 
 Launch a `screen` session on Linux to riderect the UART output from PULPissimo as:
