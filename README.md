@@ -167,6 +167,114 @@ make conf
 
 More information is available in the documentation here: pulp-builder/install/doc/vp/index.html
 
+## FPGA
+
+Here we blablanadlcalca
+
+Go to the fpga folder and run
+
+```
+make genesys2
+```
+
+this generates the PULPissimo bitstream for the XILINX GENESYS2 board.
+Boot from ROM is not available yet (the ROM would always return one instruction which is `jal x0,0`).
+Once the bitstream `pulpissimo_genesys2.bit` is generated in the fpga folder, you can open Vivado
+`vivado` (we tried the 2018.3 version) and load the binary into the fpga.
+
+On Vivado:
+
+```
+Open Hardware Manager
+Open Target
+Program FPGA
+```
+
+Now your FPGA is ready to emulate PULPissimo!
+
+
+To run or debug application for the fpga, configure the SDK by executing:
+
+```
+source configs/fpga.sh
+```
+
+Compile your application with
+
+```
+make clean all
+```
+this command create the ELF into the `build/pulpissimo/test/test` file.
+
+
+### GDB and OpenOCD
+
+
+Launch gdb from your pulp_riscv_gcc installation passing the ELF file like:
+
+`riscv32-unknown-elf-gdb PATH_TO_YOUR_ELF_FILE`
+
+In gdb, type:
+
+```
+(gdb) target remote localhost:3333
+```
+
+Please set the OPENOCD enviroment variable to the directory where openocd is installed.
+
+```
+export OPENOCD=your_openocd_installation
+```
+
+Launch openocd by passing the configuration file for the genesys2 board with:
+
+```
+openocd -f pulpissimo/fpga/pulpissimo-genesys2/openocd-genesys2.cfg
+```
+
+Launch a `screen` session on Linux to riderect the UART output from PULPissimo as:
+
+```
+screen /dev/ttyUSB0 115200
+```
+
+the ttyUSB0 target may change.
+
+Now you are ready to debug!
+
+In gdb, load the program:
+
+```
+(gdb) load
+```
+
+See the disasembled binary:
+```
+(gdb) disas
+```
+List the current C function, set a break point at line 25, continue and have fun!
+
+```
+(gdb) list
+21
+22  int main()
+23  {
+24    while (1) {
+25      printf("Hello World!\n\r");
+26     for (volatile int i=0; i<1000000; i++);
+27    }
+28    return 0;
+29  }
+
+(gdb) b 25
+Breakpoint 1 at 0x1c0083d2: file test.c, line 25.
+(gdb) c
+Continuing.
+
+Breakpoint 1, main () at test.c:25
+25      printf("Hello World!\n\r");
+
+```
 
 ## Proprietary verification IPs
 The full simulation platform can take advantage of a few models of commercial
