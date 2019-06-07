@@ -173,14 +173,14 @@ Here we blablanadlcalca
 
 Go to the fpga folder and run
 
-```
+```Shell
 make genesys2
 ```
 
 this generates the PULPissimo bitstream for the XILINX GENESYS2 board.
-Boot from ROM is not available yet (the ROM would always return one instruction which is `jal x0,0`).
+Boot from ROM is not available yet. The ROM will always return the `jal x0,0` to trap the core until the debug module takes over control and loads the programm into L2 memory.
 Once the bitstream `pulpissimo_genesys2.bit` is generated in the fpga folder, you can open Vivado
-`vivado` (we tried the 2018.3 version) and load the binary into the fpga.
+`vivado` (we tried the 2018.3 version) and load the bitstream into the fpga or use the Configuration File(`pulpissimo_genesys2.bin`) flash it to the on-board Configuration Memory.
 
 On Vivado:
 
@@ -193,32 +193,54 @@ Program FPGA
 Now your FPGA is ready to emulate PULPissimo!
 
 
-To run or debug application for the fpga, configure the SDK by executing:
+To run or debug applications for the fpga, configure the SDK for the FPGA platform by running the following commands within the SDK's root directory:
 
+```Shell
+source configs/pulpissimo.sh
+source configs/platform-fpga.sh
 ```
-source configs/fpga.sh
+
+Add the following global variable declaration to your application:
+
+```C
+unsigned int __rt_iodev_uart_baudrate = 115200;
 ```
+
+The global variable `__rt_iodev_uart_baudrate` is weakly defined in the SDK and can be used to set the baudrate of the UART peripheral.
+
 
 Compile your application with
 
+```Shell
+make clean conf all io=uart
 ```
-make clean all
-```
-this command create the ELF into the `build/pulpissimo/test/test` file.
+
+this command builds the ELF binary with UART as the default io peripheral.
+The binary will be stored at `build/pulpissimo/[app_name]/[app_name]`.
 
 
 ### GDB and OpenOCD
+In order to execute our application on the FPGA we need to load the binary into
+PULPissimo's L2 memory. To do so we can use OpenOCD in conjunction with GDB to
+communicate with the internal RISC-V debug module.
+
+For the genesys2 board we need to connect two micro USB cables to the board: The
+first cable connects to the JTAG port that is uasally used for FPGA
+configuration. Once the PULPissimo bitstream is written to the FPGA the same
+port is used to let OpenOCD communicate with the RISC-V debug module within
+PULPissimo. The second micro USB cable needs to be attached to the genesys2's
+UART port to observe the output of the application's `printf` statements.
 
 
 Please set the OPENOCD enviroment variable to the directory where openocd is installed.
 
-```
+```Shell
 export OPENOCD=your_openocd_installation
 ```
 
 Launch openocd by passing the configuration file for the genesys2 board with:
 
-```
+```Shell
 openocd -f pulpissimo/fpga/pulpissimo-genesys2/openocd-genesys2.cfg
 ```
 
@@ -232,9 +254,11 @@ In gdb, type:
 (gdb) target remote localhost:3333
 ```
 
-Launch a `screen` session on Linux to riderect the UART output from PULPissimo as:
+to connect to the OpenOCD server.
 
-```
+Launch a serial port client (e.g. `screen` or `minicom`) on Linux to riderect the UART output from PULPissimo as:
+
+```Shell
 screen /dev/ttyUSB0 115200
 ```
 
@@ -242,7 +266,7 @@ the ttyUSB0 target may change.
 
 Now you are ready to debug!
 
-In gdb, load the program:
+In gdb, load the program into L2:
 
 ```
 (gdb) load
