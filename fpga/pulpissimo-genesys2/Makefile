@@ -36,6 +36,7 @@ clean-ram: ## Removes all Block Ram IP outputs related to l2 ram
 
 clean: ## Removes all bitstreams, *.log files and vivado related files (rm -rf vivado*)
 	rm -rf ${PROJECT}.*[^'bit']
+	rm -rf ${PROJECT}.*[^'bin']
 	rm -rf *.log
 	rm -rf vivado*
 
