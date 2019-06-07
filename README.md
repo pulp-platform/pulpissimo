@@ -225,7 +225,7 @@ PULPissimo's L2 memory. To do so we can use OpenOCD in conjunction with GDB to
 communicate with the internal RISC-V debug module.
 
 For the genesys2 board we need to connect two micro USB cables to the board: The
-first cable connects to the JTAG port that is uasally used for FPGA
+first cable connects to the JTAG port that is usually used for FPGA
 configuration. Once the PULPissimo bitstream is written to the FPGA the same
 port is used to let OpenOCD communicate with the RISC-V debug module within
 PULPissimo. The second micro USB cable needs to be attached to the genesys2's
