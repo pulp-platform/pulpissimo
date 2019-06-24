@@ -201,7 +201,8 @@ To run or debug applications for the fpga, configure the SDK for the FPGA platfo
 
 ```Shell
 source configs/pulpissimo.sh
-source configs/platform-fpga.sh
+source configs/fpgas/pulpissimo/genesys2.sh
+source sdk-setup.sh
 ```
 
 Add the following global variable declaration to your application:
