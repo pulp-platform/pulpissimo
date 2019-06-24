@@ -58,7 +58,7 @@ sdk:
 	  git clone https://github.com/pulp-platform/pulp-builder.git; \
 	fi; \
 	cd pulp-builder; \
-	git checkout 63509ac7d3561a26f5368aca5094d7e49802da3b; \
+	git checkout 7bd925324fcecae2aad9875f4da45b27d8356796; \
 	. configs/pulpissimo.sh; \
 	. configs/rtl.sh; \
 	./scripts/clean; \

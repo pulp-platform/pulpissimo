@@ -89,7 +89,7 @@ Then execute the following commands:
 ```
 git clone https://github.com/pulp-platform/pulp-builder.git
 cd pulp-builder
-git checkout 63509ac7d3561a26f5368aca5094d7e49802da3b
+git checkout 7bd925324fcecae2aad9875f4da45b27d8356796
 source configs/pulpissimo.sh
 ./scripts/clean
 ./scripts/update-runtime
@@ -155,7 +155,7 @@ Once the RTL platform is installed, the following commands can be executed to in
 ```
 git clone https://github.com/pulp-platform/pulp-builder.git
 cd pulp-builder
-git checkout b3b255b0f653fce950cf730972c8ad07b1be7bf0
+git checkout 7bd925324fcecae2aad9875f4da45b27d8356796
 source configs/pulpissimo.sh
 ./scripts/build-gvsoc
 source sdk-setup.sh
@@ -191,7 +191,7 @@ On Vivado:
 ```
 Open Hardware Manager
 Open Target
-Program FPGA
+Program device
 ```
 
 Now your FPGA is ready to emulate PULPissimo!
