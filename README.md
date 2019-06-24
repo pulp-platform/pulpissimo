@@ -13,7 +13,7 @@ controller for all recent multi-core PULP chips, taking care of autonomous I/O,
 advanced data pre-processing, external interrupts, etc.
 The PULPissimo architecture includes:
 
-- Either the RI5CY core or the zero-riscy one as main core
+- Either the RI5CY core or the Ibex one as main core
 - Autonomous Input/Output subsystem (uDMA)
 - New memory subsystem
 - Support for Hardware Processing Engines (HWPEs)
@@ -30,18 +30,21 @@ such as: hardware loops, post-incrementing load and store instructions,
 bit-manipulation instructions, MAC operations, support fixed-point operations,
 packed-SIMD instructions and the dot product. It has been designed to increase
 the energy efficiency of in ultra-low-power signal processing applications.
-RISCY implementes a subset of the 1.9 privileged specification.
+RISCY implementes a subset of the 1.10 privileged specification.
+It includes an optional PMP and the possibility to have a subset of the USER MODE.
+RISCY implement the RISC-V Debug spec 0.13.
 Further information about the core can be found at
 http://ieeexplore.ieee.org/abstract/document/7864441/
 and in the documentation of the IP.
 
-zero-riscy is an in-order, single-issue core with 2 pipeline stages and it
+Ibex, formely zero-riscy, is an in-order, single-issue core with 2 pipeline stages and it
 has full support for the base integer instruction set (RV32I) and
 compressed instructions (RV32C).
 It can be configured to have multiplication instruction set extension (RV32M)
-and the reduced number of registers extension (RV32E). It has been designed to
-target ultra-low-power and ultra-low-area constraints. zero-riscy implementes
-a subset of the 1.9 privileged specification.
+and the reduced number of registers extension (RV32E).
+It has been originally designed at ETH to target ultra-low-power and ultra-low-area constraints.
+Ibex is now part of the LowRISC non-profit community.
+It implementes a subset of the 1.11 privileged specification and the RISC-V Debug spec 0.13.
 Further information about the core can be found at
 http://ieeexplore.ieee.org/document/8106976/
 and in the documentation of the IP.
