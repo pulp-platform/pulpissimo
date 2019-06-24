@@ -63,7 +63,9 @@ sdk:
 	. configs/rtl.sh; \
 	./scripts/clean; \
 	./scripts/update-runtime; \
-	./scripts/build-runtime;
+	./scripts/build-runtime; \
+	./scripts/update-runner; \
+	./scripts/build-runner;
 
 
 all: checkout build install vopt sdk
