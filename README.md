@@ -172,7 +172,8 @@ More information is available in the documentation here: pulp-builder/install/do
 
 ## FPGA
 
-Here we blablanadlcalca
+PULPissimo has been implemented on FPGA for the Xilinx Genesys 2 board.
+Follow the next steps to generate the bitstream and use it as an emulator of the microcontroller.
 
 Go to the fpga folder and run
 
