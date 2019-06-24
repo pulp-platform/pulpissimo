@@ -205,10 +205,12 @@ source configs/fpgas/pulpissimo/genesys2.sh
 source sdk-setup.sh
 ```
 
-Add the following global variable declaration to your application:
+By default, the baudrate is set to `115200`.
+
+Add the following global variable declaration to your application in case you want to change it:
 
 ```C
-unsigned int __rt_iodev_uart_baudrate = 115200;
+unsigned int __rt_iodev_uart_baudrate = your baudrate;
 ```
 
 The global variable `__rt_iodev_uart_baudrate` is weakly defined in the SDK and can be used to set the baudrate of the UART peripheral.
@@ -217,7 +219,7 @@ The global variable `__rt_iodev_uart_baudrate` is weakly defined in the SDK and 
 Compile your application with
 
 ```Shell
-make clean conf all io=uart
+make clean all
 ```
 
 this command builds the ELF binary with UART as the default io peripheral.
@@ -302,6 +304,19 @@ Continuing.
 
 Breakpoint 1, main () at test.c:25
 25      printf("Hello World!\n\r");
+
+
+(gdb) disas
+Dump of assembler code for function main:
+   0x1c0083d4 <+22>:    li  a1,1
+   0x1c0083d6 <+24>:    blt s0,a5,0x1c0083e8 <main+42>
+=> 0x1c0083da <+28>:    lw  a5,12(sp)
+   0x1c0083dc <+30>:    slli    a1,a1,0x1
+   0x1c0083de <+32>:    addi    a5,a5,1
+   0x1c0083e0 <+34>:    sw  a5,12(sp)
+
+(gdb) monitor reg a5
+a5 (/32): 0x000075B7
 
 ```
 
