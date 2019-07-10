@@ -112,8 +112,7 @@ After having access to the SDK, you can build the simulation platform by doing
 the following:
 ```
 source setup/vsim.sh
-cd sim/
-make clean lib build opt
+make clean build
 ```
 This command builds a version of the simulation platform with no dependencies on
 external models for peripherals. See below (Proprietary verification IPs) for
