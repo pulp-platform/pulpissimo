@@ -13,6 +13,7 @@
  * Francesco Conti <fconti@iis.ee.ethz.ch>
  * Antonio Pullini <pullinia@iis.ee.ethz.ch>
  * Igor Loi <igor.loi@unibo.it>
+ * Robert Balas <balasr@iis.ee.ethz.ch>
  */
 
 // timeunit 1ps;
