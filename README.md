@@ -274,12 +274,34 @@ UART port to observe the output of the application's `printf` statements.
 
 Due to a long outstanding issue in the RISC-V openocd project (issue #359) the
 riscv/riscv-openocd does not work with PULPissimo. However there is a small
-workaround that we incorporated in a patched version of openocd that is
-installed by default together with SDK (only with newer versions). The SDK will
-automatically set the environment variable `OPENOCD` to the installation path of
-this patched version.
+workaround that we incorporated in a patched version of openocd. If you have
+access to the artifactory server, the patched openocd binary is installed by
+default with the `make deps` command in the SDK. If you don't have access to the
+precompiled binaries you can automatically download and compile the patched
+OPENOCD from source. You will need to install the following dependencies on your
+machine before you can compile OpenOCD:
 
-Launch openocd by passing the configuration file for the genesys2 board with:
+- `autoconf` >= 2.64
+- `automake` >= 1.14
+- `texinfo`
+- `make`
+- `libtool`
+- `pkg-config` >= 0.23 (or compatible)
+- `libusb-1.0`
+- `libftdi`
+- `libusb-0.1` or `libusb-compat-0.1` for some older drivers
+
+After installing those dependecies with you OS' package manager you can
+download, apply the patch and compile OpenOCD with:
+
+```Shell
+source sourceme.sh && ./pulp-tools/bin/plpbuild checkout build --p openocd --stdout
+```
+
+The SDK will automatically set the environment variable `OPENOCD` to the
+installation path of this patched version.
+
+Launch openocd with the configuration file for the genesys2 board as an argument with:
 
 ```Shell
 $OPENOCD/bin/openocd -f pulpissimo/fpga/pulpissimo-genesys2/openocd-genesys2.cfg
