@@ -178,15 +178,25 @@ Follow the next steps to generate the bitstream and use it as an emulator of the
 Go to the fpga folder and run
 
 ```Shell
+make help
+```
+
+This lists a brief description of all available Make targets.
+
+In this tutorial we use the Digilent Genesys2 board which is the only one supported at the time moment.
+
+Therefore, run
+
+```Shell
 make genesys2
 ```
 
-this generates the PULPissimo bitstream for the XILINX GENESYS2 board.
+in order to generate the PULPissimo bitstream for the GENESYS2 board. If your invocation command to start Vivado isn't `vivado` you can use the Make variable `VIVADO` to specify the right command (e.g. `make genesys2 VIVADO='vivado-2018.3 vivado'` for ETH CentOS machines.)
 Boot from ROM is not available yet. The ROM will always return the `jal x0,0` to trap the core until the debug module takes over control and loads the programm into L2 memory.
 Once the bitstream `pulpissimo_genesys2.bit` is generated in the fpga folder, you can open Vivado
-`vivado` (we tried the 2018.3 version) and load the bitstream into the fpga or use the Configuration File(`pulpissimo_genesys2.bin`) flash it to the on-board Configuration Memory.
+`vivado` (we tried the 2018.3 version) and load the bitstream into the fpga or use the Configuration File (`pulpissimo_genesys2.bin`) flash it to the on-board Configuration Memory.
 
-On Vivado:
+In Vivado:
 
 ```
 Open Hardware Manager
@@ -197,24 +207,43 @@ Program device
 Now your FPGA is ready to emulate PULPissimo!
 
 
-To run or debug applications for the fpga, configure the SDK for the FPGA platform by running the following commands within the SDK's root directory:
+To run or debug applications for the fpga you need to use a recent version of the PULP-SDK (commit id 3256fe7 or newer.'). Configure the SDK for the FPGA platform by running the following commands within the SDK's root directory:
 
 ```Shell
 source configs/pulpissimo.sh
 source configs/fpgas/pulpissimo/genesys2.sh
-source sdk-setup.sh
 ```
 
-By default, the baudrate is set to `115200`.
+If you updated the SDK don't forget to recompile the SDK and the dependencies.
+
+In order for the SDK to be able to configure clock dividers (e.g. the ones for
+the UART module) to the right values it needs to know which frequencies
+PULPissimo is running at. If you didn't change anything in the synthesis script, the default frequencies are:
+
+| Core Frequency | 40MHz |
+| SoC Frequency  | 20MHz |
+
+We need to override a two weakly defined variables in our source code to configure the SDK to use these frequencies:
+```C
+#include <stdio.h>
+#include <rt/rt_api.h>
+
+int __rt_fpga_fc_frequency = 40000000;
+int __rt_fpga_periph_frequency = 20000000;
+
+int main()
+{
+...
+}
+```
+
+By default, the baudrate of the UART is set to `115200`.
 
 Add the following global variable declaration to your application in case you want to change it:
 
 ```C
 unsigned int __rt_iodev_uart_baudrate = your baudrate;
 ```
-
-The global variable `__rt_iodev_uart_baudrate` is weakly defined in the SDK and can be used to set the baudrate of the UART peripheral.
-
 
 Compile your application with
 
@@ -239,23 +268,23 @@ PULPissimo. The second micro USB cable needs to be attached to the genesys2's
 UART port to observe the output of the application's `printf` statements.
 
 
-Please set the OPENOCD enviroment variable to the directory where openocd is installed.
-
-```Shell
-export OPENOCD=your_openocd_installation
-```
+Due to a long outstanding issue in the RISC-V openocd project (issue #359) the
+riscv/riscv-openocd does not work with PULPissimo. However there is a small
+workaround that we incorporated in a patched version of openocd that is
+installed by default together with SDK (only with newer versions). The SDK will
+automatically set the environment variable `OPENOCD` to the installation path of
+this patched version.
 
 Launch openocd by passing the configuration file for the genesys2 board with:
 
 ```Shell
-openocd -f pulpissimo/fpga/pulpissimo-genesys2/openocd-genesys2.cfg
+$OPENOCD/bin/openocd -f pulpissimo/fpga/pulpissimo-genesys2/openocd-genesys2.cfg
 ```
+In a seperate terminal launch gdb from your pulp_riscv_gcc installation passing the ELF file as an argument with:
 
-Launch gdb from your pulp_riscv_gcc installation passing the ELF file like:
+`$PULP_RISCV_GCC_TOOLCHAIN_CI/bin/riscv32-unknown-elf-gdb  PATH_TO_YOUR_ELF_FILE`
 
-`riscv32-unknown-elf-gdb PATH_TO_YOUR_ELF_FILE`
-
-In gdb, type:
+In gdb, run:
 
 ```
 (gdb) target remote localhost:3333
@@ -263,7 +292,7 @@ In gdb, type:
 
 to connect to the OpenOCD server.
 
-Launch a serial port client (e.g. `screen` or `minicom`) on Linux to riderect the UART output from PULPissimo as:
+In third terminal launch a serial port client (e.g. `screen` or `minicom`) on Linux to riderect the UART output from PULPissimo with e.g.:
 
 ```Shell
 screen /dev/ttyUSB0 115200
@@ -318,6 +347,31 @@ Dump of assembler code for function main:
 (gdb) monitor reg a5
 a5 (/32): 0x000075B7
 
+```
+To get a list of available gdb commands for the riscv-dbg target execute:
+```
+monitor help
+```
+
+Most notably the command `info registers` does not work. Use `monitor reg` instead which has the same effect.
+
+### PULP run script
+If you are not intrested in debugging your application and just want to quickly
+run the application and see UART output you can use the `run` target you already
+might know from using the virtual platform. You need to install minicom (`sudo
+apt install minicom`) to be able to use this target.
+
+If you execute: 
+```Shell 
+make run PULP_GENESYS2_UART_TTY=/dev/ttyUSB0 PULP_GENESYS2_UART_BAUDRATE=115200 
+``` 
+a script will be started that automatically
+launches OpenOCD and GDB in the background to load and execute your binary. The
+output of the programm will then be shown in the minicom session launched in the
+foreground. The code snippet above shows the default values of the makefile variables to specify the UART device and the baudrate.
+If the values you need are in fact identical to the values above (ttyUSB0 and baudrate=115200) you can ommit specifying them and just call:
+```Shell
+make run
 ```
 
 ## Proprietary verification IPs
