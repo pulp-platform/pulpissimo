@@ -220,6 +220,7 @@ In order for the SDK to be able to configure clock dividers (e.g. the ones for
 the UART module) to the right values it needs to know which frequencies
 PULPissimo is running at. If you didn't change anything in the synthesis script, the default frequencies are:
 | Clock Domain   | Default Frequency on Genesys2 board |
+|----------------|------------------------------------ |
 | Core Frequency | 40MHz                               |
 | SoC Frequency  | 20MHz                               |
 
@@ -312,7 +313,7 @@ and run the programm:
 ```
 (gdb) continue
 ```
-Of course you can also benefit from debug capability that GDB provides.
+Of course you can also benefit from the debug capabilities that GDB provides.
 
 E.g. see the disasembled binary:
 ```
