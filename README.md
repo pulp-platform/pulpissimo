@@ -183,7 +183,7 @@ make help
 
 This lists a brief description of all available Make targets.
 
-In this tutorial we use the Digilent Genesys2 board which is the only one supported at the time moment.
+In this tutorial we use the Digilent Genesys2 board which is the only one supported at the moment.
 
 Therefore, run
 
@@ -194,7 +194,7 @@ make genesys2
 in order to generate the PULPissimo bitstream for the GENESYS2 board. If your invocation command to start Vivado isn't `vivado` you can use the Make variable `VIVADO` to specify the right command (e.g. `make genesys2 VIVADO='vivado-2018.3 vivado'` for ETH CentOS machines.)
 Boot from ROM is not available yet. The ROM will always return the `jal x0,0` to trap the core until the debug module takes over control and loads the programm into L2 memory.
 Once the bitstream `pulpissimo_genesys2.bit` is generated in the fpga folder, you can open Vivado
-`vivado` (we tried the 2018.3 version) and load the bitstream into the fpga or use the Configuration File (`pulpissimo_genesys2.bin`) flash it to the on-board Configuration Memory.
+`vivado` (we tried the 2018.3 version) and load the bitstream into the fpga or use the Configuration File (`pulpissimo_genesys2.bin`) to flash it to the on-board Configuration Memory.
 
 In Vivado:
 
@@ -219,11 +219,11 @@ If you updated the SDK don't forget to recompile the SDK and the dependencies.
 In order for the SDK to be able to configure clock dividers (e.g. the ones for
 the UART module) to the right values it needs to know which frequencies
 PULPissimo is running at. If you didn't change anything in the synthesis script, the default frequencies are:
+| Clock Domain   | Default Frequency on Genesys2 board |
+| Core Frequency | 40MHz                               |
+| SoC Frequency  | 20MHz                               |
 
-| Core Frequency | 40MHz |
-| SoC Frequency  | 20MHz |
-
-We need to override a two weakly defined variables in our source code to configure the SDK to use these frequencies:
+We need to override two weakly defined variables in our source code to configure the SDK to use these frequencies:
 ```C
 #include <stdio.h>
 #include <rt/rt_api.h>
@@ -251,7 +251,7 @@ Compile your application with
 make clean all
 ```
 
-this command builds the ELF binary with UART as the default io peripheral.
+This command builds the ELF binary with UART as the default io peripheral.
 The binary will be stored at `build/pulpissimo/[app_name]/[app_name]`.
 
 
@@ -292,7 +292,7 @@ In gdb, run:
 
 to connect to the OpenOCD server.
 
-In third terminal launch a serial port client (e.g. `screen` or `minicom`) on Linux to riderect the UART output from PULPissimo with e.g.:
+In a third terminal launch a serial port client (e.g. `screen` or `minicom`) on Linux to riderect the UART output from PULPissimo with e.g.:
 
 ```Shell
 screen /dev/ttyUSB0 115200
@@ -307,8 +307,14 @@ In gdb, load the program into L2:
 ```
 (gdb) load
 ```
+and run the programm:
 
-See the disasembled binary:
+```
+(gdb) continue
+```
+Of course you can also benefit from debug capability that GDB provides.
+
+E.g. see the disasembled binary:
 ```
 (gdb) disas
 ```
@@ -348,7 +354,8 @@ Dump of assembler code for function main:
 a5 (/32): 0x000075B7
 
 ```
-To get a list of available gdb commands for the riscv-dbg target execute:
+Not all gdb commands work as expected on the riscv-dbg target.
+To get a list of available gdb commands execute:
 ```
 monitor help
 ```
