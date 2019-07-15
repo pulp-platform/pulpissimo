@@ -6,8 +6,8 @@ clean_all: clean_genesys2 ## Removes synthesis output and bitstreams for all boa
 
 genesys2: ## Generates the bistream for the genesys2 board
 	cd pulpissimo-genesys2; make all
-	cp pulpissimo-genesys2/pulpissimo.runs/impl_1/xilinx_pulpissimo.bit pulpissimo_genesys2.bit
-	cp pulpissimo-genesys2/pulpissimo.runs/impl_1/xilinx_pulpissimo.bin pulpissimo_genesys2.bin
+	cp pulpissimo-genesys2/pulpissimo_genesys2.runs/impl_1/xilinx_pulpissimo.bit pulpissimo_genesys2.bit
+	cp pulpissimo-genesys2/pulpissimo_genesys2.runs/impl_1/xilinx_pulpissimo.bin pulpissimo_genesys2.bin
 	@echo "Bitstream generation for genesys2 board finished. The bitstream Configuration Memory File was copied to ./pulpissimo_genesys2.bit and ./pulpissimo_genesys2.bin"
 
 clean_genesys2: ## Removes all bitstreams, *.log files and vivado related files (rm -rf vivado*) for the genesys2 board.

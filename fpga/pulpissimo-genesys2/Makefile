@@ -1,4 +1,4 @@
-PROJECT:=pulpissimo
+PROJECT:=pulpissimo_genesys2
 VIVADO ?= vivado
 VIVADOFLAGS ?= -nojournal -mode batch -source scripts/prologue.tcl
 

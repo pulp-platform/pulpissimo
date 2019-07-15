@@ -219,10 +219,13 @@ If you updated the SDK don't forget to recompile the SDK and the dependencies.
 In order for the SDK to be able to configure clock dividers (e.g. the ones for
 the UART module) to the right values it needs to know which frequencies
 PULPissimo is running at. If you didn't change anything in the synthesis script, the default frequencies are:
+
+
 | Clock Domain   | Default Frequency on Genesys2 board |
 |----------------|------------------------------------ |
 | Core Frequency | 40MHz                               |
 | SoC Frequency  | 20MHz                               |
+
 
 We need to override two weakly defined variables in our source code to configure the SDK to use these frequencies:
 ```C

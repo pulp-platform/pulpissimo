@@ -1,4 +1,4 @@
-set project pulpissimo-genesys2
+set project pulpissimo_genesys2
 set RTL ../../../rtl
 set IPS ../../../ips
 set CONSTRS constraints
@@ -16,7 +16,7 @@ if [info exists ::env(XILINX_BOARD)] {
 }
 
 # create project
-create_project pulpissimo . -force -part $::env(XILINX_PART)
+create_project $project . -force -part $::env(XILINX_PART)
 set_property board_part $XILINX_BOARD [current_project]
 
 # set up meaningfull errors
