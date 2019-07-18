@@ -388,24 +388,6 @@ monitor help
 
 Most notably the command `info registers` does not work. Use `monitor reg` instead which has the same effect.
 
-### PULP run script
-If you are not intrested in debugging your application and just want to quickly
-run the application and see UART output you can use the `run` target you already
-might know from using the virtual platform. You need to install minicom (`sudo
-apt install minicom`) to be able to use this target.
-
-If you execute: 
-```Shell 
-make run PULP_GENESYS2_UART_TTY=/dev/ttyUSB0 PULP_GENESYS2_UART_BAUDRATE=115200 
-``` 
-a script will be started that automatically
-launches OpenOCD and GDB in the background to load and execute your binary. The
-output of the programm will then be shown in the minicom session launched in the
-foreground. The code snippet above shows the default values of the makefile variables to specify the UART device and the baudrate.
-If the values you need are in fact identical to the values above (ttyUSB0 and baudrate=115200) you can ommit specifying them and just call:
-```Shell
-make run
-```
 
 ## Proprietary verification IPs
 The full simulation platform can take advantage of a few models of commercial
