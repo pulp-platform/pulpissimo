@@ -16,8 +16,8 @@
 # Generally you just need to call make -f Makefile.incisive sim-sc to simulate
 # or make -f Makefile.incisive build-sc to just build
 
-.PHONY: build-r build-sc build-mc lib-r sim-r sim-sc sim-mc
-.PHONY: clean clean-r clean-sc clean-mc
+.PHONY: build-r build-sc build-mc lib-r sim-r sim-sc sim-mc build-deps
+.PHONY: clean clean-r clean-sc clean-mc clean-deps
 
 mkfile_path := $(dir $(abspath $(firstword $(MAKEFILE_LIST))))
 
@@ -29,10 +29,16 @@ RTLLIBS	    = -reflib ncsim_libs
 SVLIB	    =  ../rtl/tb/remote_bitbang/librbs
 VISIBILITY  = -access +r
 
+# build the bitbang library, needed for simulating a jtag bridge to OpenOCD
+build-deps:
+	$(MAKE) -C ../rtl/tb/remote_bitbang all
+
+clean-deps:
+	$(MAKE) -C ../rtl/tb/remote_bitbang clean
 
 # -allowredefinition is neede because we unfortunately got two
 # modules named axi_slice_dc_slave_wrap and axi_slice_dc_master_wrap
-sim-sc:
+sim-sc: build-deps
 	$(XRUN) -64bit -top tb_pulp $(TIMESCALE) $(WARNINGS) \
 		-sv -v93 -allowredefinition \
 		-sv_lib $(SVLIB) \
@@ -45,7 +51,7 @@ sim-sc:
 		-f ncompile/src_rtl_files.f
 
 # this target is currently broken because the parser chokes on dpi_model.sv
-sim-mc:
+sim-mc: build-deps
 	$(XRUN) -64bit $(TIMESCALE) $(WARNINGS) \
 		-mce -mce_top tb_pulp \
 		-sv -v93 -allowredefinition \
@@ -54,7 +60,7 @@ sim-mc:
 		-f ncompile/src_rtl_files.f
 
 # -v93 is required for the FLL
-build-sc:
+build-sc: build-deps
 	$(XRUN) -64bit -elaborate $(TIMESCALE) $(WARNINGS) \
 		-top tb_pulp \
 		-sv -v93 -allowredefinition \
@@ -62,7 +68,7 @@ build-sc:
 		-f ncompile/src_ips_files.f \
 		-f ncompile/src_rtl_files.f
 
-build-mc:
+build-mc: build-deps
 	$(XRUN) -64bit -elaborate $(TIMESCALE) $(WARNINGS) \
 		-mce -mce_top tb_pulp \
 		-sv -v93 -allowredefinition \
@@ -99,4 +105,4 @@ clean-r:
 	@make --no-print-directory -f $(mkfile_path)/ncompile/rtl.mk clean
 
 
-clean: clean-r clean-mc clean-sc
+clean: clean-r clean-mc clean-sc clean-deps
