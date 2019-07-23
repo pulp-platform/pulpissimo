@@ -734,6 +734,13 @@ module tb_pulp;
                   debug_mode_if.load_L2(num_stim, stimuli, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
                end
 
+               //write bootaddress
+               #50us;
+               $display("[TB] %t - boot address: 0x%h @ %s", $realtime,BEGIN_L2_INSTR,"32'h1A104004");
+               pulp_tap.write32(32'h1A104004, 1, BEGIN_L2_INSTR, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+               #50us;
+
+
                // configure for debug module dmi access again
                debug_mode_if.init_dmi_access(s_tck, s_tms, s_trstn, s_tdi);
 
