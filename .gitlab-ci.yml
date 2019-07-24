@@ -13,10 +13,10 @@
 # limitations under the License.
 
 before_script:
+  - echo "Fetching tests"
+  - make test-checkout-gitlab
   - echo "Fetching IPs"
   - make checkout
-  - echo "Fetching tests"
-  - make test-checkout
 
 after_script:
   - echo "FINISH"

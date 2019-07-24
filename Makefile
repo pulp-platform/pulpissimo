@@ -75,6 +75,11 @@ all: checkout build install vopt sdk
 test-checkout:
 	./update-tests
 
+# the gitlab runner needs a special configuration to be able to access the
+# dependent git repositories
+test-checkout-gitlab:
+	./update-tests-gitlab
+
 test:
 	cd pulp-builder; \
 	. sdk-setup.sh; \
