@@ -80,5 +80,5 @@ test:
 	. sdk-setup.sh; \
 	. configs/pulpissimo.sh; \
 	. configs/rtl.sh; \
-	cd ..; \
+	cd ../tests; \
 	plptest --threads 16 --stdout
