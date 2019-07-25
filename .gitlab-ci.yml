@@ -77,7 +77,6 @@ build_rtl:
       - install/*
 #      - pkg/* # sdk is too large
 
-
 test_all:
   stage: test
   before_script:
@@ -88,4 +87,4 @@ test_all:
     - make test
   artifacts:
     reports:
-      junit: junit-reports/TEST-*.xml
+      junit: tests/junit-reports/TEST-*.xml
