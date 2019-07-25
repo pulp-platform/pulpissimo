@@ -114,7 +114,6 @@ set_property "steps.place_design.args.directive" "RuntimeOptimized" [get_runs im
 set_property "steps.route_design.args.directive" "RuntimeOptimized" [get_runs impl_1]
 
 set_property STEPS.WRITE_BITSTREAM.ARGS.BIN_FILE true [get_runs impl_1]
-set_property config_mode SPIx4 [current_design]
 
 launch_runs impl_1 -jobs 8
 wait_on_run impl_1
