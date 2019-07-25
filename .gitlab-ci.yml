@@ -14,6 +14,7 @@
 
 
 before_script:
+  - pwd
 
 # after_script:
 #   - echo "stage finished"
@@ -28,21 +29,38 @@ fetch_tests:
   script:
     - echo "Fetching tests"
     - make test-checkout-gitlab
+  artifacts:
+    paths:
+      - tests/*
 
 fetch_ips:
   stage: fetch
   script:
     - echo "Fetching IPs"
     - make checkout
+  artifacts:
+    paths:
+      - ips/*
+      - sim/*
+      - ipstools/*
 
-fetch_sdk:
-  stage: fetch
-  script:
-    - echo "Fetching SDK from releases and setting up paths"
-    - make sdk-gitlab
+# This jobs result is too large to produce an artifact
+# fetch_sdk:
+#   stage: fetch
+#   script:
+#     - echo "Fetching SDK from releases and setting up paths"
+#     - make sdk-gitlab
+#   artifacts:
+#     paths:
+#       - pkg/
+#       - env/
 
 build_rtl:
   stage: build
+  before_script:
+    - tree
+    - echo "Fetching SDK from releases and setting up paths"
+    - make sdk-gitlab
   script:
     - echo "Compiling RTL model and DPI libraries"
     - make build
@@ -50,9 +68,21 @@ build_rtl:
     - make install
     - echo "Elaborating RTL model"
     - make vopt
+  artifacts:
+    paths:
+      - tests/*
+      - ips/*
+      - sim/*
+      - ipstools/*
+      - install/*
+#      - pkg/* # sdk is too large
+
 
 test_all:
   stage: test
+  before_script:
+    - echo "Fetching SDK from releases and setting up paths"
+    - make sdk-gitlab
   script:
     - echo "Running Tests"
     - make test
