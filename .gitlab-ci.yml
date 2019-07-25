@@ -80,6 +80,7 @@ build_rtl:
 test_all:
   stage: test
   before_script:
+    - tree
     - echo "Fetching SDK from releases and setting up paths"
     - make sdk-gitlab
   script:
