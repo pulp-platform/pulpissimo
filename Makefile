@@ -72,9 +72,6 @@ sdk:
 # continuous integration on gitlab
 sdk-gitlab:
 	sdk-releases/get-sdk-2019.07.01-CentOS_7.py; \
-	source env/env-sdk-2019.07.01.sh; \
-	source pkg/sdk/2019.07.01/configs/pulpissimo.sh; \
-	source pkg/sdk/2019.07.01/configs/platform-rtl.sh;
 
 all: checkout build install vopt sdk
 
@@ -87,4 +84,7 @@ test-checkout-gitlab:
 	./update-tests-gitlab
 
 test:
+	source env/env-sdk-2019.07.01.sh; \
+	source pkg/sdk/2019.07.01/configs/pulpissimo.sh; \
+	source pkg/sdk/2019.07.01/configs/platform-rtl.sh; \
 	cd tests && plptest --threads 16 --stdout
