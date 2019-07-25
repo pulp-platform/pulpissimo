@@ -12,16 +12,34 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-before_script:
-  - echo "Fetching tests"
-  - make test-checkout-gitlab
-  - echo "Fetching IPs"
-  - make checkout
-  - echo "Fetching SDK from releases and setting up paths"
-  - make sdk-gitlab
 
-after_script:
-  - echo "FINISH"
+before_script:
+
+# after_script:
+#   - echo "stage finished"
+
+stages:
+  - fetch
+  - build
+  - test
+
+fetch_tests:
+  stage: fetch
+  script:
+    - echo "Fetching tests"
+    - make test-checkout-gitlab
+
+fetch_ips:
+  stage: fetch
+  script:
+    - echo "Fetching IPs"
+    - make checkout
+
+fetch_sdk:
+  stage: fetch
+  script:
+    - echo "Fetching SDK from releases and setting up paths"
+    - make sdk-gitlab
 
 build_rtl:
   stage: build
