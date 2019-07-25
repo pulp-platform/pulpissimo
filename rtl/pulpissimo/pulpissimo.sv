@@ -10,7 +10,7 @@
 
 module pulpissimo
 #(
-  parameter CORE_TYPE   = 0, // 0 for RISCY, 1 for ZERORISCY, 2 for MICRORISCY
+  parameter CORE_TYPE   = 0, // 0 for RISCY, 1 for IBEX RV32IMC (formerly ZERORISCY), 2 for IBEX RV32EC (formerly MICRORISCY)
   parameter USE_FPU     = 1,
   parameter USE_HWPE    = 1
 )

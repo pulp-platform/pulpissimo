@@ -37,17 +37,19 @@ Further information about the core can be found at
 http://ieeexplore.ieee.org/abstract/document/7864441/
 and in the documentation of the IP.
 
-Ibex, formely zero-riscy, is an in-order, single-issue core with 2 pipeline stages and it
-has full support for the base integer instruction set (RV32I) and
-compressed instructions (RV32C).
-It can be configured to have multiplication instruction set extension (RV32M)
-and the reduced number of registers extension (RV32E).
-It has been originally designed at ETH to target ultra-low-power and ultra-low-area constraints.
-Ibex is now part of the LowRISC non-profit community.
-It implementes a subset of the 1.11 privileged specification and the RISC-V Debug spec 0.13.
-Further information about the core can be found at
+Ibex, formely Zero-riscy, is an in-order, single-issue core with 2 pipeline
+stages. It has full support for the base integer instruction set (RV32I
+version 2.1) and compressed instructions (RV32C version 2.0).
+It can be configured to support the multiplication instruction set extension
+(RV32M version 2.0) and the reduced number of registers extension (RV32E
+version 1.9). Ibex implementes the Machine ISA version 1.11 and has RISC-V
+External Debug Support version 0.13.2. Ibex has been originally designed at
+ETH to target ultra-low-power and ultra-low-area constraints. Ibex is now
+maintained and further developed by the non-for-profit community interest
+company lowRISC. Further information about the core can be found at
 http://ieeexplore.ieee.org/document/8106976/
-and in the documentation of the IP.
+and in the documentation of the IP at
+https://ibex-core.readthedocs.io/en/latest/index.html
 
 PULPissimo includes a new efficient I/O subsystem via a uDMA (micro-DMA) which
 communicates with the peripherals autonomously. The core just needs to program
@@ -287,6 +289,23 @@ make clean all
 
 This command builds the ELF binary with UART as the default io peripheral.
 The binary will be stored at `build/pulpissimo/[app_name]/[app_name]`.
+
+### Core selection
+By default, PULPissimo is configured to use the RI5CY core with floating-point
+support being enabled. To switch to Ibex (and disable floating-point support),
+the following steps need to be performed.
+
+1. Switch hardware configuration
+
+   Open the file `fpga/pulpissimo-<board_target>/rtl/xilinx_pulpissimo.v` and
+   change the `CORE_TYPE` parameter to the preferred value. Change the value
+   of the `USE_FPU` parameter from `1` to `0`. Save the file and regenerate
+   the FPGA bitstream.
+
+2. Switch SDK configuration
+
+   Instead of sourcing `configs/pulpissimo.sh` when configuring the SDK,
+   source `configs/pulpissimo_ibex.sh`.
 
 ### GDB and OpenOCD
 In order to execute our application on the FPGA we need to load the binary into
