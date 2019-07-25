@@ -17,6 +17,8 @@ before_script:
   - make test-checkout-gitlab
   - echo "Fetching IPs"
   - make checkout
+  - echo "Fetching SDK from releases and setting up paths"
+  - make sdk-gitlab
 
 after_script:
   - echo "FINISH"
@@ -30,12 +32,6 @@ build_rtl:
     - make install
     - echo "Elaborating RTL model"
     - make vopt
-
-build_sdk:
-  stage: build
-  script:
-    - echo "Building PULP SDK"
-    - make sdk
 
 test_all:
   stage: test
