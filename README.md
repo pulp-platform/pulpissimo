@@ -221,9 +221,9 @@ PULPissimo is running at. If you didn't change anything in the synthesis script,
 
 
 | Clock Domain   | Default Frequency on Genesys2 board |
-|----------------|------------------------------------ |
-| Core Frequency | 40MHz                               |
-| SoC Frequency  | 20MHz                               |
+|----------------|-------------------------------------|
+| Core Frequency | 20 MHz                              |
+| SoC Frequency  | 10 MHz                              |
 
 
 We need to override two weakly defined variables in our source code to configure the SDK to use these frequencies:
@@ -231,8 +231,8 @@ We need to override two weakly defined variables in our source code to configure
 #include <stdio.h>
 #include <rt/rt_api.h>
 
-int __rt_fpga_fc_frequency = 40000000;
-int __rt_fpga_periph_frequency = 20000000;
+int __rt_fpga_fc_frequency = 20000000;
+int __rt_fpga_periph_frequency = 10000000;
 
 int main()
 {
