@@ -86,6 +86,11 @@ test_all:
   script:
     - echo "Running Tests"
     - make test
+    - /usr/sepp/bin/pip3.4 install --user junit2html
+    - /usr/sepp/bin/python3.4 -m junit2htmlreport tests/junit-reports/TEST-*.xml
   artifacts:
+    paths:
+      - tests/junit-reports/TEST-*.html
+      - tests/junit-reports/TEST-*.xml
     reports:
       junit: tests/junit-reports/TEST-*.xml
