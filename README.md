@@ -89,7 +89,7 @@ Then execute the following commands:
 ```
 git clone https://github.com/pulp-platform/pulp-builder.git
 cd pulp-builder
-git checkout 63509ac7d3561a26f5368aca5094d7e49802da3b
+git checkout 7bd925324fcecae2aad9875f4da45b27d8356796
 source configs/pulpissimo.sh
 ./scripts/clean
 ./scripts/update-runtime
@@ -154,7 +154,7 @@ Once the RTL platform is installed, the following commands can be executed to in
 ```
 git clone https://github.com/pulp-platform/pulp-builder.git
 cd pulp-builder
-git checkout b3b255b0f653fce950cf730972c8ad07b1be7bf0
+git checkout 7bd925324fcecae2aad9875f4da45b27d8356796
 source configs/pulpissimo.sh
 ./scripts/build-gvsoc
 source sdk-setup.sh
@@ -168,6 +168,224 @@ make conf
 ```
 
 More information is available in the documentation here: pulp-builder/install/doc/vp/index.html
+
+## FPGA
+
+PULPissimo has been implemented on FPGA for the Xilinx Genesys 2 board.
+Follow the next steps to generate the bitstream and use it as an emulator of the microcontroller.
+
+Go to the fpga folder and run
+
+```Shell
+make help
+```
+
+This lists a brief description of all available Make targets.
+
+In this tutorial we use the Digilent Genesys2 board which is the only one supported at the moment.
+
+Therefore, run
+
+```Shell
+make genesys2
+```
+
+in order to generate the PULPissimo bitstream for the GENESYS2 board. If your invocation command to start Vivado isn't `vivado` you can use the Make variable `VIVADO` to specify the right command (e.g. `make genesys2 VIVADO='vivado-2018.3 vivado'` for ETH CentOS machines.)
+Boot from ROM is not available yet. The ROM will always return the `jal x0,0` to trap the core until the debug module takes over control and loads the programm into L2 memory.
+Once the bitstream `pulpissimo_genesys2.bit` is generated in the fpga folder, you can open Vivado
+`vivado` (we tried the 2018.3 version) and load the bitstream into the fpga or use the Configuration File (`pulpissimo_genesys2.bin`) to flash it to the on-board Configuration Memory.
+
+In Vivado:
+
+```
+Open Hardware Manager
+Open Target
+Program device
+```
+
+Now your FPGA is ready to emulate PULPissimo!
+
+
+To run or debug applications for the fpga you need to use a recent version of the PULP-SDK (commit id 3256fe7 or newer.'). Configure the SDK for the FPGA platform by running the following commands within the SDK's root directory:
+
+```Shell
+source configs/pulpissimo.sh
+source configs/fpgas/pulpissimo/genesys2.sh
+```
+
+If you updated the SDK don't forget to recompile the SDK and the dependencies.
+
+In order for the SDK to be able to configure clock dividers (e.g. the ones for
+the UART module) to the right values it needs to know which frequencies
+PULPissimo is running at. If you didn't change anything in the synthesis script, the default frequencies are:
+
+
+| Clock Domain   | Default Frequency on Genesys2 board |
+|----------------|------------------------------------ |
+| Core Frequency | 40MHz                               |
+| SoC Frequency  | 20MHz                               |
+
+
+We need to override two weakly defined variables in our source code to configure the SDK to use these frequencies:
+```C
+#include <stdio.h>
+#include <rt/rt_api.h>
+
+int __rt_fpga_fc_frequency = 40000000;
+int __rt_fpga_periph_frequency = 20000000;
+
+int main()
+{
+...
+}
+```
+
+By default, the baudrate of the UART is set to `115200`.
+
+Add the following global variable declaration to your application in case you want to change it:
+
+```C
+unsigned int __rt_iodev_uart_baudrate = your baudrate;
+```
+
+Compile your application with
+
+```Shell
+make clean all
+```
+
+This command builds the ELF binary with UART as the default io peripheral.
+The binary will be stored at `build/pulpissimo/[app_name]/[app_name]`.
+
+
+### GDB and OpenOCD
+In order to execute our application on the FPGA we need to load the binary into
+PULPissimo's L2 memory. To do so we can use OpenOCD in conjunction with GDB to
+communicate with the internal RISC-V debug module.
+
+For the genesys2 board we need to connect two micro USB cables to the board: The
+first cable connects to the JTAG port that is usually used for FPGA
+configuration. Once the PULPissimo bitstream is written to the FPGA the same
+port is used to let OpenOCD communicate with the RISC-V debug module within
+PULPissimo. The second micro USB cable needs to be attached to the genesys2's
+UART port to observe the output of the application's `printf` statements.
+
+
+Due to a long outstanding issue in the RISC-V openocd project (issue #359) the
+riscv/riscv-openocd does not work with PULPissimo. However there is a small
+workaround that we incorporated in a patched version of openocd. If you have
+access to the artifactory server, the patched openocd binary is installed by
+default with the `make deps` command in the SDK. If you don't have access to the
+precompiled binaries you can automatically download and compile the patched
+OPENOCD from source. You will need to install the following dependencies on your
+machine before you can compile OpenOCD:
+
+- `autoconf` >= 2.64
+- `automake` >= 1.14
+- `texinfo`
+- `make`
+- `libtool`
+- `pkg-config` >= 0.23 (or compatible)
+- `libusb-1.0`
+- `libftdi`
+- `libusb-0.1` or `libusb-compat-0.1` for some older drivers
+
+After installing those dependecies with you OS' package manager you can
+download, apply the patch and compile OpenOCD with:
+
+```Shell
+source sourceme.sh && ./pulp-tools/bin/plpbuild checkout build --p openocd --stdout
+```
+
+The SDK will automatically set the environment variable `OPENOCD` to the
+installation path of this patched version.
+
+Launch openocd with the configuration file for the genesys2 board as an argument with:
+
+```Shell
+$OPENOCD/bin/openocd -f pulpissimo/fpga/pulpissimo-genesys2/openocd-genesys2.cfg
+```
+In a seperate terminal launch gdb from your pulp_riscv_gcc installation passing the ELF file as an argument with:
+
+`$PULP_RISCV_GCC_TOOLCHAIN_CI/bin/riscv32-unknown-elf-gdb  PATH_TO_YOUR_ELF_FILE`
+
+In gdb, run:
+
+```
+(gdb) target remote localhost:3333
+```
+
+to connect to the OpenOCD server.
+
+In a third terminal launch a serial port client (e.g. `screen` or `minicom`) on Linux to riderect the UART output from PULPissimo with e.g.:
+
+```Shell
+screen /dev/ttyUSB0 115200
+```
+
+the ttyUSB0 target may change.
+
+Now you are ready to debug!
+
+In gdb, load the program into L2:
+
+```
+(gdb) load
+```
+and run the programm:
+
+```
+(gdb) continue
+```
+Of course you can also benefit from the debug capabilities that GDB provides.
+
+E.g. see the disasembled binary:
+```
+(gdb) disas
+```
+List the current C function, set a break point at line 25, continue and have fun!
+
+```
+(gdb) list
+21
+22  int main()
+23  {
+24    while (1) {
+25      printf("Hello World!\n\r");
+26     for (volatile int i=0; i<1000000; i++);
+27    }
+28    return 0;
+29  }
+
+(gdb) b 25
+Breakpoint 1 at 0x1c0083d2: file test.c, line 25.
+(gdb) c
+Continuing.
+
+Breakpoint 1, main () at test.c:25
+25      printf("Hello World!\n\r");
+
+
+(gdb) disas
+Dump of assembler code for function main:
+   0x1c0083d4 <+22>:    li  a1,1
+   0x1c0083d6 <+24>:    blt s0,a5,0x1c0083e8 <main+42>
+=> 0x1c0083da <+28>:    lw  a5,12(sp)
+   0x1c0083dc <+30>:    slli    a1,a1,0x1
+   0x1c0083de <+32>:    addi    a5,a5,1
+   0x1c0083e0 <+34>:    sw  a5,12(sp)
+
+(gdb) monitor reg a5
+a5 (/32): 0x000075B7
+
+```
+Not all gdb commands work as expected on the riscv-dbg target.
+To get a list of available gdb commands execute:
+```
+monitor help
+```
+
+Most notably the command `info registers` does not work. Use `monitor reg` instead which has the same effect.
 
 
 ## Proprietary verification IPs
