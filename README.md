@@ -1,3 +1,28 @@
+# RNN Extensions
+
+This repo is a fork of the PULPissimo repo.
+The RNN Extensions (related to the Huawei Project) have been implemented here.
+Submodules are the same except the risc-v ip, check that you get the right one:
+[core]
+        repositoryformatversion = 0
+        filemode = true
+        bare = false
+        logallrefupdates = true
+[remote "old-origin"]
+        url = https://github.com/pulp-platform/riscv.git
+        fetch = +refs/heads/*:refs/remotes/old-origin/*
+[branch "master"]
+        remote = origin
+        merge = refs/heads/master
+[remote "origin"]
+        url = git@iis-git.ee.ethz.ch:andri/rnn-riscv.git
+        fetch = +refs/heads/*:refs/remotes/origin/*
+[branch "rnn_extension"]
+        remote = origin
+        merge = refs/heads/rnn_extension
+
+
+
 # PULPissimo
 
 ![](doc/pulpissimo_archi.png)
