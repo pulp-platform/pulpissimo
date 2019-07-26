@@ -66,8 +66,6 @@ build_rtl:
     - make build
     - echo "Installing scripts"
     - make install
-    - echo "Elaborating RTL model"
-    - make vopt
   artifacts:
     paths:
       - tests/*
@@ -75,16 +73,17 @@ build_rtl:
       - sim/*
       - ipstools/*
       - install/*
+      - rtl/tb/remote_bitbang/* # we want to reuse bitbang lib
 #      - pkg/* # sdk is too large
 
-test_all:
+test_sw:
   stage: test
   before_script:
     - tree
     - echo "Fetching SDK from releases and setting up paths"
     - make sdk-gitlab
   script:
-    - echo "Running Tests"
+    - echo "Running software tests"
     - make test
     - /usr/sepp/bin/pip3.4 install --user junit2html
     - /usr/sepp/bin/python3.4 -m junit2htmlreport tests/junit-reports/TEST-*.xml
@@ -94,3 +93,11 @@ test_all:
       - tests/junit-reports/TEST-*.xml
     reports:
       junit: tests/junit-reports/TEST-*.xml
+
+test_dm:
+  stage: test
+  before_script:
+    - tree
+  script:
+    - echo "Running debug module testbench"
+    - cd sim/ && make lib build opt simc VSIM_FLAGS=-gENABLE_DM_TESTS=1

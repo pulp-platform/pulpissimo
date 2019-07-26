@@ -36,12 +36,10 @@ checkout:
 	./update-ips
 
 clean:
-	$(MAKE) -C rtl/tb/remote_bitbang clean
 	rm -rf $(VSIM_PATH)
 	cd sim && $(MAKE) clean
 
 build:
-	$(MAKE) -C rtl/tb/remote_bitbang all
 	cd sim && $(MAKE) lib build opt
 	cp -r rtl/tb/* $(VSIM_PATH)
 
