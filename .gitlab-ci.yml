@@ -99,5 +99,7 @@ test_dm:
   before_script:
     - tree
   script:
+    - echo "Setting up vsim path"
+    - source setup/vsim.sh
     - echo "Running debug module testbench"
     - cd sim/ && make lib build opt simc VSIM_FLAGS=-gENABLE_DM_TESTS=1
