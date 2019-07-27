@@ -17,7 +17,7 @@ git clone git@iis-git.ee.ethz.ch:pulp-sw/sequential_bare_tests.git \
 
 # using "stable" versions
 echo "Using stable versions of tests"
-git -C tests/ml_tests checkout -q dafa9053aafc685e93ab9c070587a8e9ad9a5256
+git -C tests/ml_tests checkout -q 481c83b30c2cb7b823d1769b1c0d6a30a3a3b9b0
 git -C tests/pulp_tests checkout -q ce367a85b9d4b15e92b57cdfa7b715ecf6a92a45
 git -C tests/rt-tests checkout -q 84e275e64d2d315d0fbe53e5ab6907164ac3535c
 git -C tests/parallel_bare_tests checkout -q 91b1bad09d088df9140f5391a87df3f6ebfab344
