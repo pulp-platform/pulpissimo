@@ -58,32 +58,35 @@ fetch_ips:
 build_rtl:
   stage: build
   before_script:
-    - tree
   script:
     - echo "Compiling RTL model and DPI libraries"
     - make build
     - echo "Installing scripts"
     - make install
-    - tree
   artifacts:
     paths:
       - tests/*
       - ips/*
       - sim/*
       - ipstools/*
-      - install/*
+#      - install/* # we have to rebuild in test stage because rtl libraries are
+                   # not relocatable (hardcoded paths)
       - rtl/tb/remote_bitbang/* # we want to reuse bitbang lib
 #      - pkg/* # sdk is too large
 
 test_sw:
   stage: test
   before_script:
-    - tree
     - echo "Fetching SDK from releases and setting up paths"
     - make sdk-gitlab
+    - echo "Compiling RTL model and DPI libraries"
+    - make build
+    - echo "Installing scripts"
+    - make install
   script:
     - echo "Running software tests"
     - make test
+    - echo "Generating junit test results"
     - /usr/sepp/bin/pip3.4 install --user junit2html
     - /usr/sepp/bin/python3.4 -m junit2htmlreport tests/junit-reports/TEST-*.xml
   artifacts:
@@ -96,7 +99,6 @@ test_sw:
 test_dm:
   stage: test
   before_script:
-    - tree
   script:
     - echo "Setting up vsim path"
     - source setup/vsim.sh
