@@ -70,6 +70,7 @@ sdk:
 # continuous integration on gitlab
 sdk-gitlab:
 	sdk-releases/get-sdk-2019.07.01-CentOS_7.py; \
+	cd pkg && patch -p1 < ../sdk-releases/pulp-sdk-2019.07.01-junit.patch;
 
 all: checkout build install vopt sdk
 
