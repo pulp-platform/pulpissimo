@@ -59,13 +59,12 @@ build_rtl:
   stage: build
   before_script:
     - tree
-    - echo "Fetching SDK from releases and setting up paths"
-    - make sdk-gitlab
   script:
     - echo "Compiling RTL model and DPI libraries"
     - make build
     - echo "Installing scripts"
     - make install
+    - tree
   artifacts:
     paths:
       - tests/*
