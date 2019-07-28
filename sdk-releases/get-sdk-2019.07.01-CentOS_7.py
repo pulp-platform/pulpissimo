@@ -78,7 +78,7 @@ for command in args.command:
                 artifactory_user = os.environ['ARTIFACTORY_USER']
                 artifactory_pw = os.environ['ARTIFACTORY_PASSWORD']
 
-                if os.system('wget --timeout=2 --user %s --password %s --no-check-certificate %s' % (artifactory_user, artifactory_pw, artefact)) != 0:
+                if os.system('wget -nv --timeout=2 --user %s --password %s --no-check-certificate %s' % (artifactory_user, artifactory_pw, artefact)) != 0:
                     exit(-1)
 
                 if command == 'get':
