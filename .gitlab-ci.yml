@@ -43,6 +43,7 @@ fetch_ips:
       - ips/*
       - sim/*
       - ipstools/*
+      - .cached_ipdb.json
 
 # This jobs result is too large to produce an artifact
 # fetch_sdk:
@@ -104,3 +105,29 @@ test_dm:
     - source setup/vsim.sh
     - echo "Running debug module testbench"
     - cd sim/ && make lib build opt simc VSIM_FLAGS=-gENABLE_DM_TESTS=1
+
+fpga_synth:
+  stage: test
+  before_script:
+  script:
+    - echo "(Re)generating scripts" # because paths might have changed
+    - ./generate-scripts
+    - echo "Starting synthesis with vivado"
+    - cd fpga/ && make genesys2 VIVADO='vivado-2019.1.1 vivado'
+  artifacts:
+    paths:
+      - fpga/pulpissimo_genesys2.bit
+      - fpga/pulpissimo_genesys2.bin
+      - fpga/*.jou
+      - fpga/*.log
+      - fpga/*.str
+      - fpga/pulpissimo-genesys2/reports
+      - fpga/pulpissimo-genesys2/rtl
+      - fpga/pulpissimo-genesys2/tcl
+      - fpga/pulpissimo-genesys2/pulpissimo_genesys2.xpr
+      - fpga/pulpissimo-genesys2/fpga-settings.mk
+      - fpga/pulpissimo-genesys2/*.log
+      - fpga/pulpissimo-genesys2/*.cfg
+      - fpga/pulpissimo-genesys2/*.gdb
+      - fpga/pulpissimo-genesys2/*.jou
+      - fpga/pulpissimo-genesys2/*.log
