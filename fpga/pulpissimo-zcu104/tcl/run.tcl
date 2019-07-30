@@ -112,6 +112,10 @@ remove_cell i_pulpissimo/pad_frame_i/padinst_bootsel
 set_property "steps.opt_design.args.directive" "RuntimeOptimized" [get_runs impl_1]
 set_property "steps.place_design.args.directive" "RuntimeOptimized" [get_runs impl_1]
 set_property "steps.route_design.args.directive" "RuntimeOptimized" [get_runs impl_1]
+set_property "steps.phys_opt_design.args.is_enabled" true [get_runs impl_1]
+set_property "steps.phys_opt_design.args.directive" "ExploreWithHoldFix" [get_runs impl_1]
+set_property "steps.post_route_phys_opt_design.args.is_enabled" true [get_runs impl_1]
+set_property "steps.post_route_phys_opt_design.args.directive" "ExploreWithAggressiveHoldFix" [get_runs impl_1]
 
 set_property STEPS.WRITE_BITSTREAM.ARGS.BIN_FILE true [get_runs impl_1]
 
