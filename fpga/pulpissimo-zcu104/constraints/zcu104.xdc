@@ -11,7 +11,7 @@
 
 
 #Create constraint for the clock input of the zcu104 board
-create_clock -period 5.000 -name ref_clk [get_ports ref_clk_p]
+create_clock -period 8.000 -name ref_clk [get_ports ref_clk_p]
 
 #I2S and CAM interface are not used in this FPGA port. Set constraints to
 #disable the clock

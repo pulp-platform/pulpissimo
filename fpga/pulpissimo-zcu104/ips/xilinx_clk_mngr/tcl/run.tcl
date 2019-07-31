@@ -33,7 +33,7 @@ set_property board_part $boardName [current_project]
 
 create_ip -name clk_wiz -vendor xilinx.com -library ip -module_name $ipName
 
-set_property -dict [eval list CONFIG.PRIM_IN_FREQ {200.000} \
+set_property -dict [eval list CONFIG.PRIM_IN_FREQ {125.000} \
                         CONFIG.NUM_OUT_CLKS {2} \
                         CONFIG.CLKOUT2_USED {true} \
                         CONFIG.RESET_TYPE {ACTIVE_LOW} \

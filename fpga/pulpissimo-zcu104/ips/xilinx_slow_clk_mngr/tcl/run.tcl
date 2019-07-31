@@ -27,7 +27,7 @@ set_property board_part $boardName [current_project]
 
 create_ip -name clk_wiz -vendor xilinx.com -library ip -module_name $ipName
 
-set_property -dict [eval list CONFIG.PRIM_IN_FREQ {200.000} \
+set_property -dict [eval list CONFIG.PRIM_IN_FREQ {125.000} \
                         CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {$SLOW_CLK_FREQ_MHZ} \
                         CONFIG.USE_SAFE_CLOCK_STARTUP {true} \
                         CONFIG.USE_LOCKED {false} \
