@@ -171,31 +171,60 @@ More information is available in the documentation here: pulp-builder/install/do
 
 ## FPGA
 
-PULPissimo has been implemented on FPGA for the Xilinx Genesys 2 board.
-Follow the next steps to generate the bitstream and use it as an emulator of the microcontroller.
+PULPissimo has been implemented on FPGA for the various Xilinx FPGA boards.
 
-Go to the fpga folder and run
+### Supported Boards
+At the moment the following boards are supported:
+* Digilent Genesys2
+* Xilinx ZCU104
+
+In the release section you find precompiled bitstreams for all of the above
+mentionied boards. If you want to use the latest development version PULPissimo
+follow the section below to generate the bitstreams yourself.
+
+### Bitstream Generation
+In order to generate the PULPissimo bitstream for a supported target FPGA board first generate the necessary synthesis include scripts by starting the `update-ips` script in the pulpissimo root directory:
+
+```Shell
+./update-ips
+```
+
+This will parse the ips_list.yml using the PULP IPApproX IP management tool to
+generate tcl scripts for all the IPs used in the PULPissimo project. These files
+are later on sourced by Vivado to generate the bitstream for PULPissimo.
+
+Now switch to the fpga subdirectory and start the apropriate make target to generate the bitstream:
+
+```Shell
+cd fpga
+make <board_target>
+```
+In order to show a list of all available board targets call:
 
 ```Shell
 make help
 ```
 
-This lists a brief description of all available Make targets.
+This process might take a while. If everything goes well your fpga directory
+should now contain two files:
 
-In this tutorial we use the Digilent Genesys2 board which is the only one supported at the moment.
+- `pulpissimo_<board_target>.bit` the bitstream file for JTAG configuration of the FPGA.
+- `pulpissimo_<board_target>.bin` the binary configuration file to flash to a
+  non-volatile configuration memory.
 
-Therefore, run
 
-```Shell
-make genesys2
-```
+If your invocation command to start Vivado isn't `vivado` you can use the Make
+variable `VIVADO` to specify the right command (e.g. `make genesys2
+VIVADO='vivado-2018.3 vivado'` for ETH CentOS machines.) Boot from ROM is not
+available yet. The ROM will always return the `jal x0,0` to trap the core until
+the debug module takes over control and loads the programm into L2 memory. Once
+the bitstream `pulpissimo_genesys2.bit` is generated in the fpga folder, you can
+open Vivado `vivado` (we tried the 2018.3 version) and load the bitstream into
+the fpga or use the Configuration File (`pulpissimo_genesys2.bin`) to flash it
+to the on-board Configuration Memory.
 
-in order to generate the PULPissimo bitstream for the GENESYS2 board. If your invocation command to start Vivado isn't `vivado` you can use the Make variable `VIVADO` to specify the right command (e.g. `make genesys2 VIVADO='vivado-2018.3 vivado'` for ETH CentOS machines.)
-Boot from ROM is not available yet. The ROM will always return the `jal x0,0` to trap the core until the debug module takes over control and loads the programm into L2 memory.
-Once the bitstream `pulpissimo_genesys2.bit` is generated in the fpga folder, you can open Vivado
-`vivado` (we tried the 2018.3 version) and load the bitstream into the fpga or use the Configuration File (`pulpissimo_genesys2.bin`) to flash it to the on-board Configuration Memory.
-
-In Vivado:
+### Bitstream Flashing
+Start Vivado then:
 
 ```
 Open Hardware Manager
@@ -205,34 +234,35 @@ Program device
 
 Now your FPGA is ready to emulate PULPissimo!
 
+### Board Specific Information
+Have a look at the board specific README.md files in
+`fpga/pulpissimo-<board_target>/README.md` for a description of peripheral
+mappings and default clock frequencies.
 
-To run or debug applications for the fpga you need to use a recent version of the PULP-SDK (commit id 3256fe7 or newer.'). Configure the SDK for the FPGA platform by running the following commands within the SDK's root directory:
+### Compiling Applications for the FPGA Target
+To run or debug applications for the FPGA you need to use a recent version of
+the PULP-SDK (commit id 3256fe7 or newer.'). Configure the SDK for the FPGA
+platform by running the following commands within the SDK's root directory:
 
 ```Shell
 source configs/pulpissimo.sh
-source configs/fpgas/pulpissimo/genesys2.sh
+source configs/fpgas/pulpissimo/<board_target>.sh
 ```
 
 If you updated the SDK don't forget to recompile the SDK and the dependencies.
 
 In order for the SDK to be able to configure clock dividers (e.g. the ones for
 the UART module) to the right values it needs to know which frequencies
-PULPissimo is running at. If you didn't change anything in the synthesis script, the default frequencies are:
+PULPissimo is running at. You can find the default frequencies in the above
+mentioned board specific README files.
 
-
-| Clock Domain   | Default Frequency on Genesys2 board |
-|----------------|-------------------------------------|
-| Core Frequency | 20 MHz                              |
-| SoC Frequency  | 10 MHz                              |
-
-
-We need to override two weakly defined variables in our source code to configure the SDK to use these frequencies:
+In our application we need to override two weakly defined variables in our source code to configure the SDK to use these frequencies:
 ```C
 #include <stdio.h>
 #include <rt/rt_api.h>
 
-int __rt_fpga_fc_frequency = 20000000;
-int __rt_fpga_periph_frequency = 10000000;
+int __rt_fpga_fc_frequency = <Core Frequency> // e.g. 20000000 for 20MHz;
+int __rt_fpga_periph_frequency = <SoC Frequency> // e.g. 10000000 for 10MHz;
 
 int main()
 {
@@ -257,21 +287,16 @@ make clean all
 This command builds the ELF binary with UART as the default io peripheral.
 The binary will be stored at `build/pulpissimo/[app_name]/[app_name]`.
 
-
 ### GDB and OpenOCD
 In order to execute our application on the FPGA we need to load the binary into
 PULPissimo's L2 memory. To do so we can use OpenOCD in conjunction with GDB to
 communicate with the internal RISC-V debug module.
 
-For the genesys2 board we need to connect two micro USB cables to the board: The
-first cable connects to the JTAG port that is usually used for FPGA
-configuration. Once the PULPissimo bitstream is written to the FPGA the same
-port is used to let OpenOCD communicate with the RISC-V debug module within
-PULPissimo. The second micro USB cable needs to be attached to the genesys2's
-UART port to observe the output of the application's `printf` statements.
+PULPissimo uses JTAG as a communication channel between OpenOCD and the Core.
+Have a look at the board specific README file on how to connect your PC with
+PULPissimo's JTAG port.
 
-
-Due to a long outstanding issue in the RISC-V openocd project (issue #359) the
+Due to a long outstanding issue in the RISC-V OpenOCD project (issue #359) the
 riscv/riscv-openocd does not work with PULPissimo. However there is a small
 workaround that we incorporated in a patched version of openocd. If you have
 access to the artifactory server, the patched openocd binary is installed by
@@ -300,12 +325,15 @@ source sourceme.sh && ./pulp-tools/bin/plpbuild checkout build --p openocd --std
 The SDK will automatically set the environment variable `OPENOCD` to the
 installation path of this patched version.
 
-Launch openocd with the configuration file for the genesys2 board as an argument with:
+Launch openocd with one of the provided or your own configuration file for the
+target board as an argument.
+
+E.g.:
 
 ```Shell
 $OPENOCD/bin/openocd -f pulpissimo/fpga/pulpissimo-genesys2/openocd-genesys2.cfg
 ```
-In a seperate terminal launch gdb from your pulp_riscv_gcc installation passing the ELF file as an argument with:
+In a seperate terminal launch gdb from your `pulp_riscv_gcc` installation passing the ELF file as an argument with:
 
 `$PULP_RISCV_GCC_TOOLCHAIN_CI/bin/riscv32-unknown-elf-gdb  PATH_TO_YOUR_ELF_FILE`
 
