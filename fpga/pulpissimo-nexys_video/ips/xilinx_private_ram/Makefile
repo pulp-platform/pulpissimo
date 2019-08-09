@@ -7,17 +7,18 @@ VIVADOFLAGS ?= -nojournal -mode batch -source scripts/prologue.tcl
 .PHONY: help
 
 all: ## Create and synthesize the IP in batch mode.
+ifeq ("$(wildcard ip)","")
 	$(VIVADO) -mode batch -source tcl/run.tcl
 	mkdir -p ip
 	cp -r ${PROJECT}.srcs/sources_1/ip/${PROJECT}/* ip/.
 	cp ${PROJECT}.runs/${PROJECT}_synth_1/${PROJECT}.dcp ip/.
+endif
 
 gui: ## Create and synthesize the IP in GUI mode.
 	$(VIVADO) -mode gui -source tcl/run.tcl &
 
 clean: ## Remove all build products
-	rm -rf ip/*
-	mkdir -p ip
+	rm -rf ip
 	rm -rf ${PROJECT}.*
 	rm -rf component.xml
 	rm -rf vivado*.jou
