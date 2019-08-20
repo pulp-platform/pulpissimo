@@ -152,7 +152,8 @@ before starting the simulation. You will find the VCD in
 
 ### Building and using the virtual platform
 
-Once the RTL platform is installed, the following commands can be executed to install and use the virtual platform:
+Once the RTL platform is installed, the following commands can be executed to
+install and use the virtual platform:
 ```
 git clone https://github.com/pulp-platform/pulp-builder.git
 cd pulp-builder
@@ -164,7 +165,9 @@ source configs/gvsoc.sh
 cd ..
 ```
 
-Then tests can be compiled and run as for the RTL platform. When switching from one platform to another, it may be needed to regenrate the test configuration with this command:
+Then tests can be compiled and run as for the RTL platform. When switching from
+one platform to another, it may be needed to regenrate the test configuration
+with this command:
 ```
 make conf
 ```
@@ -186,7 +189,9 @@ mentionied boards. If you want to use the latest development version PULPissimo
 follow the section below to generate the bitstreams yourself.
 
 ### Bitstream Generation
-In order to generate the PULPissimo bitstream for a supported target FPGA board first generate the necessary synthesis include scripts by starting the `update-ips` script in the pulpissimo root directory:
+In order to generate the PULPissimo bitstream for a supported target FPGA board
+first generate the necessary synthesis include scripts by starting the
+`update-ips` script in the pulpissimo root directory:
 
 ```Shell
 ./update-ips
@@ -196,7 +201,8 @@ This will parse the ips_list.yml using the PULP IPApproX IP management tool to
 generate tcl scripts for all the IPs used in the PULPissimo project. These files
 are later on sourced by Vivado to generate the bitstream for PULPissimo.
 
-Now switch to the fpga subdirectory and start the apropriate make target to generate the bitstream:
+Now switch to the fpga subdirectory and start the apropriate make target to
+generate the bitstream:
 
 ```Shell
 cd fpga
@@ -211,7 +217,8 @@ make help
 This process might take a while. If everything goes well your fpga directory
 should now contain two files:
 
-- `pulpissimo_<board_target>.bit` the bitstream file for JTAG configuration of the FPGA.
+- `pulpissimo_<board_target>.bit` the bitstream file for JTAG configuration of
+  the FPGA.
 - `pulpissimo_<board_target>.bin` the binary configuration file to flash to a
   non-volatile configuration memory.
 
@@ -259,7 +266,8 @@ the UART module) to the right values it needs to know which frequencies
 PULPissimo is running at. You can find the default frequencies in the above
 mentioned board specific README files.
 
-In our application we need to override two weakly defined variables in our source code to configure the SDK to use these frequencies:
+In our application we need to override two weakly defined variables in our
+source code to configure the SDK to use these frequencies:
 ```C
 #include <stdio.h>
 #include <rt/rt_api.h>
@@ -275,7 +283,8 @@ int main()
 
 By default, the baudrate of the UART is set to `115200`.
 
-Add the following global variable declaration to your application in case you want to change it:
+Add the following global variable declaration to your application in case
+you want to change it:
 
 ```C
 unsigned int __rt_iodev_uart_baudrate = your baudrate;
@@ -353,7 +362,8 @@ E.g.:
 ```Shell
 $OPENOCD/bin/openocd -f pulpissimo/fpga/pulpissimo-genesys2/openocd-genesys2.cfg
 ```
-In a seperate terminal launch gdb from your `pulp_riscv_gcc` installation passing the ELF file as an argument with:
+In a seperate terminal launch gdb from your `pulp_riscv_gcc` installation passing
+the ELF file as an argument with:
 
 `$PULP_RISCV_GCC_TOOLCHAIN_CI/bin/riscv32-unknown-elf-gdb  PATH_TO_YOUR_ELF_FILE`
 
@@ -365,7 +375,8 @@ In gdb, run:
 
 to connect to the OpenOCD server.
 
-In a third terminal launch a serial port client (e.g. `screen` or `minicom`) on Linux to riderect the UART output from PULPissimo with e.g.:
+In a third terminal launch a serial port client (e.g. `screen` or `minicom`) on
+Linux to riderect the UART output from PULPissimo with e.g.:
 
 ```Shell
 screen /dev/ttyUSB0 115200
@@ -433,7 +444,8 @@ To get a list of available gdb commands execute:
 monitor help
 ```
 
-Most notably the command `info registers` does not work. Use `monitor reg` instead which has the same effect.
+Most notably the command `info registers` does not work. Use `monitor reg`
+instead which has the same effect.
 
 
 ## Proprietary verification IPs
