@@ -2,25 +2,7 @@
 
 This repo is a fork of the PULPissimo repo.
 The RNN Extensions (related to the Huawei Project) have been implemented here.
-Submodules are the same except the risc-v ip, check that you get the right one:
-[core]
-        repositoryformatversion = 0
-        filemode = true
-        bare = false
-        logallrefupdates = true
-[remote "old-origin"]
-        url = https://github.com/pulp-platform/riscv.git
-        fetch = +refs/heads/*:refs/remotes/old-origin/*
-[branch "master"]
-        remote = origin
-        merge = refs/heads/master
-[remote "origin"]
-        url = git@iis-git.ee.ethz.ch:andri/rnn-riscv.git
-        fetch = +refs/heads/*:refs/remotes/origin/*
-[branch "rnn_extension"]
-        remote = origin
-        merge = refs/heads/rnn_extension
-
+The risc-v core ip has been adapted and will be checked out following the instructions below.
 
 
 # PULPissimo
@@ -101,14 +83,18 @@ control plane.
 For further information on how to design and integrate such accelerators,
 see `ips/hwpe-stream/doc` and https://arxiv.org/abs/1612.05974.
 
+# RNN Extension for PULPissimo
+todo
+
 ## Getting Started
 
-### Prerequisites
-To be able to use the PULPissimo platform, you need to have installed the software
-development kit for PULP/PULPissimo.
+### Prerequisites (adapted to the RNN Extensions)
+To be able to use the PULPissimo platform, you need to have installed the software development kit for PULP/PULPissimo.
 
 First install the system dependencies indicated here:
 https://github.com/pulp-platform/pulp-builder/blob/master/README.md
+and install the RISC-V toolchain (clone and follow instructions from https://github.com/pulp-platform/pulp-riscv-gnu-toolchain/tree/renzo-isa) and set the path (e.g. from iis/centos machine release available here):
+`export PULP_RISCV_GCC_TOOLCHAIN=/usr/scratch/larain5/haugoug/public/pulp_riscv_gcc_renzo.2`
 
 Then execute the following commands:
 ```
@@ -129,9 +115,12 @@ To build the RTL simulation platform, start by getting the latest version of the
 IPs composing the PULP system:
 ```
 ./update-ips
+./switch_to_rnn_ips
 ```
 This will download all the required IPs, solve dependencies and generate the
 scripts by calling `./generate-scripts`.
+
+
 
 After having access to the SDK, you can build the simulation platform by doing
 the following:
@@ -145,8 +134,7 @@ external models for peripherals. See below (Proprietary verification IPs) for
 details on how to plug in some models of real SPI, I2C, I2S peripherals.
 
 ### Downloading and running tests
-Finally, you can download and run the tests; for that you can checkout the
-following repositories:
+Finally, you can download and run the basic tests; for that you can checkout the following repositories:
 
 Runtime tests: https://github.com/pulp-platform/pulp-rt-examples
 
@@ -174,39 +162,10 @@ before starting the simulation. You will find the VCD in
 `build/<SRC_FILE_NAME>/pulpissimo/export.vcd.gz` where
 `<SRC_FILE_NAME>` is the name of the C source of the test.
 
-### Building and using the virtual platform
+### Building and using the virtual platform (gvsoc)
 
-Once the RTL platform is installed, the following commands can be executed to install and use the virtual platform:
-```
-git clone https://github.com/pulp-platform/pulp-builder.git
-cd pulp-builder
-git checkout b3b255b0f653fce950cf730972c8ad07b1be7bf0
-source configs/pulpissimo.sh
-./scripts/build-gvsoc
-source sdk-setup.sh
-source configs/gvsoc.sh
-cd ..
-```
+TODO, currently not supported with the pulp-builder and the rnn-extension. Please refer to the main install flow from https://iis-git.ee.ethz.ch/andri/RNNASIP
 
-Then tests can be compiled and run as for the RTL platform. When switching from one platform to another, it may be needed to regenrate the test configuration with this command:
-```
-make conf
-```
-
-More information is available in the documentation here: pulp-builder/install/doc/vp/index.html
-
-
-## Proprietary verification IPs
-The full simulation platform can take advantage of a few models of commercial
-SPI, I2C, I2S peripherals to attach to the open-source PULP simulation platform.
-In `rtl/vip/spi_flash`, `rtl/vip/i2c_eeprom`, `rtl/vip/i2s` you find the
-instructions to install SPI, I2C and I2S models.
-
-When the SPI flash model is installed, it will be possible to switch to a more
-realistic boot simulation, where the internal ROM of PULP is used to perform an
-initial boot and to start to autonomously fetch the program from the SPI flash.
-To do this, the `LOAD_L2` parameter of the testbench has to be switched from
-`JTAG` to `STANDALONE`.
 
 ## PULP platform structure
 After being fully setup as explained in the Getting Started section, this root
