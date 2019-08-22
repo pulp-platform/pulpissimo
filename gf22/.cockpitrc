@@ -1,0 +1,149 @@
+[cockpit]
+  # Do not change this section
+  config = 2018
+
+  # Still Work in Progress
+
+[library]
+  # Setup files will be generated for these libraries.
+  # 
+  # - only libraries that can be found in the "kit.ascii" database
+  #   can be used (see cockpit.log for the full unix path)
+  #   Standard cells, Low VT (fast), Regular VT and High VT (slow) are possible.
+  #   Note that you can mix and match all VTs.. 
+  # - use "-update" or "-rewrite" for the changes to take effect  
+  #
+  # The following libraries are available:
+  #   technology    : 22FDX
+  #
+  #   designkit     : 10M_2Mx_6Cx_2Ix_LB__V0.4_1.0              (10 Metals)  ++ OBSOLETE ++
+  #   designkit     : 10M_2Mx_6Cx_2Ix_LB__V0.5_0.0              (10 Metals)  ++ OBSOLETE ++
+  #   designkit     : 10M_2Mx_6Cx_2Ix_LB__V1.0_0.0              (10 Metals)  ++ OBSOLETE ++
+  #   designkit     : 10M_2Mx_6Cx_2Ix_LB__V1.1_0.0              (10 Metals)  ++ OBSOLETE ++
+  #   designkit     : 10M_2Mx_6Cx_2Ix_LB__V1.1_2.0              (10 Metals)  ++ OBSOLETE ++
+  #   designkit     : 10M_2Mx_6Cx_2Ix_LB__V1.2_0.0              (10 Metals)  ++ OBSOLETE ++
+  #   designkit     : 10M_2Mx_6Cx_2Ix_LB__V1.3_0.0              (10 Metals)  ++ OBSOLETE ++
+  #   designkit     : 10M_2Mx_6Cx_2Ix_LB__V1.3_1.0              (10 Metals)  ++ OBSOLETE ++
+  #   designkit     : 9M_2Mx_3Cx_2Bx_1Ix_1Ox_LB_MRAM__V1.3_1.0  ( 9 Metals)  ++ OBSOLETE ++
+  #   designkit     : 10M_2Mx_6Cx_2Ix_LB__V1.3_2.2              (10 Metals)
+  #   designkit     : 9M_2Mx_3Cx_2Bx_1Ix_1Ox_LB_MRAM__V1.3_2.2  ( 9 Metals)
+  #
+  # For a comparison list see: 
+  # 
+  #   http://eda.ee.ethz.ch/index.php/
+  # 
+  #   libraries     : SuperLow VT (fastfast)                            Low VT (fast)
+  #     8 track       GF22FDX_SC8T_104CPP_BASE_CSC20SL_V02.R20          GF22FDX_SC8T_104CPP_BASE_CSC20L_V02.R20  ++ OBSOLETE ++
+  #                   GF22FDX_SC8T_104CPP_BASE_CSC24SL_V02.R20          GF22FDX_SC8T_104CPP_BASE_CSC24L_V02.R20  ++ OBSOLETE ++
+  #                   GF22FDX_SC8T_104CPP_BASE_CSC28SL_V02.R20          GF22FDX_SC8T_104CPP_BASE_CSC28L_V02.R20  ++ OBSOLETE ++
+  #                     
+  #     8 track       GF22FDX_SC8T_104CPP_BASE_CSC20SL_V04R00           GF22FDX_SC8T_104CPP_BASE_CSC20L_V04R00  ++ OBSOLETE ++
+  #                   GF22FDX_SC8T_104CPP_BASE_CSC24SL_V04R00           GF22FDX_SC8T_104CPP_BASE_CSC24L_V04R00  ++ OBSOLETE ++
+  #                   GF22FDX_SC8T_104CPP_BASE_CSC28SL_V04R00           GF22FDX_SC8T_104CPP_BASE_CSC28L_V04R00  ++ OBSOLETE ++
+  #                     
+  #     8 track       GF22FDX_SC8T_104CPP_BASE_CSC20SL_V05R00           GF22FDX_SC8T_104CPP_BASE_CSC20L_V05R00
+  #                   GF22FDX_SC8T_104CPP_BASE_CSC24SL_V05R00           GF22FDX_SC8T_104CPP_BASE_CSC24L_V05R00
+  #                   GF22FDX_SC8T_104CPP_BASE_CSC28SL_V05R00           GF22FDX_SC8T_104CPP_BASE_CSC28L_V05R00
+  #                     
+  #                   GF22FDX_SC8T_104CPP_LPK_CSSL_V02R00               GF22FDX_SC8T_104CPP_LPK_CSL_V02R00
+  #                   GF22FDX_SC8T_104CPP_SHIFT_CSSL_V02R00             GF22FDX_SC8T_104CPP_SHIFT_CSL_V02R00
+  #                   GF22FDX_SC8T_104CPP_ECO_CSSL_V02R00               GF22FDX_SC8T_104CPP_ECO_CSL_V02R00
+  #                   GF22FDX_SC8T_104CPP_HPK_CSSL_V02R00               GF22FDX_SC8T_104CPP_HPK_CSL_V02R00
+  #                     
+  #     7.5 track     GF22FDX_SC7P5TLV_116CPP_BASE_CSC28SL_V01R10       GF22FDX_SC7P5TLV_116CPP_BASE_CSC28L_V01R10 
+  #       Ultra-Low   GF22FDX_SC7P5TLV_116CPP_BASE_CSC32SL_V01R10       GF22FDX_SC7P5TLV_116CPP_BASE_CSC32L_V01R10 
+  #       Voltage     GF22FDX_SC7P5TLV_116CPP_BASE_CSC36SL_V01R10       GF22FDX_SC7P5TLV_116CPP_BASE_CSC36L_V01R10 
+  #                     
+  #                   GF22FDX_SC7P5TLV_116CPP_ECO_CSSL_V01R10
+  #                                                                     GF22FDX_SC7P5TLV_116CPP_LPK_CSL_V01R10
+  #                   GF22FDX_SC7P5TLV_116CPP_SHIFT_CSSL_V01R11                                              
+  #                   
+  #                                            GF22FDX_SC7P5TLV_116CPP_CUSTOM_CS_V01R10
+  #                   
+  #                   
+  #   pad-libraries : GF22FDX_GPIO18_10M30PSG_V03.R10     ++ OBSOLETE ++
+  #                   IN22FDX_GPIO18_10M30P_V0410         ++ OBSOLETE ++
+  #                   IN22FDX_GPIO18_10M3S30P_V0430       ++ OBSOLETE ++
+  #                   IN22FDX_GPIO18_10M3S30P_FDK_V04R40  for 10M_2Mx_6Cx_2Ix_LB
+  #                   IN22FDX_GPIO18_9M20S30P_V01R20      for 9M_2Mx_3Cx_2Bx_1Ix_1Ox_LB
+  #                   
+  #   ip blocks     : IN22FDX_PMON_0100_V02R02            ++ OBSOLETE ++
+  #                   IN22FDX_BBGENP_V01R02               ++ OBSOLETE ++
+  #                   IN22FDX_BBGENN_V01R02               ++ OBSOLETE ++
+  #                   IN22FDX_7P5T_ABB_FDK_RELV01R00_P1SZ useing : M1, M2, C1, C2, C3
+  #                   IN22FDX_8T_ABB_FDK_RELV01R00_P1SZ   useing : M1, M2, C1, C2, C3
+  #                   gf22_FLL_v3.3b                      useing : M1, M2, C1, C2, C3
+  #
+  #   mem compiler  : gf22memory                          ++ OBSOLETE ++
+  #                   gf22memory_S1D_V02R51               ++ OBSOLETE ++
+  #                   gf22memory_S1D_V03R00               ++ OBSOLETE ++
+  #                   gf22memory_S1D_V03R02
+  #                   gf22memory_S1P_V03R00               ++ OBSOLETE ++
+  #                   gf22memory_S1P_V03R02
+  #                   gf22memory_R2P_V02R51               ++ OBSOLETE ++
+  #                   gf22memory_R1PH_V02R53              ++ OBSOLETE ++
+  #                   gf22memory_R1PH_V03R00              ++ OBSOLETE ++
+  #                   gf22memory_R1PH_V03R01
+  #                   gf22memory_R2PV_V02R52              ++ OBSOLETE ++
+  #                   gf22memory_R2PV_V02R60              ++ OBSOLETE ++
+  #                   gf22memory_R2PV_V03R00              ++ OBSOLETE ++
+  #                   gf22memory_R2PV_V03R01
+  #                   
+  #   mem compiler  : gf22memory_R1PL_V01R00              ++ OBSOLETE ++
+  #       Ultra-Low   gf22memory_R1PL_V01R10
+  #       Voltage     gf22memory_R2PL_V01R00              ++ OBSOLETE ++
+  #                   gf22memory_R2PL_V01R10
+  #                   
+  #   rom compiler    gf22memory_ROMI_V02R51              ++ OBSOLETE ++
+  #                   gf22memory_ROMI_V03R00              ++ OBSOLETE ++
+  #                   gf22memory_ROMI_V03R01
+
+  libs    = 22FDX 10M_2Mx_6Cx_2Ix_LB__V1.3_2.2 \
+            GF22FDX_SC8T_104CPP_BASE_CSC20L_V05R00 \
+            GF22FDX_SC8T_104CPP_BASE_CSC24L_V05R00 \
+            GF22FDX_SC8T_104CPP_BASE_CSC28L_V05R00 \
+            IN22FDX_GPIO18_10M3S30P_FDK_V04R40
+
+  # see /usr/pack/gf-22-kgf/dz/mem/<prefix>/<version>/gds to see which macros have already been generated
+  # enter the name WITHOUT '.gds' in the list below, contact us <dz@ee.ethz.ch>
+  
+  macros  = 
+  
+[version]
+  # Setup files will be generated for these software versions. 
+  # - only versions that can be found in the "kit.ascii" database
+  #   can be used (see cockpit.log for the full unix path)
+  # - if you change a version you might need to adjust some
+  #   startups in the [command] section too... 
+  # - use "-update" or "-rewrite" for the changes to take effect  
+
+  # WARNING: The primary purpose is to keep version settings within each
+  # project. Fiddling around will most likely result in an unsupported
+  # combinations and perl errors. Better update this file as a whole
+  # with '-updaterc'. 
+
+  modelsim  =  modelsim-10.6b
+  synopsys  =  synopsys-2018.06
+  tetramax  =  tetramax-2018.06
+  innovus   =  innovus-18
+  dfii      =  ic-12
+  calibre   =  calibre-2018.2
+
+[command]
+  # Startup commands available through the GUI buttons.
+  # - startup commands can be modified but need to be compatible with the
+  #   setup file versions selected in the [version] section 
+  # - to add more modelsim/synopsys startups to the GUI just put your own entries
+  #   of the form "(modelsim|synopsys):<label> = <command>" there 
+  # - changes will take effect the next time you start
+
+#  emacs                        =  emacs -f vhdl-mode
+  modelsim                     =  vsim-10.6b
+  synopsys:DC Shell            =  xterm -g 120x40 -T synopsys-2018.06 -e "sh -c 'synopsys-2018.06 dc_shell -64bit | tee view_command.log'"
+  synopsys:DesignVision        =  xterm -g 120x40 -T synopsys-2018.06 -e "sh -c 'synopsys-2018.06 design_vision -64bit -xg_mode | tee view_command.log'"
+  tetramax                     =  synopsys-2017.09 tmax
+  innovus                      =  xterm -g 136x40 -T innovus-18.11 -e "cds_innovus-18.11.000 innovus"
+  calibre                      =  xterm -g 120x40 -T calibredrv -e "./start_calibre"
+  dfii                         =  ./start_dfii
+  dz:llama                     = llama
+
