@@ -116,6 +116,7 @@ IPs composing the PULP system:
 ```
 ./update-ips
 ./switch_to_rnn_ips
+./setup_special.sh
 ```
 This will download all the required IPs, solve dependencies and generate the
 scripts by calling `./generate-scripts`.

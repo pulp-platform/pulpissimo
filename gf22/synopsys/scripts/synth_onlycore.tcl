@@ -58,8 +58,8 @@ set core_inputs  [remove_from_collection [all_inputs] [get_ports clk_i]]
 set core_inputs  [remove_from_collection $core_inputs [get_ports rst_ni]]
 
 
-set INPUT_DELAY  [expr 0.1*$CLOCK_SPEED]
-set OUTPUT_DELAY [expr 0.1*$CLOCK_SPEED]
+set INPUT_DELAY  80 #[expr 0.1*$CLOCK_SPEED]
+set OUTPUT_DELAY 80 #[expr 0.1*$CLOCK_SPEED]
 
 set_input_delay  $INPUT_DELAY  $core_inputs  -clock [get_clock]
 set_output_delay $OUTPUT_DELAY [all_outputs] -clock [get_clock]
@@ -114,5 +114,12 @@ report_timing -from debug* -to instr_*_o> tmp; exec cat tmp;
 #critical path to Mem
 report_timing -to data_*_o > tmp; exec cat tmp;
 report_timing -to instr_*_o > tmp; exec cat tmp;
+
+
+echo "\n********************* \n SAVE VERILOG NETLIST \n*********************\n"
+define_name_rules verilog -add_dummy_nets
+change_names -h -rules verilog
+write -f verilog -h -o ./netlists/${DESIGN_NAME}final.v
+
  
 echo "Finish :-)"
