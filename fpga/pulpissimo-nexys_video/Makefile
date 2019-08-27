@@ -6,7 +6,7 @@ include fpga-settings.mk
 
 .DEFAULT_GOAL:=help
 
-.PHONY: help
+.PHONY: help all gui ips clean-ips clk clean-clk ram clean-ram clean
 
 all: ips ## Generate the bitstream for pulpissimo with vivado in batch mode. The vivado invocation command may be overriden with the env variable VIVADO.
 	$(VIVADO) -mode batch -source tcl/run.tcl
