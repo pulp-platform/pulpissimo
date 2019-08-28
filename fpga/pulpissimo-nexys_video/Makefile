@@ -1,4 +1,4 @@
-PROJECT:=pulpissimo_zcu104
+PROJECT:=pulpissimo-nexys_video
 VIVADO ?= vivado
 VIVADOFLAGS ?= -nojournal -mode batch -source scripts/prologue.tcl
 
