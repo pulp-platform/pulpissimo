@@ -12,7 +12,7 @@ module cluster_clock_gating
     output logic clk_o
 );
 
-    SC8T_CKGPRELATNX2_CSC28L clk_gate_i
+    SC8T_CKGPRELATNX4_CSC28L clk_gate_i
     (
         .CLK(clk_i),
         .Z(clk_o),

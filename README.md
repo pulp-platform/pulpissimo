@@ -2,7 +2,7 @@
 
 This repo is a fork of the PULPissimo repo.
 The RNN Extensions (related to the Huawei Project) have been implemented here.
-The risc-v core ip has been adapted and will be checked out following the instructions below.
+Follow the instructions below, they include both the standard flow and the RNN ASIP specific extensions to the flow:
 
 
 # PULPissimo
@@ -133,6 +133,15 @@ make clean lib build opt
 This command builds a version of the simulation platform with no dependencies on
 external models for peripherals. See below (Proprietary verification IPs) for
 details on how to plug in some models of real SPI, I2C, I2S peripherals.
+
+### Post-synth Simulation
+To build the system for post-synth simulation use the following commands (if needed change the synthesized netlist in the corresponding makefile: sim/vcompile/ips/riscv_gate.mk):
+```
+source setup/vsim.sh
+cd sim/
+make clean lib gate_build opt
+```
+
 
 ### Downloading and running tests
 Finally, you can download and run the basic tests; for that you can checkout the following repositories:
