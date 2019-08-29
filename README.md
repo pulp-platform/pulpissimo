@@ -141,7 +141,7 @@ source setup/vsim.sh
 cd sim/
 make clean lib gate_build opt
 ```
-
+If there are X's appearing in the simulation and they actually start within the clock gating cells, this is due to (unnecessary) timing checks. Either turn them off in modelsim or comment out the timing check for the clock gating cell (i.e. SC8T_CKGPRELATNX*_CSC2*L).
 
 ### Downloading and running tests
 Finally, you can download and run the basic tests; for that you can checkout the following repositories:
