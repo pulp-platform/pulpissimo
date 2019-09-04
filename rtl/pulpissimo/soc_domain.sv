@@ -11,6 +11,7 @@
 module soc_domain #(
     parameter CORE_TYPE            = 0,
     parameter USE_FPU              = 1,
+    parameter USE_HWPE             = 1,
     parameter AXI_ADDR_WIDTH       = 32,
     parameter AXI_DATA_IN_WIDTH    = 64,
     parameter AXI_DATA_OUT_WIDTH   = 32,
@@ -27,11 +28,6 @@ module soc_domain #(
     input logic                              ref_clk_i,
     input logic                              slow_clk_i,
     input logic                              test_clk_i,
-
-`ifdef PULP_FPGA_EMUL
-    input  logic                             zynq_soc_clk_i,
-    input  logic                             zynq_per_clk_i,
-`endif
 
     input  logic                             rstn_glob_i,
 
@@ -116,16 +112,6 @@ module soc_domain #(
     input  logic                       [3:0] sdio_data_i,
     output logic                       [3:0] sdio_data_oen_o
 
-
-`ifdef PULP_FPGA_EMUL
- `ifdef TRACE_EXECUTION
-   ,
-   output logic [NB_CORES*64-1:0]            instr_trace_cycles_o,
-   output logic [NB_CORES*32-1:0]            instr_trace_instr_o,
-   output logic [NB_CORES*32-1:0]            instr_trace_pc_o,
-   output logic [NB_CORES-1:0]               instr_trace_valid_o
- `endif // `ifdef TRACE_EXECUTION
-`endif // `ifdef PULP_FPGA_EMUL
     ,
     // CLUSTER
     output logic                             cluster_clk_o,
@@ -259,6 +245,7 @@ module soc_domain #(
     #(
         .CORE_TYPE               ( CORE_TYPE          ),
         .USE_FPU                 ( USE_FPU            ),
+        .USE_HWPE                ( USE_HWPE           ),
         .AXI_ADDR_WIDTH          ( AXI_ADDR_WIDTH     ),
         .AXI_DATA_IN_WIDTH       ( AXI_DATA_IN_WIDTH  ),
         .AXI_DATA_OUT_WIDTH      ( AXI_DATA_OUT_WIDTH ),
@@ -271,10 +258,6 @@ module soc_domain #(
    pulp_soc_i
    (
 
-        `ifdef PULP_FPGA_EMUL
-        .zynq_soc_clk_i               ( zynq_soc_clk_i               ),
-        .zynq_per_clk_i               ( zynq_per_clk_i               ),
-        `endif
         .boot_l2_i                    ( 1'b0                         ),
         .*
     );

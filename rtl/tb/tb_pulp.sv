@@ -13,6 +13,7 @@
  * Francesco Conti <fconti@iis.ee.ethz.ch>
  * Antonio Pullini <pullinia@iis.ee.ethz.ch>
  * Igor Loi <igor.loi@unibo.it>
+ * Robert Balas <balasr@iis.ee.ethz.ch>
  */
 
 // timeunit 1ps;
@@ -91,6 +92,9 @@ module tb_pulp;
    // JTAG mux configuration, do not change
    parameter logic[1:0] JTAG_DPI    = 2'b01;
    parameter logic[1:0] JTAG_BRIDGE = 2'b10;
+
+   // contains the program code
+   string stimuli_file;
 
    /* simulation variables & flags */
    logic                 uart_tb_rx_en = 1'b0;
@@ -638,9 +642,14 @@ module tb_pulp;
                else
                   $display("[TB] %t - Not using CAM SDVT", $realtime);
 
-
                // read in the stimuli vectors  == address_value
-               $readmemh("./vectors/stim.txt", stimuli);
+               if ($value$plusargs("stimuli=%s", stimuli_file)) begin
+                  $display("Loading custom stimuli from %s", stimuli_file);
+                  $readmemh(stimuli_file, stimuli);
+               end else begin
+                  $display("Loading default stimuli");
+                  $readmemh("./vectors/stim.txt", stimuli);
+               end
 
                // before starting the actual boot procedure we do some light
                // testing on the jtag link

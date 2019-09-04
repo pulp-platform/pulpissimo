@@ -1574,6 +1574,8 @@ package jtag_pkg;
 
          dm::dmcontrol_t dmcontrol;
          dm::dmstatus_t  dmstatus;
+         logic [9:0]     hartsello;
+
          int hartcount = 0;
 
          error = 1'b0;
@@ -1592,7 +1594,9 @@ package jtag_pkg;
          $display("[TB] %t hartsel bits usuable %x",
                   $realtime, {dmcontrol.hartselhi, dmcontrol.hartsello});
 
-         assert({dmcontrol.hartsello}[0] === 1'b1)
+         // some simulators don't like direct indexing
+         hartsello = dmcontrol.hartsello;
+         assert(hartsello[0] === 1'b1)
              else $info("test assumes atleast one usuable bit in hartsel");
 
          for (int i = 0; i < {dmcontrol.hartselhi, dmcontrol.hartsello}; i++) begin
