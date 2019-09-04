@@ -56,12 +56,10 @@ echo "Setting clock gating variables"
 set compile_clock_gating_through_hierarchy true ;
 set power_cg_balance_stages false ;
 
+set LIB [list GF22FDX_SC8T_104CPP_BASE_CSC20L_SSG_0P59V_0P00V_0P00V_0P00V_125C \
+              GF22FDX_SC8T_104CPP_BASE_CSC24L_SSG_0P59V_0P00V_0P00V_0P00V_125C \
+              GF22FDX_SC8T_104CPP_BASE_CSC28L_SSG_0P59V_0P00V_0P00V_0P00V_125C]
 
-# if { $USE_CORNER == "SLOW" } {
-#    set LIB GF22FDX_SC8T_104CPP_BASE_CSC28L_SSG_0P59V_0P00V_0P00V_0P00V_125C
-# } else {
-    set LIB GF22FDX_SC8T_104CPP_BASE_CSC28L_TT_0P80V_0P00V_0P80V_M0P80V_25C
-# }
 
 dz_set_pvt $LIB
 create_clock      [get_ports clk_i] -period $CLOCK_SPEED -name REF_CLK
@@ -107,7 +105,7 @@ compile_ultra -no_autoungroup -gate_clock
 # write out ddc file
 write -f ddc -hierarchy  -output ./mapped_core/${DESIGN_NAME}.ddc
 
-
+create_clock [get_ports clk_i] -period 0 -name REF_CLK
 report_timing > ./reports_core/${DESIGN_NAME}_post_inc_timing.rpt
 report_area -hierarchy -nosplit > ./reports_core/${DESIGN_NAME}_area.rpt
 report_register -nosplit > ./reports_core/${DESIGN_NAME}_registers.rpt
@@ -134,33 +132,33 @@ proc extractPath {file} {
     }
 
 # not implemented set fromMEM [intersect_collection [all_registers -clock_pins] [get_pins -regexp path_to_mem/in22.*/.*]]
-set fromREG [remove_from_collection [all_registers -clock_pins] [get_pins -regexp id_stage_i/registers_i/riscv_register_file_i/mem*/.*]]
-set fromSCM [intersect_collection [all_registers -clock_pins] [get_pins -regexp id_stage_i/registers_i/riscv_register_file_i/mem*/.*]]
+set fromREG [remove_from_collection [all_registers -clock_pins] [get_pins -regexp id_stage_i/registers_i/riscv_register_file_i/mem.*/.*]]
+set fromSCM [intersect_collection [all_registers -clock_pins] [get_pins -regexp id_stage_i/registers_i/riscv_register_file_i/mem.*/.*]]
 set fromIN [all_inputs]
 
-set toREG [remove_from_collection [all_registers -data_pins] [get_pins -regexp id_stage_i/registers_i/riscv_register_file_i/mem*/.*]]
+set toREG [remove_from_collection [all_registers -data_pins] [get_pins -regexp id_stage_i/registers_i/riscv_register_file_i/mem.*/.*]]
 # not implemented set toMEM [intersect_collection [all_registers -data_pins] [get_pins -regexp i_computeTop_1/i_mem_tp.*/.*/.*]]
-set toSCM [intersect_collection [all_registers -data_pins] [get_pins -regexpid_stage_i/registers_i/riscv_register_file_i/mem*/.*]]
+set toSCM [intersect_collection [all_registers -data_pins] [get_pins -regexp id_stage_i/registers_i/riscv_register_file_i/mem.*/.*]]
 set toOUT [all_outputs]
 set table_x {IN REG SCM}
 set table_y {REG SCM OUT}
 
 set thetable ""
-    foreach y $table_y {
-        set theheader [format "%7s" " "]
-        set thetable  [string cat $thetable [format "%7s" $y]]
-        foreach x $table_x {
+    foreach x $table_x {
+        set theheader [format "%7s" "f/t"]
+        set thetable  [string cat $thetable [format "%7s" $x]]
+        foreach y $table_y {
             echo "${x}2${y}";
             eval "report_timing -from \$from${x} -to \$to${y}"   > ./reports_core/${DESIGN_NAME}_post_inc_timing_${x}2${y}.rpt
 
-            set tmp [extractPath "./reports/${REPNAME}_predft_timing_${x}2${y}.rpt"]
+            set tmp [extractPath "./reports_core/${DESIGN_NAME}_post_inc_timing_${x}2${y}.rpt"]
             if {$tmp == "-"} {
                 set thetable  [string cat $thetable [format "%6s" $tmp]] 
             } else {
                 set thetable  [string cat $thetable [format "%6.0f" $tmp]] 
             }
             
-            set theheader [string cat $theheader [format "%6s" $x]]
+            set theheader [string cat $theheader [format "%6s" $y]]
         }
         
         set thetable  [string cat $thetable "\n"] 
@@ -168,8 +166,8 @@ set thetable ""
     }
     echo "The timing information"
     set thetable  [string cat $theheader "\n" $thetable "\n"] 
-    echo $thetable > ../reports_core/${DESIGN_NAME}_post_inc_timing_ALL.rpt
-
+    echo $thetable > ./reports_core/${DESIGN_NAME}_post_inc_timing_ALL.rpt
+    echo $thetable
 echo "Feedthrough paths report..."
 
 sh rm -rf ./reports/${DESIGN_NAME}_feedthrough.rpt
@@ -191,7 +189,7 @@ report_timing -from debug* -to instr_*_o> tmp; exec cat tmp;
 #critical path to Mem
 report_timing -to data_*_o > tmp; exec cat tmp;
 report_timing -to instr_*_o > tmp; exec cat tmp;
-
+create_clock      [get_ports clk_i] -period $CLOCK_SPEED -name REF_CLK
 
 echo "\n********************* \n SAVE VERILOG NETLIST \n*********************\n"
 define_name_rules verilog -add_dummy_nets
@@ -200,3 +198,4 @@ write -f verilog -h -o ./netlists/${DESIGN_NAME}final.v
 
  
 echo "Finish :-)"
+
