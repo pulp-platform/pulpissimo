@@ -28,9 +28,9 @@ if { $USE_CORE == "ZERO-RISCY" } {
    }
 } else {
     if { $RISCV_FPU == "TRUE" } {
-       elaborate riscv_core -work work -parameters FPU=1
+       elaborate riscv_core -work work -parameters "FPU=1, USE_PMP=0"
     } else {
-       elaborate riscv_core -work work -parameters FPU=0
+       elaborate riscv_core -work work -parameters "FPU=0, USE_PMP=0"
     }
 }
 
