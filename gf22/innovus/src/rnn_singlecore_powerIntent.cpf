@@ -1,0 +1,135 @@
+##########################################################################
+#  Title      : Sample Common Power Format (cpf).file.
+#  Project    : gf 22 dz flow
+##########################################################################
+#  File       : chip.cpf
+#  Author     : Beat Muheim  <muheim@ee.ethz.ch>
+#  Company    : Microelectronics Design Center (DZ), ETH Zurich
+##########################################################################
+#  Description : Sample file to create the power intent of a design, 
+#                withe one default power domain,
+#                The power domain have do be linked to a delay corner withe
+#                'update_delay_corner' don in our case in to "mmmc.view.tcl".
+#
+#                Please note these are just for reference, adapt according
+#                to your design!
+#
+#                Perform:
+#                read_power_intent -cpf compGf22.cpf
+#                commit_power_intent
+#
+#  Inputs      : 
+#  Outputs     : 
+#  Resources   :
+##########################################################################
+#  Copyright (c) 2016 Microelectronics Design Center, ETH Zurich
+##########################################################################
+# v0.1  - bm - Fri Mar 31 09:35:36 CEST 2017
+#  - copy from tsmc28 v0.1 and adapt 
+##########################################################################
+
+#-------------------------------------------------------------------------------
+# setting
+#-------------------------------------------------------------------------------
+set_cpf_version 1.1
+set_hierarchy_separator "/"
+
+#include ../../technology/cpf/
+
+#-------------------------------------------------------------------------------
+# design
+#-------------------------------------------------------------------------------
+set_design riscv_core
+
+# define_library_set -name GFwc_0v59_125 -libraries \
+    # [list  \
+       # ../technology/lib/GF22FDX_SC8T_104CPP_BASE_CSC28L_SSG_0P59V_0P00V_0P00V_0P00V_125C.lib.gz \
+       # ../technology/lib/GF22FDX_SC8T_104CPP_BASE_CSC20L_SSG_0P59V_0P00V_0P00V_0P00V_125C.lib.gz \
+       # ../technology/lib/GF22FDX_SC8T_104CPP_BASE_CSC24L_SSG_0P59V_0P00V_0P00V_0P00V_125C.lib.gz \
+       # ../technology/lib/IN22FDX_GPIO18_10M3S30P_V0430_SSG_0P59_1P08_125.lib \
+       # ../memgen/output/model/timing/lib/IN22FDX_S1D_BFRG_W01024B112M04C128_104cpp_SSG_0P590V_0P720V_0P000V_0P000V_125C.lib \
+     # ]
+
+#define_library_set -name GFtt_0v80_25 -libraries \
+#    [list  \
+#            ../technology/lib/GF22FDX_SC8T_104CPP_BASE_CSC20L_TT_0P80V_0P00V_0P00V_0P00V_25C.lib.gz \
+#            ../technology/lib/GF22FDX_SC8T_104CPP_BASE_CSC24L_TT_0P80V_0P00V_0P00V_0P00V_25C.lib.gz \
+#            ../technology/lib/GF22FDX_SC8T_104CPP_BASE_CSC28L_TT_0P80V_0P00V_0P00V_0P00V_25C.lib.gz \
+#            ../technology/lib/IN22FDX_GPIO18_10M3S30P_TT_0P8_1P8_25.lib \
+#            ../memgen/output/model/timing/lib/IN22FDX_S1D_BFRG_W01024B112M04C128_104cpp_TT_0P800V_0P800V_0P000V_0P000V_025C.lib \
+#     ]
+
+
+#-------------------------------------------------------------------------------
+# physical dmplementation
+#-------------------------------------------------------------------------------
+# create power domains
+create_power_domain -name PD_core -default 
+create_power_domain -name PD_memarray
+create_power_domain -name PD_periphery
+
+# create nominal conditions
+create_nominal_condition -name 0V65 -state on -voltage 0.65
+#create_nominal_condition -name 0V59 -state on -voltage 0.59
+create_nominal_condition -name 0V72 -state on -voltage 0.72
+#create_nominal_condition -name 0V00 -state on -voltage 0.00
+
+#update_nominal_condition -name 0V59 -library_set GFwc_0v59_125
+#update_nominal_condition -name 0V80 -library_iset GFtt_0v80_25
+
+#######################################################################################
+#### Creating Power Modes 
+#######################################################################################
+create_power_mode -name PM_default \
+                  -domain_conditions { PD_core@0V65 PD_memarray@0V72 PD_periphery@0V65 } \
+                  -default
+
+
+#######################################################################################
+### Power Nets 
+#######################################################################################
+
+create_power_nets  -nets VDD
+create_ground_nets -nets VSS
+create_power_nets  -nets VDD_PER
+create_power_nets  -nets VDD_ARR
+
+create_bias_net    -net VPW_P
+create_bias_net    -net VNW_N
+
+#######################################################################################
+### Power Nets Connections
+#######################################################################################
+
+#connect memories (incl. weight buffer scm)
+
+
+# core power
+create_global_connection -net VDD    -pins VDD
+create_global_connection -net VSS    -pins VSS
+
+### BODY BIAS
+create_global_connection -net VPW_P  -pins VBP
+create_global_connection -net VNW_N  -pins VBN
+
+
+#######################################################################################
+### Update Power Domain
+#######################################################################################
+update_power_domain -name PD_core      -primary_power_net VDD      -primary_ground_net VSS
+update_power_domain -name PD_memarray  -primary_power_net VDD_ARR  -primary_ground_net VSS
+update_power_domain -name PD_periphery -primary_power_net VDD_PER  -primary_ground_net VSS
+update_power_domain -name PD_core      -pmos_bias_net VNW_N        -nmos_bias_net VPW_P
+
+  # WA: innovus is thinking NW have to be below pmos, this is not the case withe
+  #     the flip well cells (L & SL)
+  #     withe the opposite bias_net seating terms, it will be done correctly
+
+
+
+#-------------------------------------------------------------------------------
+# 
+#-------------------------------------------------------------------------------
+end_design
+
+

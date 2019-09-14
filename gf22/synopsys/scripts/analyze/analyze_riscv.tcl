@@ -25,7 +25,6 @@ analyze -format sverilog -work work [list                          \
 analyze -format sverilog -work work [list                           \
                             $RISCV_PATH/include/apu_core_package.sv \
                             $RISCV_PATH/include/riscv_defines.sv    \
-                            $RISCV_PATH/riscv_core.sv               \
                             $RISCV_PATH/riscv_prefetch_buffer.sv          \
                             $RISCV_PATH/riscv_mult.sv                     \
                             $RISCV_PATH/riscv_load_store_unit.sv          \
@@ -46,6 +45,8 @@ analyze -format sverilog -work work [list                           \
 
                             # $RISCV_PATH/riscv_debug_unit.sv               \                            
                             # $RISCV_PATH/riscv_alu_basic.sv                \
+                            # 
+analyze -format sverilog -work work $RISCV_PATH/riscv_core.sv               
 
 analyze -format sverilog -work work ../sourcecode/cluster_clock_gating_gf22.sv
 if { [string is true -strict $CORE_LATCH_RF] } {

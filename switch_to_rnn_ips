@@ -1,4 +1,9 @@
-oldpwd=/scratch2/andrire/rnn-pulp-test/ips/riscv; cd ips/riscv
-git remote set-url origin iis-git.ee.ethz.ch:andri/rnn-riscv.git
+cd ips 
+cp -rf riscv riscv_orig
+cd riscv_orig
+git checkout master
+cd ../riscv
+#git remote set-url origin iis-git.ee.ethz.ch:andri/rnn-riscv.git
 git checkout rnn_extension
-cd /scratch2/andrire/rnn-pulp-test/ips/riscv
+cd -
+#cd /scratch2/andrire/rnn-pulp-test/ips/riscv

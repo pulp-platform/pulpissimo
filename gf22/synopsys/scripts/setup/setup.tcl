@@ -16,6 +16,8 @@ set MICRO_RISCY    "FALSE"      ;
 set USE_ORIGINAL   "FALSE"      ; # use the original PULP RISC core.
 
 
+      set RISCY RISCY
+
 if { $USE_CORE == "ZERO-RISCY" } {
 
    if { $USE_CORNER == "SLOW"} {
@@ -40,13 +42,13 @@ if { $USE_CORE == "ZERO-RISCY" } {
 
 
    if { $RISCV_FPU == "TRUE"} {
-      set DESIGN_NAME FPRISCY_${CLOCK_SPEED}
+      set DESIGN_NAME FP${RISCY}_${CLOCK_SPEED}
    } else {
-      set DESIGN_NAME RISCY_${CLOCK_SPEED}
+      set DESIGN_NAME ${RISCY}_${CLOCK_SPEED}
    }
 
 }
-
+echo "DESIGN_NAME=$DESIGN_NAME"
 set ASIC_PATH  ../../rtl
 set RTL_PATH   ../../rtl
 set IPS_PATH   ../../ips
