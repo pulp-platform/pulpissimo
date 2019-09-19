@@ -68,6 +68,6 @@
     assign lhs.penable  = rhs.penable; \
     assign rhs.prdata   = lhs.prdata;  \
     assign rhs.pready   = lhs.pready;  \
-    assign rhs.pslverr  = lhs.pslverr;
+    assign rhs.pslverr  = lhs.pslverr
 
 `define APB_ASSIGN_MASTER(lhs, rhs) `APB_ASSIGN_SLAVE(rhs, lhs)
