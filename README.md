@@ -37,17 +37,19 @@ Further information about the core can be found at
 http://ieeexplore.ieee.org/abstract/document/7864441/
 and in the documentation of the IP.
 
-Ibex, formely zero-riscy, is an in-order, single-issue core with 2 pipeline stages and it
-has full support for the base integer instruction set (RV32I) and
-compressed instructions (RV32C).
-It can be configured to have multiplication instruction set extension (RV32M)
-and the reduced number of registers extension (RV32E).
-It has been originally designed at ETH to target ultra-low-power and ultra-low-area constraints.
-Ibex is now part of the LowRISC non-profit community.
-It implementes a subset of the 1.11 privileged specification and the RISC-V Debug spec 0.13.
-Further information about the core can be found at
+Ibex, formely Zero-riscy, is an in-order, single-issue core with 2 pipeline
+stages. It has full support for the base integer instruction set (RV32I
+version 2.1) and compressed instructions (RV32C version 2.0).
+It can be configured to support the multiplication instruction set extension
+(RV32M version 2.0) and the reduced number of registers extension (RV32E
+version 1.9). Ibex implementes the Machine ISA version 1.11 and has RISC-V
+External Debug Support version 0.13.2. Ibex has been originally designed at
+ETH to target ultra-low-power and ultra-low-area constraints. Ibex is now
+maintained and further developed by the non-for-profit community interest
+company lowRISC. Further information about the core can be found at
 http://ieeexplore.ieee.org/document/8106976/
-and in the documentation of the IP.
+and in the documentation of the IP at
+https://ibex-core.readthedocs.io/en/latest/index.html
 
 PULPissimo includes a new efficient I/O subsystem via a uDMA (micro-DMA) which
 communicates with the peripherals autonomously. The core just needs to program
@@ -150,7 +152,8 @@ before starting the simulation. You will find the VCD in
 
 ### Building and using the virtual platform
 
-Once the RTL platform is installed, the following commands can be executed to install and use the virtual platform:
+Once the RTL platform is installed, the following commands can be executed to
+install and use the virtual platform:
 ```
 git clone https://github.com/pulp-platform/pulp-builder.git
 cd pulp-builder
@@ -162,7 +165,9 @@ source configs/gvsoc.sh
 cd ..
 ```
 
-Then tests can be compiled and run as for the RTL platform. When switching from one platform to another, it may be needed to regenrate the test configuration with this command:
+Then tests can be compiled and run as for the RTL platform. When switching from
+one platform to another, it may be needed to regenrate the test configuration
+with this command:
 ```
 make conf
 ```
@@ -184,7 +189,9 @@ mentionied boards. If you want to use the latest development version PULPissimo
 follow the section below to generate the bitstreams yourself.
 
 ### Bitstream Generation
-In order to generate the PULPissimo bitstream for a supported target FPGA board first generate the necessary synthesis include scripts by starting the `update-ips` script in the pulpissimo root directory:
+In order to generate the PULPissimo bitstream for a supported target FPGA board
+first generate the necessary synthesis include scripts by starting the
+`update-ips` script in the pulpissimo root directory:
 
 ```Shell
 ./update-ips
@@ -194,7 +201,8 @@ This will parse the ips_list.yml using the PULP IPApproX IP management tool to
 generate tcl scripts for all the IPs used in the PULPissimo project. These files
 are later on sourced by Vivado to generate the bitstream for PULPissimo.
 
-Now switch to the fpga subdirectory and start the apropriate make target to generate the bitstream:
+Now switch to the fpga subdirectory and start the apropriate make target to
+generate the bitstream:
 
 ```Shell
 cd fpga
@@ -209,7 +217,8 @@ make help
 This process might take a while. If everything goes well your fpga directory
 should now contain two files:
 
-- `pulpissimo_<board_target>.bit` the bitstream file for JTAG configuration of the FPGA.
+- `pulpissimo_<board_target>.bit` the bitstream file for JTAG configuration of
+  the FPGA.
 - `pulpissimo_<board_target>.bin` the binary configuration file to flash to a
   non-volatile configuration memory.
 
@@ -257,7 +266,8 @@ the UART module) to the right values it needs to know which frequencies
 PULPissimo is running at. You can find the default frequencies in the above
 mentioned board specific README files.
 
-In our application we need to override two weakly defined variables in our source code to configure the SDK to use these frequencies:
+In our application we need to override two weakly defined variables in our
+source code to configure the SDK to use these frequencies:
 ```C
 #include <stdio.h>
 #include <rt/rt_api.h>
@@ -273,7 +283,8 @@ int main()
 
 By default, the baudrate of the UART is set to `115200`.
 
-Add the following global variable declaration to your application in case you want to change it:
+Add the following global variable declaration to your application in case
+you want to change it:
 
 ```C
 unsigned int __rt_iodev_uart_baudrate = your baudrate;
@@ -287,6 +298,23 @@ make clean all
 
 This command builds the ELF binary with UART as the default io peripheral.
 The binary will be stored at `build/pulpissimo/[app_name]/[app_name]`.
+
+### Core selection
+By default, PULPissimo is configured to use the RI5CY core with floating-point
+support being enabled. To switch to Ibex (and disable floating-point support),
+the following steps need to be performed.
+
+1. Switch hardware configuration
+
+   Open the file `fpga/pulpissimo-<board_target>/rtl/xilinx_pulpissimo.v` and
+   change the `CORE_TYPE` parameter to the preferred value. Change the value
+   of the `USE_FPU` parameter from `1` to `0`. Save the file and regenerate
+   the FPGA bitstream.
+
+2. Switch SDK configuration
+
+   Instead of sourcing `configs/pulpissimo.sh` when configuring the SDK,
+   source `configs/pulpissimo_ibex.sh`.
 
 ### GDB and OpenOCD
 In order to execute our application on the FPGA we need to load the binary into
@@ -334,7 +362,8 @@ E.g.:
 ```Shell
 $OPENOCD/bin/openocd -f pulpissimo/fpga/pulpissimo-genesys2/openocd-genesys2.cfg
 ```
-In a seperate terminal launch gdb from your `pulp_riscv_gcc` installation passing the ELF file as an argument with:
+In a seperate terminal launch gdb from your `pulp_riscv_gcc` installation passing
+the ELF file as an argument with:
 
 `$PULP_RISCV_GCC_TOOLCHAIN_CI/bin/riscv32-unknown-elf-gdb  PATH_TO_YOUR_ELF_FILE`
 
@@ -346,7 +375,8 @@ In gdb, run:
 
 to connect to the OpenOCD server.
 
-In a third terminal launch a serial port client (e.g. `screen` or `minicom`) on Linux to riderect the UART output from PULPissimo with e.g.:
+In a third terminal launch a serial port client (e.g. `screen` or `minicom`) on
+Linux to riderect the UART output from PULPissimo with e.g.:
 
 ```Shell
 screen /dev/ttyUSB0 115200
@@ -414,7 +444,8 @@ To get a list of available gdb commands execute:
 monitor help
 ```
 
-Most notably the command `info registers` does not work. Use `monitor reg` instead which has the same effect.
+Most notably the command `info registers` does not work. Use `monitor reg`
+instead which has the same effect.
 
 
 ## Proprietary verification IPs
