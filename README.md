@@ -2,14 +2,14 @@
 changed C flags to export CFLAGS="-march=nocona -ftree-vectorize -fPIC -fstack-protector-strong -O2 -ffunction-sections -pipe"
 to avoid problems with g++.
 
-# RNN Extensions
+## RNN Extensions
 
 This repo is a fork of the PULPissimo repo.
 The RNN Extensions (related to the Huawei Project) have been implemented here.
 Follow the instructions below, they include both the standard flow and the RNN ASIP specific extensions to the flow:
 
 
-# PULPissimo
+## PULPissimo
 
 ![](doc/pulpissimo_archi.png)
 
@@ -87,13 +87,11 @@ control plane.
 For further information on how to design and integrate such accelerators,
 see `ips/hwpe-stream/doc` and https://arxiv.org/abs/1612.05974.
 
-# RNN Extension for PULPissimo
-todo
 
 ## Getting Started
 Follow the instructions in the ```RNNASIP``` repo to install the SDK.
 
-### Building the RTL simulation platform
+## Building the RTL simulation platform
 To build the RTL simulation platform, start by getting the latest version of the
 IPs composing the PULP system:
 ```
@@ -118,7 +116,7 @@ This command builds a version of the simulation platform with no dependencies on
 external models for peripherals. See below (Proprietary verification IPs) for
 details on how to plug in some models of real SPI, I2C, I2S peripherals.
 
-### Post-synth Simulation
+## Post-synth Simulation
 To build the system for post-synth simulation use the following commands (if needed change the synthesized netlist in the corresponding makefile: sim/vcompile/ips/riscv_gate.mk):
 ```
 source setup/vsim.sh
@@ -127,7 +125,7 @@ make clean lib gate_build opt
 ```
 If there are X's appearing in the simulation and they actually start within the clock gating cells, this is due to (unnecessary) timing checks. Either turn them off in modelsim or comment out the timing check for the clock gating cell (i.e. SC8T_CKGPRELATNX*_CSC2*L).
 
-### Downloading and running tests
+## Downloading and running tests
 Finally, you can download and run the basic tests; for that you can checkout the following repositories:
 
 Runtime tests: https://github.com/pulp-platform/pulp-rt-examples

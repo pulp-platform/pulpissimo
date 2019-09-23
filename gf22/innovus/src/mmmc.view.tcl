@@ -58,6 +58,19 @@ create_library_set -name typical_libs \
            ../technology/aocv/GF22FDX_SC8T_104CPP_BASE_CSC28L_TT_0P65V_0P00V_0P00V_0P00V_25C.aocv \
                           ]
 
+create_library_set -name typical_fast_libs \
+                  -timing [ list \
+           ../technology/lib/GF22FDX_SC8T_104CPP_BASE_CSC20L_TT_0P90V_0P00V_0P00V_0P00V_25C.lib.gz \
+           ../technology/lib/GF22FDX_SC8T_104CPP_BASE_CSC24L_TT_0P90V_0P00V_0P00V_0P00V_25C.lib.gz \
+           ../technology/lib/GF22FDX_SC8T_104CPP_BASE_CSC28L_TT_0P90V_0P00V_0P00V_0P00V_25C.lib.gz \
+                          ] \
+                  -aocv [ list \
+           ../technology/aocv/GF22FDX_SC8T_104CPP_BASE_CSC20L_TT_0P90V_0P00V_0P00V_0P00V_25C.aocv \
+           ../technology/aocv/GF22FDX_SC8T_104CPP_BASE_CSC24L_TT_0P90V_0P00V_0P00V_0P00V_25C.aocv \
+           ../technology/aocv/GF22FDX_SC8T_104CPP_BASE_CSC28L_TT_0P90V_0P00V_0P00V_0P00V_25C.aocv \
+                          ]
+
+
 # use the worst case corner as typical
 # create_library_set -name typical_libs \
 #                    -timing [ list \
@@ -148,6 +161,7 @@ create_delay_corner -name typical_delay -library_set typical_libs -rc_corner typ
 create_delay_corner -name best_delay    -library_set best_libs    -rc_corner best_rc
 create_delay_corner -name worst_delay   -library_set worst_libs   -rc_corner worst_rc
 
+create_delay_corner -name typical_fast_delay -library_set typical_fast_libs -rc_corner typical_rc
 # update_delay_corner -name typical_delay    -library_set typical_libs -rc_corner typical_rc -power_domain PD_core
 # update_delay_corner -name best_delay    -library_set best_libs    -rc_corner best_rc    -power_domain PD_core
 # update_delay_corner -name worst_delay   -library_set worst_libs   -rc_corner worst_rc   -power_domain PD_core
@@ -185,9 +199,10 @@ create_constraint_mode -name test_mode -sdc_files [list src/mmmc_test.sdc src/mm
 ##
 ## This example uses three views:
 ##
-create_analysis_view -name func_view -delay_corner typical_delay -constraint_mode func_mode
-create_analysis_view -name test_view -delay_corner typical_delay -constraint_mode test_mode
-create_analysis_view -name hold_view -delay_corner best_delay    -constraint_mode test_mode
+create_analysis_view -name func_view -delay_corner typical_delay         -constraint_mode func_mode
+create_analysis_view -name test_view -delay_corner typical_delay         -constraint_mode test_mode
+create_analysis_view -name hold_view -delay_corner best_delay            -constraint_mode test_mode
+create_analysis_view -name func_fast -delay_corner typical_fast_delay    -constraint_mode func_mode
 
 #################################################################
 ## SET ANALYSIS VIEWS
@@ -240,7 +255,7 @@ set_analysis_view -setup { func_view test_view  } \
                                      view_test_best_delay_rccRCminDP_125C \
                                      view_test_best_delay_rccCminDP_m40C  \
                                      view_test_best_delay_rccRCminDP_m40C }
-
+ 
 ## *IMPORTANT* It is actually possible that due to the differences in modelling,
 ##             for some circuits it could actually be possible that hold violations
 ##             can occur for 'typical' or 'worst' timing. We would advise to create
