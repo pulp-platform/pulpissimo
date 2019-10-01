@@ -25,7 +25,9 @@
 //`define USE_DPI      1
 
 
-module tb_pulp;
+module tb_pulp #(
+    parameter logic [31:0] ENTRY_POINT = 32'h1C008080
+);
 
    parameter CONFIG_FILE = "NONE";
 
@@ -216,7 +218,7 @@ module tb_pulp;
 
 
    logic [8:0] jtag_conf_reg, jtag_conf_rego; //22bits but actually only the last 9bits are used
-   localparam BEGIN_L2_INSTR = 32'h1C008080;
+   localparam logic [31:0] BEGIN_L2_INSTR = ENTRY_POINT;
 
 
    `ifdef USE_DPI
