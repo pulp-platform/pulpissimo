@@ -464,9 +464,9 @@ module safe_domain
 
     generate
        for (i=0; i<32; i++)
-	 begin
+	 begin : GEN_GPIO_CFG_I
 	    for (j=0; j<6; j++)
-	      begin
+	      begin : GEN_GPIO_CFG_J
 		 assign s_gpio_cfg[i][j] = gpio_cfg_i[j+6*i];
 	      end
 	 end

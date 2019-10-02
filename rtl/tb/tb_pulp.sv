@@ -216,7 +216,6 @@ module tb_pulp;
 
 
    logic [8:0] jtag_conf_reg, jtag_conf_rego; //22bits but actually only the last 9bits are used
-   localparam BEGIN_L2_INSTR = 32'h1C008080;
 
 
    `ifdef USE_DPI
@@ -603,6 +602,16 @@ module tb_pulp;
          logic        error;
          automatic logic [9:0]  FC_CORE_ID = {5'd31,5'd0};
 
+         int entry_point;
+         logic [31:0] begin_l2_instr;
+
+         // read entry point from commandline
+         if ($value$plusargs("ENTRY_POINT=%h", entry_point))
+             begin_l2_instr = entry_point;
+         else
+             begin_l2_instr = 32'h1C008080;
+         $display("[TB] %t - Entry point is set to 0x%h", $realtime, begin_l2_instr);
+
          $display("[TB] %t - Asserting hard reset", $realtime);
          s_rst_n = 1'b0;
 
@@ -681,13 +690,13 @@ module tb_pulp;
 
                $display("[TB] %t - Init PULP TAP", $realtime);
 
-               pulp_tap.write32(BEGIN_L2_INSTR, 1, 32'hABBAABBA,
+               pulp_tap.write32(begin_l2_instr, 1, 32'hABBAABBA,
                    s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
                $display("[TB] %t - Write32 PULP TAP", $realtime);
 
                #50us;
-               pulp_tap.read32(BEGIN_L2_INSTR, 1, jtag_data,
+               pulp_tap.read32(begin_l2_instr, 1, jtag_data,
                    s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
                if(jtag_data[0] != 32'hABBAABBA)
@@ -715,12 +724,12 @@ module tb_pulp;
                debug_mode_if.halt_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
                $display("[TB] %t - Writing the boot address into dpc", $realtime);
-               debug_mode_if.write_reg_abstract_cmd(riscv::CSR_DPC, BEGIN_L2_INSTR,
+               debug_mode_if.write_reg_abstract_cmd(riscv::CSR_DPC, begin_l2_instr,
                    s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
                // long debug module + jtag tests
                if(ENABLE_DM_TESTS == 1) begin
-                  debug_mode_if.run_dm_tests(FC_CORE_ID, BEGIN_L2_INSTR,
+                  debug_mode_if.run_dm_tests(FC_CORE_ID, begin_l2_instr,
                                            error, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
                end
 
