@@ -183,6 +183,7 @@ At the moment the following boards are supported:
 * Digilent Genesys2
 * Xilinx ZCU104
 * Digilent Nexys Video
+* ZedBoard
 
 In the release section you find precompiled bitstreams for all of the above
 mentionied boards. If you want to use the latest development version PULPissimo
