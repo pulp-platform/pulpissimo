@@ -23,5 +23,5 @@ git -C tests/ml_tests checkout -q 481c83b30c2cb7b823d1769b1c0d6a30a3a3b9b0
 git -C tests/pulp_tests checkout -q ce367a85b9d4b15e92b57cdfa7b715ecf6a92a45
 git -C tests/rt-tests checkout -q 84e275e64d2d315d0fbe53e5ab6907164ac3535c
 git -C tests/parallel_bare_tests checkout -q 91b1bad09d088df9140f5391a87df3f6ebfab344
-git -C tests/riscv_tests checkout -q 7f36d794464f7dafd0e1cb9d600e4af19e32a904
+git -C tests/riscv_tests checkout -q 713c129cbe3cdfa048e4dbf8d41c55f88dd868cb
 git -C tests/sequential_bare_tests checkout -q 149f92fe3ecbd82cde87c3865b4d25d8c825a25d
