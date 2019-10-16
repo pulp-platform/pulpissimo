@@ -15,7 +15,7 @@
 
 int rbs_init(uint16_t port)
 {
-    socket_fd  = 0; // THIS IS THE ISSUE, can't accces and crash
+    socket_fd  = 0;
     client_fd  = 0;
     recv_start = 0;
     recv_end   = 0;
@@ -68,9 +68,7 @@ int rbs_init(uint16_t port)
     trstn = 1;
     quit  = 0;
 
-    fprintf(
-        stderr,
-        "This emulator compiled with JTAG Remote Bitbang client. To enable, use +jtag_rbb_enable=1.\n");
+    fprintf(stderr, "JTAG remote bitbang server is ready\n");
     fprintf(stderr, "Listening on port %d\n", ntohs(addr.sin_port));
     return 1;
 }
@@ -136,9 +134,10 @@ void rbs_execute_command()
         if (num_read == -1) {
             if (errno == EAGAIN) {
                 // We'll try again the next call.
-                fprintf(
-                    stderr,
-                    "Received no command. Will try again on the next call\n");
+                if (VERBOSE)
+                    fprintf(
+                        stderr,
+                        "Received no command. Will try again on the next call\n");
             } else {
                 fprintf(stderr,
                         "remote_bitbang failed to read on socket: %s (%d)\n",
@@ -147,14 +146,13 @@ void rbs_execute_command()
                 abort();
             }
         } else if (num_read == 0) {
-            fprintf(stderr, "No Command Received.\n");
-            again = 1;
+            fprintf(stderr, "No command received. Stopping further reads.\n");
+            // again = 1;
+            return;
         } else {
             again = 0;
         }
     }
-
-    fprintf(stderr, "Received a command %c\n", command);
 
     int dosend = 0;
 
@@ -162,67 +160,83 @@ void rbs_execute_command()
 
     switch (command) {
     case 'B':
-        fprintf(stderr, "*BLINK*\n");
+        if (VERBOSE)
+            fprintf(stderr, "*BLINK*\n");
         break;
     case 'b':
-        fprintf(stderr, "blink off\n");
+        if (VERBOSE)
+            fprintf(stderr, "blink off\n");
         break;
     case 'r':
-        fprintf(stderr, "r-reset\n");
+        if (VERBOSE)
+            fprintf(stderr, "r-reset\n");
         rbs_reset();
         break; // This is wrong. 'r' has other bits that indicated TRST and
                // SRST.
     case 's':
-        fprintf(stderr, "s-reset\n");
+        if (VERBOSE)
+            fprintf(stderr, "s-reset\n");
         rbs_reset();
         break; // This is wrong.
     case 't':
-        fprintf(stderr, "t-reset\n");
+        if (VERBOSE)
+            fprintf(stderr, "t-reset\n");
         rbs_reset();
         break; // This is wrong.
     case 'u':
-        fprintf(stderr, "u-reset\n");
+        if (VERBOSE)
+            fprintf(stderr, "u-reset\n");
         rbs_reset();
         break; // This is wrong.
     case '0':
-        fprintf(stderr, "Write 0 0 0\n");
+        if (VERBOSE)
+            fprintf(stderr, "Write 0 0 0\n");
         rbs_set_pins(0, 0, 0);
         break;
     case '1':
-        fprintf(stderr, "Write 0 0 1\n");
+        if (VERBOSE)
+            fprintf(stderr, "Write 0 0 1\n");
         rbs_set_pins(0, 0, 1);
         break;
     case '2':
-        fprintf(stderr, "Write 0 1 0\n");
+        if (VERBOSE)
+            fprintf(stderr, "Write 0 1 0\n");
         rbs_set_pins(0, 1, 0);
         break;
     case '3':
-        fprintf(stderr, "Write 0 1 1\n");
+        if (VERBOSE)
+            fprintf(stderr, "Write 0 1 1\n");
         rbs_set_pins(0, 1, 1);
         break;
     case '4':
-        fprintf(stderr, "Write 1 0 0\n");
+        if (VERBOSE)
+            fprintf(stderr, "Write 1 0 0\n");
         rbs_set_pins(1, 0, 0);
         break;
     case '5':
-        fprintf(stderr, "Write 1 0 1\n");
+        if (VERBOSE)
+            fprintf(stderr, "Write 1 0 1\n");
         rbs_set_pins(1, 0, 1);
         break;
     case '6':
-        fprintf(stderr, "Write 1 1 0\n");
+        if (VERBOSE)
+            fprintf(stderr, "Write 1 1 0\n");
         rbs_set_pins(1, 1, 0);
         break;
     case '7':
-        fprintf(stderr, "Write 1 1 1\n");
+        if (VERBOSE)
+            fprintf(stderr, "Write 1 1 1\n");
         rbs_set_pins(1, 1, 1);
         break;
     case 'R':
-        fprintf(stderr, "Read req\n");
+        if (VERBOSE)
+            fprintf(stderr, "Read req\n");
         dosend = 1;
         tosend = tdo ? '1' : '0';
         break;
     case 'Q':
-        fprintf(stderr, "Quit req\n");
+        if (VERBOSE)
+            fprintf(stderr, "Quit req\n");
         quit = 1;
         break;
     default:
@@ -244,7 +258,6 @@ void rbs_execute_command()
     }
 
     if (quit) {
-        // The remote disconnected.
         fprintf(stderr, "Remote end disconnected\n");
         close(client_fd);
         client_fd = 0;

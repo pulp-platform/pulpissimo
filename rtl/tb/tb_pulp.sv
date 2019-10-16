@@ -13,6 +13,7 @@
  * Francesco Conti <fconti@iis.ee.ethz.ch>
  * Antonio Pullini <pullinia@iis.ee.ethz.ch>
  * Igor Loi <igor.loi@unibo.it>
+ * Robert Balas <balasr@iis.ee.ethz.ch>
  */
 
 // timeunit 1ps;
@@ -91,6 +92,9 @@ module tb_pulp;
    // JTAG mux configuration, do not change
    parameter logic[1:0] JTAG_DPI    = 2'b01;
    parameter logic[1:0] JTAG_BRIDGE = 2'b10;
+
+   // contains the program code
+   string stimuli_file;
 
    /* simulation variables & flags */
    logic                 uart_tb_rx_en = 1'b0;
@@ -212,7 +216,6 @@ module tb_pulp;
 
 
    logic [8:0] jtag_conf_reg, jtag_conf_rego; //22bits but actually only the last 9bits are used
-   localparam BEGIN_L2_INSTR = 32'h1C008080;
 
 
    `ifdef USE_DPI
@@ -599,6 +602,16 @@ module tb_pulp;
          logic        error;
          automatic logic [9:0]  FC_CORE_ID = {5'd31,5'd0};
 
+         int entry_point;
+         logic [31:0] begin_l2_instr;
+
+         // read entry point from commandline
+         if ($value$plusargs("ENTRY_POINT=%h", entry_point))
+             begin_l2_instr = entry_point;
+         else
+             begin_l2_instr = 32'h1C008080;
+         $display("[TB] %t - Entry point is set to 0x%h", $realtime, begin_l2_instr);
+
          $display("[TB] %t - Asserting hard reset", $realtime);
          s_rst_n = 1'b0;
 
@@ -638,9 +651,14 @@ module tb_pulp;
                else
                   $display("[TB] %t - Not using CAM SDVT", $realtime);
 
-
                // read in the stimuli vectors  == address_value
-               $readmemh("./vectors/stim.txt", stimuli);
+               if ($value$plusargs("stimuli=%s", stimuli_file)) begin
+                  $display("Loading custom stimuli from %s", stimuli_file);
+                  $readmemh(stimuli_file, stimuli);
+               end else begin
+                  $display("Loading default stimuli");
+                  $readmemh("./vectors/stim.txt", stimuli);
+               end
 
                // before starting the actual boot procedure we do some light
                // testing on the jtag link
@@ -672,13 +690,13 @@ module tb_pulp;
 
                $display("[TB] %t - Init PULP TAP", $realtime);
 
-               pulp_tap.write32(BEGIN_L2_INSTR, 1, 32'hABBAABBA,
+               pulp_tap.write32(begin_l2_instr, 1, 32'hABBAABBA,
                    s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
                $display("[TB] %t - Write32 PULP TAP", $realtime);
 
                #50us;
-               pulp_tap.read32(BEGIN_L2_INSTR, 1, jtag_data,
+               pulp_tap.read32(begin_l2_instr, 1, jtag_data,
                    s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
                if(jtag_data[0] != 32'hABBAABBA)
@@ -706,12 +724,12 @@ module tb_pulp;
                debug_mode_if.halt_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
                $display("[TB] %t - Writing the boot address into dpc", $realtime);
-               debug_mode_if.write_reg_abstract_cmd(riscv::CSR_DPC, BEGIN_L2_INSTR,
+               debug_mode_if.write_reg_abstract_cmd(riscv::CSR_DPC, begin_l2_instr,
                    s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
                // long debug module + jtag tests
                if(ENABLE_DM_TESTS == 1) begin
-                  debug_mode_if.run_dm_tests(FC_CORE_ID, BEGIN_L2_INSTR,
+                  debug_mode_if.run_dm_tests(FC_CORE_ID, begin_l2_instr,
                                            error, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
                end
 

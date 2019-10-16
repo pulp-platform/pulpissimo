@@ -1,4 +1,7 @@
 tb:
+  targets: [
+    rtl
+  ]
   files: [
     riscv_pkg.sv,
     jtag_pkg.sv,

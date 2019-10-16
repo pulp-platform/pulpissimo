@@ -36,11 +36,13 @@ checkout:
 	./update-ips
 
 clean:
+	$(MAKE) -C rtl/tb/remote_bitbang clean
 	rm -rf $(VSIM_PATH)
-	cd sim && make clean
+	cd sim && $(MAKE) clean
 
 build:
-	cd sim && make lib build opt
+	$(MAKE) -C rtl/tb/remote_bitbang all
+	cd sim && $(MAKE) lib build opt
 	cp -r rtl/tb/* $(VSIM_PATH)
 
 install: $(INSTALL_HEADERS)
@@ -58,12 +60,14 @@ sdk:
 	  git clone https://github.com/pulp-platform/pulp-builder.git; \
 	fi; \
 	cd pulp-builder; \
-	git checkout b3b255b0f653fce950cf730972c8ad07b1be7bf0; \
+	git checkout 7f26b4877f000940026788b4debbf89d86e18ff7; \
 	. configs/pulpissimo.sh; \
 	. configs/rtl.sh; \
 	./scripts/clean; \
 	./scripts/update-runtime; \
-	./scripts/build-runtime;
+	./scripts/build-runtime; \
+	./scripts/update-runner; \
+	./scripts/build-runner;
 
 
 all: checkout build install vopt sdk

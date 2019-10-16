@@ -1,4 +1,4 @@
-# Copyright (C) 2018 ETH Zurich and University of Bologna
+# Copyright (C) 2019 ETH Zurich and University of Bologna
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 # limitations under the License.
 #
 #
-# Author: Robert Balas (balasr@student.ethz.ch)
+# Author: Robert Balas (balasr@iis.ee.ethz.ch)
 
 CFLAGS          = -Wall -Wextra -Wno-missing-field-initializers \
 			-Wno-unused-function -Wno-missing-braces \
@@ -34,7 +34,7 @@ ALL_CFLAGS_DBG  = -std=gnu11 -Wall -Wextra -Wno-missing-field-initializers \
 # TODO: better path?
 LIB_DIRS        =
 LIBS            =
-INCLUDE_DIRS    = ./ /usr/pack/modelsim-10.5c-kgf/questasim/include
+INCLUDE_DIRS    = ./
 
 
 LDFLAGS         = $(addprefix -L, $(LIB_DIRS))
