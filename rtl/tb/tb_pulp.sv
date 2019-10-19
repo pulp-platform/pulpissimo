@@ -737,11 +737,12 @@ module tb_pulp;
                                            error, num_err, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
                   // we don't have any program to load so we finish the testing
                   if (num_err == 0) begin
-                     $finish(1);
+                     exit_status = `EXIT_SUCCESS;
                   end else begin
+                     exit_status = `EXIT_FAIL;
                      $error("Debug Module: %d tests failed", num_err);
-                     $fatal(1);
                   end
+                  $stop;
                end
 
                $display("[TB] %t - Loading L2", $realtime);
