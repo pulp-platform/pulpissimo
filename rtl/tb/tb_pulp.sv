@@ -603,11 +603,11 @@ module tb_pulp;
          int         num_err;
          automatic logic [9:0]  FC_CORE_ID = {5'd31, 5'd0};
 
-         error   = 1'b0;
-         num_err = 0;
-
          int entry_point;
          logic [31:0] begin_l2_instr;
+
+         error   = 1'b0;
+         num_err = 0;
 
          // read entry point from commandline
          if ($value$plusargs("ENTRY_POINT=%h", entry_point))
@@ -733,14 +733,14 @@ module tb_pulp;
 
                // long debug module + jtag tests
                if(ENABLE_DM_TESTS == 1) begin
-                  debug_mode_if.run_dm_tests(FC_CORE_ID, BEGIN_L2_INSTR,
+                  debug_mode_if.run_dm_tests(FC_CORE_ID, begin_l2_instr,
                                            error, num_err, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
                   // we don't have any program to load so we finish the testing
                   if (num_err == 0) begin
-                     $finish(2);
+                     $finish(1);
                   end else begin
                      $error("Debug Module: %d tests failed", num_err);
-                     $fatal(2);
+                     $fatal(1);
                   end
                end
 
