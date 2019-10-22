@@ -87,6 +87,8 @@ development kit for PULP/PULPissimo.
 First install the system dependencies indicated here:
 https://github.com/pulp-platform/pulp-builder/blob/master/README.md
 
+In particular don't forget to set PULP_RISCV_GCC_TOOLCHAIN.
+
 Then execute the following commands:
 ```
 git clone https://github.com/pulp-platform/pulp-builder.git
