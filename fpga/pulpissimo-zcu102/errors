@@ -1,0 +1,115 @@
+NFO: [Timing 38-35] Done setting XDC timing constraints.
+ERROR: [Place 30-716] Sub-optimal placement for a global clock-capable IO pin-BUFGCE-MMCM pair. If this sub optimal condition
+ is acceptable for this design, you may use the CLOCK_DEDICATED_ROUTE constraint in the .xdc file to demote this message to a
+ WARNING. However, the use of this override is highly discouraged. These examples can be used directly in the .xdc file to ov
+erride this clock rule.
+	< set_property CLOCK_DEDICATED_ROUTE ANY_CMT_COLUMN [get_nets ref_clk_BUFGCE] >
+
+	ref_clk_BUFGCE_inst (BUFGCE.O) is provisionally placed by clockplacer on BUFGCE_HDIO_X1Y3
+	i_pulpissimo/safe_domain_i/i_slow_clk_gen/i_slow_clk_mngr/inst/mmcme4_adv_inst (MMCME4_ADV.CLKIN1) is provisionally p
+laced by clockplacer on MMCM_X0Y0
+	i_pulpissimo/soc_domain_i/pulp_soc_i/i_clk_rst_gen/i_fpga_clk_gen/i_clk_manager/inst/mmcme4_adv_inst (MMCME4_ADV.CLKI
+N1) is provisionally placed by clockplacer on MMCM_X0Y1
+
+	The above error could possibly be related to other connected instances. Following is a list of 
+	all the related clock rules and their respective instances.
+
+	Clock Rule: rule_bufgce_bufg_conflict
+	Status: PASS 
+	Rule Description: Only one of the 2 available sites (BUFGCE or BUFGCE_DIV/BUFGCTRL) in a pair can be
+	used at the same time
+	i_pulpissimo/safe_domain_i/i_slow_clk_gen/i_slow_clk_mngr/inst/clkout1_buf (BUFGCE.O) is provisionally placed by cloc
+kplacer on BUFGCE_X0Y23
+
+	Clock Rule: rule_mmcm_bufg
+	Status: PASS 
+	Rule Description: A MMCM driving a BUFG must be placed in the same clock region of the device as the
+	BUFG
+	i_pulpissimo/safe_domain_i/i_slow_clk_gen/i_slow_clk_mngr/inst/mmcme4_adv_inst (MMCME4_ADV.CLKOUT0) is provisionally 
+placed by clockplacer on MMCM_X0Y0
+	i_pulpissimo/safe_domain_i/i_slow_clk_gen/i_slow_clk_mngr/inst/clkout1_buf_en (BUFGCE.I) is provisionally placed by c
+lockplacer on BUFGCE_X0Y22
+	i_pulpissimo/safe_domain_i/i_slow_clk_gen/i_slow_clk_mngr/inst/clkout1_buf (BUFGCE.I) is provisionally placed by cloc
+kplacer on BUFGCE_X0Y23
+
+	Clock Rule: rule_bufgce_bufg_conflict
+	Status: PASS 
+	Rule Description: Only one of the 2 available sites (BUFGCE or BUFGCE_DIV/BUFGCTRL) in a pair can be
+	used at the same time
+	ref_clk_BUFGCE_inst (BUFGCE.O) is provisionally placed by clockplacer on BUFGCE_HDIO_X1Y3
+
+	Clock Rule: rule_bufgce_bufg_conflict
+	Status: PASS 
+	Rule Description: Only one of the 2 available sites (BUFGCE or BUFGCE_DIV/BUFGCTRL) in a pair can be
+	used at the same time
+	i_pulpissimo/safe_domain_i/i_slow_clk_gen/i_slow_clk_mngr/inst/clkout1_buf_en (BUFGCE.O) is provisionally placed by c
+lockplacer on BUFGCE_X0Y22
+
+	Clock Rule: rule_gclkio_bufg
+	Status: PASS 
+	Rule Description: An IOB driving a BUFG must use a GCIO in the same clock region as the BUFG
+	i_sysclk_iobuf/IBUFCTRL_INST (IBUFCTRL.O) is locked to IOB_X0Y164
+	ref_clk_BUFGCE_inst (BUFGCE.I) is provisionally placed by clockplacer on BUFGCE_HDIO_X1Y3
+
+	Clock Rule: rule_mmcm_bufg
+	Status: PASS 
+	Rule Description: A MMCM driving a BUFG must be placed in the same clock region of the device as the
+	BUFG
+	i_pulpissimo/soc_domain_i/pulp_soc_i/i_clk_rst_gen/i_fpga_clk_gen/i_clk_manager/inst/mmcme4_adv_inst (MMCME4_ADV.CLKO
+UT0) is provisionally placed by clockplacer on MMCM_X0Y1
+	i_pulpissimo/soc_domain_i/pulp_soc_i/i_clk_rst_gen/i_fpga_clk_gen/i_clk_manager/inst/clkout1_buf (BUFGCE.I) is provis
+ionally placed by clockplacer on BUFGCE_X0Y47
+
+	Clock Rule: rule_bufgce_bufg_conflict
+	Status: PASS 
+	Rule Description: Only one of the 2 available sites (BUFGCE or BUFGCE_DIV/BUFGCTRL) in a pair can be
+	used at the same time
+	i_pulpissimo/soc_domain_i/pulp_soc_i/i_clk_rst_gen/i_fpga_clk_gen/i_clk_manager/inst/clkout1_buf (BUFGCE.O) is provis
+ionally placed by clockplacer on BUFGCE_X0Y47
+
+	Clock Rule: rule_bufgce_bufg_conflict
+	Status: PASS 
+	Rule Description: Only one of the 2 available sites (BUFGCE or BUFGCE_DIV/BUFGCTRL) in a pair can be
+	used at the same time
+	i_pulpissimo/soc_domain_i/pulp_soc_i/i_clk_rst_gen/i_fpga_clk_gen/i_clk_manager/inst/clkout2_buf (BUFGCE.O) is provis
+ionally placed by clockplacer on BUFGCE_X0Y46
+
+Resolution: A dedicated routing path between the pairs can be used if: (a) The global clock-capable IO (GCIO) is placed on a 
+GCIO capable site (b) The BUFGCE and MMCM is placed in the same clock region as the GCIO pin. If the IOB is driving BUFGCE an
+d driving multiple MMCMs, all MMCMs must be placed in the same clock region, one clock region above or one clock region below
+ the IOB and the BUFGCE. Both the above conditions must be met at the same time, else it may lead to longer and less predicta
+ble clock insertion delays.
+WARNING: [Place 30-675] Sub-optimal placement for a global clock-capable IO pin and BUFG pair.This is normally an ERROR but t
+he CLOCK_DEDICATED_ROUTE constraint is set to FALSE allowing your design to continue. The use of this override is highly disc
+ouraged as it may lead to very poor timing results. It is recommended that this error condition be corrected in the design.
+
+	pad_jtag_tck_IBUF_inst/IBUFCTRL_INST (IBUFCTRL.O) is locked to IOB_X0Y190
+	pad_jtag_tck_IBUF_BUFG_inst (BUFGCE.I) is provisionally placed by clockplacer on BUFGCE_X0Y21
+Resolution: A dedicated routing path between the two can be used if: (a) The global clock-capable IO (GCIO) is placed on a GC
+IO capable site (b) The BUFG is placed in the same bank of the device as the GCIO pin. Both the above conditions must be met 
+at the same time, else it may lead to longer and less predictable clock insertion delays.
+Phase 1.2 IO Placement/ Clock Placement/ Build Placer Device | Checksum: 10611bb84
+
+Time (s): cpu = 00:01:12 ; elapsed = 00:01:33 . Memory (MB): peak = 3876.773 ; gain = 1147.441 ; free physical = 6601 ; free 
+virtual = 9102
+Phase 1 Placer Initialization | Checksum: 10611bb84
+
+Time (s): cpu = 00:01:12 ; elapsed = 00:01:33 . Memory (MB): peak = 3876.773 ; gain = 1147.441 ; free physical = 6601 ; free 
+virtual = 9102
+ERROR: [Place 30-99] Placer failed with error: 'IO Clock Placer failed'
+Please review all ERROR, CRITICAL WARNING, and WARNING messages during placement to understand the cause for failure.
+Ending Placer Task | Checksum: 10611bb84
+
+Time (s): cpu = 00:01:12 ; elapsed = 00:01:33 . Memory (MB): peak = 3876.773 ; gain = 1147.441 ; free physical = 6614 ; free 
+virtual = 9115
+INFO: [Common 17-83] Releasing license: Implementation
+55 Infos, 10 Warnings, 3 Critical Warnings and 3 Errors encountered.
+place_design failed
+ERROR: [Common 17-69] Command failed: Placer could not place all instances
+INFO: [Common 17-206] Exiting Vivado at Wed Sep  4 23:14:18 2019...
+[Wed Sep  4 23:14:19 2019] impl_1 finished
+# open_run impl_1
+ERROR: [Common 17-69] Command failed: Run 'impl_1' failed. Unable to open
+INFO: [Common 17-206] Exiting Vivado at Wed Sep  4 23:14:19 2019...
+olive@ubuntu:~/pulpissimo/fpga/pulpissimo-zcu102$ 
+
