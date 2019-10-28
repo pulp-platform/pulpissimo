@@ -14,11 +14,12 @@ if [info exists ::env(XILINX_BOARD)] {
 if [info exists ::env(SLOW_CLK_PERIOD_NS)] {
     set SLOW_CLK_PERIOD_NS $::env(SLOW_CLK_PERIOD_NS)
 } else {
-    set SLOW_CLK_PERIOD_NS 10.000
+    set SLOW_CLK_PERIOD_NS 30517
 }
 
-
-set SLOW_CLK_FREQ_MHZ [expr 1000 / $SLOW_CLK_PERIOD_NS]
+# Multiply frequency by 256 as there is a clock divider (by 256) after the
+# slow_clk_mngr since the MMCMs do not support clocks slower then 4.69 MHz.
+set SLOW_CLK_FREQ_MHZ [expr 1000 * 256 / $SLOW_CLK_PERIOD_NS]
 
 set ipName xilinx_slow_clk_mngr
 
