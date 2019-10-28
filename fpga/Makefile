@@ -49,15 +49,15 @@ clean_zedboard: ## Removes all bitstreams, *.log files and vivado related files 
 	rm -f pulpissimo_zedboard.bin
 
 zcu102: ## Generates the bistream for the zcu102 board
-        cd pulpissimo-zcu102; make all
-        cp pulpissimo-zcu102/pulpissimo_zcu102.runs/impl_1/xilinx_pulpissimo.bit pulpissimo_zcu102.bit
-        cp pulpissimo-zcu102/pulpissimo_zcu102.runs/impl_1/xilinx_pulpissimo.bin pulpissimo_zcu102.bin
-        @echo "Bitstream generation for zcu102 board finished. The bitstream Configuration Memory File was copied to ./pulpissimo_zcu102.bit and ./pulpissimo_zcu102.bin"
+	cd pulpissimo-zcu102; make all
+	cp pulpissimo-zcu102/pulpissimo_zcu102.runs/impl_1/xilinx_pulpissimo.bit pulpissimo_zcu102.bit
+	cp pulpissimo-zcu102/pulpissimo_zcu102.runs/impl_1/xilinx_pulpissimo.bin pulpissimo_zcu102.bin
+	@echo "Bitstream generation for zcu102 board finished. The bitstream Configuration Memory File was copied to ./pulpissimo_zcu102.bit and ./pulpissimo_zcu102.bin"
 
 clean_zcu102: ## Removes all bitstreams, *.log files and vivado related files (rm -rf vivado*) for the zcu102 board.
-        cd pulpissimo-zcu102; make clean
-        rm -f pulpissimo_zcu102.bit
-        rm -f pulpissimo_zcu102.bin
+	cd pulpissimo-zcu102; make clean
+	rm -f pulpissimo_zcu102.bit
+	rm -f pulpissimo_zcu102.bin
 
 
 help: ## Show this help message
