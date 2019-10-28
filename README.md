@@ -184,6 +184,7 @@ PULPissimo has been implemented on FPGA for the various Xilinx FPGA boards.
 At the moment the following boards are supported:
 * Digilent Genesys2
 * Xilinx ZCU104
+* Xilinx ZCU102
 * Digilent Nexys Video
 * ZedBoard
 
