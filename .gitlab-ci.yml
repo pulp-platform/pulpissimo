@@ -85,7 +85,7 @@ test_sw:
     - make install
   script:
     - echo "Running software tests"
-    - make test
+    - make test-gitlab
     - echo "Generating junit test results"
     - /usr/sepp/bin/pip3.4 install --user junit2html
     - /usr/sepp/bin/python3.4 -m junit2htmlreport tests/junit-reports/TEST-*.xml
