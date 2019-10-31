@@ -1,8 +1,8 @@
 .DEFAULT_GOAL:=help
 
-all: genesys2 zcu104 nexys_video zedboard ## Generates the bitstream for all supported boards board.
+all: genesys2 zcu104 nexys_video zedboard zcu102 ## Generates the bitstream for all supported boards board.
 
-clean_all: clean_genesys2 clean_zcu104 clean_nexys_video clean_zedboard ## Removes synthesis output and bitstreams for all boards.
+clean_all: clean_genesys2 clean_zcu104 clean_nexys_video clean_zedboard clean_zcu102 ## Removes synthesis output and bitstreams for all boards.
 
 genesys2: ## Generates the bistream for the genesys2 board
 	cd pulpissimo-genesys2; make all
@@ -47,6 +47,18 @@ clean_zedboard: ## Removes all bitstreams, *.log files and vivado related files 
 	cd pulpissimo-zedboard; make clean
 	rm -f pulpissimo_zedboard.bit
 	rm -f pulpissimo_zedboard.bin
+
+zcu102: ## Generates the bistream for the zcu102 board
+	cd pulpissimo-zcu102; make all
+	cp pulpissimo-zcu102/pulpissimo_zcu102.runs/impl_1/xilinx_pulpissimo.bit pulpissimo_zcu102.bit
+	cp pulpissimo-zcu102/pulpissimo_zcu102.runs/impl_1/xilinx_pulpissimo.bin pulpissimo_zcu102.bin
+	@echo "Bitstream generation for zcu102 board finished. The bitstream Configuration Memory File was copied to ./pulpissimo_zcu102.bit and ./pulpissimo_zcu102.bin"
+
+clean_zcu102: ## Removes all bitstreams, *.log files and vivado related files (rm -rf vivado*) for the zcu102 board.
+	cd pulpissimo-zcu102; make clean
+	rm -f pulpissimo_zcu102.bit
+	rm -f pulpissimo_zcu102.bin
+
 
 help: ## Show this help message
 	@echo "PULPissimo on FPGA"

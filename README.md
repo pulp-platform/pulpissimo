@@ -87,6 +87,8 @@ development kit for PULP/PULPissimo.
 First install the system dependencies indicated here:
 https://github.com/pulp-platform/pulp-builder/blob/master/README.md
 
+In particular don't forget to set PULP_RISCV_GCC_TOOLCHAIN.
+
 Then execute the following commands:
 ```
 git clone https://github.com/pulp-platform/pulp-builder.git
@@ -182,6 +184,7 @@ PULPissimo has been implemented on FPGA for the various Xilinx FPGA boards.
 At the moment the following boards are supported:
 * Digilent Genesys2
 * Xilinx ZCU104
+* Xilinx ZCU102
 * Digilent Nexys Video
 * ZedBoard
 
