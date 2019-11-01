@@ -5,6 +5,18 @@
 # All rights reserved.
 
 from ipstools_cfg import *
+import argparse
+
+parser = argparse.ArgumentParser(
+    prog='PULP update script',
+    description="""Fetch IPs and resolve dependencies for PULPissimo""")
+
+parser.add_argument('--rt-dpi', action='store_true',
+                    help='Use the PULP Runtime DPI to emulate peripherals')
+parser.add_argument('--verbose', action='store_true',
+                    help='Show more information about commands')
+
+args = parser.parse_args()
 
 try:
     os.mkdir("ips")
@@ -18,12 +30,20 @@ ipdb = ipstools.IPDatabase(
     rtl_dir='rtl',
     ips_dir='ips',
     vsim_dir='sim',
-    default_server=DEFAULT_SERVER
+    default_server=DEFAULT_SERVER,
+    verbose=args.verbose
 )
 # updates the IPs from the git repo
 ipdb.update_ips()
 
 # launch generate-ips.py
 ipdb.save_database()
-execute("./generate-scripts")
+gen_cmd = "./generate-scripts"
 
+if args.rt_dpi:
+    gen_cmd += ' --rt-dpi'
+
+if args.verbose:
+    gen_cmd += ' --verbose'
+
+execute(gen_cmd)

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 # Francesco Conti <f.conti@unibo.it>
 #
 # Copyright (C) 2016-2018 ETH Zurich, University of Bologna.
@@ -6,6 +7,18 @@
 
 from ipstools_cfg import *
 import fileinput
+import argparse
+
+parser = argparse.ArgumentParser(
+    prog='PULP generate script',
+    description="""generate build/compile/synthesis scripts for PULPissimo""")
+
+parser.add_argument('--rt-dpi', action='store_true',
+                    help='Use the PULP Runtime DPI to emulate peripherals')
+parser.add_argument('--verbose', action='store_true',
+                    help='Show more information about commands')
+
+args = parser.parse_args()
 
 execute("mkdir -p sim/vcompile/ips")
 execute("rm -rf sim/vcompile/ips/*")
@@ -24,7 +37,12 @@ execute("mkdir -p sim/ncompile/tb")
 execute("rm -rf sim/ncompile/tb/*")
 
 # creates an IPApproX database
-ipdb = ipstools.IPDatabase(rtl_dir='rtl', ips_dir='ips', vsim_dir='sim', load_cache=True)
+ipdb = ipstools.IPDatabase(rtl_dir='rtl', ips_dir='ips', vsim_dir='sim',
+                           load_cache=True, verbose=args.verbose)
+
+# setting defines
+if args.rt_dpi:
+    ipdb.rtl_dic['tb'].sub_ips['tb'].defines = ['USE_DPI']
 
 # generate ModelSim/QuestaSim compilation scripts
 ipdb.export_make(script_path="sim/vcompile/ips")
