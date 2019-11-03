@@ -33,7 +33,7 @@ BRANCH ?= master
 
 checkout:
 	git submodule update --init
-	./update-ips
+	./update-ips  --rt-dpi
 
 # generic clean and build targets for the platform
 clean:
