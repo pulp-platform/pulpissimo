@@ -86,40 +86,18 @@ build_rtl:
       - rtl/tb/remote_bitbang/* # we want to reuse bitbang lib
 #      - pkg/* # sdk is too large
 
-# test_sw:
-#   stage: test
-#   before_script:
-#     - echo "Fetching SDK from releases and setting up paths"
-#     - make sdk-gitlab
-#     - echo "Compiling RTL model and DPI libraries"
-#     - make build
-#     - echo "Installing scripts"
-#     - make install
-#   script:
-#     - echo "Running software tests"
-#     - make test-gitlab
-#     - echo "Generating junit test results"
-#     - /usr/sepp/bin/pip3.4 install --user junit2html
-#     - /usr/sepp/bin/python3.4 -m junit2htmlreport tests/junit-reports/TEST-*.xml
-#   artifacts:
-#     paths:
-#       - tests/junit-reports/TEST-*.html
-#       - tests/junit-reports/TEST-*.xml
-#     reports:
-#       junit: tests/junit-reports/TEST-*.xml
-
-test_sw_build_sdk:
+test_sw:
   stage: test
   before_script:
+    - echo "Fetching SDK from releases and setting up paths"
+    - make sdk-gitlab
     - echo "Compiling RTL model and DPI libraries"
     - make build
-    - echo "Installing scripts" # don't call this, breaks build
+    - echo "Installing scripts"
     - make install
-    - echo "Building SDK"
-    - make sdk
   script:
-    - echo "Running software tests with built SDK"
-    - make test-gitlab2
+    - echo "Running software tests"
+    - make test-gitlab
     - echo "Generating junit test results"
     - /usr/sepp/bin/pip3.4 install --user junit2html
     - /usr/sepp/bin/python3.4 -m junit2htmlreport tests/junit-reports/TEST-*.xml
@@ -130,6 +108,28 @@ test_sw_build_sdk:
       - tests/junit-reports/TEST-*.xml
     reports:
       junit: tests/junit-reports/TEST-*.xml
+
+# test_sw_build_sdk:
+#   stage: test
+#   before_script:
+#     - echo "Compiling RTL model and DPI libraries"
+#     - make build
+#     - echo "Installing scripts" # don't call this, breaks build
+#     - make install
+#     - echo "Building SDK"
+#     - make sdk
+#   script:
+#     - echo "Running software tests with built SDK"
+#     - make test-gitlab2
+#     - echo "Generating junit test results"
+#     - /usr/sepp/bin/pip3.4 install --user junit2html
+#     - /usr/sepp/bin/python3.4 -m junit2htmlreport tests/junit-reports/TEST-*.xml
+#   artifacts:
+#     paths:
+#       - tests/junit-reports/TEST-*.html
+#       - tests/junit-reports/TEST-*.xml
+#     reports:
+#       junit: tests/junit-reports/TEST-*.xml
 
 test_dm:
   stage: test
