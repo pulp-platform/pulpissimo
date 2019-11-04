@@ -135,7 +135,7 @@ test_dm:
   stage: test
   before_script:
   script:
-    - echo "(Re)generating scripts" # because paths might have changed
+    - echo "(Re)generating scripts with DPI disabled"
     - ./generate-scripts
     - echo "Setting up vsim path"
     - source setup/vsim.sh
