@@ -5,10 +5,14 @@
 # respective READMEs
 set -o errexit -o pipefail -o noclobber -o nounset
 
+ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/" && pwd)
+
 GITLAB=iis-git.ee.ethz.ch
 VIP_DIR=vip-proprietary
 AGREE_LICENSE=0
 USE_GITLAB=0
+
+cd "$ROOT"
 
 while [[ "$#" -gt 0 ]]; do case $1 in
   -y|--yes) AGREE_LICENSE=1;;
