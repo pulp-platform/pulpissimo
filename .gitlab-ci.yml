@@ -107,6 +107,8 @@ test_dm:
   stage: test
   before_script:
   script:
+    - echo "(Re)generating scripts" # because paths might have changed
+    - ./generate-scripts
     - echo "Setting up vsim path"
     - source setup/vsim.sh
     - echo "Running debug module testbench"
