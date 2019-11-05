@@ -38,11 +38,17 @@ fetch_ips:
   script:
     - echo "Fetching IPs"
     - make checkout
+    - echo "Fetching VIPs"
+    - ./rtl/vip/get-vips.sh --yes --gitlab
+    - echo "Generate scripts with DPI and VIP support"
+    - ./generate-scripts --rt-dpi --i2c-vip --flash-vip --i2s-vip
+
   artifacts:
     paths:
       - ips/*
       - sim/*
       - ipstools/*
+      - rtl/vip/*
       - .cached_ipdb.json
 
 # This jobs result is too large to produce an artifact
