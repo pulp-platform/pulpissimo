@@ -13,6 +13,15 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument('--rt-dpi', action='store_true',
                     help='Use the PULP Runtime DPI to emulate peripherals')
+parser.add_argument('--i2c-vip', action='store_true',
+                    help="""Use the i2c model (24FC1025).
+                    Needs to be installed.""")
+parser.add_argument('--flash-vip', action='store_true',
+                    help="""Use the flash model (S25FS256).
+                    Needs to be installed.""")
+parser.add_argument('--i2s-vip', action='store_true',
+                    help="""Use the i2s model (24FC1025).
+                    Needs to be installed.""")
 parser.add_argument('--verbose', action='store_true',
                     help='Show more information about commands')
 
@@ -42,7 +51,12 @@ gen_cmd = "./generate-scripts"
 
 if args.rt_dpi:
     gen_cmd += ' --rt-dpi'
-
+if args.i2c_vip:
+    gen_cmd += ' --i2c-vip'
+if args.flash_vip:
+    gen_cmd += ' --flash-vip'
+if args.i2s_vip:
+    gen_cmd += ' --i2s-vip'
 if args.verbose:
     gen_cmd += ' --verbose'
 
