@@ -6,6 +6,7 @@
 
 from ipstools_cfg import *
 import argparse
+import sys
 
 parser = argparse.ArgumentParser(
     prog='PULP update script',
@@ -47,17 +48,7 @@ ipdb.update_ips()
 
 # launch generate-ips.py
 ipdb.save_database()
-gen_cmd = "./generate-scripts"
 
-if args.rt_dpi:
-    gen_cmd += ' --rt-dpi'
-if args.i2c_vip:
-    gen_cmd += ' --i2c-vip'
-if args.flash_vip:
-    gen_cmd += ' --flash-vip'
-if args.i2s_vip:
-    gen_cmd += ' --i2s-vip'
-if args.verbose:
-    gen_cmd += ' --verbose'
+# pass arguments and call generate script
+execute("./generate-scripts " + (' '.join(sys.argv[1:])))
 
-execute(gen_cmd)
