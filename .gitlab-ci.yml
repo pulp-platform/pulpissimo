@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-variables:
-  PULP_RISCV_GCC_TOOLCHAIN: "/home/balasr/.pulp_riscv"
+# variables:
+#  PULP_RISCV_GCC_TOOLCHAIN: your-compiler-path
 
 before_script:
   - pwd
