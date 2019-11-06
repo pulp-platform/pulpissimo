@@ -30,6 +30,7 @@ fetch_tests:
     - echo "Fetching tests"
     - make test-checkout-gitlab
   artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
     paths:
       - tests/*
 
@@ -44,6 +45,7 @@ fetch_ips:
     - ./generate-scripts --rt-dpi --i2c-vip --flash-vip --i2s-vip
 
   artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
     paths:
       - ips/*
       - sim/*
@@ -71,6 +73,7 @@ build_rtl:
     - echo "Installing scripts"
     - make install
   artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
     paths:
       - tests/*
       - ips/*
@@ -97,6 +100,7 @@ test_sw:
     - /usr/sepp/bin/pip3.4 install --user junit2html
     - /usr/sepp/bin/python3.4 -m junit2htmlreport tests/junit-reports/TEST-*.xml
   artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
     paths:
       - tests/junit-reports/TEST-*.html
       - tests/junit-reports/TEST-*.xml
@@ -123,6 +127,7 @@ fpga_synth:
     - echo "Starting synthesis with vivado"
     - cd fpga/ && make genesys2 VIVADO='vivado-2019.1.1 vivado'
   artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
     paths:
       - fpga/pulpissimo_genesys2.bit
       - fpga/pulpissimo_genesys2.bin
