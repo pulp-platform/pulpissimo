@@ -6,6 +6,7 @@
 
 from ipstools_cfg import *
 import argparse
+import sys
 
 parser = argparse.ArgumentParser(
     prog='PULP update script',
@@ -13,6 +14,15 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument('--rt-dpi', action='store_true',
                     help='Use the PULP Runtime DPI to emulate peripherals')
+parser.add_argument('--i2c-vip', action='store_true',
+                    help="""Use the i2c model (24FC1025).
+                    Needs to be installed.""")
+parser.add_argument('--flash-vip', action='store_true',
+                    help="""Use the flash model (S25FS256).
+                    Needs to be installed.""")
+parser.add_argument('--i2s-vip', action='store_true',
+                    help="""Use the i2s model (24FC1025).
+                    Needs to be installed.""")
 parser.add_argument('--verbose', action='store_true',
                     help='Show more information about commands')
 
@@ -38,12 +48,7 @@ ipdb.update_ips()
 
 # launch generate-ips.py
 ipdb.save_database()
-gen_cmd = "./generate-scripts"
 
-if args.rt_dpi:
-    gen_cmd += ' --rt-dpi'
+# pass arguments and call generate script
+execute("./generate-scripts " + (' '.join(sys.argv[1:])))
 
-if args.verbose:
-    gen_cmd += ' --verbose'
-
-execute(gen_cmd)
