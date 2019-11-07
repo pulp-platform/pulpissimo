@@ -33,7 +33,8 @@ BRANCH ?= master
 
 checkout:
 	git submodule update --init
-	./update-ips  --rt-dpi
+	./rtl/vip/get-vips.sh --yes
+	./update-ips  --rt-dpi --i2c-vip
 
 # generic clean and build targets for the platform
 clean:
