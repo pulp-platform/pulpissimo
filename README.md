@@ -93,7 +93,7 @@ Then execute the following commands:
 ```
 git clone https://github.com/pulp-platform/pulp-builder.git
 cd pulp-builder
-git checkout 7bd925324fcecae2aad9875f4da45b27d8356796
+git checkout 0e51ae60d66f4ec326582d63a9fcd40ed2a70e15
 source configs/pulpissimo.sh
 ./scripts/clean
 ./scripts/update-runtime
