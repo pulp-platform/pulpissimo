@@ -77,7 +77,7 @@ synth_design -rtl -name rtl_1 -sfcu;# sfcu -> run synthesis in single file compi
 # Launch synthesis
 set_property STEPS.SYNTH_DESIGN.ARGS.FLATTEN_HIERARCHY none [get_runs synth_1]
 set_property -name {STEPS.SYNTH_DESIGN.ARGS.MORE OPTIONS} -value -sfcu -objects [get_runs synth_1] ;# Use single file compilation unit mode to prevent issues with import pkg::* statements in the codebase
-launch_runs synth_1 -jobs 8
+launch_runs synth_1 -jobs $CPUS
 wait_on_run synth_1
 open_run synth_1 -name netlist_1
 set_property needs_refresh false [get_runs synth_1]
@@ -97,9 +97,9 @@ set_property "steps.route_design.args.directive" "RuntimeOptimized" [get_runs im
 
 set_property STEPS.WRITE_BITSTREAM.ARGS.BIN_FILE true [get_runs impl_1]
 
-launch_runs impl_1 -jobs 8
+launch_runs impl_1 -jobs $CPUS 
 wait_on_run impl_1
-launch_runs impl_1 -to_step write_bitstream
+launch_runs impl_1 -jobs $CPUS -to_step write_bitstream
 wait_on_run impl_1
 
 open_run impl_1
