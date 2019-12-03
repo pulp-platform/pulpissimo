@@ -18,20 +18,20 @@ ips: clk ram ## Synthesizes necessary xilinx IP
 clean-ips: clean-clk clean-ram ## Clean all IPs
 
 clk: ## Synthesizes the Xilinx Clocking Manager IPs
-	cd ips/xilinx_clk_mngr; make all
-	cd ips/xilinx_slow_clk_mngr; make all
+	$(MAKE) -C ips/xilinx_clk_mngr all
+	$(MAKE) -C ips/xilinx_slow_clk_mngr all
 
 clean-clk: ## Removes all Clocking Wizard IP outputs
-	cd ips/xilinx_clk_mngr; make clean
-	cd ips/xilinx_slow_clk_mngr; make clean
+	$(MAKE) -C ips/xilinx_clk_mngr clean
+	$(MAKE) -C ips/xilinx_slow_clk_mngr clean
 
 ram: ## Synthesizes the Xilinx Block Memory Generator IPs for PULPissimo's L2 Ram
-	cd ips/xilinx_interleaved_ram; make all
-	cd ips/xilinx_private_ram; make all
+	$(MAKE) -C ips/xilinx_interleaved_ram all
+	$(MAKE) -C ips/xilinx_private_ram all
 
 clean-ram: ## Removes all Block Ram IP outputs related to l2 ram
-	cd ips/xilinx_interleaved_ram; make clean
-	cd ips/xilinx_private_ram; make clean
+	$(MAKE) -C ips/xilinx_interleaved_ram clean
+	$(MAKE) -C ips/xilinx_private_ram clean
 
 clean: ## Removes all bitstreams, *.log files and vivado related files (rm -rf vivado*)
 	rm -rf ${PROJECT}.*[^'bit']
