@@ -7,7 +7,12 @@ In the fpga folder, run
 make zedboard
 ```
 which will generate `pulpissimo_zedboard.bit`.
-Use Vivado to load it into the FPGA.
+
+## Bitstream Download
+To download this bitstream into the FPGA connect the PROG USB header, turn the board on and run
+```Shell
+make -C pulpissimo-zedboard download
+```
 
 ## Default SoC and Core Frequencies
 

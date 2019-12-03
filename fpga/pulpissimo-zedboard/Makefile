@@ -39,5 +39,8 @@ clean: ## Removes all bitstreams, *.log files and vivado related files (rm -rf v
 	rm -rf *.log
 	rm -rf vivado*
 
+download: ## Download the bitstream into the FPGA
+	$(VIVADO) -mode batch -source tcl/download_bitstream.tcl -tclargs $(PROJECT).runs/impl_1/xilinx_pulpissimo.bit pulpissimo_$(BOARD).bit
+
 help:
 	@grep -E -h '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
