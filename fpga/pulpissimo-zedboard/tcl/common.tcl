@@ -1,5 +1,16 @@
-# sets up Vivado messages in a more sensible way
+# detect board
+if [info exists ::env(BOARD)] {
+    set BOARD $::env(BOARD)
+} else {
+    puts "BOARD is not defined. Please include 'fpga-settings.mk' in your Makefile to setup necessary environment variables."
+    exit
+}
+if [info exists ::env(XILINX_BOARD)] {
+    set XILINX_BOARD $::env(XILINX_BOARD)
+}
+set partNumber $::env(XILINX_PART)
 
+# sets up Vivado messages in a more sensible way
 set_msg_config -id {[Synth 8-3352]}         -new_severity "critical warning"
 set_msg_config -id {[Synth 8-350]}          -new_severity "critical warning"
 set_msg_config -id {[Synth 8-2490]}         -new_severity "warning"

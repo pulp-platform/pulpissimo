@@ -1,13 +1,4 @@
-# detect board
-if [info exists ::env(BOARD)] {
-    set BOARD $::env(BOARD)
-} else {
-    puts "Please include 'fpga-settings.mk' in your Makefile to setup necessary environment variables."
-    exit
-}
-if [info exists ::env(XILINX_BOARD)] {
-    set XILINX_BOARD $::env(XILINX_BOARD)
-}
+source tcl/common.tcl
 
 set PROJECT pulpissimo-$BOARD
 set RTL ../../../rtl
@@ -17,9 +8,6 @@ set CONSTRS constraints
 # create project
 create_project $PROJECT . -force -part $::env(XILINX_PART)
 set_property board_part $XILINX_BOARD [current_project]
-
-# set up meaningfull errors
-source tcl/messages.tcl
 
 # set up includes
 source ../pulpissimo/tcl/ips_inc_dirs.tcl

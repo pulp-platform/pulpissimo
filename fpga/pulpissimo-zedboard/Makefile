@@ -1,8 +1,7 @@
-PROJECT:=pulpissimo-zedboard
-VIVADO ?= vivado
-VIVADOFLAGS ?= -nojournal -mode batch -source scripts/prologue.tcl
-
 include fpga-settings.mk
+
+PROJECT:=pulpissimo-$(BOARD)
+VIVADO ?= vivado
 
 .DEFAULT_GOAL:=help
 
