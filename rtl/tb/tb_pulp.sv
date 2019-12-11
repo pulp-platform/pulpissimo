@@ -628,7 +628,7 @@ module tb_pulp;
 
          if (ENABLE_OPENOCD == 1) begin
             // Use openocd to interact with the simulation
-            s_bootsel = 1'b0;
+            s_bootsel = 1'b1;
             $display("[TB] %t - Releasing hard reset", $realtime);
             s_rst_n = 1'b1;
 
@@ -642,9 +642,9 @@ module tb_pulp;
 
             // determine if we want to load the binary with jtag or from flash
             if (LOAD_L2 == "STANDALONE")
-               s_bootsel = 1'b1;
-            else if (LOAD_L2 == "JTAG") begin
                s_bootsel = 1'b0;
+            else if (LOAD_L2 == "JTAG") begin
+               s_bootsel = 1'b1;
             end
 
             if (LOAD_L2 == "JTAG") begin
@@ -681,13 +681,21 @@ module tb_pulp;
 
                test_mode_if.init(s_tck, s_tms, s_trstn, s_tdi);
 
-               jtag_conf_reg = {USE_FLL ? 1'b0 : 1'b1, 6'b0, LOAD_L2 == "JTAG" ? 2'b11 : 2'b00};
                $display("[TB] %t - Enabling clock out via jtag", $realtime);
 
-               test_mode_if.set_confreg(jtag_conf_reg, jtag_conf_rego,
-                   s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-
-               $display("[TB] %t - jtag_conf_reg set to %x", $realtime, jtag_conf_reg);
+               // we are using a bootsel based booting method:
+               // bootsel = 1'b1 means booting from jtag => bootrom makes us wait in a wfi/busy loop
+               // bootsel = 1'b1 means booting from flash => start loading image from flash
+               // This logic is handled in the bootrom which will read the bootsel signal value.
+               //
+               // This also means we are currently not relying on the jtag confreg to configure the booting behavior but it is still possible to use it.
+               // When the confreg is not set then we will boot according to bootsel.
+               // TODO: regression: we can't propgate our FLL settings like this. Needs sw changes (?)
+               //
+               // jtag_conf_reg = {USE_FLL ? 1'b0 : 1'b1, 6'b0, LOAD_L2 == "JTAG" ? 2'b10 : 2'b00};
+               // test_mode_if.set_confreg(jtag_conf_reg, jtag_conf_rego,
+               //     s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+               // $display("[TB] %t - jtag_conf_reg set to %x", $realtime, jtag_conf_reg);
 
                $display("[TB] %t - Releasing hard reset", $realtime);
                s_rst_n = 1'b1;

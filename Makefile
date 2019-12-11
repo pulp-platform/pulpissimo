@@ -56,14 +56,15 @@ import_bootcode:
 
 # JENKIN CI
 # continuous integration on jenkins
-all: checkout buld install vopt sdk
+all: checkout build install vopt sdk
 
 sdk:
 	if [ ! -e pulp-builder ]; then \
-	  git clone https://github.com/pulp-platform/pulp-builder.git; \
+	  git clone --recurse https://github.com/pulp-platform/pulp-builder.git; \
 	fi; \
 	cd pulp-builder; \
-	git checkout 7f26b4877f000940026788b4debbf89d86e18ff7; \
+	git checkout 83953d5ca4c545f4186bf3683d509566c3067012; \
+	git checkout --recurse-submodules; \
 	. configs/pulpissimo.sh; \
 	. configs/rtl.sh; \
 	./scripts/clean; \
@@ -86,16 +87,25 @@ test:
 # GITLAB CI
 # continuous integration on gitlab
 sdk-gitlab:
-	sdk-releases/get-sdk-2019.07.01-CentOS_7.py; \
-	cd pkg && patch -p1 < ../sdk-releases/pulp-sdk-2019.07.01-junit.patch;
+	sdk-releases/get-sdk-2019.11.03-CentOS_7.py; \
 
 # the gitlab runner needs a special configuration to be able to access the
 # dependent git repositories
 test-checkout-gitlab:
 	./update-tests-gitlab
 
+# test with sdk release
 test-gitlab:
-	source env/env-sdk-2019.07.01.sh; \
-	source pkg/sdk/2019.07.01/configs/pulpissimo.sh; \
-	source pkg/sdk/2019.07.01/configs/platform-rtl.sh; \
+	source env/env-sdk-2019.11.03.sh; \
+	source pkg/sdk/2019.11.03/configs/pulpissimo.sh; \
+	source pkg/sdk/2019.11.03/configs/platform-rtl.sh; \
 	cd tests && plptest --threads 16 --stdout
+
+# test with built sdk
+test-gitlab2:
+	cd pulp-builder; \
+	source sdk-setup.sh; \
+	source configs/pulpissimo.sh; \
+	source configs/rtl.sh; \
+	cd ../tests && plptest --threads 16 --stdout
+
