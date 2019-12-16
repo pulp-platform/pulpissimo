@@ -939,6 +939,7 @@ module pulpissimo
         .cluster_fetch_enable_o       (                                  ),
         .cluster_boot_addr_o          (                                  ),
         .cluster_test_en_o            (                                  ),
+        .cluster_dbg_irq_valid_o      (                                  ),
         .*
     );
 
