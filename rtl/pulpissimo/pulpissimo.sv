@@ -8,14 +8,14 @@
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 
-module pulpissimo
-#(
-  parameter CORE_TYPE   = 0, // 0 for RISCY, 1 for IBEX RV32IMC (formerly ZERORISCY), 2 for IBEX RV32EC (formerly MICRORISCY)
-  parameter USE_FPU     = 1,
-  parameter USE_HWPE    = 1
-)
-(
+`include "pulp_soc_defines.sv"
 
+module pulpissimo #(
+    parameter CORE_TYPE   = 0, // 0 for RISCY, 1 for IBEX RV32IMC (formerly ZERORISCY), 2 for IBEX RV32EC (formerly MICRORISCY)
+    parameter USE_FPU     = 1,
+    parameter USE_HWPE    = 1,
+    parameter NB_CORES    = `NB_CORES
+) (
    inout  wire        pad_spim_sdio0,
    inout  wire        pad_spim_sdio1,
    inout  wire        pad_spim_sdio2,
@@ -727,7 +727,8 @@ module pulpissimo
       .AXI_STRB_IN_WIDTH  ( AXI_CLUSTER_SOC_STRB_WIDTH ),
       .AXI_STRB_OUT_WIDTH ( AXI_SOC_CLUSTER_STRB_WIDTH ),
       .BUFFER_WIDTH       ( BUFFER_WIDTH               ),
-      .EVNT_WIDTH         ( EVENT_WIDTH                )
+      .EVNT_WIDTH         ( EVENT_WIDTH                ),
+      .NB_CORES           ( NB_CORES                   )
    ) soc_domain_i (
 
         .ref_clk_i                    ( s_ref_clk                        ),

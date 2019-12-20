@@ -24,7 +24,8 @@ module soc_domain #(
     parameter AXI_STRB_IN_WIDTH    = AXI_DATA_IN_WIDTH/8,
     parameter AXI_STRB_OUT_WIDTH   = AXI_DATA_OUT_WIDTH/8,
     parameter BUFFER_WIDTH         = 8,
-    parameter EVNT_WIDTH           = 8
+    parameter EVNT_WIDTH           = 8,
+    parameter NB_CORES             = 8
 )(
 
     input logic                              ref_clk_i,
@@ -46,7 +47,7 @@ module soc_domain #(
     input  logic                             jtag_tdi_i,
     output logic                             jtag_tdo_o,
 
-    output logic [`NB_CORES-1:0]             cluster_dbg_irq_valid_o,
+    output logic [NB_CORES-1:0]              cluster_dbg_irq_valid_o,
 
     input  logic [31:0]                      gpio_in_i,
     output logic [31:0]                      gpio_out_o,
@@ -245,8 +246,7 @@ module soc_domain #(
     output logic [7:0]                       data_master_b_readpointer_o
     );
 
-    pulp_soc
-    #(
+    pulp_soc #(
         .CORE_TYPE               ( CORE_TYPE          ),
         .USE_FPU                 ( USE_FPU            ),
         .USE_HWPE                ( USE_HWPE           ),
@@ -257,11 +257,14 @@ module soc_domain #(
         .AXI_ID_OUT_WIDTH        ( AXI_ID_OUT_WIDTH   ),
         .AXI_USER_WIDTH          ( AXI_USER_WIDTH     ),
         .EVNT_WIDTH              ( EVNT_WIDTH         ),
-        .BUFFER_WIDTH            ( BUFFER_WIDTH       )
-   )
-   pulp_soc_i
-   (
-
+        .BUFFER_WIDTH            ( BUFFER_WIDTH       ),
+        .NB_CORES                ( NB_CORES           )
+        // .NB_HWPE_PORTS           ( 4                  ),
+        // .NGPIO                   ( 43                 ),
+        // .NPAD                    ( 64                 ),
+        // .NBIT_PADCFG             ( 4                  ),
+        // .NBIT_PADMUX             ( 2                  )
+    ) pulp_soc_i (
         .boot_l2_i                    ( 1'b0                         ),
         .cluster_dbg_irq_valid_o      ( cluster_dbg_irq_valid_o      ),
         .*
