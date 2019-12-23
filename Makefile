@@ -89,17 +89,26 @@ test:
 sdk-gitlab:
 	sdk-releases/get-sdk-2019.11.03-CentOS_7.py; \
 
+# simplified runtime for PULP that doesn't need the sdk
+pulp-runtime:
+	git clone https://github.com/pulp-platform/pulpissimo.git -b v0.0.2
+
 # the gitlab runner needs a special configuration to be able to access the
 # dependent git repositories
 test-checkout-gitlab:
 	./update-tests-gitlab
 
 # test with sdk release
-test-gitlab:
+test-gitlab: tests
 	source env/env-sdk-2019.11.03.sh; \
 	source pkg/sdk/2019.11.03/configs/pulpissimo.sh; \
 	source pkg/sdk/2019.11.03/configs/platform-rtl.sh; \
 	cd tests && plptest --threads 16 --stdout
+
+test-runtime-gitlab: pulp-runtime
+	source setup/vsim.sh; \
+	source pulp-runtime/configs/pulpissimo.sh; \
+	cd tests/riscv_tests/testALU && make all run
 
 # test with built sdk
 test-gitlab2:
