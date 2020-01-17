@@ -58,6 +58,14 @@ Otherwise there will be an error about target being busy.
 $OPENOCD/bin/openocd -f pulpissimo-zedboard/openocd-zedboard-hs2.cfg
 ```
 
+#### Altera USB Blaster
+
+After connecting the adapter with 6 jumper wires, simply run:
+
+```Shell
+$OPENOCD/bin/openocd -f pulpissimo-zedboard/openocd-zedboard-usbblaster.cfg
+```
+
 ### UART
 
 There are UART pins connected to the same PMOD as the JTAG signals (PMOD A), which are utilized by the stdio driver of the PULP SDK (e.g., for the hello example).
