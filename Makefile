@@ -91,7 +91,7 @@ sdk-gitlab:
 
 # simplified runtime for PULP that doesn't need the sdk
 pulp-runtime:
-	git clone https://github.com/pulp-platform/pulpissimo.git -b v0.0.2
+	git clone https://github.com/pulp-platform/pulp-runtime.git -b v0.0.3
 
 # the gitlab runner needs a special configuration to be able to access the
 # dependent git repositories
@@ -108,7 +108,10 @@ test-gitlab: tests
 test-runtime-gitlab: pulp-runtime
 	source setup/vsim.sh; \
 	source pulp-runtime/configs/pulpissimo.sh; \
-	cd tests/riscv_tests/testALU && make all run
+        cd tests && ../pulp-runtime/scripts/bwruntests.py --proc-verbose -v \
+		--report-junit -t 3600 --yaml \
+		-o simplified-runtime.xml runtime-tests.yaml
+
 
 # test with built sdk
 test-gitlab2:

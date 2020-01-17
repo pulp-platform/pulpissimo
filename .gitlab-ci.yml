@@ -123,9 +123,6 @@ test_simplified_sw:
     - echo "Running software test"
     - make test-runtime-gitlab
 
-
-
-
 # Built SDK with the `make sdk` target and run all tests
 # test_sw_build_sdk:
 #   variables:
