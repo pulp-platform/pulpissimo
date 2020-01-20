@@ -122,6 +122,13 @@ test_simplified_sw:
   script:
     - echo "Running software test"
     - make test-runtime-gitlab
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - tests/*.html
+      - tests/*.xml
+    reports:
+      junit: tests/*.xml
 
 # Built SDK with the `make sdk` target and run all tests
 # test_sw_build_sdk:
