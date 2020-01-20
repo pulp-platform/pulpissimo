@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Bump `pulp_soc` to `v1.1.0`
+
+### Added
+- CI support for pulp-runtime to run tests, using bwruntest.py and
+  tests/runtime-tests.yaml
+
+### Fixed
+- Properly propagate NB_CORES
+
 ## [5.0.0] - 2019-11-18
 
 ### Added
