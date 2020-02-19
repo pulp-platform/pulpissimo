@@ -33,6 +33,9 @@ remove_file $IPS/tech_cells_generic/pad_functional_xilinx.sv
 
 # Set Verilog Defines.
 set DEFINES "FPGA_TARGET_XILINX=1 PULP_FPGA_EMUL=1 AXI4_XCHECK_OFF=1"
+if { $BOARD == "zedboard" } {
+    set DEFINES "$DEFINES ZEDBOARD=1"
+}
 set_property verilog_define $DEFINES [current_fileset]
 
 # detect target clock

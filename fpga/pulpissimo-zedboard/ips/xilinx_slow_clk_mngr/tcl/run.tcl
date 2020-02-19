@@ -7,7 +7,7 @@ if [info exists ::env(SLOW_CLK_PERIOD_NS)] {
     set SLOW_CLK_PERIOD_NS 30517
 }
 
-# Multiply frequency by 250 as there is a clock divider (by 250) after the
+# Multiply frequency by 256 as there is a clock divider (by 256) after the
 # slow_clk_mngr since the MMCMs do not support clocks slower then 4.69 MHz.
 set SLOW_CLK_FREQ_MHZ [expr 1000 * 256 / $SLOW_CLK_PERIOD_NS]
 

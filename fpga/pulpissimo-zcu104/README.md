@@ -2,12 +2,17 @@
 [\[Datasheet\]](https://www.xilinx.com/support/documentation/boards_and_kits/zcu104/ug1267-zcu104-eval-bd.pdf)
 
 ## Bitstream Generation
-In the fpga folder, run
+In the `fpga` folder, run
 ```Shell
 make zcu104
 ```
 which will generate `pulpissimo_zcu104.bit`.
-Use Vivado to load it into the FPGA.
+
+## Bitstream Download
+To download this bitstream into the FPGA connect the PROG USB header, turn the board on and run
+```Shell
+make -C pulpissimo-zedboard download
+```
 
 ## Default SoC and Core Frequencies
 

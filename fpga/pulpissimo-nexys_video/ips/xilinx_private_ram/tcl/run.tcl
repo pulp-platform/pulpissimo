@@ -1,14 +1,4 @@
-set partNumber $::env(XILINX_PART)
-
-if [info exists ::env(BOARD)] {
-    set BOARD $::env(BOARD)
-} else {
-    error "BOARD is not defined. Please source the sourceme.sh file."
-    exit
-}
-if [info exists ::env(XILINX_BOARD)] {
-	set boardName  $::env(XILINX_BOARD)
-}
+source ../../tcl/common.tcl
 
 # detect target ram size
 if [info exists ::env(PRIVATE_BANK_SIZE)] {
@@ -20,7 +10,7 @@ if [info exists ::env(PRIVATE_BANK_SIZE)] {
 set ipName xilinx_private_ram
 
 create_project $ipName . -part $partNumber
-set_property board_part $boardName [current_project]
+set_property board_part $XILINX_BOARD [current_project]
 
 create_ip -name blk_mem_gen -vendor xilinx.com -library ip -module_name $ipName
 
