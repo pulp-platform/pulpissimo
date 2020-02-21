@@ -2,14 +2,18 @@
 [\[Documentation\]](https://reference.digilentinc.com/reference/programmable-logic/genesys-2/start)
 
 ## Bitstream Generation
-In the fpga folder, run
+In the `fpga` folder, run
 ```Shell
 make genesys2
 ```
 which will generate `pulpissimo_genesys2.bit`.
-Use Vivado to load it into the FPGA.
 
-## Default SoC and Core Frequencies
+## Bitstream Download
+To download this bitstream into the FPGA connect the PROG USB header, turn the board on and run
+```Shell
+make -C pulpissimo-genesys2 download
+```
+## Default Frequencies
 
 By default the clock generating IPs are synthesized to provide the following frequencies to PULPissimo:
 
@@ -20,6 +24,8 @@ By default the clock generating IPs are synthesized to provide the following fre
 
 
 ## Peripherals
+If in doubt please review constraint file for current peripheral mapping in `constraints/genesys2.xdc`.
+
 PULPissimo is connected to the following board peripherals:
 
 

@@ -16,7 +16,7 @@ gui: MODE=gui  ## Create and synthesize the IP in GUI mode.
 all gui: $(PROJECT).xpr
 
 $(PROJECT).xpr: ../../fpga-settings.mk tcl/run.tcl
-	make clean
+	$(MAKE) clean
 	$(VIVADO) -mode $(MODE) -source tcl/run.tcl
 	mkdir -p ip
 	cp -r ${PROJECT}.srcs/sources_1/ip/${PROJECT}/* ip/.

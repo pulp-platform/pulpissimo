@@ -1,13 +1,4 @@
-# detect board
-if [info exists ::env(BOARD)] {
-    set BOARD $::env(BOARD)
-} else {
-    puts "Please include 'fpga-settings.mk' in your Makefile to setup necessary environment variables."
-    exit
-}
-if [info exists ::env(XILINX_BOARD)] {
-    set XILINX_BOARD $::env(XILINX_BOARD)
-}
+source tcl/common.tcl
 
 set PROJECT pulpissimo-$BOARD
 set RTL ../../../rtl
@@ -17,9 +8,6 @@ set CONSTRS constraints
 # create project
 create_project $PROJECT . -force -part $::env(XILINX_PART)
 set_property board_part $XILINX_BOARD [current_project]
-
-# set up meaningfull errors
-source tcl/messages.tcl
 
 # set up includes
 source ../pulpissimo/tcl/ips_inc_dirs.tcl
@@ -45,6 +33,9 @@ remove_file $IPS/tech_cells_generic/pad_functional_xilinx.sv
 
 # Set Verilog Defines.
 set DEFINES "FPGA_TARGET_XILINX=1 PULP_FPGA_EMUL=1 AXI4_XCHECK_OFF=1"
+if { $BOARD == "zedboard" } {
+    set DEFINES "$DEFINES ZEDBOARD=1"
+}
 set_property verilog_define $DEFINES [current_fileset]
 
 # detect target clock
@@ -89,7 +80,7 @@ synth_design -rtl -name rtl_1 -sfcu;# sfcu -> run synthesis in single file compi
 # Launch synthesis
 set_property STEPS.SYNTH_DESIGN.ARGS.FLATTEN_HIERARCHY none [get_runs synth_1]
 set_property -name {STEPS.SYNTH_DESIGN.ARGS.MORE OPTIONS} -value -sfcu -objects [get_runs synth_1] ;# Use single file compilation unit mode to prevent issues with import pkg::* statements in the codebase
-launch_runs synth_1 -jobs 8
+launch_runs synth_1 -jobs $CPUS
 wait_on_run synth_1
 open_run synth_1 -name netlist_1
 set_property needs_refresh false [get_runs synth_1]
@@ -109,9 +100,9 @@ set_property "steps.route_design.args.directive" "RuntimeOptimized" [get_runs im
 
 set_property STEPS.WRITE_BITSTREAM.ARGS.BIN_FILE true [get_runs impl_1]
 
-launch_runs impl_1 -jobs 8
+launch_runs impl_1 -jobs $CPUS 
 wait_on_run impl_1
-launch_runs impl_1 -to_step write_bitstream
+launch_runs impl_1 -jobs $CPUS -to_step write_bitstream
 wait_on_run impl_1
 
 open_run impl_1
