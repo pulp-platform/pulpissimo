@@ -19,7 +19,7 @@ make -C pulpissimo-zedboard download
 
 By default the clock generating IPs are synthesized to provide the following frequencies to PULPissimo:
 
-| Clock Domain   | Default Frequency on ZCU104 board  |
+| Clock Domain   | Default Frequency on ZCU102 board  |
 |----------------|------------------------------------|
 | Core Frequency | 20 MHz                             |
 | SoC Frequency  | 10 MHz                             |
