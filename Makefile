@@ -44,6 +44,10 @@ build:
 	cd sim && $(MAKE) lib build opt
 	cp -r rtl/tb/* $(VSIM_PATH)
 
+build-incisive:
+	cd sim && $(MAKE) -f Makefile.incisive build-sc
+	$(warning There is currently no SDK support for this simulator. You need to manually run your programs)
+
 # sdk specific targets
 install: $(INSTALL_HEADERS)
 
