@@ -90,7 +90,10 @@ ipdb.generate_ncsim_command_list(script_path="./sim/ncompile/src_rtl_files.f",
 # this is sed -i '/tb\/tb_hwpe/d' sim/ncompile/src_ips_files.f
 for line in fileinput.input("sim/ncompile/src_ips_files.f", inplace=True):
     line = line.strip('\n')
-    if not 'tb/tb_hwpe' in line:
+    if (not 'tb/tb_hwpe' in line and
+        not 'src/axi_test' in line and
+        not 'components/axi_slice_dc_master_wrap' in line and
+        not 'components/axi_slice_dc_slave_wrap' in line):
         print(line)
 
 
