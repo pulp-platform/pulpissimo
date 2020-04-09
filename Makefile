@@ -3,6 +3,14 @@ SHELL=bash
 
 PKG_DIR ?= $(PWD)/install
 
+#Questasim Commands
+export VLIB_CMD?=vlib
+export VMAP_CMD?=vmap
+export VLOG_CMD?=vlog
+export VCOM_CMD?=vcom
+export VSIM_CMD?=vsim
+
+
 export VSIM_PATH=$(PKG_DIR)
 export PULP_PATH=$(PWD)
 
@@ -52,7 +60,7 @@ build-incisive:
 install: $(INSTALL_HEADERS)
 
 vopt:
-	export VOPT_FLOW=1 && cd $(VSIM_PATH) && vsim -64 -c -do "source tcl_files/config/vsim.tcl; quit"
+	export VOPT_FLOW=1 && cd $(VSIM_PATH) && ${VSIM_CMD} -64 -c -do "source tcl_files/config/vsim.tcl; quit"
 
 import_bootcode:
 	cd sim/boot && objcopy --srec-len 1 --output-target=srec ${PULP_SDK_HOME}/install/bin/boot-pulpissimo boot-pulpissimo.s19

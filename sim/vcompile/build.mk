@@ -16,6 +16,12 @@ Red=\e[0;91m
 NC=\e[0;0m
 Blue=\e[0;94m
 
+#CMDs
+VLIB_CMD?=vlib
+VMAP_CMD?=vmap
+VLOG_CMD?=vlog
+VCOM_CMD?=vcom
+
 # paths
 VSIM_PATH?=.
 PULP_PATH?=../..
@@ -27,19 +33,19 @@ LIB_PATH=$(MSIM_LIBS_PATH)/$(LIB_NAME)
 
 # commands
 ifndef VERBOSE
-	LIB_CREATE=@vlib
-	LIB_MAP=@vmap
-	SVLOG_CC=@vlog -quiet -sv
-	VLOG_CC=@vlog -quiet
-	VHDL_CC=@vcom -quiet
+	LIB_CREATE=@${VLIB_CMD}
+	LIB_MAP=@${VMAP_CMD}
+	SVLOG_CC=@${VLOG_CMD} -quiet -sv
+	VLOG_CC=@${VLOG_CMD} -quiet
+	VHDL_CC=@${VCOM_CMD} -quiet
 	subip_echo=@echo -e "  $(NC)Building $(Yellow)$(IP)$(NC)/$(Yellow)$(1)$(NC)"
 	ip_echo=@echo -e "$(Green)Built$(NC) $(Yellow)$(IP)$(NC)"
 else
-	LIB_CREATE=vlib
-	LIB_MAP=vmap
-	SVLOG_CC=vlog -quiet -sv
-	VLOG_CC=vlog -quiet
-	VHDL_CC=vcom -quiet
+	LIB_CREATE=${VLIB_CMD}
+	LIB_MAP=${VMAP_CMD}
+	SVLOG_CC=${VLOG_CMD} -quiet -sv
+	VLOG_CC=${VLOG_CMD} -quiet
+	VHDL_CC=${VCOM_CMD} -quiet
 	subip_echo=@echo -e "\n$(NC)Building $(Yellow)$(IP)$(NC)/$(Yellow)$(1)$(NC)"
 	ip_echo=@echo -e "\n$(Green)Built$(NC) $(Yellow)$(IP)$(NC)"
 endif
