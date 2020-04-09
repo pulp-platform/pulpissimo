@@ -48,7 +48,7 @@ clean:
 	rm -rf $(VSIM_PATH)
 	cd sim && $(MAKE) clean
 
-build:
+build: install
 	cd sim && $(MAKE) lib build opt
 	cp -r rtl/tb/* $(VSIM_PATH)
 
@@ -133,3 +133,8 @@ test-gitlab2:
 	source configs/rtl.sh; \
 	cd ../tests && plptest --threads 16 --stdout
 
+# Build and run the tb to debug the Questasim Issue in 2020.1
+# Change the variable VSIM_CMD, VLOG_CMD, VCOM_CMD, VLIB_CMD and VMAP_CMD to
+# appropriate values if you want to use a non-default version of questasim
+problems: build
+	cd $(VSIM_PATH) && $(VSIM_CMD) vopt_tb -suppress vsim-3009 -do "do waves/perf_counter_bug.tcl; do waves/core.tcl;"
