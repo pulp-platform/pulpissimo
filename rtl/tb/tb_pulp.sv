@@ -886,8 +886,50 @@ module tb_pulp;
          end
       end
 
-
+   //Bind Performance Counter bug assertions to RI5CY's cs register module
+  bind riscv_cs_registers riscv_cs_registers_asserts #(.N_PERF_COUNTERS(N_PERF_COUNTERS)) i_perf_bug_asserts (.*);
+  initial
+    begin
+       # 300us $stop(2);
+    end
 endmodule // tb_pulp
+
+module riscv_cs_registers_asserts #(
+  parameter N_PERF_COUNTERS
+)(
+  input logic                       clk,
+  input logic [N_PERF_COUNTERS-1:0] PCCR_in,
+  input logic                       id_valid_i,
+  input logic                       is_decoding_i,
+  input logic                       ld_stall_i,
+  input logic                       id_valid_q,
+  input logic                       jr_stall_i,
+  input logic                       imiss_i,
+  input logic                       pc_set_i,
+  input logic                       mem_load_i,
+  input logic                       mem_store_i,
+  input logic                       jump_i,
+  input logic                       branch_i,
+  input logic                       branch_taken_i,
+  input logic                       is_compressed_i,
+  input logic                       pipeline_stall_i
+);
+
+PCCR_in_0:   assert property (@(posedge clk) PCCR_in[0]  === 1'b1);
+PCCR_in_1:   assert property (@(posedge clk) PCCR_in[1]  === (id_valid_i & is_decoding_i));                    // instruction counter
+PCCR_in_2:   assert property (@(posedge clk) PCCR_in[2]  === (ld_stall_i & id_valid_q));                       // nr of load use hazards
+PCCR_in_3:   assert property (@(posedge clk) PCCR_in[3]  === (jr_stall_i & id_valid_q));                       // nr of jump register hazards
+PCCR_in_4:   assert property (@(posedge clk) PCCR_in[4]  === (imiss_i & (~pc_set_i)));                         // cycles waiting for instruction fetches, excluding jumps and branches
+PCCR_in_5:   assert property (@(posedge clk) PCCR_in[5]  === mem_load_i);                                    // nr of loads
+PCCR_in_6:   assert property (@(posedge clk) PCCR_in[6]  === mem_store_i);                                   // nr of stores
+PCCR_in_7:   assert property (@(posedge clk) PCCR_in[7]  === (jump_i                     & id_valid_q));       // nr of jumps (unconditional)
+PCCR_in_8:   assert property (@(posedge clk) PCCR_in[8]  === (branch_i                   & id_valid_q));       // nr of branches (conditional)
+PCCR_in_9:   assert property (@(posedge clk) PCCR_in[9]  === (branch_i & branch_taken_i  & id_valid_q));       // nr of taken branches (conditional)
+PCCR_in_10:  assert property (@(posedge clk) PCCR_in[10] === (id_valid_i & is_decoding_i & is_compressed_i));  // compressed instruction counter
+PCCR_in_11:  assert property (@(posedge clk) PCCR_in[11] === pipeline_stall_i);                              //extra cycles from elw
+
+endmodule : riscv_cs_registers_asserts
+
 
 // Local Variables:
 // verilog-indent-level: 3
