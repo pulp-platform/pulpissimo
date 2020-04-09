@@ -4,11 +4,13 @@ SHELL=bash
 PKG_DIR ?= $(PWD)/install
 
 #Questasim Commands
-export VLIB_CMD?=vlib
-export VMAP_CMD?=vmap
-export VLOG_CMD?=vlog
-export VCOM_CMD?=vcom
-export VSIM_CMD?=vsim
+export ETH_QUESTA_PREFIX ?= ""
+
+export VLIB_CMD ?= ${ETH_QUESTA_PREFIX}vlib
+export VMAP_CMD ?= ${ETH_QUESTA_PREFIX}vmap
+export VLOG_CMD ?= ${ETH_QUESTA_PREFIX}vlog
+export VCOM_CMD ?= ${ETH_QUESTA_PREFIX}vcom
+export VSIM_CMD ?= ${ETH_QUESTA_PREFIX}vsim
 
 
 export VSIM_PATH=$(PKG_DIR)
