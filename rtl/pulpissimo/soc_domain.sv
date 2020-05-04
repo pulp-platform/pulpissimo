@@ -14,6 +14,7 @@ module soc_domain #(
     parameter CORE_TYPE            = 0,
     parameter USE_FPU              = 1,
     parameter USE_HWPE             = 1,
+    parameter NB_CL_CORES          = 8,
     parameter AXI_ADDR_WIDTH       = 32,
     parameter AXI_DATA_IN_WIDTH    = 64,
     parameter AXI_DATA_OUT_WIDTH   = 32,
@@ -23,9 +24,14 @@ module soc_domain #(
     parameter AXI_USER_WIDTH       = 6,
     parameter AXI_STRB_IN_WIDTH    = AXI_DATA_IN_WIDTH/8,
     parameter AXI_STRB_OUT_WIDTH   = AXI_DATA_OUT_WIDTH/8,
+
     parameter BUFFER_WIDTH         = 8,
     parameter EVNT_WIDTH           = 8,
-    parameter NB_CORES             = 8
+
+    parameter int unsigned N_UART = 1,
+    parameter int unsigned N_SPI  = 1,
+    parameter int unsigned N_I2C  = 2
+
 )(
 
     input logic                              ref_clk_i,
@@ -50,7 +56,7 @@ module soc_domain #(
     input  logic                             jtag_tdi_i,
     output logic                             jtag_tdo_o,
 
-    output logic [NB_CORES-1:0]              cluster_dbg_irq_valid_o,
+    output logic [NB_CL_CORES-1:0]           cluster_dbg_irq_valid_o,
 
     input  logic [31:0]                      gpio_in_i,
     output logic [31:0]                      gpio_out_o,
@@ -73,19 +79,12 @@ module soc_domain #(
     output logic [3:0]                       timer_ch2_o,
     output logic [3:0]                       timer_ch3_o,
 
-    input  logic                             i2c0_scl_i,
-    output logic                             i2c0_scl_o,
-    output logic                             i2c0_scl_oe_o,
-    input  logic                             i2c0_sda_i,
-    output logic                             i2c0_sda_o,
-    output logic                             i2c0_sda_oe_o,
-
-    input  logic                             i2c1_scl_i,
-    output logic                             i2c1_scl_o,
-    output logic                             i2c1_scl_oe_o,
-    input  logic                             i2c1_sda_i,
-    output logic                             i2c1_sda_o,
-    output logic                             i2c1_sda_oe_o,
+    input  logic [N_I2C-1:0]                 i2c_scl_i,
+    output logic [N_I2C-1:0]                 i2c_scl_o,
+    output logic [N_I2C-1:0]                 i2c_scl_oe_o,
+    input  logic [N_I2C-1:0]                 i2c_sda_i,
+    output logic [N_I2C-1:0]                 i2c_sda_o,
+    output logic [N_I2C-1:0]                 i2c_sda_oe_o,
 
     input  logic                             i2s_slave_sd0_i,
     input  logic                             i2s_slave_sd1_i,
@@ -96,21 +95,11 @@ module soc_domain #(
     output logic                             i2s_slave_sck_o,
     output logic                             i2s_slave_sck_oe,
 
-    output logic                             spi_master0_clk_o,
-    output logic                             spi_master0_csn0_o,
-    output logic                             spi_master0_csn1_o,
-    output logic                             spi_master0_oen0_o,
-    output logic                             spi_master0_oen1_o,
-    output logic                             spi_master0_oen2_o,
-    output logic                             spi_master0_oen3_o,
-    output logic                             spi_master0_sdo0_o,
-    output logic                             spi_master0_sdo1_o,
-    output logic                             spi_master0_sdo2_o,
-    output logic                             spi_master0_sdo3_o,
-    input  logic                             spi_master0_sdi0_i,
-    input  logic                             spi_master0_sdi1_i,
-    input  logic                             spi_master0_sdi2_i,
-    input  logic                             spi_master0_sdi3_i,
+    output logic [N_SPI-1:0]                 spi_clk_o,
+    output logic [N_SPI-1:0][3:0]            spi_csn_o,
+    output logic [N_SPI-1:0][3:0]            spi_oen_o,
+    output logic [N_SPI-1:0][3:0]            spi_sdo_o,
+    input  logic [N_SPI-1:0][3:0]            spi_sdi_i,
 
     output logic                             sdio_clk_o,
     output logic                             sdio_cmd_o,
@@ -118,9 +107,8 @@ module soc_domain #(
     output logic                             sdio_cmd_oen_o,
     output logic                       [3:0] sdio_data_o,
     input  logic                       [3:0] sdio_data_i,
-    output logic                       [3:0] sdio_data_oen_o
+    output logic                       [3:0] sdio_data_oen_o,
 
-    ,
     // CLUSTER
     output logic                             cluster_clk_o,
     output logic                             cluster_rstn_o,
