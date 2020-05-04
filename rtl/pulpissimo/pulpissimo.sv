@@ -66,6 +66,11 @@ module pulpissimo #(
    inout  wire        pad_xtal_in
   );
 
+  // Depending on usage, these could be consolidated to one or hardwired to 1'b1
+  // and removed
+  inout wire pad_fc_fetch_en_valid,
+  inout wire pad_fc_fetch_en,
+
   localparam AXI_ADDR_WIDTH             = 32;
   localparam AXI_CLUSTER_SOC_DATA_WIDTH = 64;
   localparam AXI_SOC_CLUSTER_DATA_WIDTH = 32;
@@ -507,10 +512,17 @@ module pulpissimo #(
         .pad_xtal_in           ( pad_xtal_in            )
 
    );
+  logic                        s_fc_fetch_en_valid;
+  logic                        s_fc_fetch_en;
+
+    .fc_fetch_en_valid_o   ( s_fc_fetch_en_valid    ),
+    .fc_fetch_en_o         ( s_fc_fetch_en          ),
 
   //***********************************************************
   //********** SAFE DOMAIN ************************************
   //***********************************************************
+    .pad_fc_fetch_en_valid ( pad_fc_fetch_en_valid  ),
+    .pad_fc_fetch_en       ( pad_fc_fetch_en        )
    safe_domain safe_domain_i (
 
         .ref_clk_i                  ( s_ref_clk                   ),
@@ -742,6 +754,9 @@ module pulpissimo #(
         .dft_test_mode_i              ( s_test_mode                      ),
 
         .bootsel_i                    ( s_bootsel                        ),
+
+        .fc_fetch_en_valid_i          ( s_fc_fetch_en_valid              ),
+        .fc_fetch_en_i                ( s_fc_fetch_en                    ),
 
         .jtag_tck_i                   ( s_jtag_tck                       ),
         .jtag_trst_ni                 ( s_jtag_trst                      ),

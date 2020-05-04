@@ -170,6 +170,9 @@ module tb_pulp;
    wire                  w_tms;
    wire                  w_tdo;
 
+   wire                  w_fc_fetch_en_valid;
+   wire                  w_fc_fetch_en;
+
    logic                 s_vpi_trstn;
    logic                 s_vpi_tck;
    logic                 s_vpi_tdi;
@@ -586,8 +589,15 @@ module tb_pulp;
       .pad_jtag_tms       ( w_tms              ),
       .pad_jtag_trst      ( w_trstn            ),
 
-      .pad_xtal_in        ( w_clk_ref          )
+      .pad_xtal_in        ( w_clk_ref          ),
+
+      .pad_fc_fetch_en_valid ( w_fc_fetch_en_valid ),
+      .pad_fc_fetch_en    ( w_fc_fetch_en      )
    );
+
+   // immediately start fetching with the fc
+   assign w_fc_fetch_en_valid = 1'b1;
+   assign w_fc_fetch_en       = 1'b1;
 
    tb_clk_gen #( .CLK_PERIOD(REF_CLK_PERIOD) ) i_ref_clk_gen (.clk_o(s_clk_ref) );
 
