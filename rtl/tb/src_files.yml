@@ -17,3 +17,6 @@ tb:
   vlog_opts : [
     -L riscv_dbg_lib,
   ]
+  flags: [
+    skip_synthesis
+  ]
