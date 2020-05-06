@@ -56,11 +56,6 @@ module pulpissimo #(
   inout wire pad_reset_n,
   inout wire pad_bootsel,
 
-  // Depending on usage, these could be consolidated to one or hardwired to 1'b1
-  // and removed
-  inout wire pad_fc_fetch_en_valid,
-  inout wire pad_fc_fetch_en,
-
   inout wire pad_jtag_tck,
   inout wire pad_jtag_tdi,
   inout wire pad_jtag_tdo,
@@ -488,9 +483,6 @@ module pulpissimo #(
     .in_uart_rx_o          ( s_in_uart_rx           ),
     .in_uart_tx_o          ( s_in_uart_tx           ),
     .bootsel_o             ( s_bootsel              ),
-    .fc_fetch_en_valid_o   ( s_fc_fetch_en_valid    ),
-    .fc_fetch_en_o         ( s_fc_fetch_en          ),
-
 
     //EXT CHIP to PAD
     .pad_spim_sdio0        ( pad_spim_sdio0         ),
@@ -533,10 +525,7 @@ module pulpissimo #(
     .pad_jtag_tdo          ( pad_jtag_tdo           ),
     .pad_jtag_tms          ( pad_jtag_tms           ),
     .pad_jtag_trst         ( pad_jtag_trst          ),
-    .pad_xtal_in           ( pad_xtal_in            ),
-
-    .pad_fc_fetch_en_valid ( pad_fc_fetch_en_valid  ),
-    .pad_fc_fetch_en       ( pad_fc_fetch_en        )
+    .pad_xtal_in           ( pad_xtal_in            )
   );
 
   //
@@ -755,8 +744,9 @@ module pulpissimo #(
 
         .bootsel_i                    ( s_bootsel                        ),
 
-        .fc_fetch_en_valid_i          ( s_fc_fetch_en_valid              ),
-        .fc_fetch_en_i                ( s_fc_fetch_en                    ),
+        // we immediately start booting in the default setup
+        .fc_fetch_en_valid_i          ( 1'b1                             ),
+        .fc_fetch_en_i                ( 1'b1                             ),
 
         .jtag_tck_i                   ( s_jtag_tck                       ),
         .jtag_trst_ni                 ( s_jtag_trst                      ),
