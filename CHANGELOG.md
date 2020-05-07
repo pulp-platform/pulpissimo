@@ -8,10 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Bump `pulp_soc` to `v1.1.0`
+- Make number of SPI and I2C peripherals parametrizable
 
 ### Added
 - CI support for pulp-runtime to run tests, using bwruntest.py and
   tests/runtime-tests.yaml
+- Point to simple runtime in `README.md`
 
 ### Fixed
 - Properly propagate NB_CORES
