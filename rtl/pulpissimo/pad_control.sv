@@ -194,7 +194,9 @@ module pad_control #(
    logic s_alt0,s_alt1,s_alt2,s_alt3;
 
    // check invariants
-   if (N_SPI < 1) $error("Need at least one SPI device (N_SPI >= 1)");
+   if (N_SPI  <  1 || N_SPI  >  2) $error("The current verion of Pad control supports only 1 or 2 SPI peripherals");
+   if (N_I2C  != 2) $error("The current version of Pad control only supports exactly 2 I2C peripherals");
+   if (N_UART != 1) $error("The current version of Pad control only supports exactly 1 UART peripherals");
 
    // DEFINE DEFAULT FOR NOT USED ALTERNATIVES
    assign s_alt0 = 1'b0;
