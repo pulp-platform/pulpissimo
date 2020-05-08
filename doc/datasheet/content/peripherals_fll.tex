@@ -10,17 +10,18 @@ bypass register.
 
 \subsection{SoC FLL registers}
 \begin{table}[htbp]
+  \small
 \begin{tabularx}{\textwidth}{|l|l|l|l|l|l|X|}
   \hline
   \textbf{Name} & \textbf{Address}  & \textbf{Size} & \textbf{Type} & \textbf{Access} & \textbf{Default} & \textbf{Description} \\
   \hline
-  STATUS & 0x1A100000 & 32 & Config & R/W    & 0x0000 & FLL status register \\
+  STATUS & \texttt{0x1A100000} & 32 & Status & R    & \texttt{0x00000000} & FLL status register \\
   \hline
-  CFG1   & 0x1A100004 & 32 & Config & R/W    & 0x0000 & FLL configuration 1 register \\
+  CFG1   & \texttt{0x1A100004} & 32 & Config & R/W    & \texttt{0x00000000} & FLL configuration 1 register \\
   \hline
-  CFG2   & 0x1A100008 & 32 & Config & R/W    & 0x0000 & FLL configuration 2 register \\
+  CFG2   & \texttt{0x1A100008} & 32 & Config & R/W    & \texttt{0x00000000} & FLL configuration 2 register \\
   \hline
-  INTEG  & 0x1A10000C & 32 & Config & R/W    & 0x0000 & FLL integrator configuration register. \\
+  INTEG  & \texttt{0x1A10000C} & 32 & Config & R/W    & \texttt{0x00000000} & FLL integrator configuration register. \\
   \hline
 \end{tabularx}
 \caption{SoC FLL register table \label{tab:table_label}}
@@ -35,7 +36,7 @@ bypass register.
   \bitbox{16}{MF}
   \end{bytefield}
 }{
-  \regitem{Bit 15-0}{MF}{R/W}{Current DCO multiplication factor value bitfield}
+  \regitem{Bit 15-0}{MF}{R}{Current DCO multiplication factor value bitfield}
 }
 
 \regdoc{0x1A10\_0004}{0x0000\_0000}{CFG1}{
