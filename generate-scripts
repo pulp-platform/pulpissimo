@@ -13,7 +13,7 @@ parser = argparse.ArgumentParser(
     prog='PULP generate script',
     description="""generate build/compile/synthesis scripts for PULPissimo""")
 
-parser.add_argument('--vlog-args', type=str,
+parser.add_argument('--vlog-args', type=str, default="",
                     help="""Pass additonal options to vlog""")
 parser.add_argument('--rt-dpi', action='store_true',
                     help="""Use the PULP Runtime DPI to emulate peripherals""")
@@ -69,9 +69,9 @@ if not args.i2s_vip:
 
 # generate ModelSim/QuestaSim compilation scripts
 ipdb.export_make(script_path="sim/vcompile/ips",
-                 more_opts=(args.vlog_args if args.vlog_args else ""))
+                 more_opts=args.vlog_args)
 ipdb.export_make(script_path="sim/vcompile/rtl",
-                 more_opts=(args.vlog_args if args.vlog_args else ""),
+                 more_opts=args.vlog_args,
                  source='rtl')
 
 # generate vsim.tcl with ModelSim/QuestaSim "linking" script
