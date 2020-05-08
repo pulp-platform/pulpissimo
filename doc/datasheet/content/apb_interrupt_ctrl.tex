@@ -1,13 +1,18 @@
 \section{Event/Interrupt Controller}
 
 \pulpissimo features a lightweight event and interrupt controller which supports
-vectorized interrupts and events of up to 32 lines.
-It contains a FIFO of events from the peripherals or SW events.
-When an interrupt is ready and it is enabled (not masked), the unit sends the 5bit ID to the core and the interrupt request line is raised up. If the core takes the interrupt, it replies with the ID of the interrupt taken and the acknowledge signal. The communication between the interrupt controller and the core is completly asynchronous.
-Note that the interrupt controller can change the interrupt ID anytime but it must rely
-on the ID sent by the core to know which interrupt has been taken.
-This is an important feature that covers the situation where a higher priority interrupt request prevent another one that has been already sent to the core.
-Depending on the core state and core interrupt enable, the interrupt can be accepted within a couple of clock cycles.
+vectorized interrupts and events of up to 32 lines. It contains a FIFO of events
+from the peripherals or SW events. When an interrupt is ready and it is enabled
+(not masked), the unit sends the 5-bit ID to the core and the interrupt request
+line is raised up. If the core takes the interrupt, it replies with the ID of
+the interrupt taken and the acknowledge signal. The communication between the
+interrupt controller and the core is completly asynchronous. Note that the
+interrupt controller can change the interrupt ID anytime but it must rely on the
+ID sent by the core to know which interrupt has been taken. This is an important
+feature that covers the situation where a higher priority interrupt request
+prevent another one that has been already sent to the core. Depending on the
+core state and core interrupt enable, the interrupt can be accepted within a
+couple of clock cycles.
 
 
 \regDesc{0x1A10\_9000}{0x0000\_0000}{Mask}{
