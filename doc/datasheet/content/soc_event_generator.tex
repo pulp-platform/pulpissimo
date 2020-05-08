@@ -83,6 +83,11 @@ There are three set of masks available to do this:
   \hline
   ERR7 & \texttt{0x1A106080} & 32 & Status & R    & \texttt{0xFFFFFFFF} & Events 224-255 event queue overflow \\
   \hline
+  TIMER\_LO & \texttt{0x1A106084} & 32 & Status & R/W & \texttt{0xFFFFFFFF} & Trigger Timer LO of APB Timer with event \\
+  \hline
+  TIMER\_HI & \texttt{0x1A106088} & 32 & Status & R/W & \texttt{0xFFFFFFFF} & Trigger Timer HI of APB Timer with event \\
+  \hline
+
 \end{tabularx}
 \caption{SoC Event Generator register table part 2\label{tab:soc_eg_table1}}
 \end{table}
@@ -143,4 +148,26 @@ There are three set of masks available to do this:
   \regitem{Bit 31-0}{ERR}{R/W}{Event queue overflow. Clear after read. Reading
     $0b1$ at $ERR[i]$ means the event queue of event with id $32*X+i$
     overflowed.}
+}
+
+\regdoc{0x1A10\_6084}{0x0000\_0000}{TIMER\_LO}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+  \bitheader[lsb=16]{16-31} \\
+  \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
+  \bitheader{0-15} \\
+  \bitbox{8}{\color{lightgray}\rule{\width}{\height}}\bitbox{8}{TIMER\_LO\_EVENT}
+  \end{bytefield}
+}{
+  \regitem{Bit 7-0}{TIMER\_LO\_EVENT}{R/W}{Trigger and start APB Timer LO by the event with id that equals TIMER\_LO\_EVENT}
+}
+
+\regdoc{0x1A10\_6088}{0x0000\_0000}{TIMER\_HI}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+  \bitheader[lsb=16]{16-31} \\
+  \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
+  \bitheader{0-15} \\
+  \bitbox{8}{\color{lightgray}\rule{\width}{\height}}\bitbox{8}{TIMER\_HI\_EVENT}
+  \end{bytefield}
+}{
+  \regitem{Bit 7-0}{TIMER\_HI\_EVENT}{R/W}{Trigger and start APB Timer HI by the event with id that equals TIMER\_HI\_EVENT}
 }
