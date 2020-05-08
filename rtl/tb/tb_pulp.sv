@@ -170,9 +170,6 @@ module tb_pulp;
    wire                  w_tms;
    wire                  w_tdo;
 
-   wire                  w_fc_fetch_en_valid;
-   wire                  w_fc_fetch_en;
-
    logic                 s_vpi_trstn;
    logic                 s_vpi_tck;
    logic                 s_vpi_tdi;
