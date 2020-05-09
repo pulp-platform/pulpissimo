@@ -1,10 +1,10 @@
 \section{SoC Event Generator}
 
-\pulpissimo Events from peripherals and other sources can be forwarded to the
+Events from peripherals and other sources can be forwarded to the
 fabric controller, cluster or (back) to certain peripherals, though for
 PULPissimo we don't have a cluster.
 
-It is the SoC Event Generator's job to control which events are to be forwarded and where to.
+It is the SoC Event Generator's (\texttt{soc\_event\_generator.sv}) job to control which events are to be forwarded and where to.
 There are three set of masks available to do this:
 \begin{enumerate}[leftmargin=\widthof{[Peripheral Masks]}+\labelsep]
   \item[FC Masks] Control which events are to be forwarded to the fabric controller
