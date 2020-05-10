@@ -43,6 +43,7 @@ def escape_latex(s):
         '~':  r'\~',
         '^':  r'\^',
         '\\': r'\\\\',
+        '\n': r'\\',  # try to preserve newlines
     }
 
     return ("".join([CHARS.get(char, char) for char in s]))
@@ -290,7 +291,7 @@ def write_reg_table(reglist, table_name="NO NAME", base_address=0):
   \\caption{%s}
 \\end{tabularx}
 }
-    """ % (table_name, regs, table_name))
+""" % (table_name, regs, table_name))
     return
 
 
