@@ -273,29 +273,31 @@ def write_reg_table(reglist, table_name="NO NAME", base_address=0):
     """Write register overview table in latex to stream."""
     regs = ""
     for reg in reglist:
-        regs += '    ' + write_reg_entry(reg, base_address) + '\n'
-        regs += '    \\hline\n'
+        regs += '  ' + write_reg_entry(reg, base_address) + '\n'
+        regs += '  \\hline\n'
     regs = regs[:-1]
 
     # Understand that there is a reason this looks like this. The output is
     # good.
     print("""
 \\subsection{%s Registers}
-\\begin{table}[htbp]
-  \\small
-  \\begin{tabularx}{\\textwidth}{|l|l|l|l|l|l|X|}
-    \\hline
-    \\textbf{Name} & \\textbf{Address}  & \\textbf{Size} & \\textbf{Type} & \\textbf{Access} & \\textbf{Default} & \\textbf{Description} \\\\
-    \\hline
+{\\small
+\\begin{tabularx}{\\textwidth}{|l|l|l|l|l|l|X|}
+  \\hline
+  \\textbf{Name} & \\textbf{Address}  & \\textbf{Size} & \\textbf{Type} & \\textbf{Access} & \\textbf{Default} & \\textbf{Description} \\\\
+  \\hline
 %s
-  \\end{tabularx}
   \\caption{%s}
-\\end{table}
+\\end{tabularx}
+}
     """ % (table_name, regs, table_name))
     return
 
 
 required_macros = r"""
+%
+% Make also sure you use the ltablex package to split tables that are too long
+%
 \newcommand{\regdoc}[5]{
   \subsection{#3}
   \textbf{Address:} \texttt{#1}\\%
