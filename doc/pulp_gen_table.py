@@ -239,7 +239,7 @@ def write_reg_doc(regname, bitfields, address=0, reset_value=0):
     reg_items = reg_items[:-1]
 
     print("""
-\\regdoc{0x%08x}{0x%08x}{%s}{
+\\regdoc{0x%08X}{0x%08X}{%s}{
   \\begin{bytefield}[endianness=big,bitwidth=2em]{16}
     \\bitheader[lsb=16]{16-31} \\\\
    %s \\\\[3ex]
@@ -258,8 +258,8 @@ def write_reg_doc(regname, bitfields, address=0, reset_value=0):
 
 def write_reg_entry(reg_entry, base_address=0):
     name, attrs = reg_entry
-    address = '0x%08x' % ((int(attrs['Address'], 16) + base_address))
-    reset = '0x%08x' % int(attrs['Default Value'], 16)
+    address = '0x%08X' % ((int(attrs['Address'], 16) + base_address))
+    reset = '0x%08X' % int(attrs['Default Value'], 16)
     reg_type = attrs['Register Type']
     size = str(attrs['Size'])
     access = attrs['Host Access Type']
