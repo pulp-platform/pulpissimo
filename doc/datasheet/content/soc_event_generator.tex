@@ -14,10 +14,9 @@ There are three set of masks available to do this:
 
 
 
-\subsection{SoC Event Generator registers}
+\subsection{SoC Event Generator Registers}
 
-\begin{table}[htbp]
-  \small
+{\small
 \begin{tabularx}{\textwidth}{|l|l|l|l|l|l|X|}
   \hline
   \textbf{Name} & \textbf{Address}  & \textbf{Size} & \textbf{Type} & \textbf{Access} & \textbf{Default} & \textbf{Description} \\
@@ -39,17 +38,6 @@ There are three set of masks available to do this:
   FC\_MASK6 & \texttt{0x1A10601C} & 32 & Config & R/W    & \texttt{0xFFFFFFFF} & Events 191-223 dispatch mask to FC \\
   \hline
   FC\_MASK7 & \texttt{0x1A106020} & 32 & Config & R/W    & \texttt{0xFFFFFFFF} & Events 224-255 dispatch mask to FC \\
-  \hline
-
-\end{tabularx}
-\caption{SoC Event Generator register table part 1\label{tab:soc_eg_table0}}
-\end{table}
-
-\begin{table}[htbp]
-  \small
-\begin{tabularx}{\textwidth}{|l|l|l|l|l|l|X|}
-  \hline
-  \textbf{Name} & \textbf{Address}  & \textbf{Size} & \textbf{Type} & \textbf{Access} & \textbf{Default} & \textbf{Description} \\
   \hline
   PR\_MASK0 & \texttt{0x1A106044} & 32 & Config & R/W    & \texttt{0xFFFFFFFF} & Events 0-31 dispatch mask to peripherals \\
   \hline
@@ -87,12 +75,9 @@ There are three set of masks available to do this:
   \hline
   TIMER\_HI & \texttt{0x1A106088} & 32 & Status & R/W & \texttt{0xFFFFFFFF} & Trigger Timer HI of APB Timer with event \\
   \hline
-
+\caption{SoC Event Generator register table \label{tab:soc_eg_table}}
 \end{tabularx}
-\caption{SoC Event Generator register table part 2\label{tab:soc_eg_table1}}
-\end{table}
 
-\newpage
 
 \regdoc{0x1A10\_6000}{0x0000\_0000}{SW\_EVENT}{
   \begin{bytefield}[endianness=big,bitwidth=2em]{16}
