@@ -76,18 +76,20 @@ def parse_excel(file_name):
         regmap = sheets['IPREGMAP_rel1.0.0']
     except KeyError as e:
         print('parse_excel: sheet ' + str(e) + ' does not exist in ' +
-              file_name)
+              file_name, file=sys.stderr)
         exit(-1)
 
     # sanity checks on sheets
     for expected in expected_reglist_keys:
         if not (expected in reglist):
-            print('parse_excel: reglist is missing key ' + expected)
+            print('parse_excel: reglist is missing key ' + expected,
+                  file=sys.stderr)
             exit(-1)
 
     for expected in expected_regmap_keys:
         if not (expected in regmap):
-            print('parse_excel: regmap is missing key/column ' + expected)
+            print('parse_excel: regmap is missing key/column ' + expected,
+                  file=sys.stderr)
             exit(-1)
 
     reglist_dict = DataFrame.to_dict(reglist)
@@ -176,7 +178,7 @@ def write_bitbox(bitfields, start, length, downsize=True):
 
         if position > index:
             print("""write_bitbox: field starts and end outside above assigned
-            range""")
+            range""", file=sys.stderr)
             exit(-1)
 
         # truncate if field is too long. This happens if we try to output the
@@ -325,7 +327,8 @@ if __name__ == "__main__":
     sys.stdout = open(args.output, "w") if args.output else sys.stdout
 
     if not(path.exists(args.filename)):
-        print("pulp_gen_table.py: File " + args.filename + " does not exist.")
+        print("pulp_gen_table.py: File " + args.filename + " does not exist.",
+              file=sys.stderr)
         exit(-1)
     (reglist, regmap) = parse_excel(args.filename)
 
