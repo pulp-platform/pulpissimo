@@ -185,8 +185,10 @@ def write_bitbox(bitfields, start, length, downsize=True):
         position = bf['Bit Position']
         size = bf['Size']
 
-        if downsize and size <= 2:
+        if downsize and size <= 2 and len(name) <= 3:
             name = "\\tiny " + name
+        elif downsize and size <= 2 and len(name) > 3:
+            name = r'\let\bw=\width\resizebox{\bw}{!}' + ('{~%s~}' % name)
 
         if position > index:
             print("""write_bitbox: field starts and end outside above assigned
