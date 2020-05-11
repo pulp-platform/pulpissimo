@@ -104,8 +104,8 @@ def parse_excel(file_name):
         # the values are the associated bit fields plus information
         value = {}
         value['Bit field'] = escape_latex(regmap_dict['Bit field'][i])
-        value['Bit Position'] = regmap_dict['Bit Position'][i]
-        value['Size'] = regmap_dict['Size'][i]
+        value['Bit Position'] = int(regmap_dict['Bit Position'][i])
+        value['Size'] = int(regmap_dict['Size'][i])
         value['Host Access Type'] = regmap_dict['Host Access Type'][i]
         value['Reset Value'] = regmap_dict['Reset Value'][i]
         value['Description'] = escape_latex(regmap_dict['Description'][i])
