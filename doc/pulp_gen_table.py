@@ -191,8 +191,11 @@ def write_bitbox(bitfields, start, length, downsize=True):
             name = r'\let\bw=\width\resizebox{\bw}{!}' + ('{~%s~}' % name)
 
         if position > index:
-            print("""write_bitbox: field starts and end outside above assigned
-            range""", file=sys.stderr)
+            print("""write_bitbox: field %s starts (%d) and ends (%d) outside
+            above assigned range (start=%d, length=%d). This means the input
+            data is most likely buggy.""" %
+                  (name, position, (position + size), start, length),
+                  file=sys.stderr)
             exit(-1)
 
         # truncate if field is too long. This happens if we try to output the
