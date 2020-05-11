@@ -83,7 +83,7 @@
     \bitheader[lsb=16]{16-31} \\
     \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
     \bitheader{0-15} \\
-    \bitbox{11}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\tiny ARM} \bitbox{1}{\tiny RESET} \bitbox{1}{\tiny UPDATE} \bitbox{1}{\tiny STOP} \bitbox{1}{\tiny START}
+    \bitbox{11}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\tiny ARM} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~RESET~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~UPDATE~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~STOP~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~START~}}
   \end{bytefield}
 }{
   \regitem{Bit 4}{ARM}{R/W}{ADV\_TIMER0 arm command bitfield.}
@@ -99,7 +99,7 @@
     \bitheader[lsb=16]{16-31} \\
     \bitbox{8}{\color{lightgray}\rule{\width}{\height}} \bitbox{8}{PRESC} \\[3ex]
     \bitheader{0-15} \\
-    \bitbox{3}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\tiny UPDOWNSEL} \bitbox{1}{\tiny CLKSEL} \bitbox{3}{MODE} \bitbox{8}{INSEL}
+    \bitbox{3}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~UPDOWNSEL~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~CLKSEL~}} \bitbox{3}{MODE} \bitbox{8}{INSEL}
   \end{bytefield}
 }{
   \regitem{Bit 23 - 16}{PRESC}{R/W}{ADV\_TIMER0 prescaler value configuration bitfield.}
@@ -180,7 +180,7 @@
     \bitheader[lsb=16]{16-31} \\
     \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
     \bitheader{0-15} \\
-    \bitbox{11}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\tiny ARM} \bitbox{1}{\tiny RESET} \bitbox{1}{\tiny UPDATE} \bitbox{1}{\tiny STOP} \bitbox{1}{\tiny START}
+    \bitbox{11}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\tiny ARM} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~RESET~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~UPDATE~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~STOP~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~START~}}
   \end{bytefield}
 }{
   \regitem{Bit 4}{ARM}{R/W}{ADV\_TIMER1 arm command bitfield.}
@@ -196,7 +196,7 @@
     \bitheader[lsb=16]{16-31} \\
     \bitbox{8}{\color{lightgray}\rule{\width}{\height}} \bitbox{8}{PRESC} \\[3ex]
     \bitheader{0-15} \\
-    \bitbox{3}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\tiny UPDOWNSEL} \bitbox{1}{\tiny CLKSEL} \bitbox{3}{MODE} \bitbox{8}{INSEL}
+    \bitbox{3}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~UPDOWNSEL~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~CLKSEL~}} \bitbox{3}{MODE} \bitbox{8}{INSEL}
   \end{bytefield}
 }{
   \regitem{Bit 23 - 16}{PRESC}{R/W}{ADV\_TIMER1 prescaler value configuration bitfield.}
@@ -277,7 +277,7 @@
     \bitheader[lsb=16]{16-31} \\
     \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
     \bitheader{0-15} \\
-    \bitbox{11}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\tiny ARM} \bitbox{1}{\tiny RESET} \bitbox{1}{\tiny UPDATE} \bitbox{1}{\tiny STOP} \bitbox{1}{\tiny START}
+    \bitbox{11}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\tiny ARM} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~RESET~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~UPDATE~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~STOP~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~START~}}
   \end{bytefield}
 }{
   \regitem{Bit 4}{ARM}{R/W}{ADV\_TIMER2 arm command bitfield.}
@@ -293,7 +293,7 @@
     \bitheader[lsb=16]{16-31} \\
     \bitbox{8}{\color{lightgray}\rule{\width}{\height}} \bitbox{8}{PRESC} \\[3ex]
     \bitheader{0-15} \\
-    \bitbox{3}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\tiny UPDOWNSEL} \bitbox{1}{\tiny CLKSEL} \bitbox{3}{MODE} \bitbox{8}{INSEL}
+    \bitbox{3}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~UPDOWNSEL~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~CLKSEL~}} \bitbox{3}{MODE} \bitbox{8}{INSEL}
   \end{bytefield}
 }{
   \regitem{Bit 23 - 16}{PRESC}{R/W}{ADV\_TIMER2 prescaler value configuration bitfield.}
@@ -374,7 +374,7 @@
     \bitheader[lsb=16]{16-31} \\
     \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
     \bitheader{0-15} \\
-    \bitbox{11}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\tiny ARM} \bitbox{1}{\tiny RESET} \bitbox{1}{\tiny UPDATE} \bitbox{1}{\tiny STOP} \bitbox{1}{\tiny START}
+    \bitbox{11}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\tiny ARM} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~RESET~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~UPDATE~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~STOP~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~START~}}
   \end{bytefield}
 }{
   \regitem{Bit 4}{ARM}{R/W}{ADV\_TIMER3 arm command bitfield.}
@@ -390,7 +390,7 @@
     \bitheader[lsb=16]{16-31} \\
     \bitbox{8}{\color{lightgray}\rule{\width}{\height}} \bitbox{8}{PRESC} \\[3ex]
     \bitheader{0-15} \\
-    \bitbox{3}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\tiny UPDOWNSEL} \bitbox{1}{\tiny CLKSEL} \bitbox{3}{MODE} \bitbox{8}{INSEL}
+    \bitbox{3}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~UPDOWNSEL~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~CLKSEL~}} \bitbox{3}{MODE} \bitbox{8}{INSEL}
   \end{bytefield}
 }{
   \regitem{Bit 23 - 16}{PRESC}{R/W}{ADV\_TIMER3 prescaler value configuration bitfield.}
@@ -463,22 +463,6 @@
 }{
   \regitem{Bit 18 - 16}{MODE}{R/W}{ADV\_TIMER3 channel 3 threshold match action on channel output signal configuration bitfield:\\- 3'h0: set.\\- 3'h1: toggle then next threshold match action is clear.\\- 3'h2: set then next threshold match action is clear.\\- 3'h3: toggle.\\- 3'h4: clear.\\- 3'h5: toggle then next threshold match action is set.\\- 3'h6: clear then next threshold match action is set.}
   \regitem{Bit 15 - 0}{TH}{R/W}{ADV\_TIMER3 channel 3 threshold configuration bitfield.}
-}
-
-
-\regdoc{0x1A104100}{0x00000000}{EVENT\_CFG}{
-  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
-    \bitheader[lsb=16]{16-31} \\
-    \bitbox{12}{\color{lightgray}\rule{\width}{\height}} \bitbox{4}{ENA} \\[3ex]
-    \bitheader{0-15} \\
-    \bitbox{4}{SEL3} \bitbox{4}{SEL2} \bitbox{4}{SEL1} \bitbox{4}{SEL0}
-  \end{bytefield}
-}{
-  \regitem{Bit 19 - 16}{ENA}{R/W}{ADV\_TIMER output event enable configuration bitfield. ENA[i]=1 enables output event i generation.}
-  \regitem{Bit 15 - 12}{SEL3}{R/W}{ADV\_TIMER output event 3 source configuration bitfiled:\\- 4'h0: ADV\_TIMER0 channel 0.\\- 4'h1: ADV\_TIMER0 channel 1.\\- 4'h2: ADV\_TIMER0 channel 2.\\- 4'h3: ADV\_TIMER0 channel 3.\\- 4'h4: ADV\_TIMER1 channel 0.\\- 4'h5: ADV\_TIMER1 channel 1.\\- 4'h6: ADV\_TIMER1 channel 2.\\- 4'h7: ADV\_TIMER1 channel 3.\\- 4'h8: ADV\_TIMER2 channel 0.\\- 4'h9: ADV\_TIMER2 channel 1.\\- 4'hA: ADV\_TIMER2 channel 2.\\- 4'hB: ADV\_TIMER2 channel 3.\\- 4'hC: ADV\_TIMER3 channel 0.\\- 4'hD: ADV\_TIMER3 channel 1.\\- 4'hE: ADV\_TIMER3 channel 2.\\- 4'hF: ADV\_TIMER3 channel 3.}
-  \regitem{Bit 11 - 8}{SEL2}{R/W}{ADV\_TIMER output event 2 source configuration bitfiled:\\- 4'h0: ADV\_TIMER0 channel 0.\\- 4'h1: ADV\_TIMER0 channel 1.\\- 4'h2: ADV\_TIMER0 channel 2.\\- 4'h3: ADV\_TIMER0 channel 3.\\- 4'h4: ADV\_TIMER1 channel 0.\\- 4'h5: ADV\_TIMER1 channel 1.\\- 4'h6: ADV\_TIMER1 channel 2.\\- 4'h7: ADV\_TIMER1 channel 3.\\- 4'h8: ADV\_TIMER2 channel 0.\\- 4'h9: ADV\_TIMER2 channel 1.\\- 4'hA: ADV\_TIMER2 channel 2.\\- 4'hB: ADV\_TIMER2 channel 3.\\- 4'hC: ADV\_TIMER3 channel 0.\\- 4'hD: ADV\_TIMER3 channel 1.\\- 4'hE: ADV\_TIMER3 channel 2.\\- 4'hF: ADV\_TIMER3 channel 3.}
-  \regitem{Bit 7 - 4}{SEL1}{R/W}{ADV\_TIMER output event 1 source configuration bitfiled:\\- 4'h0: ADV\_TIMER0 channel 0.\\- 4'h1: ADV\_TIMER0 channel 1.\\- 4'h2: ADV\_TIMER0 channel 2.\\- 4'h3: ADV\_TIMER0 channel 3.\\- 4'h4: ADV\_TIMER1 channel 0.\\- 4'h5: ADV\_TIMER1 channel 1.\\- 4'h6: ADV\_TIMER1 channel 2.\\- 4'h7: ADV\_TIMER1 channel 3.\\- 4'h8: ADV\_TIMER2 channel 0.\\- 4'h9: ADV\_TIMER2 channel 1.\\- 4'hA: ADV\_TIMER2 channel 2.\\- 4'hB: ADV\_TIMER2 channel 3.\\- 4'hC: ADV\_TIMER3 channel 0.\\- 4'hD: ADV\_TIMER3 channel 1.\\- 4'hE: ADV\_TIMER3 channel 2.\\- 4'hF: ADV\_TIMER3 channel 3.}
-  \regitem{Bit 3 - 0}{SEL0}{R/W}{ADV\_TIMER output event 0 source configuration bitfiled:\\- 4'h0: ADV\_TIMER0 channel 0.\\- 4'h1: ADV\_TIMER0 channel 1.\\- 4'h2: ADV\_TIMER0 channel 2.\\- 4'h3: ADV\_TIMER0 channel 3.\\- 4'h4: ADV\_TIMER1 channel 0.\\- 4'h5: ADV\_TIMER1 channel 1.\\- 4'h6: ADV\_TIMER1 channel 2.\\- 4'h7: ADV\_TIMER1 channel 3.\\- 4'h8: ADV\_TIMER2 channel 0.\\- 4'h9: ADV\_TIMER2 channel 1.\\- 4'hA: ADV\_TIMER2 channel 2.\\- 4'hB: ADV\_TIMER2 channel 3.\\- 4'hC: ADV\_TIMER3 channel 0.\\- 4'hD: ADV\_TIMER3 channel 1.\\- 4'hE: ADV\_TIMER3 channel 2.\\- 4'hF: ADV\_TIMER3 channel 3.}
 }
 
 
