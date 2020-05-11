@@ -1,0 +1,113 @@
+\subsection{I2C uDMA}
+The I2C uDMA peripheral has two uDMA channel.
+The RX channel is used to write the data received from an external I2C device to
+a configured memory location.
+The TX channel is used to fetch a mixture of configuration commands for the I2C
+peripheral and actual TX data to send to the external I2C device.
+The following list contains all possible uDMA commands.
+The arguments of these commands are supposed to follow the command byte contiguosly as follows:
+\begin{center}
+    \begin{bytefield}[endianness=big, bitwidth=4em]{8}
+        \bitheader{0,3,4,7}\\
+        \bitbox{4}{CMD Code} \bitbox{4}{\color{lightgray}\rule{\width}{\height}}\\
+        \bitbox{8}{Argument}\\
+        \bitbox{4}{CMD Code} \bitbox{4}{\color{lightgray}\rule{\width}{\height}}\\
+        \bitbox{8}{Argument}\\
+        \bitbox{4}{CMD\_RPT (0xC)}
+        \bitbox{4}{\color{lightgray}\rule{\width}{\height}}\\
+        \bitbox{8}{Repeat Count}\\
+        \bitbox{4}{CMD\_WR (0x8)}
+        \bitbox{4}{\color{lightgray}\rule{\width}{\height}}\\
+        \bitbox{8}{TX Data}\\
+        \bitbox{8}{TX Data}\\
+        \bitbox{8}{TX Data}\\
+        \bitbox{8}{...}\\
+    \end{bytefield}
+\end{center}
+
+\subsubsection{I2C uDMA CMD List}
+{\small
+\begin{tabularx}{\textwidth}{|l|l|l|}
+  \hline
+  \textbf{CMD Name} & \textbf{OP Code}  & \textbf{CMD Description} \\
+  \hline
+  I2C\_CMD\_START    & 0x0 & I2C Start of Transfer command.               \\
+  I2C\_CMD\_STOP     & 0x2 & I2C End of Transfer command.                 \\
+  I2C\_CMD\_RD\_ACK   & 0x4 & I2C receive data and acknowledge command.    \\
+  I2C\_CMD\_RD\_NACK  & 0x6 & I2C receive data and not acknowledge command.\\
+  I2C\_CMD\_WR       & 0x8 & I2C send data and wait acknowledge command.  \\
+  I2C\_CMD\_WAIT     & 0xA & I2C wait dummy cycles command.               \\
+  I2C\_CMD\_RPT      & 0xC & I2C next command repeat command.             \\
+  I2C\_CMD\_CFG      & 0xE & I2C configuration command.                   \\
+  I2C\_CMD\_WAIT\_EV & 0x1 & I2C wait uDMA external event command.        \\
+  \hline
+\end{tabularx}
+}
+
+\subsubsection{I2C\_CMD\_START}
+\paragraph{Command Description}
+I2C Start of Transfer command.
+\paragraph{Parameter}
+\textit{None}
+
+\subsubsection{I2C\_CMD\_STOP}
+\paragraph{Command Description}
+I2C End of Transfer command.
+\paragraph{Parameter}
+\textit{None}
+
+\subsubsection{I2C\_CMD\_RD\_ACK}
+\paragraph{Command Description}
+I2C receive data and acknowledge command.
+\paragraph{Parameter}
+\textit{None}
+
+\subsubsection{I2C\_CMD\_RD\_NACK}
+\paragraph{Command Description}
+I2C receive data and not acknowledge command.
+\paragraph{Parameter}
+\textit{None}
+
+\subsubsection{I2C\_CMD\_WR}
+\paragraph{Command Description}
+I2C send data and wait acknowledge command.
+\paragraph{Parameter}
+The value following the I2C\_CMD\_WR command indicates byte value to transmit or multiple byte values to transmit if this command is preceded by a I2C\_CMD\_RPT command.
+\paragraph{Parameter Size}
+1 byte or many bytes if preceded by a  I2C\_CMD\_RPT command.
+
+
+\subsubsection{I2C\_CMD\_WAIT}
+\paragraph{Command Description}
+I2C wait dummy cycles command.
+\paragraph{Parameter}
+The value following the I2C\_CMD\_WAIT command indicates I2C dummy clock cycles value.
+\paragraph{Parameter Size}
+1 byte.
+
+
+\subsubsection{I2C\_CMD\_RPT}
+\paragraph{Command Description}
+I2C next command repeat command.
+\paragraph{Parameter}
+The value following the I2C\_CMD\_RPT command indicates number of times to repeat next command.
+\paragraph{Parameter Size}
+1 byte.
+
+
+\subsubsection{I2C\_CMD\_CFG}
+\paragraph{Command Description}
+I2C configuration command.
+\paragraph{Parameter}
+The value following the I2C\_CMD\_CFG command indicates I2C clock divider 16bits value related to SoC clock frequency. MSB byte is sent first.
+\paragraph{Parameter Size}
+2 bytes.
+
+
+\subsubsection{I2C\_CMD\_WAIT\_EV}
+\paragraph{Command Description}
+I2C wait uDMA external event command.
+\paragraph{Parameter}
+The value following the I2C\_CMD\_WAIT\_EV command indicates selected uDMA external event ID.
+\paragraph{Parameter Size}
+1 byte (bit[1:0] – event\_id).
