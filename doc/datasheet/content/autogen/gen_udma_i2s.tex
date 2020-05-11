@@ -5,32 +5,32 @@
   \hline
   \textbf{Name} & \textbf{Address}  & \textbf{Size} & \textbf{Type} & \textbf{Access} & \textbf{Default} & \textbf{Description} \\
   \hline
-  I2S\_RX\_SADDR & \texttt{0x1A102280} & 32 & Config & R/W & \texttt{0x00000000} & RX Channel 0 I2S uDMA transfer address of associated buffer\\
+  I2S\_RX\_SADDR & \texttt{0x1A102300} & 32 & Config & R/W & \texttt{0x00000000} & RX Channel 0 I2S uDMA transfer address of associated buffer\\
   \hline
-  I2S\_RX\_SIZE & \texttt{0x1A102284} & 32 & Config & R/W & \texttt{0x00000000} & RX Channel 0 I2S uDMA transfer size of buffer\\
+  I2S\_RX\_SIZE & \texttt{0x1A102304} & 32 & Config & R/W & \texttt{0x00000000} & RX Channel 0 I2S uDMA transfer size of buffer\\
   \hline
-  I2S\_RX\_CFG & \texttt{0x1A102288} & 32 & Config & R/W & \texttt{0x00000004} & RX Channel 0 I2S uDMA transfer configuration\\
+  I2S\_RX\_CFG & \texttt{0x1A102308} & 32 & Config & R/W & \texttt{0x00000004} & RX Channel 0 I2S uDMA transfer configuration\\
   \hline
-  I2S\_TX\_SADDR & \texttt{0x1A102290} & 32 & Config & R/W & \texttt{0x00000000} &  TX Channel I2S uDMA transfer address of associated buffer\\
+  I2S\_TX\_SADDR & \texttt{0x1A102310} & 32 & Config & R/W & \texttt{0x00000000} &  TX Channel I2S uDMA transfer address of associated buffer\\
   \hline
-  I2S\_TX\_SIZE & \texttt{0x1A102294} & 32 & Config & R/W & \texttt{0x00000000} &  TX Channel I2S uDMA transfer size of buffer\\
+  I2S\_TX\_SIZE & \texttt{0x1A102314} & 32 & Config & R/W & \texttt{0x00000000} &  TX Channel I2S uDMA transfer size of buffer\\
   \hline
-  I2S\_TX\_CFG & \texttt{0x1A102298} & 32 & Config & R/W & \texttt{0x00000004} &  TX Channel I2S uDMA transfer configuration\\
+  I2S\_TX\_CFG & \texttt{0x1A102318} & 32 & Config & R/W & \texttt{0x00000004} &  TX Channel I2S uDMA transfer configuration\\
   \hline
-  I2S\_CLKCFG\_SETUP & \texttt{0x1A1022A0} & 32 & Config & R/W & \texttt{0x00000000} & Clock configuration for both master, slave and pdm\\
+  I2S\_CLKCFG\_SETUP & \texttt{0x1A102320} & 32 & Config & R/W & \texttt{0x00000000} & Clock configuration for both master, slave and pdm\\
   \hline
-  I2S\_SLV\_SETUP & \texttt{0x1A1022A4} & 32 & Config & R/W & \texttt{0x00000000} & Configuration of I2S slave\\
+  I2S\_SLV\_SETUP & \texttt{0x1A102324} & 32 & Config & R/W & \texttt{0x00000000} & Configuration of I2S slave\\
   \hline
-  I2S\_MST\_SETUP & \texttt{0x1A1022A8} & 32 & Config & R/W & \texttt{0x00000000} & Configuration of I2S master\\
+  I2S\_MST\_SETUP & \texttt{0x1A102328} & 32 & Config & R/W & \texttt{0x00000000} & Configuration of I2S master\\
   \hline
-  I2S\_PDM\_SETUP & \texttt{0x1A1022AC} & 32 & Config & R/W & \texttt{0x00000000} & Configuration of PDM module\\
+  I2S\_PDM\_SETUP & \texttt{0x1A10232C} & 32 & Config & R/W & \texttt{0x00000000} & Configuration of PDM module\\
   \hline
   \caption{uDMA I2S}
 \end{tabularx}
 }
 
 
-\regdoc{0x1A102280}{0x00000000}{I2S\_RX\_SADDR}{
+\regdoc{0x1A102300}{0x00000000}{I2S\_RX\_SADDR}{
   \begin{bytefield}[endianness=big,bitwidth=2em]{16}
     \bitheader[lsb=16]{16-31} \\
     \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
@@ -42,7 +42,7 @@
 }
 
 
-\regdoc{0x1A102284}{0x00000000}{I2S\_RX\_SIZE}{
+\regdoc{0x1A102304}{0x00000000}{I2S\_RX\_SIZE}{
   \begin{bytefield}[endianness=big,bitwidth=2em]{16}
     \bitheader[lsb=16]{16-31} \\
     \bitbox{15}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{RX\_SIZE} \\[3ex]
@@ -54,7 +54,7 @@
 }
 
 
-\regdoc{0x1A102288}{0x00000004}{I2S\_RX\_CFG}{
+\regdoc{0x1A102308}{0x00000004}{I2S\_RX\_CFG}{
   \begin{bytefield}[endianness=big,bitwidth=2em]{16}
     \bitheader[lsb=16]{16-31} \\
     \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
@@ -70,7 +70,7 @@
 }
 
 
-\regdoc{0x1A102290}{0x00000000}{I2S\_TX\_SADDR}{
+\regdoc{0x1A102310}{0x00000000}{I2S\_TX\_SADDR}{
   \begin{bytefield}[endianness=big,bitwidth=2em]{16}
     \bitheader[lsb=16]{16-31} \\
     \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
@@ -82,7 +82,7 @@
 }
 
 
-\regdoc{0x1A102294}{0x00000000}{I2S\_TX\_SIZE}{
+\regdoc{0x1A102314}{0x00000000}{I2S\_TX\_SIZE}{
   \begin{bytefield}[endianness=big,bitwidth=2em]{16}
     \bitheader[lsb=16]{16-31} \\
     \bitbox{15}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{TX\_SIZE} \\[3ex]
@@ -94,7 +94,7 @@
 }
 
 
-\regdoc{0x1A102298}{0x00000004}{I2S\_TX\_CFG}{
+\regdoc{0x1A102318}{0x00000004}{I2S\_TX\_CFG}{
   \begin{bytefield}[endianness=big,bitwidth=2em]{16}
     \bitheader[lsb=16]{16-31} \\
     \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
@@ -110,7 +110,7 @@
 }
 
 
-\regdoc{0x1A1022A0}{0x00000000}{I2S\_CLKCFG\_SETUP}{
+\regdoc{0x1A102320}{0x00000000}{I2S\_CLKCFG\_SETUP}{
   \begin{bytefield}[endianness=big,bitwidth=2em]{16}
     \bitheader[lsb=16]{16-31} \\
     \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~MASTER\_NUM~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~MASTER\_EXT~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~SLAVE\_NUM~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~SLAVE\_EXT~}} \bitbox{1}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~PDM\_CLK\_EN~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~MASTER\_CLK\_EN~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~SLAVE\_CLK\_EN~}} \bitbox{8}{COMMON\_CLK\_DIV} \\[3ex]
@@ -131,7 +131,7 @@
 }
 
 
-\regdoc{0x1A1022A4}{0x00000000}{I2S\_SLV\_SETUP}{
+\regdoc{0x1A102324}{0x00000000}{I2S\_SLV\_SETUP}{
   \begin{bytefield}[endianness=big,bitwidth=2em]{16}
     \bitheader[lsb=16]{16-31} \\
     \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~SLAVE\_EN~}} \bitbox{13}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~SLAVE\_2CH~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~SLAVE\_LSB~}} \\[3ex]
@@ -147,7 +147,7 @@
 }
 
 
-\regdoc{0x1A1022A8}{0x00000000}{I2S\_MST\_SETUP}{
+\regdoc{0x1A102328}{0x00000000}{I2S\_MST\_SETUP}{
   \begin{bytefield}[endianness=big,bitwidth=2em]{16}
     \bitheader[lsb=16]{16-31} \\
     \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~MASTER\_EN~}} \bitbox{13}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~MASTER\_2CH~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~MASTER\_LSB~}} \\[3ex]
@@ -163,7 +163,7 @@
 }
 
 
-\regdoc{0x1A1022AC}{0x00000000}{I2S\_PDM\_SETUP}{
+\regdoc{0x1A10232C}{0x00000000}{I2S\_PDM\_SETUP}{
   \begin{bytefield}[endianness=big,bitwidth=2em]{16}
     \bitheader[lsb=16]{16-31} \\
     \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]

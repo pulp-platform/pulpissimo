@@ -5,36 +5,36 @@
   \hline
   \textbf{Name} & \textbf{Address}  & \textbf{Size} & \textbf{Type} & \textbf{Access} & \textbf{Default} & \textbf{Description} \\
   \hline
-  RX\_SADDR & \texttt{0x1A102000} & 32 & Config & R/W & \texttt{0x00000000} & uDMA RX UART buffer base address configuration register.\\
+  RX\_SADDR & \texttt{0x1A102080} & 32 & Config & R/W & \texttt{0x00000000} & uDMA RX UART buffer base address configuration register.\\
   \hline
-  RX\_SIZE & \texttt{0x1A102004} & 32 & Config & R/W & \texttt{0x00000000} & uDMA RX UART buffer size configuration register.\\
+  RX\_SIZE & \texttt{0x1A102084} & 32 & Config & R/W & \texttt{0x00000000} & uDMA RX UART buffer size configuration register.\\
   \hline
-  RX\_CFG & \texttt{0x1A102008} & 32 & Config & R/W & \texttt{0x00000000} & uDMA RX UART stream configuration register.\\
+  RX\_CFG & \texttt{0x1A102088} & 32 & Config & R/W & \texttt{0x00000000} & uDMA RX UART stream configuration register.\\
   \hline
-  TX\_SADDR & \texttt{0x1A102010} & 32 & Config & R/W & \texttt{0x00000000} & uDMA TX UART buffer base address configuration register.\\
+  TX\_SADDR & \texttt{0x1A102090} & 32 & Config & R/W & \texttt{0x00000000} & uDMA TX UART buffer base address configuration register.\\
   \hline
-  TX\_SIZE & \texttt{0x1A102014} & 32 & Config & R/W & \texttt{0x00000000} & uDMA TX UART buffer size configuration register.\\
+  TX\_SIZE & \texttt{0x1A102094} & 32 & Config & R/W & \texttt{0x00000000} & uDMA TX UART buffer size configuration register.\\
   \hline
-  TX\_CFG & \texttt{0x1A102018} & 32 & Config & R/W & \texttt{0x00000000} & uDMA TX UART stream configuration register.\\
+  TX\_CFG & \texttt{0x1A102098} & 32 & Config & R/W & \texttt{0x00000000} & uDMA TX UART stream configuration register.\\
   \hline
-  STATUS & \texttt{0x1A102020} & 32 & Status & R & \texttt{0x00000000} & uDMA UART status register.\\
+  STATUS & \texttt{0x1A1020A0} & 32 & Status & R & \texttt{0x00000000} & uDMA UART status register.\\
   \hline
-  SETUP & \texttt{0x1A102024} & 32 & Config & R/W & \texttt{0x00000000} & UDMA UART configuration register.\\
+  SETUP & \texttt{0x1A1020A4} & 32 & Config & R/W & \texttt{0x00000000} & UDMA UART configuration register.\\
   \hline
-  ERROR & \texttt{0x1A102028} & 32 & Status & R & \texttt{0x00000000} & uDMA UART Error status\\
+  ERROR & \texttt{0x1A1020A8} & 32 & Status & R & \texttt{0x00000000} & uDMA UART Error status\\
   \hline
-  IRQ\_EN & \texttt{0x1A10202C} & 32 & Config & R/W & \texttt{0x00000000} & uDMA UART Read or Error interrupt enable register.\\
+  IRQ\_EN & \texttt{0x1A1020AC} & 32 & Config & R/W & \texttt{0x00000000} & uDMA UART Read or Error interrupt enable register.\\
   \hline
-  VALID & \texttt{0x1A102030} & 32 & Status & R & \texttt{0x00000000} & uDMA UART Read polling data valid flag register.\\
+  VALID & \texttt{0x1A1020B0} & 32 & Status & R & \texttt{0x00000000} & uDMA UART Read polling data valid flag register.\\
   \hline
-  DATA & \texttt{0x1A102034} & 32 & Data & R & \texttt{0x00000000} & uDMA UART Read polling data register.\\
+  DATA & \texttt{0x1A1020B4} & 32 & Data & R & \texttt{0x00000000} & uDMA UART Read polling data register.\\
   \hline
   \caption{uDMA UART}
 \end{tabularx}
 }
 
 
-\regdoc{0x1A102000}{0x00000000}{RX\_SADDR}{
+\regdoc{0x1A102080}{0x00000000}{RX\_SADDR}{
   \begin{bytefield}[endianness=big,bitwidth=2em]{16}
     \bitheader[lsb=16]{16-31} \\
     \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
@@ -46,7 +46,7 @@
 }
 
 
-\regdoc{0x1A102004}{0x00000000}{RX\_SIZE}{
+\regdoc{0x1A102084}{0x00000000}{RX\_SIZE}{
   \begin{bytefield}[endianness=big,bitwidth=2em]{16}
     \bitheader[lsb=16]{16-31} \\
     \bitbox{15}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{RX\_SIZE} \\[3ex]
@@ -58,7 +58,7 @@
 }
 
 
-\regdoc{0x1A102008}{0x00000000}{RX\_CFG}{
+\regdoc{0x1A102088}{0x00000000}{RX\_CFG}{
   \begin{bytefield}[endianness=big,bitwidth=2em]{16}
     \bitheader[lsb=16]{16-31} \\
     \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
@@ -73,7 +73,7 @@
 }
 
 
-\regdoc{0x1A102010}{0x00000000}{TX\_SADDR}{
+\regdoc{0x1A102090}{0x00000000}{TX\_SADDR}{
   \begin{bytefield}[endianness=big,bitwidth=2em]{16}
     \bitheader[lsb=16]{16-31} \\
     \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
@@ -85,7 +85,7 @@
 }
 
 
-\regdoc{0x1A102014}{0x00000000}{TX\_SIZE}{
+\regdoc{0x1A102094}{0x00000000}{TX\_SIZE}{
   \begin{bytefield}[endianness=big,bitwidth=2em]{16}
     \bitheader[lsb=16]{16-31} \\
     \bitbox{15}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{TX\_SIZE} \\[3ex]
@@ -97,7 +97,7 @@
 }
 
 
-\regdoc{0x1A102018}{0x00000000}{TX\_CFG}{
+\regdoc{0x1A102098}{0x00000000}{TX\_CFG}{
   \begin{bytefield}[endianness=big,bitwidth=2em]{16}
     \bitheader[lsb=16]{16-31} \\
     \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
@@ -112,7 +112,7 @@
 }
 
 
-\regdoc{0x1A102020}{0x00000000}{STATUS}{
+\regdoc{0x1A1020A0}{0x00000000}{STATUS}{
   \begin{bytefield}[endianness=big,bitwidth=2em]{16}
     \bitheader[lsb=16]{16-31} \\
     \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
@@ -125,7 +125,7 @@
 }
 
 
-\regdoc{0x1A102024}{0x00000000}{SETUP}{
+\regdoc{0x1A1020A4}{0x00000000}{SETUP}{
   \begin{bytefield}[endianness=big,bitwidth=2em]{16}
     \bitheader[lsb=16]{16-31} \\
     \bitbox{16}{CLKDIV} \\[3ex]
@@ -144,7 +144,7 @@
 }
 
 
-\regdoc{0x1A102028}{0x00000000}{ERROR}{
+\regdoc{0x1A1020A8}{0x00000000}{ERROR}{
   \begin{bytefield}[endianness=big,bitwidth=2em]{16}
     \bitheader[lsb=16]{16-31} \\
     \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
@@ -157,7 +157,7 @@
 }
 
 
-\regdoc{0x1A10202C}{0x00000000}{IRQ\_EN}{
+\regdoc{0x1A1020AC}{0x00000000}{IRQ\_EN}{
   \begin{bytefield}[endianness=big,bitwidth=2em]{16}
     \bitheader[lsb=16]{16-31} \\
     \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
@@ -170,7 +170,7 @@
 }
 
 
-\regdoc{0x1A102030}{0x00000000}{VALID}{
+\regdoc{0x1A1020B0}{0x00000000}{VALID}{
   \begin{bytefield}[endianness=big,bitwidth=2em]{16}
     \bitheader[lsb=16]{16-31} \\
     \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
@@ -182,7 +182,7 @@
 }
 
 
-\regdoc{0x1A102034}{0x00000000}{DATA}{
+\regdoc{0x1A1020B4}{0x00000000}{DATA}{
   \begin{bytefield}[endianness=big,bitwidth=2em]{16}
     \bitheader[lsb=16]{16-31} \\
     \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]

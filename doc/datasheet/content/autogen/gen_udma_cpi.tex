@@ -5,30 +5,30 @@
   \hline
   \textbf{Name} & \textbf{Address}  & \textbf{Size} & \textbf{Type} & \textbf{Access} & \textbf{Default} & \textbf{Description} \\
   \hline
-  CAM\_RX\_SADDR & \texttt{0x1A102300} & 32 & Config & R/W & \texttt{0x00000000} & RX Camera uDMA transfer address of associated buffer register\\
+  CAM\_RX\_SADDR & \texttt{0x1A102380} & 32 & Config & R/W & \texttt{0x00000000} & RX Camera uDMA transfer address of associated buffer register\\
   \hline
-  CAM\_RX\_SIZE & \texttt{0x1A102304} & 32 & Config & R/W & \texttt{0x00000000} & RX Camera uDMA transfer size of buffer register\\
+  CAM\_RX\_SIZE & \texttt{0x1A102384} & 32 & Config & R/W & \texttt{0x00000000} & RX Camera uDMA transfer size of buffer register\\
   \hline
-  CAM\_RX\_CFG & \texttt{0x1A102308} & 32 & Config & R/W & \texttt{0x00000000} & RX Camera uDMA transfer configuration register\\
+  CAM\_RX\_CFG & \texttt{0x1A102388} & 32 & Config & R/W & \texttt{0x00000000} & RX Camera uDMA transfer configuration register\\
   \hline
-  CAM\_CFG\_GLOB & \texttt{0x1A102320} & 32 & Config & R/W & \texttt{0x00000000} & Global configuration register\\
+  CAM\_CFG\_GLOB & \texttt{0x1A1023A0} & 32 & Config & R/W & \texttt{0x00000000} & Global configuration register\\
   \hline
-  CAM\_CFG\_LL & \texttt{0x1A102324} & 32 & Config & R/W & \texttt{0x00000000} & Lower Left corner configuration register\\
+  CAM\_CFG\_LL & \texttt{0x1A1023A4} & 32 & Config & R/W & \texttt{0x00000000} & Lower Left corner configuration register\\
   \hline
-  CAM\_CFG\_UR & \texttt{0x1A102328} & 32 & Config & R/W & \texttt{0x00000000} & Upper Right corner configuration register\\
+  CAM\_CFG\_UR & \texttt{0x1A1023A8} & 32 & Config & R/W & \texttt{0x00000000} & Upper Right corner configuration register\\
   \hline
-  CAM\_CFG\_SIZE & \texttt{0x1A10232C} & 32 & Config & R/W & \texttt{0x00000000} & Horizontal Resolution configuration register\\
+  CAM\_CFG\_SIZE & \texttt{0x1A1023AC} & 32 & Config & R/W & \texttt{0x00000000} & Horizontal Resolution configuration register\\
   \hline
-  CAM\_CFG\_FILTER & \texttt{0x1A102330} & 32 & Config & R/W & \texttt{0x00000000} & RGB coefficients configuration register\\
+  CAM\_CFG\_FILTER & \texttt{0x1A1023B0} & 32 & Config & R/W & \texttt{0x00000000} & RGB coefficients configuration register\\
   \hline
-  CAM\_VSYNC\_POLARITY & \texttt{0x1A102334} & 32 & Config & R/W & \texttt{0x00000000} & VSYNC Polarity register\\
+  CAM\_VSYNC\_POLARITY & \texttt{0x1A1023B4} & 32 & Config & R/W & \texttt{0x00000000} & VSYNC Polarity register\\
   \hline
   \caption{uDMA Camera Interface}
 \end{tabularx}
 }
 
 
-\regdoc{0x1A102300}{0x00000000}{CAM\_RX\_SADDR}{
+\regdoc{0x1A102380}{0x00000000}{CAM\_RX\_SADDR}{
   \begin{bytefield}[endianness=big,bitwidth=2em]{16}
     \bitheader[lsb=16]{16-31} \\
     \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
@@ -40,7 +40,7 @@
 }
 
 
-\regdoc{0x1A102304}{0x00000000}{CAM\_RX\_SIZE}{
+\regdoc{0x1A102384}{0x00000000}{CAM\_RX\_SIZE}{
   \begin{bytefield}[endianness=big,bitwidth=2em]{16}
     \bitheader[lsb=16]{16-31} \\
     \bitbox{15}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{RX\_SIZE} \\[3ex]
@@ -52,7 +52,7 @@
 }
 
 
-\regdoc{0x1A102308}{0x00000000}{CAM\_RX\_CFG}{
+\regdoc{0x1A102388}{0x00000000}{CAM\_RX\_CFG}{
   \begin{bytefield}[endianness=big,bitwidth=2em]{16}
     \bitheader[lsb=16]{16-31} \\
     \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
@@ -68,7 +68,7 @@
 }
 
 
-\regdoc{0x1A102320}{0x00000000}{CAM\_CFG\_GLOB}{
+\regdoc{0x1A1023A0}{0x00000000}{CAM\_CFG\_GLOB}{
   \begin{bytefield}[endianness=big,bitwidth=2em]{16}
     \bitheader[lsb=16]{16-31} \\
     \bitbox{1}{\tiny EN} \bitbox{15}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
@@ -85,7 +85,7 @@
 }
 
 
-\regdoc{0x1A102324}{0x00000000}{CAM\_CFG\_LL}{
+\regdoc{0x1A1023A4}{0x00000000}{CAM\_CFG\_LL}{
   \begin{bytefield}[endianness=big,bitwidth=2em]{16}
     \bitheader[lsb=16]{16-31} \\
     \bitbox{16}{FRAMESLICE\_LLY} \\[3ex]
@@ -98,7 +98,7 @@
 }
 
 
-\regdoc{0x1A102328}{0x00000000}{CAM\_CFG\_UR}{
+\regdoc{0x1A1023A8}{0x00000000}{CAM\_CFG\_UR}{
   \begin{bytefield}[endianness=big,bitwidth=2em]{16}
     \bitheader[lsb=16]{16-31} \\
     \bitbox{16}{FRAMESLICE\_URY} \\[3ex]
@@ -111,7 +111,7 @@
 }
 
 
-\regdoc{0x1A10232C}{0x00000000}{CAM\_CFG\_SIZE}{
+\regdoc{0x1A1023AC}{0x00000000}{CAM\_CFG\_SIZE}{
   \begin{bytefield}[endianness=big,bitwidth=2em]{16}
     \bitheader[lsb=16]{16-31} \\
     \bitbox{16}{ROWLEN} \\[3ex]
@@ -123,7 +123,7 @@
 }
 
 
-\regdoc{0x1A102330}{0x00000000}{CAM\_CFG\_FILTER}{
+\regdoc{0x1A1023B0}{0x00000000}{CAM\_CFG\_FILTER}{
   \begin{bytefield}[endianness=big,bitwidth=2em]{16}
     \bitheader[lsb=16]{16-31} \\
     \bitbox{8}{\color{lightgray}\rule{\width}{\height}} \bitbox{8}{R\_COEFF} \\[3ex]
@@ -137,7 +137,7 @@
 }
 
 
-\regdoc{0x1A102334}{0x00000000}{CAM\_VSYNC\_POLARITY}{
+\regdoc{0x1A1023B4}{0x00000000}{CAM\_VSYNC\_POLARITY}{
   \begin{bytefield}[endianness=big,bitwidth=2em]{16}
     \bitheader[lsb=16]{16-31} \\
     \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]

@@ -5,34 +5,34 @@
   \hline
   \textbf{Name} & \textbf{Address}  & \textbf{Size} & \textbf{Type} & \textbf{Access} & \textbf{Default} & \textbf{Description} \\
   \hline
-  RX\_SADDR & \texttt{0x1A102100} & 32 & Config & R/W & \texttt{0x00000000} & uDMA RX I2C buffer base address configuration register.\\
+  RX\_SADDR & \texttt{0x1A102180} & 32 & Config & R/W & \texttt{0x00000000} & uDMA RX I2C buffer base address configuration register.\\
   \hline
-  RX\_SIZE & \texttt{0x1A102104} & 32 & Config & R/W & \texttt{0x00000000} & uDMA RX I2C buffer size configuration register.\\
+  RX\_SIZE & \texttt{0x1A102184} & 32 & Config & R/W & \texttt{0x00000000} & uDMA RX I2C buffer size configuration register.\\
   \hline
-  RX\_CFG & \texttt{0x1A102108} & 32 & Config & R/W & \texttt{0x00000000} & uDMA RX I2C stream configuration register.\\
+  RX\_CFG & \texttt{0x1A102188} & 32 & Config & R/W & \texttt{0x00000000} & uDMA RX I2C stream configuration register.\\
   \hline
-  TX\_SADDR & \texttt{0x1A102110} & 32 & Config & R/W & \texttt{0x00000000} & uDMA TX I2C buffer base address configuration register.\\
+  TX\_SADDR & \texttt{0x1A102190} & 32 & Config & R/W & \texttt{0x00000000} & uDMA TX I2C buffer base address configuration register.\\
   \hline
-  TX\_SIZE & \texttt{0x1A102114} & 32 & Config & R/W & \texttt{0x00000000} & uDMA TX I2C buffer size configuration register.\\
+  TX\_SIZE & \texttt{0x1A102194} & 32 & Config & R/W & \texttt{0x00000000} & uDMA TX I2C buffer size configuration register.\\
   \hline
-  TX\_CFG & \texttt{0x1A102118} & 32 & Config & R/W & \texttt{0x00000000} & uDMA TX I2C stream configuration register.\\
+  TX\_CFG & \texttt{0x1A102198} & 32 & Config & R/W & \texttt{0x00000000} & uDMA TX I2C stream configuration register.\\
   \hline
-  CMD\_SADDR & \texttt{0x1A102120} & 32 & Config & R/W & \texttt{0x00000000} & uDMA CMD I2C buffer base address configuration register.\\
+  CMD\_SADDR & \texttt{0x1A1021A0} & 32 & Config & R/W & \texttt{0x00000000} & uDMA CMD I2C buffer base address configuration register.\\
   \hline
-  CMD\_SIZE & \texttt{0x1A102124} & 32 & Config & R/W & \texttt{0x00000000} & uDMA CMD I2C buffer size configuration register.\\
+  CMD\_SIZE & \texttt{0x1A1021A4} & 32 & Config & R/W & \texttt{0x00000000} & uDMA CMD I2C buffer size configuration register.\\
   \hline
-  CMD\_CFG & \texttt{0x1A102128} & 32 & Config & R/W & \texttt{0x00000000} & uDMA CMD I2C stream configuration register.\\
+  CMD\_CFG & \texttt{0x1A1021A8} & 32 & Config & R/W & \texttt{0x00000000} & uDMA CMD I2C stream configuration register.\\
   \hline
-  STATUS & \texttt{0x1A102130} & 32 & Status & R/W & \texttt{0x00000000} & uDMA I2C Status register.\\
+  STATUS & \texttt{0x1A1021B0} & 32 & Status & R/W & \texttt{0x00000000} & uDMA I2C Status register.\\
   \hline
-  SETUP & \texttt{0x1A102134} & 32 & Config & R/W & \texttt{0x00000000} & uDMA I2C Configuration register.\\
+  SETUP & \texttt{0x1A1021B4} & 32 & Config & R/W & \texttt{0x00000000} & uDMA I2C Configuration register.\\
   \hline
   \caption{uDMA I2C0}
 \end{tabularx}
 }
 
 
-\regdoc{0x1A102100}{0x00000000}{RX\_SADDR}{
+\regdoc{0x1A102180}{0x00000000}{RX\_SADDR}{
   \begin{bytefield}[endianness=big,bitwidth=2em]{16}
     \bitheader[lsb=16]{16-31} \\
     \bitbox{11}{\color{lightgray}\rule{\width}{\height}} \bitbox{5}{RX\_SADDR} \\[3ex]
@@ -44,7 +44,7 @@
 }
 
 
-\regdoc{0x1A102104}{0x00000000}{RX\_SIZE}{
+\regdoc{0x1A102184}{0x00000000}{RX\_SIZE}{
   \begin{bytefield}[endianness=big,bitwidth=2em]{16}
     \bitheader[lsb=16]{16-31} \\
     \bitbox{12}{\color{lightgray}\rule{\width}{\height}} \bitbox{4}{RX\_SIZE} \\[3ex]
@@ -56,7 +56,7 @@
 }
 
 
-\regdoc{0x1A102108}{0x00000000}{RX\_CFG}{
+\regdoc{0x1A102188}{0x00000000}{RX\_CFG}{
   \begin{bytefield}[endianness=big,bitwidth=2em]{16}
     \bitheader[lsb=16]{16-31} \\
     \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
@@ -71,7 +71,7 @@
 }
 
 
-\regdoc{0x1A102110}{0x00000000}{TX\_SADDR}{
+\regdoc{0x1A102190}{0x00000000}{TX\_SADDR}{
   \begin{bytefield}[endianness=big,bitwidth=2em]{16}
     \bitheader[lsb=16]{16-31} \\
     \bitbox{11}{\color{lightgray}\rule{\width}{\height}} \bitbox{5}{TX\_SADDR} \\[3ex]
@@ -83,7 +83,7 @@
 }
 
 
-\regdoc{0x1A102114}{0x00000000}{TX\_SIZE}{
+\regdoc{0x1A102194}{0x00000000}{TX\_SIZE}{
   \begin{bytefield}[endianness=big,bitwidth=2em]{16}
     \bitheader[lsb=16]{16-31} \\
     \bitbox{12}{\color{lightgray}\rule{\width}{\height}} \bitbox{4}{TX\_SIZE} \\[3ex]
@@ -95,7 +95,7 @@
 }
 
 
-\regdoc{0x1A102118}{0x00000000}{TX\_CFG}{
+\regdoc{0x1A102198}{0x00000000}{TX\_CFG}{
   \begin{bytefield}[endianness=big,bitwidth=2em]{16}
     \bitheader[lsb=16]{16-31} \\
     \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
@@ -110,7 +110,7 @@
 }
 
 
-\regdoc{0x1A102120}{0x00000000}{CMD\_SADDR}{
+\regdoc{0x1A1021A0}{0x00000000}{CMD\_SADDR}{
   \begin{bytefield}[endianness=big,bitwidth=2em]{16}
     \bitheader[lsb=16]{16-31} \\
     \bitbox{11}{\color{lightgray}\rule{\width}{\height}} \bitbox{5}{CMD\_SADDR} \\[3ex]
@@ -122,7 +122,7 @@
 }
 
 
-\regdoc{0x1A102124}{0x00000000}{CMD\_SIZE}{
+\regdoc{0x1A1021A4}{0x00000000}{CMD\_SIZE}{
   \begin{bytefield}[endianness=big,bitwidth=2em]{16}
     \bitheader[lsb=16]{16-31} \\
     \bitbox{12}{\color{lightgray}\rule{\width}{\height}} \bitbox{4}{CMD\_SIZE} \\[3ex]
@@ -134,7 +134,7 @@
 }
 
 
-\regdoc{0x1A102128}{0x00000000}{CMD\_CFG}{
+\regdoc{0x1A1021A8}{0x00000000}{CMD\_CFG}{
   \begin{bytefield}[endianness=big,bitwidth=2em]{16}
     \bitheader[lsb=16]{16-31} \\
     \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
@@ -149,7 +149,7 @@
 }
 
 
-\regdoc{0x1A102130}{0x00000000}{STATUS}{
+\regdoc{0x1A1021B0}{0x00000000}{STATUS}{
   \begin{bytefield}[endianness=big,bitwidth=2em]{16}
     \bitheader[lsb=16]{16-31} \\
     \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
@@ -163,7 +163,7 @@
 }
 
 
-\regdoc{0x1A102134}{0x00000000}{SETUP}{
+\regdoc{0x1A1021B4}{0x00000000}{SETUP}{
   \begin{bytefield}[endianness=big,bitwidth=2em]{16}
     \bitheader[lsb=16]{16-31} \\
     \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
