@@ -92,6 +92,18 @@ def parse_excel(file_name):
                   file=sys.stderr)
             exit(-1)
 
+    # aggresively remove empty rows (marked with nan)
+    regmap_na_free = regmap.dropna(axis=0, how='any')
+    # show dropped rows
+    if args.verbose:
+        print("parse_excel: Dropped the following rows", file=sys.stderr)
+        print(regmap[~regmap.index.isin(regmap_na_free.index)],
+              file=sys.stderr)
+    regmap = regmap_na_free
+
+    # Deleting rows makes holes in the index. Refresh the index.
+    regmap = regmap.reset_index(drop=True)
+
     reglist_dict = DataFrame.to_dict(reglist)
     regmap_dict = DataFrame.to_dict(regmap)
 
