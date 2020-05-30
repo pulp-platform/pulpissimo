@@ -1,0 +1,209 @@
+\section{APB Timer}
+
+The APB Timer (\texttt{apb\_timer\_unit.sv}) has the following features:
+\begin{itemize}
+\item 2 general purpose 32-bit upwards counters
+\item Can be triggered by multiple sources:
+  \begin{itemize}
+  \item FLL clock
+  \item FLL clock + Prescale
+  \item Reference clock at 32 kHz
+  \item Any event
+  \end{itemize}
+\item 8-bit programmable prescaler (divides the FLL clock frequency)
+\item Different counting modes:
+  \begin{itemize}
+  \item One shot mode: timer is stopped after the first comparison match
+  \item Continuous mode: timer continues couting after a match
+  \item 64-bit cascaded mode: use both 32-bit timers as a 64-bit timer
+  \end{itemize}
+\item Interrupt request generation on comparison match
+\end{itemize}
+
+\subsection{APB Timer Registers}
+\begin{table}[htbp]
+  \small
+\begin{tabularx}{\textwidth}{|l|l|l|l|l|l|X|}
+  \hline
+  \textbf{Name} & \textbf{Address}  & \textbf{Size} & \textbf{Type} & \textbf{Access} & \textbf{Default} & \textbf{Description} \\
+  \hline
+  CFG\_LO   & \texttt{0x1A10B000} & 32 & Config & R/W & \texttt{0x00000000} & Timer Low Configuration register \\
+  \hline
+  CFG\_HI   & \texttt{0x1A10B004}  & 32 & Config & R/W & \texttt{0x00000000} & Timer High Configuration register\\
+  \hline
+  CNT\_LO   & \texttt{0x1A10B008}  & 32 & Data & R/W &   \texttt{0x00000000}  & Timer Low counter value register\\
+  \hline
+  CNT\_HI   & \texttt{0x1A10B00C}  & 32 & Data & R/W &   \texttt{0x00000000} & Timer High counter value register\\
+  \hline
+  CMP\_LO   & \texttt{0x1A10B010}  & 32 & Config & R/W & \texttt{0x00000000}  & Timer Low comparator value register\\
+  \hline
+  CMP\_HI   & \texttt{0x1A10B014}  & 32 & Config & R/W & \texttt{0x00000000} & Timer High comparator value register\\
+  \hline
+  START\_LO & \texttt{0x1A10B018}  & 32 & Config & R/W & \texttt{0x00000000} & Start Timer Low counting register\\
+  \hline
+  START\_HI & \texttt{0x1A10B01C}  & 32 & Config & R/W & \texttt{0x00000000} & Start Timer High counting register\\
+  \hline
+  RESET\_LO & \texttt{0x1A10B020}  & 32 & Config & R/W & \texttt{0x00000000} & Reset Timer Low counter register\\
+  \hline
+  RESET\_HI & \texttt{0x1A10B024}  & 32 & Config & R/W & \texttt{0x00000000} & Reset Timer High counter register\\
+  \hline
+
+\end{tabularx}
+\caption{APB Timer register table\label{tab:apb_timer}}
+\end{table}
+
+\regdoc{0x1A10\_B000}{0x0000\_0000}{CFG\_LO}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+  \bitheader[lsb=16]{16-31} \\
+  \bitbox{1}{\tiny CASC} \bitbox{15}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
+  \bitheader{0-15} \\
+  \bitbox{8}{PVAL}\bitbox{1}{\tiny CCFG} \bitbox{1}{\tiny PEN} \bitbox{1}{\tiny ONES} \bitbox{1}{\tiny MODE} \bitbox{1}{\color{lightgray}\rule{\width}{\height}}\bitbox{1}{\tiny IRQEN}\bitbox{1}{\tiny RST}\bitbox{1}{\tiny EN}
+  \end{bytefield}
+}{
+  \regitem{Bit 31}{CASC}{R/W}{Timer low and Timer high 64-bit cascaded mode enable bit}
+  \regitem{Bit 15-8}{PVAL}{R/W}{Timer low prescaler value. $f_{timer}=f_{clk}/(1+PVAL)}$
+  \regitem{Bit 7}{CCFG}{R/W}{Timer low clock source configuration
+    \begin{itemize}
+      \item $0b0$: FLL or FLL plus Prescaler
+      \item $0b1$: 32 kHz reference clock
+    \end{itemize}
+  }
+  \regitem{Bit 6}{PEN}{R/W}{Timer low prescaler enable bit}
+  \regitem{Bit 5}{ONES}{R/W}{Timer low one shot configuration
+    \begin{itemize}
+      \item $0b0$: Timer stays enabled after a compare match with CMP\_LO
+      \item $0b1$: Timer is disabled after a compare match with CMP\_LO
+    \end{itemize}
+  }
+  \regitem{Bit 4}{MODE}{R/W}{Timer low continuous mode configuration
+    \begin{itemize}
+    \item $0b0$: Continue incrementing timer low counter after a compare match with CMP\_LO
+    \item $0b1$: Reset timer to after a compare match with CMP\_LO
+    \end{itemize}
+  }
+  \regitem{Bit 2}{IRQEN}{R/W}{Timer low interrupt generation on compare match enable}
+  \regitem{Bit 1}{RST}{R/W}{Timer low reset, cleared after the reset happened}
+  \regitem{Bit 0}{EN}{R/W}{Timer enable (starts couting) bit}
+}
+
+\regdoc{0x1A10\_B004}{0x0000\_0000}{CFG\_HI}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+  \bitheader[lsb=16]{16-31} \\
+  \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
+  \bitheader{0-15} \\
+  \bitbox{8}{PVAL}\bitbox{1}{\tiny CCFG} \bitbox{1}{\tiny PEN} \bitbox{1}{\tiny ONES} \bitbox{1}{\tiny MODE} \bitbox{1}{\color{lightgray}\rule{\width}{\height}}\bitbox{1}{\tiny IRQEN}\bitbox{1}{\tiny RST}\bitbox{1}{\tiny EN}
+  \end{bytefield}
+}{
+  \regitem{Bit 16-8}{PVAL}{R/W}{Timer hi prescaler value. $f_{timer}=f_{clk}/(1+PVAL)}$
+  \regitem{Bit 7}{CCFG}{R/W}{Timer hi clock source configuration
+    \begin{itemize}
+      \item $0b0$: FLL or FLL plus Prescaler
+      \item $0b1$: 32 kHz reference clock
+    \end{itemize}
+  }
+  \regitem{Bit 6}{PEN}{R/W}{Timer hi prescaler enable bit}
+  \regitem{Bit 5}{ONES}{R/W}{Timer hi one shot configuration
+    \begin{itemize}
+      \item $0b0$: Timer stays enabled after a compare match with CMP\_HI
+      \item $0b1$: Timer is disabled after a compare match with CMP\_HI
+    \end{itemize}
+  }
+  \regitem{Bit 4}{MODE}{R/W}{Timer hi continuous mode configuration
+    \begin{itemize}
+    \item $0b0$: Continue incrementing timer hi counter after a compare match with CMP\_HI
+    \item $0b1$: Reset timer to after a compare match with CMP\_HI
+    \end{itemize}
+  }
+  \regitem{Bit 2}{IRQEN}{R/W}{Timer hi interrupt generation on compare match enable}
+  \regitem{Bit 1}{RST}{R/W}{Timer hi reset, cleared after the reset happened}
+  \regitem{Bit 0}{EN}{R/W}{Timer enable (starts couting) bit}
+}
+
+\regdoc{0x1A10\_B008}{0x0000\_0000}{CNT\_LO}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+  \bitheader[lsb=16]{16-31} \\
+  \bitbox{16}{CNT\_LO} \\[3ex]
+  \bitheader{0-15} \\
+  \bitbox{16}{CNT\_LO}
+  \end{bytefield}
+}{
+  \regitem{Bit 31-0}{CNT\_LO}{R/W}{Timer low counter value}
+}
+
+\regdoc{0x1A10\_B00C}{0x0000\_0000}{CNT\_HI}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+  \bitheader[lsb=16]{16-31} \\
+  \bitbox{16}{CNT\_HI} \\[3ex]
+  \bitheader{0-15} \\
+  \bitbox{16}{CNT\_HI}
+  \end{bytefield}
+}{
+  \regitem{Bit 31-0}{CNT\_HI}{R/W}{Timer high counter value}
+}
+
+
+\regdoc{0x1A10\_B010}{0x0000\_0000}{CMP\_LO}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+  \bitheader[lsb=16]{16-31} \\
+  \bitbox{16}{CMP\_LO} \\[3ex]
+  \bitheader{0-15} \\
+  \bitbox{16}{CMP\_LO}
+  \end{bytefield}
+}{
+  \regitem{Bit 31-0}{CMP\_LO}{R/W}{Timer low comparator value}
+}
+
+\regdoc{0x1A10\_B014}{0x0000\_0000}{CMP\_HI}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+  \bitheader[lsb=16]{16-31} \\
+  \bitbox{16}{CMP\_HI} \\[3ex]
+  \bitheader{0-15} \\
+  \bitbox{16}{CMP\_HI}
+  \end{bytefield}
+}{
+  \regitem{Bit 31-0}{CMP\_HI}{R/W}{Timer high comparator value}
+}
+
+\regdoc{0x1A10\_B018}{0x0000\_0000}{START\_LO}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+  \bitheader[lsb=16]{16-31} \\
+  \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
+  \bitheader{0-15} \\
+  \bitbox{15}{\color{lightgray}\rule{\width}{\height}}\bitbox{1}{\tiny STRT}
+  \end{bytefield}
+}{
+  \regitem{Bit 0}{STRT}{W}{Timer high start command (sets EN in CFG\_LO)}
+}
+
+\regdoc{0x1A10\_B01C}{0x0000\_0000}{START\_HI}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+  \bitheader[lsb=16]{16-31} \\
+  \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
+  \bitheader{0-15} \\
+  \bitbox{15}{\color{lightgray}\rule{\width}{\height}}\bitbox{1}{\tiny STRT}
+  \end{bytefield}
+}{
+  \regitem{Bit 0}{STRT}{W}{Timer high start command (sets EN in CFG\_HI)}
+}
+
+\regdoc{0x1A10\_B020}{0x0000\_0000}{RESET\_LO}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+  \bitheader[lsb=16]{16-31} \\
+  \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
+  \bitheader{0-15} \\
+  \bitbox{15}{\color{lightgray}\rule{\width}{\height}}\bitbox{1}{\tiny RST}
+  \end{bytefield}
+}{
+  \regitem{Bit 0}{RST}{W}{Timer high reset command (writes RST in CFG\_LO)}
+}
+
+\regdoc{0x1A10\_B024}{0x0000\_0000}{RESET\_HI}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+  \bitheader[lsb=16]{16-31} \\
+  \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
+  \bitheader{0-15} \\
+  \bitbox{15}{\color{lightgray}\rule{\width}{\height}}\bitbox{1}{\tiny RST}
+  \end{bytefield}
+}{
+  \regitem{Bit 0}{RST}{W}{Timer high reset command (sets RST in CFG\_HI)}
+}

@@ -1,0 +1,177 @@
+
+\subsection{uDMA I2S Registers}
+{\small
+\begin{tabularx}{\textwidth}{|l|l|l|l|l|l|X|}
+  \hline
+  \textbf{Name} & \textbf{Address}  & \textbf{Size} & \textbf{Type} & \textbf{Access} & \textbf{Default} & \textbf{Description} \\
+  \hline
+  I2S\_RX\_SADDR & \texttt{0x1A102300} & 32 & Config & R/W & \texttt{0x00000000} & RX Channel 0 I2S uDMA transfer address of associated buffer\\
+  \hline
+  I2S\_RX\_SIZE & \texttt{0x1A102304} & 32 & Config & R/W & \texttt{0x00000000} & RX Channel 0 I2S uDMA transfer size of buffer\\
+  \hline
+  I2S\_RX\_CFG & \texttt{0x1A102308} & 32 & Config & R/W & \texttt{0x00000004} & RX Channel 0 I2S uDMA transfer configuration\\
+  \hline
+  I2S\_TX\_SADDR & \texttt{0x1A102310} & 32 & Config & R/W & \texttt{0x00000000} &  TX Channel I2S uDMA transfer address of associated buffer\\
+  \hline
+  I2S\_TX\_SIZE & \texttt{0x1A102314} & 32 & Config & R/W & \texttt{0x00000000} &  TX Channel I2S uDMA transfer size of buffer\\
+  \hline
+  I2S\_TX\_CFG & \texttt{0x1A102318} & 32 & Config & R/W & \texttt{0x00000004} &  TX Channel I2S uDMA transfer configuration\\
+  \hline
+  I2S\_CLKCFG\_SETUP & \texttt{0x1A102320} & 32 & Config & R/W & \texttt{0x00000000} & Clock configuration for both master, slave and pdm\\
+  \hline
+  I2S\_SLV\_SETUP & \texttt{0x1A102324} & 32 & Config & R/W & \texttt{0x00000000} & Configuration of I2S slave\\
+  \hline
+  I2S\_MST\_SETUP & \texttt{0x1A102328} & 32 & Config & R/W & \texttt{0x00000000} & Configuration of I2S master\\
+  \hline
+  I2S\_PDM\_SETUP & \texttt{0x1A10232C} & 32 & Config & R/W & \texttt{0x00000000} & Configuration of PDM module\\
+  \hline
+  \caption{uDMA I2S}
+\end{tabularx}
+}
+
+
+\regdoc{0x1A102300}{0x00000000}{I2S\_RX\_SADDR}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{RX\_SADDR}
+  \end{bytefield}
+}{
+  \regitem{Bit 15 - 0}{RX\_SADDR}{R/W}{Configure pointer to memory buffer:\\- Read: value of the pointer until transfer is over. Else returns 0\\- Write: set Address Pointer to memory buffer start address}
+}
+
+
+\regdoc{0x1A102304}{0x00000000}{I2S\_RX\_SIZE}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{15}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{RX\_SIZE} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{RX\_SIZE}
+  \end{bytefield}
+}{
+  \regitem{Bit 16 - 0}{RX\_SIZE}{R/W}{Buffer size in byte. (128kBytes maximum)\\- Read: buffer size left\\- Write: set buffer size}
+}
+
+
+\regdoc{0x1A102308}{0x00000004}{I2S\_RX\_CFG}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{9}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\tiny CLR} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~PENDING~}} \bitbox{1}{\tiny EN} \bitbox{1}{\color{lightgray}\rule{\width}{\height}} \bitbox{2}{\let\bw=\width\resizebox{\bw}{!}{~DATASIZE~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~CONTINOUS~}}
+  \end{bytefield}
+}{
+  \regitem{Bit 6}{CLR}{W}{Channel clear and stop transfer:\\-1'b0: disable\\-1'b1: enable}
+  \regitem{Bit 5}{PENDING}{R}{Transfer pending in queue status flag:\\-1'b0: free\\-1'b1: pending}
+  \regitem{Bit 4}{EN}{R/W}{Channel enable and start transfer:\\-1'b0: disable\\-1'b1: enable\\This signal is used also to queue a transfer if one is already ongoing.}
+  \regitem{Bit 2 - 1}{DATASIZE}{R/W}{Channel transfer size used to increment uDMA buffer address pointer:\\- 2'b00: +1 (8 bits)\\- 2'b01: +2 (16 bits)\\- 2'b10: +4 (32 bits)\\- 2'b11: +0}
+  \regitem{Bit 0}{CONTINOUS}{R/W}{Channel continuous mode:\\-1'b0: disable\\-1'b1: enable\\At the end of the buffer the uDMA reloads the address and size and starts a new transfer.}
+}
+
+
+\regdoc{0x1A102310}{0x00000000}{I2S\_TX\_SADDR}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{TX\_SADDR}
+  \end{bytefield}
+}{
+  \regitem{Bit 15 - 0}{TX\_SADDR}{R/W}{Configure pointer to memory buffer:\\- Read: value of the pointer until transfer is over. Else returns 0\\- Write: set Address Pointer to memory buffer start address}
+}
+
+
+\regdoc{0x1A102314}{0x00000000}{I2S\_TX\_SIZE}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{15}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{TX\_SIZE} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{TX\_SIZE}
+  \end{bytefield}
+}{
+  \regitem{Bit 16 - 0}{TX\_SIZE}{R/W}{Buffer size in byte. (128kBytes maximum)\\- Read: buffer size left\\- Write: set buffer size}
+}
+
+
+\regdoc{0x1A102318}{0x00000004}{I2S\_TX\_CFG}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{9}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\tiny CLR} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~PENDING~}} \bitbox{1}{\tiny EN} \bitbox{1}{\color{lightgray}\rule{\width}{\height}} \bitbox{2}{\let\bw=\width\resizebox{\bw}{!}{~DATASIZE~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~CONTINOUS~}}
+  \end{bytefield}
+}{
+  \regitem{Bit 6}{CLR}{R/W}{Channel clear and stop transfer:\\-1'b0: disable\\-1'b1: enable}
+  \regitem{Bit 5}{PENDING}{R}{Transfer pending in queue status flag:\\-1'b0: free\\-1'b1: pending}
+  \regitem{Bit 4}{EN}{R/W}{Channel enable and start transfer:\\-1'b0: disable\\-1'b1: enable\\This signal is used also to queue a transfer if one is already ongoing.}
+  \regitem{Bit 2 - 1}{DATASIZE}{R/W}{Channel transfer size used to increment uDMA buffer address pointer:\\- 2'b00: +1 (8 bits)\\- 2'b01: +2 (16 bits)\\- 2'b10: +4 (32 bits)\\- 2'b11: +0}
+  \regitem{Bit 0}{CONTINOUS}{R/W}{Channel continuous mode:\\-1'b0: disable\\-1'b1: enable\\At the end of the buffer the uDMA reloads the address and size and starts a new transfer.}
+}
+
+
+\regdoc{0x1A102320}{0x00000000}{I2S\_CLKCFG\_SETUP}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~MASTER\_NUM~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~MASTER\_EXT~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~SLAVE\_NUM~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~SLAVE\_EXT~}} \bitbox{1}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~PDM\_CLK\_EN~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~MASTER\_CLK\_EN~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~SLAVE\_CLK\_EN~}} \bitbox{8}{COMMON\_CLK\_DIV} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{8}{SLAVE\_CLK\_DIV} \bitbox{8}{MASTER\_CLK\_DIV}
+  \end{bytefield}
+}{
+  \regitem{Bit 31}{MASTER\_NUM}{R/W}{Selects master clock source(either ext or generated):\\-1’b0:selects master\\-1’b1:selects slave}
+  \regitem{Bit 30}{MASTER\_EXT}{R/W}{When set uses external clock for master}
+  \regitem{Bit 29}{SLAVE\_NUM}{R/W}{Selects slave clock source(either ext or generated):\\-1’b0:selects master\\-1’b1:selects slave}
+  \regitem{Bit 28}{SLAVE\_EXT}{R/W}{When set uses external clock for slave}
+  \regitem{Bit 26}{PDM\_CLK\_EN}{R/W}{When enabled slave output clock is taken from PDM module}
+  \regitem{Bit 25}{MASTER\_CLK\_EN}{R/W}{Enables Master clock}
+  \regitem{Bit 24}{SLAVE\_CLK\_EN}{R/W}{Enables Slave clock}
+  \regitem{Bit 23 - 16}{COMMON\_CLK\_DIV}{R/W}{MSBs of both master and slave clock divider}
+  \regitem{Bit 15 - 8}{SLAVE\_CLK\_DIV}{R/W}{LSB of slave clock divider}
+  \regitem{Bit 7 - 0}{MASTER\_CLK\_DIV}{R/W}{LSB of master clock divider}
+}
+
+
+\regdoc{0x1A102324}{0x00000000}{I2S\_SLV\_SETUP}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~SLAVE\_EN~}} \bitbox{13}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~SLAVE\_2CH~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~SLAVE\_LSB~}} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{3}{\color{lightgray}\rule{\width}{\height}} \bitbox{5}{SLAVE\_BITS} \bitbox{5}{\color{lightgray}\rule{\width}{\height}} \bitbox{3}{SLAVE\_WORDS}
+  \end{bytefield}
+}{
+  \regitem{Bit 31}{SLAVE\_EN}{R/W}{Enables the Slave}
+  \regitem{Bit 17}{SLAVE\_2CH}{R/W}{Enables both channels}
+  \regitem{Bit 16}{SLAVE\_LSB}{R/W}{Enables LSB shifting}
+  \regitem{Bit 12 - 8}{SLAVE\_BITS}{R/W}{Sets how many bits per word}
+  \regitem{Bit 2 - 0}{SLAVE\_WORDS}{R/W}{Sets how many words for each I2S phase}
+}
+
+
+\regdoc{0x1A102328}{0x00000000}{I2S\_MST\_SETUP}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~MASTER\_EN~}} \bitbox{13}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~MASTER\_2CH~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~MASTER\_LSB~}} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{3}{\color{lightgray}\rule{\width}{\height}} \bitbox{5}{MASTER\_BITS} \bitbox{5}{\color{lightgray}\rule{\width}{\height}} \bitbox{3}{MASTER\_WORDS}
+  \end{bytefield}
+}{
+  \regitem{Bit 31}{MASTER\_EN}{R/W}{Enables the Master}
+  \regitem{Bit 17}{MASTER\_2CH}{R/W}{Enables both channels}
+  \regitem{Bit 16}{MASTER\_LSB}{R/W}{Enables LSB shifting}
+  \regitem{Bit 12 - 8}{MASTER\_BITS}{R/W}{Sets how many bits per word}
+  \regitem{Bit 2 - 0}{MASTER\_WORDS}{R/W}{Sets how many words for each I2S phase}
+}
+
+
+\regdoc{0x1A10232C}{0x00000000}{I2S\_PDM\_SETUP}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{3}{\color{lightgray}\rule{\width}{\height}} \bitbox{10}{PDM\_DECIMATION} \bitbox{3}{PDM\_SHIFT}
+  \end{bytefield}
+}{
+  \regitem{Bit 12 - 3}{PDM\_DECIMATION}{R/W}{Sets the decimation ratio of the filter}
+  \regitem{Bit 2 - 0}{PDM\_SHIFT}{R/W}{Shifts the output of the filter}
+}
+

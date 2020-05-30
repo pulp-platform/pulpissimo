@@ -1,0 +1,355 @@
+
+\subsection{APB GPIO Registers}
+{\small
+\begin{tabularx}{\textwidth}{|l|l|l|l|l|l|X|}
+  \hline
+  \textbf{Name} & \textbf{Address}  & \textbf{Size} & \textbf{Type} & \textbf{Access} & \textbf{Default} & \textbf{Description} \\
+  \hline
+  PADDIR\_00\_31 & \texttt{0x1A101000} & 32 & Config & R/W & \texttt{0x00000000} & GPIO pad direction configuration register.\\
+  \hline
+  GPIOEN\_00\_31 & \texttt{0x1A101004} & 32 & Config & R/W & \texttt{0x00000000} & GPIO enable register.\\
+  \hline
+  PADIN\_00\_31 & \texttt{0x1A101008} & 32 & Config & R & \texttt{0x00000000} & GPIO pad input value register.\\
+  \hline
+  PADOUT\_00\_31 & \texttt{0x1A10100C} & 32 & Config & R/W & \texttt{0x00000000} & GPIO pad output value register.\\
+  \hline
+  PADOUTSET\_00\_31 & \texttt{0x1A101010} & 32 & Config & R/W & \texttt{0x00000000} & GPIO pad output set register.\\
+  \hline
+  PADOUTCLR\_00\_31 & \texttt{0x1A101014} & 32 & Config & R/W & \texttt{0x00000000} & GPIO pad output clear register.\\
+  \hline
+  INTEN\_00\_31 & \texttt{0x1A101018} & 32 & Config & R/W & \texttt{0x00000000} & GPIO pad interrupt enable configuration register.\\
+  \hline
+  INTTYPE\_00\_15 & \texttt{0x1A10101C} & 32 & Config & R/W & \texttt{0x00000000} & GPIO pad interrupt type gpio 0 to 15 register.\\
+  \hline
+  INTTYPE\_16\_31 & \texttt{0x1A101020} & 32 & Config & R/W & \texttt{0x00000000} & GPIO pad interrupt type gpio 16 to 31 register.\\
+  \hline
+  INTSTATUS\_00\_31 & \texttt{0x1A101024} & 32 & Status & R & \texttt{0x00000000} & GPIO pad interrupt status register.\\
+  \hline
+  PADCFG\_00\_07 & \texttt{0x1A101028} & 32 & Config & R/W & \texttt{0x00000000} & GPIO pad pin 0 to 7 configuration register.\\
+  \hline
+  PADCFG\_08\_15 & \texttt{0x1A10102C} & 32 & Config & R/W & \texttt{0x00000000} & GPIO pad pin 8 to 15 configuration register.\\
+  \hline
+  PADCFG\_16\_23 & \texttt{0x1A101030} & 32 & Config & R/W & \texttt{0x00000000} & GPIO pad pin 16 to 23 configuration register.\\
+  \hline
+  PADCFG\_24\_31 & \texttt{0x1A101034} & 32 & Config & R/W & \texttt{0x00000000} & GPIO pad pin 24 to 31 configuration register.\\
+  \hline
+  PADDIR\_32\_63 & \texttt{0x1A101038} & 32 & Config & R/W & \texttt{0x00000000} & GPIO pad direction configuration register.\\
+  \hline
+  GPIOEN\_32\_63 & \texttt{0x1A10103C} & 32 & Config & R/W & \texttt{0x00000000} & GPIO enable register.\\
+  \hline
+  PADIN\_32\_63 & \texttt{0x1A101040} & 32 & Config & R & \texttt{0x00000000} & GPIO pad input value register.\\
+  \hline
+  PADOUT\_32\_63 & \texttt{0x1A101044} & 32 & Config & R/W & \texttt{0x00000000} & GPIO pad output value register.\\
+  \hline
+  PADOUTSET\_32\_63 & \texttt{0x1A101048} & 32 & Config & R/W & \texttt{0x00000000} & GPIO pad output set register.\\
+  \hline
+  PADOUTCLR\_32\_63 & \texttt{0x1A10104C} & 32 & Config & R/W & \texttt{0x00000000} & GPIO pad output clear register.\\
+  \hline
+  INTEN\_32\_63 & \texttt{0x1A101050} & 32 & Config & R/W & \texttt{0x00000000} & GPIO pad interrupt enable configuration register.\\
+  \hline
+  INTTYPE\_32\_47 & \texttt{0x1A101054} & 32 & Config & R/W & \texttt{0x00000000} & GPIO pad interrupt type gpio 32 to 47 register.\\
+  \hline
+  INTTYPE\_48\_63 & \texttt{0x1A101058} & 32 & Config & R/W & \texttt{0x00000000} & GPIO pad interrupt type gpio 48 to 63 register.\\
+  \hline
+  INTSTATUS\_32\_63 & \texttt{0x1A10105C} & 32 & Status & R & \texttt{0x00000000} & GPIO pad interrupt status register.\\
+  \hline
+  PADCFG\_32\_39 & \texttt{0x1A101060} & 32 & Config & R/W & \texttt{0x00000000} & GPIO pad pin 32 to 39 configuration register.\\
+  \hline
+  PADCFG\_40\_47 & \texttt{0x1A101064} & 32 & Config & R/W & \texttt{0x00000000} & GPIO pad pin 40 to 47 configuration register.\\
+  \hline
+  PADCFG\_48\_55 & \texttt{0x1A101068} & 32 & Config & R/W & \texttt{0x00000000} & GPIO pad pin 48 to 55 configuration register.\\
+  \hline
+  PADCFG\_56\_63 & \texttt{0x1A10106C} & 32 & Config & R/W & \texttt{0x00000000} & GPIO pad pin 56 to 63 configuration register.\\
+  \hline
+  \caption{APB GPIO}
+\end{tabularx}
+}
+
+
+\regdoc{0x1A101000}{0x00000000}{PADDIR\_00\_31}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{DIR} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{DIR}
+  \end{bytefield}
+}{
+  \regitem{Bit 31 - 0}{DIR}{R/W}{GPIO[31:0] direction configuration bitfield:\\- bit[i]=1'b0: Input mode for GPIO[i]\\- bit[i]=1'b1: Output mode for GPIO[i]}
+}
+
+
+\regdoc{0x1A101004}{0x00000000}{GPIOEN\_00\_31}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{GPIOEN} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{GPIOEN}
+  \end{bytefield}
+}{
+  \regitem{Bit 31 - 0}{GPIOEN}{R/W}{GPIO[31:0] clock enable configuration bitfield:\\- bit[i]=1'b0: disable clock for GPIO[i]\\- bit[i]=1'b1: enable clock for GPIO[i]\\GPIOs are gathered by groups of 4. The clock gating of one group is done only if all 4 GPIOs are disabled. \\Clock must be enabled for a GPIO if it's direction is configured in input mode.}
+}
+
+
+\regdoc{0x1A101008}{0x00000000}{PADIN\_00\_31}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{DATA\_IN} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{DATA\_IN}
+  \end{bytefield}
+}{
+  \regitem{Bit 31 - 0}{DATA\_IN}{R}{GPIO[31:0] input data read bitfield. DATA\_IN[i] corresponds to input data of GPIO[i].}
+}
+
+
+\regdoc{0x1A10100C}{0x00000000}{PADOUT\_00\_31}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{DATA\_OUT} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{DATA\_OUT}
+  \end{bytefield}
+}{
+  \regitem{Bit 31 - 0}{DATA\_OUT}{R/W}{GPIO[31:0] output data read bitfield. DATA\_OUT[i] corresponds to output data set on GPIO[i].}
+}
+
+
+\regdoc{0x1A101018}{0x00000000}{INTEN\_00\_31}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{INTEN} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{INTEN}
+  \end{bytefield}
+}{
+  \regitem{Bit 31 - 0}{INTEN}{R/W}{GPIO[31:0] interrupt enable configuration bitfield:\\- bit[i]=1'b0: disable interrupt for GPIO[i]\\- bit[i]=1'b1: enable interrupt for GPIO[i]}
+}
+
+
+\regdoc{0x1A10101C}{0x00000000}{INTTYPE\_00\_15}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{INTTYPE0} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{INTTYPE0}
+  \end{bytefield}
+}{
+  \regitem{Bit 31 - 0}{INTTYPE0}{R/W}{GPIO[15:0] interrupt type configuration bitfield:\\- bit[2*i+1:2*i]=2'b00: interrupt on falling edge for GPIO[i]\\- bit[2*i+1:2*i]=2'b01: interrupt on rising edge for GPIO[i]\\- bit[2*i+1:2*i]=2'b10: interrupt on rising and falling edge for GPIO[i]\\- bit[2*i+1:2*i]=2'b11: RFU}
+}
+
+
+\regdoc{0x1A101020}{0x00000000}{INTTYPE\_16\_31}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{INTTYPE1} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{INTTYPE1}
+  \end{bytefield}
+}{
+  \regitem{Bit 31 - 0}{INTTYPE1}{R/W}{GPIO[31:16] interrupt type configuration bitfield:\\- bit[2*i+1:2*i]=2'b00: interrupt on falling edge for GPIO[16+i]\\- bit[2*i+1:2*i]=2'b01: interrupt on rising edge for GPIO[16+i]\\- bit[2*i+1:2*i]=2'b10: interrupt on rising and falling edge for GPIO[16+i]\\- bit[2*i+1:2*i]=2'b11: RFU}
+}
+
+
+\regdoc{0x1A101024}{0x00000000}{INTSTATUS\_00\_31}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{INTSTATUS} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{INTSTATUS}
+  \end{bytefield}
+}{
+  \regitem{Bit 31 - 0}{INTSTATUS}{R}{GPIO[31:0] Interrupt status flags bitfield. INTSTATUS[i]=1 when interrupt received on GPIO[i]. INTSTATUS is cleared when it is red. GPIO interrupt line is also cleared when INTSTATUS register is red.}
+}
+
+
+\regdoc{0x1A101028}{0x00000000}{PADCFG\_00\_07}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{CFG} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{CFG}
+  \end{bytefield}
+}{
+  \regitem{Bit 31 - 0}{CFG}{R/W}{GPIO[i] configuration bitfield, 0 <= i < 8:\\CFG[4*i+3:4*i] denotes a pad specific configuration (drive strength, Schmitt triggers, slew rate, etc.). This is dependant on the exact pads used.}
+}
+
+
+\regdoc{0x1A10102C}{0x00000000}{PADCFG\_08\_15}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{CFG} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{CFG}
+  \end{bytefield}
+}{
+  \regitem{Bit 31 - 0}{CFG}{R/W}{GPIO[i] configuration bitfield, 8 <= i < 16:\\CFG[4*i-8+3:4*i-8] denotes a pad specific configuration (drive strength, Schmitt triggers, slew rate, etc.). This is dependant on the exact pads used.}
+}
+
+
+\regdoc{0x1A101030}{0x00000000}{PADCFG\_16\_23}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{CFG} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{CFG}
+  \end{bytefield}
+}{
+  \regitem{Bit 31 - 0}{CFG}{R/W}{GPIO[i] configuration bitfield, 16 <= i < 24:\\CFG[4*i-16+3:4*i-16] denotes a pad specific configuration (drive strength, Schmitt triggers, slew rate, etc.). This is dependant on the exact pads used.}
+}
+
+
+\regdoc{0x1A101034}{0x00000000}{PADCFG\_24\_31}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{CFG} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{CFG}
+  \end{bytefield}
+}{
+  \regitem{Bit 31 - 0}{CFG}{R/W}{GPIO[i] configuration bitfield, 24 <= i < 32:\\CFG[4*i-24+3:4*i-24] denotes a pad specific configuration (drive strength, Schmitt triggers, slew rate, etc.). This is dependant on the exact pads used.}
+}
+
+
+\regdoc{0x1A101038}{0x00000000}{PADDIR\_32\_63}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{DIR} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{DIR}
+  \end{bytefield}
+}{
+  \regitem{Bit 31 - 0}{DIR}{R/W}{GPIO[63:32] direction configuration bitfield:\\- bit[i]=1'b0: Input mode for GPIO[i]\\- bit[i]=1'b1: Output mode for GPIO[i]}
+}
+
+
+\regdoc{0x1A10103C}{0x00000000}{GPIOEN\_32\_63}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{GPIOEN} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{GPIOEN}
+  \end{bytefield}
+}{
+  \regitem{Bit 31 - 0}{GPIOEN}{R/W}{GPIO[63:32] clock enable configuration bitfield:\\- bit[i]=1'b0: disable clock for GPIO[i]\\- bit[i]=1'b1: enable clock for GPIO[i]\\GPIOs are gathered by groups of 4. The clock gating of one group is done only if all 4 GPIOs are disabled. \\Clock must be enabled for a GPIO if it's direction is configured in input mode.}
+}
+
+
+\regdoc{0x1A101040}{0x00000000}{PADIN\_32\_63}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{DATA\_IN} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{DATA\_IN}
+  \end{bytefield}
+}{
+  \regitem{Bit 31 - 0}{DATA\_IN}{R}{GPIO[63:32] input data read bitfield. DATA\_IN[i] corresponds to input data of GPIO[i].}
+}
+
+
+\regdoc{0x1A101044}{0x00000000}{PADOUT\_32\_63}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{DATA\_OUT} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{DATA\_OUT}
+  \end{bytefield}
+}{
+  \regitem{Bit 31 - 0}{DATA\_OUT}{R/W}{GPIO[63:32] output data read bitfield. DATA\_OUT[i] corresponds to output data set on GPIO[i].}
+}
+
+
+\regdoc{0x1A101050}{0x00000000}{INTEN\_32\_63}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{INTEN} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{INTEN}
+  \end{bytefield}
+}{
+  \regitem{Bit 31 - 0}{INTEN}{R/W}{GPIO[63:32] interrupt enable configuration bitfield:\\- bit[i]=1'b0: disable interrupt for GPIO[i]\\- bit[i]=1'b1: enable interrupt for GPIO[i]}
+}
+
+
+\regdoc{0x1A101054}{0x00000000}{INTTYPE\_32\_47}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{INTTYPE0} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{INTTYPE0}
+  \end{bytefield}
+}{
+  \regitem{Bit 31 - 0}{INTTYPE0}{R/W}{GPIO[47:32] interrupt type configuration bitfield:\\- bit[2*i+1:2*i]=2'b00: interrupt on falling edge for GPIO[i]\\- bit[2*i+1:2*i]=2'b01: interrupt on rising edge for GPIO[i]\\- bit[2*i+1:2*i]=2'b10: interrupt on rising and falling edge for GPIO[i]\\- bit[2*i+1:2*i]=2'b11: RFU}
+}
+
+
+\regdoc{0x1A101058}{0x00000000}{INTTYPE\_48\_63}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{INTTYPE1} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{INTTYPE1}
+  \end{bytefield}
+}{
+  \regitem{Bit 31 - 0}{INTTYPE1}{R/W}{GPIO[63:48] interrupt type configuration bitfield:\\- bit[2*i+1:2*i]=2'b00: interrupt on falling edge for GPIO[16+i]\\- bit[2*i+1:2*i]=2'b01: interrupt on rising edge for GPIO[16+i]\\- bit[2*i+1:2*i]=2'b10: interrupt on rising and falling edge for GPIO[16+i]\\- bit[2*i+1:2*i]=2'b11: RFU}
+}
+
+
+\regdoc{0x1A10105C}{0x00000000}{INTSTATUS\_32\_63}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{INTSTATUS} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{INTSTATUS}
+  \end{bytefield}
+}{
+  \regitem{Bit 31 - 0}{INTSTATUS}{R}{GPIO[63:32] Interrupt status flags bitfield. INTSTATUS[i]=1 when interrupt received on GPIO[i]. INTSTATUS is cleared when it is red. GPIO interrupt line is also cleared when INTSTATUS register is red.}
+}
+
+
+\regdoc{0x1A101060}{0x00000000}{PADCFG\_32\_39}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{CFG} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{CFG}
+  \end{bytefield}
+}{
+  \regitem{Bit 31 - 0}{CFG}{R/W}{GPIO[i] configuration bitfield, 32 <= i < 40:\\CFG[4*i-32+3:4*i-32] denotes a pad specific configuration (drive strength, Schmitt triggers, slew rate, etc.). This is dependant on the exact pads used.}
+}
+
+
+\regdoc{0x1A101064}{0x00000000}{PADCFG\_40\_47}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{CFG} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{CFG}
+  \end{bytefield}
+}{
+  \regitem{Bit 31 - 0}{CFG}{R/W}{GPIO[i] configuration bitfield, 40 <= i < 48:\\CFG[4*i-40+3:4*i-40] denotes a pad specific configuration (drive strength, Schmitt triggers, slew rate, etc.). This is dependant on the exact pads used.}
+}
+
+
+\regdoc{0x1A101068}{0x00000000}{PADCFG\_48\_55}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{CFG} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{CFG}
+  \end{bytefield}
+}{
+  \regitem{Bit 31 - 0}{CFG}{R/W}{GPIO[i] configuration bitfield, 48 <= i < 56:\\CFG[4*i-48+3:4*i-48] denotes a pad specific configuration (drive strength, Schmitt triggers, slew rate, etc.). This is dependant on the exact pads used.}
+}
+
+
+\regdoc{0x1A10106C}{0x00000000}{PADCFG\_56\_63}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{CFG} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{CFG}
+  \end{bytefield}
+}{
+  \regitem{Bit 31 - 0}{CFG}{R/W}{GPIO[i] configuration bitfield, 56 <= i < 64:\\CFG[4*i-56+3:4*i-56] denotes a pad specific configuration (drive strength, Schmitt triggers, slew rate, etc.). This is dependant on the exact pads used.}
+}
+

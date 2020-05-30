@@ -1,0 +1,51 @@
+
+\subsection{uDMA Control Registers}
+{\small
+\begin{tabularx}{\textwidth}{|l|l|l|l|l|l|X|}
+  \hline
+  \textbf{Name} & \textbf{Address}  & \textbf{Size} & \textbf{Type} & \textbf{Access} & \textbf{Default} & \textbf{Description} \\
+  \hline
+  CTRL\_CFG\_CG & \texttt{0x1A102000} & 32 & Config & R/W & \texttt{0x00000000} & uDMA peripherals clock gate configuration\\
+  \hline
+  CTRL\_CFG\_EVENT & \texttt{0x1A102004} & 32 & Config & R/W & \texttt{0x00000000} & uDMA peripherals external event configuration\\
+  \hline
+  CTRL\_CFG\_RST & \texttt{0x1A102008} & 32 & Config & R/W & \texttt{0x00000000} & uDMA peripherals reset trigger (unimplemented)\\
+  \hline
+  \caption{uDMA Control}
+\end{tabularx}
+}
+
+
+\regdoc{0x1A102000}{0x00000000}{CTRL\_CFG\_CG}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{8}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~CG\_FILTER~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~CG\_CAM~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~CG\_I2S~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~CG\_SDIO~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~CG\_I2C1~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~CG\_I2C0~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~CG\_SPIM~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~CG\_UART~}}
+  \end{bytefield}
+}{
+  \regitem{Bit 7}{CG\_FILTER}{R/W}{Defines uDMA peripherals clock gate configuration for FILTER}
+  \regitem{Bit 6}{CG\_CAM}{R/W}{Defines uDMA peripherals clock gate configuration for CAM}
+  \regitem{Bit 5}{CG\_I2S}{R/W}{Defines uDMA peripherals clock gate configuration for I2S}
+  \regitem{Bit 4}{CG\_SDIO}{R/W}{Defines uDMA peripherals clock gate configuration for SDIO}
+  \regitem{Bit 3}{CG\_I2C1}{R/W}{Defines uDMA peripherals clock gate configuration for I2C1}
+  \regitem{Bit 2}{CG\_I2C0}{R/W}{Defines uDMA peripherals clock gate configuration for I2C0}
+  \regitem{Bit 1}{CG\_SPIM}{R/W}{Defines uDMA peripherals clock gate configuration for SPIM}
+  \regitem{Bit 0}{CG\_UART}{R/W}{Defines uDMA peripherals clock gate configuration for UART}
+}
+
+
+\regdoc{0x1A102004}{0x00000000}{CTRL\_CFG\_EVENT}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{8}{CMP\_EVT3} \bitbox{8}{CMP\_EVT2} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{8}{CMP\_EVT1} \bitbox{8}{CMP\_EVT0}
+  \end{bytefield}
+}{
+  \regitem{Bit 31 - 24}{CMP\_EVT3}{R/W}{Forward event with ID matching CMP\_EVT3 to peripherals as event3}
+  \regitem{Bit 23 - 16}{CMP\_EVT2}{R/W}{Forward event with ID matching CMP\_EVT2 to peripherals as event2}
+  \regitem{Bit 15 - 8}{CMP\_EVT1}{R/W}{Forward event with ID matching CMP\_EVT1 to peripherals as event1}
+  \regitem{Bit 7 - 0}{CMP\_EVT0}{R/W}{Forward event with ID matching CMP\_EVT0 to peripherals as event0}
+}
+

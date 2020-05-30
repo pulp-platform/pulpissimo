@@ -1,0 +1,101 @@
+\subsection{uDMA SPI Command list}
+The SPI module uses a third uDMA channel (appart from the TX and RX channel) to
+supply it with a stream of simple configuration commands.
+This allows to programm complex transactions without involvement of a processor
+core.
+The processor prepares the stream of uDMA commands at an appropriate memory
+location.
+Then it configures the command chanels and the TX/RX channel accordingly.
+The following list contains all possible uDMA commands.
+{\small
+  \begin{tabularx}{\textwidth}{|l|l|l|}
+      \hline
+      \textbf{CMD Name} & \textbf{OP Code}  & \textbf{CMD Description} \\
+      \hline
+      SPI\_CMD\_CFG       	& 0x0 & Sets the configuration for the SPI Master IP \\
+      SPI\_CMD\_SOT       	& 0x1 & Sets the Chip Select (CS) \\
+      SPI\_CMD\_SEND\_CMD  	& 0x2 & Transmits up to 16bits of data sent in the command \\
+      SPI\_CMD\_DUMMY     	& 0x4 & Receives a number of dummy bits (not sent to the rx interface) \\
+      SPI\_CMD\_WAIT      	& 0x5 & Waits an external event to move to the next instruction \\
+      SPI\_CMD\_TX\_DATA   	& 0x6 & Sends data (max 256Kbits) \\
+      SPI\_CMD\_RX\_DATA   	& 0x7 & Receives data (max 256Kbits) \\
+      SPI\_CMD\_RPT       	& 0x8 & Repeat the commands until RTP\_END for N times \\
+      SPI\_CMD\_EOT       	& 0x9 & Clears the Chip Select (CS) \\
+      SPI\_CMD\_RPT\_END   	& 0xA & End of the repeat loop command \\
+      SPI\_CMD\_RX\_CHECK  	& 0xB & Checks up to 16 bits of data against an expected value \\
+      SPI\_CMD\_FULL\_DUPL 	& 0xC & Activate full duplex mode \\
+      SPI\_CMD\_SETUP\_UCA 	& 0xD & Sets address for uDMA tx/rx channel \\
+      SPI\_CMD\_SETUP\_UCS 	& 0xE & Sets size and starts uDMA tx/rx channel \\
+      \hline
+  \end{tabularx}
+}
+
+\subsection{SPI\_CMD\_CFG}
+Sets the configuration for the SPI Master IP.
+\begin{center}
+  \begin{bytefield}[endianness=big,bitwidth=1.5em]{32}
+      \bitheader{0,7,8,9,27,28,31} \\
+      \bitbox{4}{CMD (0x0)} \bitbox{17}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\tiny{CPOL}} \bitbox{1}{\tiny{CPHA}} \bitbox{8}{CLKDIV} \\
+  \end{bytefield}
+\end{center}
+\begin{itemize}
+  \item \textbf{CPOL}: Sets the clock polarity:
+    \begin{itemize}
+      \item 1'b0: CPOL0
+      \item 1'b1: CPOL1
+    \end{itemize}
+  \item \textbf{CPHA}: Sets the clock phase:
+    \begin{itemize}
+      \item 1'b0: CPHA0
+      \item 1'b1: CPHA1
+    \end{itemize}
+\end{itemize}
+
+
+
+\subsection{SPI\_CMD\_SOT}
+Sets the Chip Select (CS).
+\begin{center}
+    \begin{bytefield}[endianness=big,bitwidth=1.5em]{32}
+        \bitheader{0,1,2,27,28,31} \\
+        \bitbox{4}{CMD (0x1)} \bitbox{26}{\color{lightgray}\rule{\width}{\height}} \bitbox{2}{\tiny{CS}} \\
+    \end{bytefield}
+\end{center}
+\begin{itemize}
+  \item \textbf{CS}: Sets the chip select (CS):
+    \begin{itemize}
+      \item 2'b00: Select CSN0
+      \item 2'b01: Select CSN1
+      \item 2'b10: Select CSN2
+      \item 2'b11: Select CSN3
+    \end{itemize}
+\end{itemize}
+
+\subsection{SPI\_CMD\_SEND\_CMD}
+Transmits up to 16bits of data sent in the command.
+\begin{center}
+    \begin{bytefield}[endianness=big,bitwidth=1.5em]{32}
+        \bitheader{0,15,16,19,20,25,26,27,28,31} \\
+        \bitbox{4}{CMD (0x2)} \bitbox{1}{\tiny{QPI}} \bitbox{1}{\tiny{LSB}} \bitbox{6}{\color{lightgray}\rule{\width}{\height}} \bitbox{4}{\tiny{SIZE}} \bitbox{16}{VALUE}\\
+    \end{bytefield}
+\end{center}
+\begin{itemize}
+  \item \textbf{QPI}: Sends the command using QuadSPI.
+  \item \textbf{LSB}: Send the data starting LSB first.
+  \item \textbf{SIZE}: Size in bits of the command ot send. The value written here is num bits-1.
+  \item \textbf{VALUE}: The data to be send. MSB must always be at bit 15 also if SIZE is lower than 16.
+\end{itemize}
+
+\subsection{SPI\_CMD\_DUMMY}
+Receives a number of dummy bits (not sent to the rx interface)
+\begin{center}
+    \begin{bytefield}[endianness=big,bitwidth=1.5em]{32}
+        \bitheader{0,15,16,20,21,27,28,31} \\
+        \bitbox{4}{CMD (0x4)} \bitbox{7}{\color{lightgray}\rule{\width}{\height}} \bitbox{5}{\tiny{CYCLES}} \bitbox{16}{\color{lightgray}\rule{\width}{\height}}\\
+    \end{bytefield}
+\end{center}
+\begin{itemize}
+  \item \textbf{CYCLES}: Number of dummy cycles to perform.
+\end{itemize}
+
+

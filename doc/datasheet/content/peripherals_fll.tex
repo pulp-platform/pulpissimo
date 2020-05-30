@@ -1,7 +1,111 @@
 \section{FLL}
 
-\pulpissimo containts 3 FLLs. One FLL is meant for generating the clock for the peripheral domain, one for the core domain (core, memories, event unit etc) and one is meant for the cluster. The latter is not used.
+\pulpissimo containts 3 FLLs. One FLL is meant for generating the clock for the
+peripheral domain, one for the core domain (core, memories, event unit etc) and
+one is meant for the cluster. The latter is not used.
 
-All the FLLs can be bypassed by writing to the JTAG register before the reset signal is asserted. See Section ~\ref{sec:soc_ctrl} for more details about the bypass register.
+All the FLLs can be bypassed by writing to the JTAG register before the reset
+signal is asserted. See Section ~\ref{sec:soc_ctrl} for more details about the
+bypass register.
 
-See the FLL documentation for more details under the FLL repository.
+\subsection{SoC FLL registers}
+\begin{table}[htbp]
+  \small
+\begin{tabularx}{\textwidth}{|l|l|l|l|l|l|X|}
+  \hline
+  \textbf{Name} & \textbf{Address}  & \textbf{Size} & \textbf{Type} & \textbf{Access} & \textbf{Default} & \textbf{Description} \\
+  \hline
+  STATUS & \texttt{0x1A100000} & 32 & Status & R    & \texttt{0x00000000} & FLL status register \\
+  \hline
+  CFG1   & \texttt{0x1A100004} & 32 & Config & R/W    & \texttt{0x00000000} & FLL configuration 1 register \\
+  \hline
+  CFG2   & \texttt{0x1A100008} & 32 & Config & R/W    & \texttt{0x00000000} & FLL configuration 2 register \\
+  \hline
+  INTEG  & \texttt{0x1A10000C} & 32 & Config & R/W    & \texttt{0x00000000} & FLL integrator configuration register. \\
+  \hline
+\end{tabularx}
+\caption{SoC FLL register table \label{tab:table_label}}
+\end{table}
+
+
+\regdoc{0x1A10\_0000}{0x0000\_0000}{STATUS}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+  \bitheader[lsb=16]{16-31} \\
+  \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
+  \bitheader{0-15} \\
+  \bitbox{16}{MF}
+  \end{bytefield}
+}{
+  \regitem{Bit 15-0}{MF}{R}{Current DCO multiplication factor value bitfield}
+}
+
+\regdoc{0x1A10\_0004}{0x0000\_0000}{CFG1}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+  \bitheader[lsb=16]{16-31} \\
+  \bitbox{1}{\tiny CKM} \bitbox{1}{\tiny CKG} \bitbox{4}{CKDIV} \bitbox{10}{ICS} \\[3ex]
+  \bitheader{0-15} \\
+  \bitbox{16}{MFN}
+  \end{bytefield}
+}{
+  \regitem{Bit 31}{CKM}{R/W}{FLL operation mode configuration bitfield
+    \begin{itemize}
+      \item 0b0: standalone
+      \item 0b1: normal
+    \end{itemize}}
+  \regitem{Bit 30}{CKG}{R/W}{FLL output clock divider configuration
+   \begin{itemize}
+      \item 0b0: not gated
+      \item 0b1: gated
+    \end{itemize}}
+  \regitem{Bit 29-26}{CKDIV}{R/W}{FLL output clock divider configuration}
+  \regitem{Bit 25-16}{ICS}{R/W}{DCO input code in standalone}
+  \regitem{Bit 15-0}{MFN}{R/W}{Target clock multiplication factor in normal mode}
+}
+
+\regdoc{0x1A10\_0008}{0x0000\_0000}{CFG2}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+  \bitheader[lsb=16]{16-31} \\
+  \bitbox{1}{\tiny DITH} \bitbox{1}{\tiny OL} \bitbox{1}{\tiny CKSEL} \bitbox{1}{\color{lightgray}\rule{\width}{\height}} \bitbox{12}{LT} \\[3ex]
+  \bitheader{0-15} \\
+  \bitbox{6}{SCKL} \bitbox{6}{UCKL} \bitbox{4}{LG}
+  \end{bytefield}
+}{
+  \regitem{Bit 31}{DITH}{R/W}{Dithering activation}
+  \regitem{Bit 30}{CKM}{R/W}{Open loop when locked
+    \begin{itemize}
+      \item 0b0: disabled
+      \item 0b1: enabled
+    \end{itemize}}
+  \regitem{Bit 29}{CKSEL}{R/W}{Configuration clock selection in standalone mode
+    \begin{itemize}
+      \item 0b0: DCO clock
+      \item 0b1: Reference clock
+    \end{itemize}}
+
+  \regitem{Bit 27-16}{LT}{R/W}{Lock tolerance configuration. It is the margin
+    around the multiplication factor within which the output clock is considered
+    stable.}
+
+  \regitem{Bit 15-10}{SCKL}{R/W}{Number of stable REFCLK cycles until LOCK
+    assert in normal mode. Uppper 6 bits of LOCK assert counter target in
+    standalone mode.}
+
+  \regitem{Bit 9-4}{UCKL}{R/W}{Number of unstable REFCLK cycles until LOCK
+    de-assert in normal mode. Lower 6 bits of LOCK assert counter target in
+    standalone mode.}
+  \regitem{Bit 3-0}{LG}{R/W}{FLL loop gain setting}
+}
+
+
+\regdoc{0x1A10\_000C}{0x0000\_0000}{INTEG}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+  \bitheader[lsb=16]{16-31} \\
+  \bitbox{6}{\color{lightgray}\rule{\width}{\height}} \bitbox{10}{INTEG} \\[3ex]
+  \bitheader{0-15} \\
+  \bitbox{10}{FRAC} \bitbox{6}{\color{lightgray}\rule{\width}{\height}}
+  \end{bytefield}
+}{
+  \regitem{Bit 25-16}{INTEG}{R/W}{Integer part of integrator state bitfield. It corresponds to DCO unit bits.}
+  \regitem{Bit 15-6}{FRAC}{R/W}{Fractional part of integrator state bitfield. It corresponds to dither unit input.}
+}
+

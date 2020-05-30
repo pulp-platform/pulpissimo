@@ -1,0 +1,150 @@
+
+\subsection{uDMA Camera Interface Registers}
+{\small
+\begin{tabularx}{\textwidth}{|l|l|l|l|l|l|X|}
+  \hline
+  \textbf{Name} & \textbf{Address}  & \textbf{Size} & \textbf{Type} & \textbf{Access} & \textbf{Default} & \textbf{Description} \\
+  \hline
+  CAM\_RX\_SADDR & \texttt{0x1A102380} & 32 & Config & R/W & \texttt{0x00000000} & RX Camera uDMA transfer address of associated buffer register\\
+  \hline
+  CAM\_RX\_SIZE & \texttt{0x1A102384} & 32 & Config & R/W & \texttt{0x00000000} & RX Camera uDMA transfer size of buffer register\\
+  \hline
+  CAM\_RX\_CFG & \texttt{0x1A102388} & 32 & Config & R/W & \texttt{0x00000000} & RX Camera uDMA transfer configuration register\\
+  \hline
+  CAM\_CFG\_GLOB & \texttt{0x1A1023A0} & 32 & Config & R/W & \texttt{0x00000000} & Global configuration register\\
+  \hline
+  CAM\_CFG\_LL & \texttt{0x1A1023A4} & 32 & Config & R/W & \texttt{0x00000000} & Lower Left corner configuration register\\
+  \hline
+  CAM\_CFG\_UR & \texttt{0x1A1023A8} & 32 & Config & R/W & \texttt{0x00000000} & Upper Right corner configuration register\\
+  \hline
+  CAM\_CFG\_SIZE & \texttt{0x1A1023AC} & 32 & Config & R/W & \texttt{0x00000000} & Horizontal Resolution configuration register\\
+  \hline
+  CAM\_CFG\_FILTER & \texttt{0x1A1023B0} & 32 & Config & R/W & \texttt{0x00000000} & RGB coefficients configuration register\\
+  \hline
+  CAM\_VSYNC\_POLARITY & \texttt{0x1A1023B4} & 32 & Config & R/W & \texttt{0x00000000} & VSYNC Polarity register\\
+  \hline
+  \caption{uDMA Camera Interface}
+\end{tabularx}
+}
+
+
+\regdoc{0x1A102380}{0x00000000}{CAM\_RX\_SADDR}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{RX\_SADDR}
+  \end{bytefield}
+}{
+  \regitem{Bit 15 - 0}{RX\_SADDR}{R/W}{Configure pointer to memory buffer:\\- Read: value of the pointer until transfer is over. Else returns 0\\- Write: set Address Pointer to memory buffer start address}
+}
+
+
+\regdoc{0x1A102384}{0x00000000}{CAM\_RX\_SIZE}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{15}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{RX\_SIZE} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{RX\_SIZE}
+  \end{bytefield}
+}{
+  \regitem{Bit 16 - 0}{RX\_SIZE}{R/W}{Buffer size in bytes. (128kBytes maximum)\\- Read: buffer size left\\- Write: set buffer size\\NOTE: Careful with size in byte. If you use uncompressed pixel data mapped on 16 bits, you have to declare buffer size in bytes even if buffer type is short.}
+}
+
+
+\regdoc{0x1A102388}{0x00000000}{CAM\_RX\_CFG}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{9}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\tiny CLR} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~PENDING~}} \bitbox{1}{\tiny EN} \bitbox{1}{\color{lightgray}\rule{\width}{\height}} \bitbox{2}{\let\bw=\width\resizebox{\bw}{!}{~DATASIZE~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~CONTINOUS~}}
+  \end{bytefield}
+}{
+  \regitem{Bit 6}{CLR}{W}{Channel clear and stop transfer:\\-1'b0: disable\\-1'b1: enable}
+  \regitem{Bit 5}{PENDING}{R}{Transfer pending in queue status flag:\\-1'b0: free\\-1'b1: pending}
+  \regitem{Bit 4}{EN}{R/W}{Channel enable and start transfer:\\-1'b0: disable\\-1'b1: enable\\This signal is used also to queue a transfer if one is already ongoing.}
+  \regitem{Bit 2 - 1}{DATASIZE}{R/W}{Channel transfer size used to increment uDMA buffer address pointer:\\- 2'b00: +1 (8 bits)\\- 2'b01: +2 (16 bits)\\- 2'b10: +4 (32 bits)\\- 2'b11: +0}
+  \regitem{Bit 0}{CONTINOUS}{R/W}{Channel continuous mode:\\-1'b0: disable\\-1'b1: enable\\At the end of the buffer the uDMA reloads the address and size and starts a new transfer.}
+}
+
+
+\regdoc{0x1A1023A0}{0x00000000}{CAM\_CFG\_GLOB}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{1}{\tiny EN} \bitbox{15}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{1}{\color{lightgray}\rule{\width}{\height}} \bitbox{4}{SHIFT} \bitbox{3}{FORMAT} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~FRAMESLICE\_EN~}} \bitbox{6}{FRAMEDROP\_VAL} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~FRAMEDROP\_EN~}}
+  \end{bytefield}
+}{
+  \regitem{Bit 31}{EN}{R/W}{Enable data rx from camera interface. \\The enable/disable happens only at the start of a frame.\\- 1'b0: disable\\- 1'b1: enable}
+  \regitem{Bit 14 - 11}{SHIFT}{R/W}{Right shift of final pixel value (DivFactor)\\NOTE: not used if FORMAT == BYPASS}
+  \regitem{Bit 10 - 8}{FORMAT}{R/W}{Input frame format:\\- 3'b000: RGB565\\- 3'b001: RGB555\\- 3'b010: RGB444\\- 3'b100: BYPASS\_LITEND\\- 3’b101: BYPASS\_BIGEND}
+  \regitem{Bit 7}{FRAMESLICE\_EN}{R/W}{Input frame slicing:\\- 1'b0: disable\\- 1'b1: enable}
+  \regitem{Bit 6 - 1}{FRAMEDROP\_VAL}{R/W}{Sets how many frames should be dropped after each received.}
+  \regitem{Bit 0}{FRAMEDROP\_EN}{R/W}{Frame dropping:\\- 1'b0: disable\\- 1'b1: enable}
+}
+
+
+\regdoc{0x1A1023A4}{0x00000000}{CAM\_CFG\_LL}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{FRAMESLICE\_LLY} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{FRAMESLICE\_LLX}
+  \end{bytefield}
+}{
+  \regitem{Bit 31 - 16}{FRAMESLICE\_LLY}{R/W}{Y coordinate of lower left corner of slice}
+  \regitem{Bit 15 - 0}{FRAMESLICE\_LLX}{R/W}{X coordinate of lower left corner of slice}
+}
+
+
+\regdoc{0x1A1023A8}{0x00000000}{CAM\_CFG\_UR}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{FRAMESLICE\_URY} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{FRAMESLICE\_URX}
+  \end{bytefield}
+}{
+  \regitem{Bit 31 - 16}{FRAMESLICE\_URY}{R/W}{Y coordinate of upper right corner of slice}
+  \regitem{Bit 15 - 0}{FRAMESLICE\_URX}{R/W}{X coordinate of upper right corner of slice}
+}
+
+
+\regdoc{0x1A1023AC}{0x00000000}{CAM\_CFG\_SIZE}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{ROWLEN} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{\color{lightgray}\rule{\width}{\height}}
+  \end{bytefield}
+}{
+  \regitem{Bit 31 - 16}{ROWLEN}{R/W}{Horizontal Resolution. It is used for slice mode. Value set into the bitfield must be equal to (rowlen-1).}
+}
+
+
+\regdoc{0x1A1023B0}{0x00000000}{CAM\_CFG\_FILTER}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{8}{\color{lightgray}\rule{\width}{\height}} \bitbox{8}{R\_COEFF} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{8}{G\_COEFF} \bitbox{8}{B\_COEFF}
+  \end{bytefield}
+}{
+  \regitem{Bit 23 - 16}{R\_COEFF}{R/W}{Coefficient that multiplies the R component\\NOTE: not used if FORMAT == BYPASS}
+  \regitem{Bit 15 - 8}{G\_COEFF}{R/W}{Coefficient that multiplies the G component\\NOTE: not used if FORMAT == BYPASS}
+  \regitem{Bit 7 - 0}{B\_COEFF}{R/W}{Coefficient that multiplies the B component\\NOTE: not used if FORMAT == BYPASS}
+}
+
+
+\regdoc{0x1A1023B4}{0x00000000}{CAM\_VSYNC\_POLARITY}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{15}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~VSYNC\_POLARITY~}}
+  \end{bytefield}
+}{
+  \regitem{Bit 0}{VSYNC\_POLARITY}{R/W}{Set vsync polarity of CPI.\\- 1'b0: Active 0\\- 1'b1: Active 1}
+}
+

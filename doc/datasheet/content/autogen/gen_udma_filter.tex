@@ -1,0 +1,152 @@
+
+\subsection{uDMA Filter Registers}
+{\small
+\begin{tabularx}{\textwidth}{|l|l|l|l|l|l|X|}
+  \hline
+  \textbf{Name} & \textbf{Address}  & \textbf{Size} & \textbf{Type} & \textbf{Access} & \textbf{Default} & \textbf{Description} \\
+  \hline
+  REG\_TX\_CH0\_ADD & \texttt{0x1A102400} & 32 & Config & R/W & \texttt{0x00000000} & FILTER tx channel 0 address register\\
+  \hline
+  REG\_TX\_CH0\_CFG & \texttt{0x1A102404} & 32 & Config & R/W & \texttt{0x00000000} & FILTER tx channel 0 configuration register\\
+  \hline
+  REG\_TX\_CH0\_LEN0 & \texttt{0x1A102408} & 32 & Config & R/W & \texttt{0x00000000} & FILTER tx channel 0 length0 register\\
+  \hline
+  REG\_TX\_CH0\_LEN1 & \texttt{0x1A10240C} & 32 & Config & R/W & \texttt{0x00000000} & FILTER tx channel 0 length1 register\\
+  \hline
+  REG\_TX\_CH0\_LEN2 & \texttt{0x1A102410} & 32 & Config & R/W & \texttt{0x00000000} & FILTER tx channel 0 length2 register\\
+  \hline
+  REG\_TX\_CH1\_ADD & \texttt{0x1A102414} & 32 & Config & R/W & \texttt{0x00000000} & FILTER tx channel 1 address register\\
+  \hline
+  REG\_TX\_CH1\_CFG & \texttt{0x1A102418} & 32 & Config & R/W & \texttt{0x00000000} & FILTER tx channel 1 configuration register\\
+  \hline
+  REG\_TX\_CH1\_LEN0 & \texttt{0x1A10241C} & 32 & Config & R/W & \texttt{0x00000000} & FILTER tx channel 1 length0 register\\
+  \hline
+  REG\_TX\_CH1\_LEN1 & \texttt{0x1A102420} & 32 & Config & R/W & \texttt{0x00000000} & FILTER tx channel 1 length1 register\\
+  \hline
+  REG\_TX\_CH1\_LEN2 & \texttt{0x1A102424} & 32 & Config & R/W & \texttt{0x00000000} & FILTER tx channel 1 length2 register\\
+  \hline
+  REG\_RX\_CH\_ADD & \texttt{0x1A102428} & 32 & Config & R/W & \texttt{0x00000000} & FILTER RX channel address register\\
+  \hline
+  REG\_RX\_CH\_CFG & \texttt{0x1A10242C} & 32 & Config & R/W & \texttt{0x00000000} & FILTER RX channel configuration register\\
+  \hline
+  REG\_RX\_CH\_LEN0 & \texttt{0x1A102430} & 32 & Config & R/W & \texttt{0x00000000} & FILTER RX channel length0 register\\
+  \hline
+  REG\_RX\_CH\_LEN1 & \texttt{0x1A102434} & 32 & Config & R/W & \texttt{0x00000000} & FILTER RX channel length1 register\\
+  \hline
+  REG\_RX\_CH\_LEN2 & \texttt{0x1A102438} & 32 & Config & R/W & \texttt{0x00000000} & FILTER RX channel length2 register\\
+  \hline
+  REG\_AU\_CFG & \texttt{0x1A10243C} & 32 & Config & R/W & \texttt{0x00000000} & FILTER arithmetic unit configuration register\\
+  \hline
+  REG\_AU\_REG0 & \texttt{0x1A102440} & 32 & Config & R/W & \texttt{0x00000000} & FILTER arithmetic unit 0 register\\
+  \hline
+  REG\_AU\_REG1 & \texttt{0x1A102444} & 32 & Config & R/W & \texttt{0x00000000} & FILTER arithmetic unit 1 register\\
+  \hline
+  REG\_BINCU\_TH & \texttt{0x1A102448} & 32 & Config & R/W & \texttt{0x00000000} & FILTER binarization threshold register\\
+  \hline
+  REG\_BINCU\_CNT & \texttt{0x1A10244C} & 32 & Config & R/W & \texttt{0x00000000} & FILTER binarization count register\\
+  \hline
+  REG\_BINCU\_SETUP & \texttt{0x1A102450} & 32 & Config & R/W & \texttt{0x00000000} & FILTER binarization datasize format register\\
+  \hline
+  REG\_BINCU\_VAL & \texttt{0x1A102454} & 32 & Status & R & \texttt{0x00000000} & FILTER binarization result count register\\
+  \hline
+  REG\_FILT & \texttt{0x1A102458} & 32 & Config & R/W & \texttt{0x00000000} & FILTER control mode register\\
+  \hline
+  REG\_FILT\_CMD & \texttt{0x1A10245C} & 32 & Config & R/W & \texttt{0x00000000} & FILTER start register\\
+  \hline
+  REG\_STATUS & \texttt{0x1A102460} & 32 & Status & R/W & \texttt{0x00000000} & FILTER status register\\
+  \hline
+  \caption{uDMA Filter}
+\end{tabularx}
+}
+
+
+\regdoc{0x1A102404}{0x00000000}{REG\_TX\_CH0\_CFG}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{6}{\color{lightgray}\rule{\width}{\height}} \bitbox{2}{\let\bw=\width\resizebox{\bw}{!}{~MODE~}} \bitbox{6}{\color{lightgray}\rule{\width}{\height}} \bitbox{2}{\let\bw=\width\resizebox{\bw}{!}{~SIZE~}}
+  \end{bytefield}
+}{
+  \regitem{Bit 9 - 8}{MODE}{R}{Data transfer mode:\\- 2’b00: Linear\\- 2’b01: Sliding\\- 2;b10:Circular\\- 2;b11:2D}
+  \regitem{Bit 1 - 0}{SIZE}{R}{Data transfer format:\\- 2’b00: 8-bit\\- 2’b01:16-bit\\- 2;b10:32-bit}
+}
+
+
+\regdoc{0x1A102418}{0x00000000}{REG\_TX\_CH1\_CFG}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{6}{\color{lightgray}\rule{\width}{\height}} \bitbox{2}{\let\bw=\width\resizebox{\bw}{!}{~MODE~}} \bitbox{6}{\color{lightgray}\rule{\width}{\height}} \bitbox{2}{\let\bw=\width\resizebox{\bw}{!}{~SIZE~}}
+  \end{bytefield}
+}{
+  \regitem{Bit 9 - 8}{MODE}{R/W}{Data transfer mode:\\- 2’b00: Linear\\- 2’b01: Sliding\\- 2;b10:Circular\\- 2;b11:2D}
+  \regitem{Bit 1 - 0}{SIZE}{R}{Data transfer format:\\- 2’b00: 8-bit\\- 2’b01:16-bit\\- 2’b10:32-bit}
+}
+
+
+\regdoc{0x1A10242C}{0x00000000}{REG\_RX\_CH\_CFG}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{6}{\color{lightgray}\rule{\width}{\height}} \bitbox{2}{\let\bw=\width\resizebox{\bw}{!}{~MODE~}} \bitbox{6}{\color{lightgray}\rule{\width}{\height}} \bitbox{2}{\let\bw=\width\resizebox{\bw}{!}{~SIZE~}}
+  \end{bytefield}
+}{
+  \regitem{Bit 9 - 8}{MODE}{R/W}{Data transfer mode:\\- 2’b00: Linear\\- 2’b01: Sliding\\- 2;b10:Circular\\- 2;b11:2D}
+  \regitem{Bit 1 - 0}{SIZE}{R/W}{Data transfer format:\\- 2’b00: 8-bit\\- 2’b01:16-bit\\- 2;b10:32-bit}
+}
+
+
+\regdoc{0x1A10243C}{0x00000000}{REG\_AU\_CFG}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{11}{\color{lightgray}\rule{\width}{\height}} \bitbox{5}{SHIFT} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{4}{\color{lightgray}\rule{\width}{\height}} \bitbox{4}{MODE} \bitbox{6}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~BYPASS~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~SIGNED~}}
+  \end{bytefield}
+}{
+  \regitem{Bit 20 - 16}{SHIFT}{R/W}{Arithmetic Unit shift window size, (0 – 31).}
+  \regitem{Bit 11 - 8}{MODE}{R/W}{Arithmetic Unit mode:\\-4’b0000: AU\_MODE\_AxB\\-4’b0001: AU\_MODE\_AxB+REG0\\-4’b0010: AU\_MODE\_AxB accumulation\\-4’b0011: AU\_MODE\_AxA\\-4’b0100: AU\_MODE\_AxA+B\\-4’b0101: AU\_MODE\_AxA-B\\-4’b0110: AU\_MODE\_AxA accumulation\\-4’b0111: AU\_MODE\_AxA+REG0\\-4’b1000: AU\_MODE\_AxREG1\\-4’b1001: AU\_MODE\_AxREG1+B\\-4’b1010: AU\_MODE\_AxREG1-B\\-4’b1011: AU\_MODE\_AxREG1+REG0\\-4’b1100: AU\_MODE\_AxREG1 accumulation\\-4’b1101: AU\_MODE\_A+B\\-4’b1110: AU\_MODE\_A-B\\-4’b1111: AU\_MODE\_A+REG0}
+  \regitem{Bit 1}{BYPASS}{R/W}{Arithmetic Unit bypass or not.\\-1’b0: not bypass AU\\-1’b1: bypass AU}
+  \regitem{Bit 0}{SIGNED}{R/W}{Arithmetic Unit result signed or not.\\-1’b0: not signed\\-1’b1: signed}
+}
+
+
+\regdoc{0x1A10244C}{0x00000000}{REG\_BINCU\_CNT}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{1}{\tiny EN} \bitbox{11}{\color{lightgray}\rule{\width}{\height}} \bitbox{4}{COUNT} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{COUNT}
+  \end{bytefield}
+}{
+  \regitem{Bit 31}{EN}{R/W}{ Binarization and counting unit enable:\\-1’b0: not enable \\-1’b1: enable}
+  \regitem{Bit 19 - 0}{COUNT}{R/W}{ Binarization and counting unit count value set.}
+}
+
+
+\regdoc{0x1A10245C}{0x00000000}{REG\_FILT\_CMD}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{15}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~START~}}
+  \end{bytefield}
+}{
+  \regitem{Bit 0}{START}{R/W}{Filter start flag, write only, write 1 to start the filter :}
+}
+
+
+\regdoc{0x1A102460}{0x00000000}{REG\_STATUS}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{15}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~DONE~}}
+  \end{bytefield}
+}{
+  \regitem{Bit 0}{DONE}{R/W}{Filter done flag, write 1 to clear the flag :\\-1’b0: Filter process is not finished\\-1’b1: Filter process is finished}
+}
+

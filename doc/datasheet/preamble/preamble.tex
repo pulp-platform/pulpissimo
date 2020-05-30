@@ -19,6 +19,8 @@
 
 % Provides stretchable tables.
 \usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{ltablex}
 
 % Provides image loading.
 \usepackage{graphicx}
@@ -59,7 +61,18 @@
 
 \usepackage{tikz-timing}[2009/05/15]
 
+% allow rotated text
+\usepackage{rotating}
 
+% hyperlinks in toc
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks,
+    citecolor=black,
+    filecolor=black,
+    linkcolor=black,
+    urlcolor=black
+}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%                                                                 %
 %%%%%     Custom Macros                                               %
@@ -131,6 +144,31 @@
     #5
   \end{enumerate}}
 
+\newcommand{\regdoc}[5]{
+  \subsection{#3}
+  \textbf{Address:} \texttt{#1}\\%
+  \textbf{Reset Value:} \texttt{#2}\\%
+  \begin{center}
+    #4
+  \end{center}
+  \begin{enumerate}[leftmargin=20mm]
+    #5
+  \end{enumerate}
+}
+
+\newcommand{\bitlabel}[2]{%
+  \bitbox[]{#1}{%
+    \raisebox{0pt}[4ex][0pt]{%
+      \turnbox{45}{\fontsize{7}{7}\selectfont#2}%
+    }%
+  }%
+}
+\definecolor{lightgray}{gray}{0.8}
+
 \newcommand\regItem[3]{%
   \item[\texttt{#1}] \textbf{#2}: #3
+}
+
+\newcommand\regitem[4]{%
+  \item[\texttt{#1}] \textbf{#2} \textit{(#3)} #4
 }

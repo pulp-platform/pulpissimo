@@ -1,0 +1,149 @@
+
+\subsection{uDMA SPI Registers}
+{\small
+\begin{tabularx}{\textwidth}{|l|l|l|l|l|l|X|}
+  \hline
+  \textbf{Name} & \textbf{Address}  & \textbf{Size} & \textbf{Type} & \textbf{Access} & \textbf{Default} & \textbf{Description} \\
+  \hline
+  SPIM\_RX\_SADDR & \texttt{0x1A102100} & 32 & Config & R/W & \texttt{0x00000000} & RX SPI uDMA transfer address of associated buffer\\
+  \hline
+  SPIM\_RX\_SIZE & \texttt{0x1A102104} & 32 & Config & R/W & \texttt{0x00000000} & RX SPI uDMA transfer size of buffer\\
+  \hline
+  SPIM\_RX\_CFG & \texttt{0x1A102108} & 32 & Config & R/W & \texttt{0x00000004} & RX SPI uDMA transfer configuration\\
+  \hline
+  SPIM\_TX\_SADDR & \texttt{0x1A102110} & 32 & Config & R/W & \texttt{0x00000000} & TX SPI uDMA transfer address of associated buffer\\
+  \hline
+  SPIM\_TX\_SIZE & \texttt{0x1A102114} & 32 & Config & R/W & \texttt{0x00000000} & TX SPI uDMA transfer size of buffer\\
+  \hline
+  SPIM\_TX\_CFG & \texttt{0x1A102118} & 32 & Config & R/W & \texttt{0x00000000} & TX SPI uDMA transfer configuration\\
+  \hline
+  SPIM\_CMD\_SADDR & \texttt{0x1A102120} & 32 & Config & R/W & \texttt{0x00000000} & CMD SPI uDMA transfer address of associated buffer\\
+  \hline
+  SPIM\_CMD\_SIZE & \texttt{0x1A102124} & 32 & Config & R/W & \texttt{0x00000000} & CMD SPI uDMA transfer size of buffer\\
+  \hline
+  SPIM\_CMD\_CFG & \texttt{0x1A102128} & 32 & Config & R/W & \texttt{0x00000004} & CMD SPI uDMA transfer configuration\\
+  \hline
+  \caption{uDMA SPI}
+\end{tabularx}
+}
+
+
+\regdoc{0x1A102120}{0x00000000}{SPIM\_CMD\_SADDR}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{CMD\_SADDR} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{CMD\_SADDR}
+  \end{bytefield}
+}{
+  \regitem{Bit 31 - 0}{CMD\_SADDR}{R/W}{Configure pointer to memory buffer:\\- Read: value of the pointer until transfer is over. Else returns 0\\- Write: set Address Pointer to memory buffer start address}
+}
+
+
+\regdoc{0x1A102124}{0x00000000}{SPIM\_CMD\_SIZE}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{12}{\color{lightgray}\rule{\width}{\height}} \bitbox{4}{CMD\_SIZE} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{CMD\_SIZE}
+  \end{bytefield}
+}{
+  \regitem{Bit 19 - 0}{CMD\_SIZE}{R/W}{Buffer size in bytes. (1MBytes maximum)\\- Read: buffer size left\\- Write: set buffer size}
+}
+
+
+\regdoc{0x1A102128}{0x00000004}{SPIM\_CMD\_CFG}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{9}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\tiny CLR} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~PENDING~}} \bitbox{1}{\tiny EN} \bitbox{1}{\color{lightgray}\rule{\width}{\height}} \bitbox{2}{\let\bw=\width\resizebox{\bw}{!}{~DATASIZE~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~CONTINOUS~}}
+  \end{bytefield}
+}{
+  \regitem{Bit 6}{CLR}{W}{Channel clear and stop transfer:\\-1'b0: disable\\-1'b1: enable}
+  \regitem{Bit 5}{PENDING}{R}{Transfer pending in queue status flag:\\-1'b0: free\\-1'b1: pending}
+  \regitem{Bit 4}{EN}{R/W}{Channel enable and start transfer:\\-1'b0: disable\\-1'b1: enable\\This signal is used also to queue a transfer if one is already ongoing.}
+  \regitem{Bit 2 - 1}{DATASIZE}{R/W}{Channel transfer size used to increment uDMA buffer address pointer:\\- 2'b00: +1 (8 bits)\\- 2'b01: +2 (16 bits)\\- 2'b10: +4 (32 bits)(default)\\- 2'b11: +0}
+  \regitem{Bit 0}{CONTINOUS}{R/W}{Channel continuous mode:\\-1'b0: disable\\-1'b1: enable\\At the end of the buffer the uDMA reloads the address and size and starts a new transfer.}
+}
+
+
+\regdoc{0x1A102100}{0x00000000}{SPIM\_RX\_SADDR}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{RX\_SADDR} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{RX\_SADDR}
+  \end{bytefield}
+}{
+  \regitem{Bit 31 - 0}{RX\_SADDR}{R/W}{Configure pointer to memory buffer:\\- Read: value of the pointer until transfer is over. Else returns 0\\- Write: set Address Pointer to memory buffer start address}
+}
+
+
+\regdoc{0x1A102104}{0x00000000}{SPIM\_RX\_SIZE}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{12}{\color{lightgray}\rule{\width}{\height}} \bitbox{4}{RX\_SIZE} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{RX\_SIZE}
+  \end{bytefield}
+}{
+  \regitem{Bit 19 - 0}{RX\_SIZE}{R/W}{Buffer size in bytes. (1MBytes maximum)\\- Read: buffer size left\\- Write: set buffer size}
+}
+
+
+\regdoc{0x1A102108}{0x00000004}{SPIM\_RX\_CFG}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{9}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\tiny CLR} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~PENDING~}} \bitbox{1}{\tiny EN} \bitbox{1}{\color{lightgray}\rule{\width}{\height}} \bitbox{2}{\let\bw=\width\resizebox{\bw}{!}{~DATASIZE~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~CONTINOUS~}}
+  \end{bytefield}
+}{
+  \regitem{Bit 6}{CLR}{W}{Channel clear and stop transfer:\\-1'b0: disable\\-1'b1: enable}
+  \regitem{Bit 5}{PENDING}{R}{Transfer pending in queue status flag:\\-1'b0: free\\-1'b1: pending}
+  \regitem{Bit 4}{EN}{R/W}{Channel enable and start transfer:\\-1'b0: disable\\-1'b1: enable\\This signal is used also to queue a transfer if one is already ongoing.}
+  \regitem{Bit 2 - 1}{DATASIZE}{R/W}{Channel transfer size used to increment uDMA buffer address pointer:\\- 2'b00: +1 (8 bits)\\- 2'b01: +2 (16 bits)\\- 2'b10: +4 (32 bits)(default)\\- 2'b11: +0}
+  \regitem{Bit 0}{CONTINOUS}{R/W}{Channel continuous mode:\\-1'b0: disable\\-1'b1: enable\\At the end of the buffer the uDMA reloads the address and size and starts a new transfer.}
+}
+
+
+\regdoc{0x1A102110}{0x00000000}{SPIM\_TX\_SADDR}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{TX\_SADDR} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{TX\_SADDR}
+  \end{bytefield}
+}{
+  \regitem{Bit 31 - 0}{TX\_SADDR}{R/W}{Configure pointer to memory buffer:\\- Read: value of the pointer until transfer is over. Else returns 0\\- Write: set Address Pointer to memory buffer start address}
+}
+
+
+\regdoc{0x1A102114}{0x00000000}{SPIM\_TX\_SIZE}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{12}{\color{lightgray}\rule{\width}{\height}} \bitbox{4}{TX\_SIZE} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{TX\_SIZE}
+  \end{bytefield}
+}{
+  \regitem{Bit 19 - 0}{TX\_SIZE}{R/W}{Buffer size in bytes. (1MBytes maximum)\\- Read: buffer size left\\- Write: set buffer size}
+}
+
+
+\regdoc{0x1A102118}{0x00000000}{SPIM\_TX\_CFG}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{9}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\tiny CLR} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~PENDING~}} \bitbox{1}{\tiny EN} \bitbox{1}{\color{lightgray}\rule{\width}{\height}} \bitbox{2}{\let\bw=\width\resizebox{\bw}{!}{~DATASIZE~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~CONTINOUS~}}
+  \end{bytefield}
+}{
+  \regitem{Bit 6}{CLR}{W}{Channel clear and stop transfer:\\-1'b0: disable\\-1'b1: enable}
+  \regitem{Bit 5}{PENDING}{R}{Transfer pending in queue status flag:\\-1'b0: free\\-1'b1: pending}
+  \regitem{Bit 4}{EN}{R/W}{Channel enable and start transfer:\\-1'b0: disable\\-1'b1: enable\\This signal is used also to queue a transfer if one is already ongoing.}
+  \regitem{Bit 2 - 1}{DATASIZE}{R/W}{Channel transfer size used to increment uDMA buffer address pointer:\\- 2'b00: +1 (8 bits)\\- 2'b01: +2 (16 bits)\\- 2'b10: +4 (32 bits)(default)\\- 2'b11: +0}
+  \regitem{Bit 0}{CONTINOUS}{R/W}{Channel continuous mode:\\-1'b0: disable\\-1'b1: enable\\At the end of the buffer the uDMA reloads the address and size and starts a new transfer.}
+}
+

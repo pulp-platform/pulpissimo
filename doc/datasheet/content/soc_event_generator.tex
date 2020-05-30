@@ -1,0 +1,239 @@
+\section{SoC Event Generator}
+
+Events from peripherals and other sources can be forwarded to the
+fabric controller, cluster or (back) to certain peripherals, though for
+PULPissimo we don't have a cluster.
+
+It is the SoC Event Generator's (\texttt{soc\_event\_generator.sv}) job to control which events are to be forwarded and where to.
+There are three set of masks available to do this:
+\begin{enumerate}[leftmargin=\widthof{[Peripheral Masks]}+\labelsep]
+  \item[FC Masks] Control which events are to be forwarded to the fabric controller
+  \item[Cluster Masks] Control which events are to be forwarded to the cluster (disabled)
+  \item[Peripheral Masks] Control which events are to be forwarded to peripherals
+\end{enumerate}
+
+
+\subsection{SoC Event IDs}
+Brief overview of the currently assigned event IDs in \pulpissimo.
+{\small
+\begin{tabularx}{\textwidth}{|l|l|X|}
+  \hline
+  \textbf{Event Name} & \textbf{ID}  & \textbf{Description} \\
+  \hline
+  %REG\_TX\_CH0\_ADD & \texttt{0x1A102400} & 32 & Config & R/W & \texttt{0x00000000} & FILTER tx channel 0 address register\\
+  uart\_rx                & $0$              &               \\
+  \hline
+  uart\_tx                & $1$              &               \\
+  \hline
+  ...                     & ...              & ...           \\
+  \hline
+  spim0\_rx               & $4$              &               \\
+  \hline
+  spim0\_tx               & $5$              &               \\
+  \hline
+  spim0\_cmd              & $6$              &               \\
+  \hline
+  spim0\_eot              & $7$              &               \\
+  \hline
+  i2c0\_rx                & $8$              &               \\
+  \hline
+  i2c0\_tx                & $9$              &               \\
+  \hline
+  ...                     & ...              & ...           \\
+  \hline
+  i2c1\_rx                & $12$             &               \\
+  \hline
+  i2c1\_tx                & $13$             &               \\
+  \hline
+  ...                     & ...              & ...           \\
+  \hline
+  sdio\_rx                & $16$             &               \\
+  \hline
+  sdio\_tx                & $17$             &               \\
+  \hline
+  sdio\_cmd               & $18$             &               \\
+  \hline
+  sdio\_eot               & $19$             &               \\
+  \hline
+  i2s0\_rx                & $20$             &               \\
+  \hline
+  i2s0\_tx                & $21$             &               \\
+  \hline
+  ...                     & ...              & ...           \\
+  \hline
+  cpio0\_rx               & $24$             &               \\
+  \hline
+  ...                     & ...              & ...           \\
+  \hline
+  filter0\_rx             & $28$             &               \\
+  \hline
+  filter0\_tx             & $29$             &               \\
+  \hline
+  ...                     & ...              & ...           \\
+  \hline
+  s\_adv\_timer\_events[0]& $135$            & see \texttt{soc\_peripherals.sv} \\
+  \hline
+  s\_adv\_timer\_events[1]& $136$            &               \\
+  \hline
+  s\_adv\_timer\_events[2]& $137$            &               \\
+  \hline
+  s\_adv\_timer\_events[3]& $138$            &               \\
+  \hline
+  s\_gpio\_event          & $139$            &               \\
+  \hline
+  fc\_hwpe\_events\_i[0]  & $140$            &               \\
+  \hline
+  fc\_hwpe\_events\_i[1]  & $141$            &               \\
+  \hline
+  ...                     & ...              & ...           \\
+  \hline
+  apb\_event              & $[160:167]$      & lower 8-bits of write to REG\_EVENT show up \\
+  \hline
+  s\_ls\_rise             & $168$            & slow clock event \\
+
+  \hline
+  \caption{SoC Event ID assignment}
+\end{tabularx}
+}
+\subsection{SoC Event Generator Registers}
+
+{\small
+\begin{tabularx}{\textwidth}{|l|l|l|l|l|l|X|}
+  \hline
+  \textbf{Name} & \textbf{Address}  & \textbf{Size} & \textbf{Type} & \textbf{Access} & \textbf{Default} & \textbf{Description} \\
+  \hline
+  SW\_EVENT & \texttt{0x1A106000} & 32 & Config & W      & \texttt{0x00000000} & SoC software events trigger register \\
+  \hline
+  FC\_MASK0 & \texttt{0x1A106004} & 32 & Config & R/W    & \texttt{0xFFFFFFFF} & Events 0-31 dispatch mask to FC \\
+  \hline
+  FC\_MASK1 & \texttt{0x1A106008} & 32 & Config & R/W    & \texttt{0xFFFFFFFF} & Events 32-63 dispatch mask to FC \\
+  \hline
+  FC\_MASK2 & \texttt{0x1A10600C} & 32 & Config & R/W    & \texttt{0xFFFFFFFF} & Events 64-95 dispatch mask to FC \\
+  \hline
+  FC\_MASK3 & \texttt{0x1A106010} & 32 & Config & R/W    & \texttt{0xFFFFFFFF} & Events 96-127 dispatch mask to FC \\
+  \hline
+  FC\_MASK4 & \texttt{0x1A106014} & 32 & Config & R/W    & \texttt{0xFFFFFFFF} & Events 128-159 dispatch mask to FC \\
+  \hline
+  FC\_MASK5 & \texttt{0x1A106018} & 32 & Config & R/W    & \texttt{0xFFFFFFFF} & Events 160-191 dispatch mask to FC \\
+  \hline
+  FC\_MASK6 & \texttt{0x1A10601C} & 32 & Config & R/W    & \texttt{0xFFFFFFFF} & Events 191-223 dispatch mask to FC \\
+  \hline
+  FC\_MASK7 & \texttt{0x1A106020} & 32 & Config & R/W    & \texttt{0xFFFFFFFF} & Events 224-255 dispatch mask to FC \\
+  \hline
+  PR\_MASK0 & \texttt{0x1A106044} & 32 & Config & R/W    & \texttt{0xFFFFFFFF} & Events 0-31 dispatch mask to peripherals \\
+  \hline
+  PR\_MASK1 & \texttt{0x1A106048} & 32 & Config & R/W    & \texttt{0xFFFFFFFF} & Events 32-63 dispatch mask to peripherals \\
+  \hline
+  PR\_MASK2 & \texttt{0x1A10604C} & 32 & Config & R/W    & \texttt{0xFFFFFFFF} & Events 64-95 dispatch mask to peripherals \\
+  \hline
+  PR\_MASK3 & \texttt{0x1A106050} & 32 & Config & R/W    & \texttt{0xFFFFFFFF} & Events 96-127 dispatch mask to peripherals \\
+  \hline
+  PR\_MASK4 & \texttt{0x1A106054} & 32 & Config & R/W    & \texttt{0xFFFFFFFF} & Events 128-159 dispatch mask to peripherals \\
+  \hline
+  PR\_MASK5 & \texttt{0x1A106058} & 32 & Config & R/W    & \texttt{0xFFFFFFFF} & Events 160-191 dispatch mask to peripherals \\
+  \hline
+  PR\_MASK6 & \texttt{0x1A10605C} & 32 & Config & R/W    & \texttt{0xFFFFFFFF} & Events 191-223 dispatch mask to peripherals \\
+  \hline
+  PR\_MASK7 & \texttt{0x1A106060} & 32 & Config & R/W    & \texttt{0xFFFFFFFF} & Events 224-255 dispatch mask to peripherals \\
+  \hline
+  ERR0 & \texttt{0x1A106064} & 32 & Status & R    & \texttt{0x00000000} & Events 0-31 event queue overflow \\
+  \hline
+  ERR1 & \texttt{0x1A106068} & 32 & Status & R    & \texttt{0x00000000} & Events 32-63 event queue overflow \\
+  \hline
+  ERR2 & \texttt{0x1A10606C} & 32 & Status & R    & \texttt{0x00000000} & Events 64-95 event queue overflow \\
+  \hline
+  ERR3 & \texttt{0x1A106070} & 32 & Status & R    & \texttt{0x00000000} & Events 96-127 event queue overflow \\
+  \hline
+  ERR4 & \texttt{0x1A106074} & 32 & Status & R    & \texttt{0x00000000} & Events 128-159 event queue overflow \\
+  \hline
+  ERR5 & \texttt{0x1A106078} & 32 & Status & R    & \texttt{0x00000000} & Events 160-191 event queue overflow \\
+  \hline
+  ERR6 & \texttt{0x1A10607C} & 32 & Status & R    & \texttt{0x00000000} & Events 191-223 event queue overflow \\
+  \hline
+  ERR7 & \texttt{0x1A106080} & 32 & Status & R    & \texttt{0xFFFFFFFF} & Events 224-255 event queue overflow \\
+  \hline
+  TIMER\_LO & \texttt{0x1A106084} & 32 & Status & R/W & \texttt{0xFFFFFFFF} & Trigger Timer LO of APB Timer with event \\
+  \hline
+  TIMER\_HI & \texttt{0x1A106088} & 32 & Status & R/W & \texttt{0xFFFFFFFF} & Trigger Timer HI of APB Timer with event \\
+  \hline
+\caption{SoC Event Generator register table \label{tab:soc_eg_table}}
+\end{tabularx}
+
+
+\regdoc{0x1A10\_6000}{0x0000\_0000}{SW\_EVENT}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+  \bitheader[lsb=16]{16-31} \\
+  \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
+  \bitheader{0-15} \\
+  \bitbox{8}{\color{lightgray}\rule{\width}{\height}}\bitbox{8}{EVENT}
+  \end{bytefield}
+}{
+  \regitem{Bit 7-0}{EVENT}{W}{Writing a one-hot value into EVENT triggers a SoC software event. 8 software events are available.}
+}
+
+\regdoc{0x1A10\_6004 + 0x4 * $X$}{0xFFFF\_FFFF}{FC\_MASK$X$, $X=0...7$}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+  \bitheader[lsb=16]{16-31} \\
+  \bitbox{16}{FC\_MASK} \\[3ex]
+  \bitheader{0-15} \\
+  \bitbox{16}{FC\_MASK}
+  \end{bytefield}
+}{
+  \regitem{Bit 31-0}{FC\_MASK}{R/W}{Event Mask to enable/disable event dispatch to FC interrupt controller.
+    \begin{itemize}
+      \item Setting $bit[i]$ to $0b1$ disables dispatching $event[32*X+i]$ to FC interrupt controller.
+      \item Setting $bit[i]$ to $0b0$ enables dispatching $event[32*X+i]$ to FC interrupt controller.
+    \end{itemize}
+  }
+}
+
+\regdoc{0x1A10\_6044 + 0x4 * $X$}{0xFFFF\_FFFF}{PR\_MASK$X$, $X=0...7$}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+  \bitheader[lsb=16]{16-31} \\
+  \bitbox{16}{PR\_MASK} \\[3ex]
+  \bitheader{0-15} \\
+  \bitbox{16}{PR\_MASK}
+  \end{bytefield}
+}{
+  \regitem{Bit 31-0}{PR\_MASK}{R/W}{Event Mask to enable/disable event dispatch to peripherals.
+    \begin{itemize}
+      \item Setting $bit[i]$ to $0b1$ disables dispatching $event[32*X+i]$ to peripherals.
+      \item Setting $bit[i]$ to $0b0$ enables dispatching $event[32*X+i]$ to peripherals.
+    \end{itemize}
+  }
+}
+
+\regdoc{0x1A10\_6064 + 0x4 * $X$}{0x0000\_0000}{ERR$X$, $X=0...7$}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+  \bitheader[lsb=16]{16-31} \\
+  \bitbox{16}{ERR} \\[3ex]
+  \bitheader{0-15} \\
+  \bitbox{16}{ERR}
+  \end{bytefield}
+}{
+  \regitem{Bit 31-0}{ERR}{R/W}{Event queue overflow. Clear after read. Reading
+    $0b1$ at $ERR[i]$ means the event queue of event with id $32*X+i$
+    overflowed.}
+}
+
+\regdoc{0x1A10\_6084}{0x0000\_0000}{TIMER\_LO}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+  \bitheader[lsb=16]{16-31} \\
+  \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
+  \bitheader{0-15} \\
+  \bitbox{8}{\color{lightgray}\rule{\width}{\height}}\bitbox{8}{TIMER\_LO\_EVENT}
+  \end{bytefield}
+}{
+  \regitem{Bit 7-0}{TIMER\_LO\_EVENT}{R/W}{Trigger and start APB Timer LO by the event with id that equals TIMER\_LO\_EVENT}
+}
+
+\regdoc{0x1A10\_6088}{0x0000\_0000}{TIMER\_HI}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+  \bitheader[lsb=16]{16-31} \\
+  \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
+  \bitheader{0-15} \\
+  \bitbox{8}{\color{lightgray}\rule{\width}{\height}}\bitbox{8}{TIMER\_HI\_EVENT}
+  \end{bytefield}
+}{
+  \regitem{Bit 7-0}{TIMER\_HI\_EVENT}{R/W}{Trigger and start APB Timer HI by the event with id that equals TIMER\_HI\_EVENT}
+}

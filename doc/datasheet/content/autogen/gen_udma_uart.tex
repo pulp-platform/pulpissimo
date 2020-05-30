@@ -1,0 +1,195 @@
+
+\subsection{uDMA UART Registers}
+{\small
+\begin{tabularx}{\textwidth}{|l|l|l|l|l|l|X|}
+  \hline
+  \textbf{Name} & \textbf{Address}  & \textbf{Size} & \textbf{Type} & \textbf{Access} & \textbf{Default} & \textbf{Description} \\
+  \hline
+  RX\_SADDR & \texttt{0x1A102080} & 32 & Config & R/W & \texttt{0x00000000} & uDMA RX UART buffer base address configuration register.\\
+  \hline
+  RX\_SIZE & \texttt{0x1A102084} & 32 & Config & R/W & \texttt{0x00000000} & uDMA RX UART buffer size configuration register.\\
+  \hline
+  RX\_CFG & \texttt{0x1A102088} & 32 & Config & R/W & \texttt{0x00000000} & uDMA RX UART stream configuration register.\\
+  \hline
+  TX\_SADDR & \texttt{0x1A102090} & 32 & Config & R/W & \texttt{0x00000000} & uDMA TX UART buffer base address configuration register.\\
+  \hline
+  TX\_SIZE & \texttt{0x1A102094} & 32 & Config & R/W & \texttt{0x00000000} & uDMA TX UART buffer size configuration register.\\
+  \hline
+  TX\_CFG & \texttt{0x1A102098} & 32 & Config & R/W & \texttt{0x00000000} & uDMA TX UART stream configuration register.\\
+  \hline
+  STATUS & \texttt{0x1A1020A0} & 32 & Status & R & \texttt{0x00000000} & uDMA UART status register.\\
+  \hline
+  SETUP & \texttt{0x1A1020A4} & 32 & Config & R/W & \texttt{0x00000000} & UDMA UART configuration register.\\
+  \hline
+  ERROR & \texttt{0x1A1020A8} & 32 & Status & R & \texttt{0x00000000} & uDMA UART Error status\\
+  \hline
+  IRQ\_EN & \texttt{0x1A1020AC} & 32 & Config & R/W & \texttt{0x00000000} & uDMA UART Read or Error interrupt enable register.\\
+  \hline
+  VALID & \texttt{0x1A1020B0} & 32 & Status & R & \texttt{0x00000000} & uDMA UART Read polling data valid flag register.\\
+  \hline
+  DATA & \texttt{0x1A1020B4} & 32 & Data & R & \texttt{0x00000000} & uDMA UART Read polling data register.\\
+  \hline
+  \caption{uDMA UART}
+\end{tabularx}
+}
+
+
+\regdoc{0x1A102080}{0x00000000}{RX\_SADDR}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{RX\_SADDR}
+  \end{bytefield}
+}{
+  \regitem{Bit 15 - 0}{RX\_SADDR}{R/W}{RX buffer base address bitfield:\\- Read: returns value of the buffer pointer until transfer is finished. Else returns 0.\\- Write: sets RX buffer base address}
+}
+
+
+\regdoc{0x1A102084}{0x00000000}{RX\_SIZE}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{15}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{RX\_SIZE} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{RX\_SIZE}
+  \end{bytefield}
+}{
+  \regitem{Bit 16 - 0}{RX\_SIZE}{R/W}{RX buffer size bitfield in bytes. (128kBytes maximum)\\- Read: returns remaining buffer size to transfer.\\- Write: sets buffer size.}
+}
+
+
+\regdoc{0x1A102088}{0x00000000}{RX\_CFG}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{9}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\tiny CLR} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~PENDING~}} \bitbox{1}{\tiny EN} \bitbox{3}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~CONTINOUS~}}
+  \end{bytefield}
+}{
+  \regitem{Bit 6}{CLR}{W}{RX channel clear and stop transfer:\\-1'b0: disable\\-1'b1: stop and clear the on-going transfer}
+  \regitem{Bit 5}{PENDING}{R}{RX transfer pending in queue status flag:\\-1'b0: no pending transfer in the queue\\-1'b1: pending transfer in the queue}
+  \regitem{Bit 4}{EN}{R/W}{RX channel enable and start transfer bitfield:\\-1'b0: disable\\-1'b1: enable and start the transfer\\This signal is used also to queue a transfer if one is already ongoing.}
+  \regitem{Bit 0}{CONTINOUS}{R/W}{RX channel continuous mode bitfield:\\-1'b0: disabled\\-1'b1: enabled\\At the end of the buffer transfer, the uDMA reloads the address / buffer size and starts a new transfer.}
+}
+
+
+\regdoc{0x1A102090}{0x00000000}{TX\_SADDR}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{TX\_SADDR}
+  \end{bytefield}
+}{
+  \regitem{Bit 15 - 0}{TX\_SADDR}{R/W}{TX buffer base address bitfield:\\- Read: returns value of the buffer pointer until transfer is finished. Else returns 0.\\- Write: sets buffer base address}
+}
+
+
+\regdoc{0x1A102094}{0x00000000}{TX\_SIZE}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{15}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{TX\_SIZE} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{16}{TX\_SIZE}
+  \end{bytefield}
+}{
+  \regitem{Bit 16 - 0}{TX\_SIZE}{R/W}{TX buffer size bitfield in bytes. (128kBytes maximum)\\- Read: returns remaining buffer size to transfer.\\- Write: sets buffer size.}
+}
+
+
+\regdoc{0x1A102098}{0x00000000}{TX\_CFG}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{9}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\tiny CLR} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~PENDING~}} \bitbox{1}{\tiny EN} \bitbox{3}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~CONTINOUS~}}
+  \end{bytefield}
+}{
+  \regitem{Bit 6}{CLR}{W}{TX channel clear and stop transfer bitfield:\\-1'b0: disabled\\-1'b1: stop and clear the on-going transfer}
+  \regitem{Bit 5}{PENDING}{R}{TX transfer pending in queue status flag:\\-1'b0: no pending transfer in the queue\\-1'b1: pending transfer in the queue}
+  \regitem{Bit 4}{EN}{R/W}{TX channel enable and start transfer bitfield:\\-1'b0: disabled\\-1'b1: enable and start the transfer\\This signal is used also to queue a transfer if one is already ongoing.}
+  \regitem{Bit 0}{CONTINOUS}{R/W}{TX channel continuous mode bitfield:\\-1'b0: disabled\\-1'b1: enabled\\At the end of the buffer transfer, the uDMA reloads the address / buffer size and starts a new transfer.}
+}
+
+
+\regdoc{0x1A1020A0}{0x00000000}{STATUS}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{14}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~RX\_BUSY~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~TX\_BUSY~}}
+  \end{bytefield}
+}{
+  \regitem{Bit 1}{RX\_BUSY}{R}{RX busy status flag:\\- 1'b0: no RX transfer on-going\\- 1'b1: RX transfer on-going}
+  \regitem{Bit 0}{TX\_BUSY}{R}{TX busy status flag:\\- 1'b0: no TX transfer on-going\\- 1'b1: TX transfer on-going}
+}
+
+
+\regdoc{0x1A1020A4}{0x00000000}{SETUP}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{CLKDIV} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{6}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~RX\_ENA~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~TX\_ENA~}} \bitbox{2}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~CLEAN\_FIFO~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~POLLING\_EN~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~STOP\_BITS~}} \bitbox{2}{\let\bw=\width\resizebox{\bw}{!}{~BIT\_LENGTH~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~PARITY\_ENA~}}
+  \end{bytefield}
+}{
+  \regitem{Bit 31 - 16}{CLKDIV}{R/W}{UART Clock divider configuration bitfield. The baudrate is equal to SOC\_FREQ/CLKDIV.}
+  \regitem{Bit 9}{RX\_ENA}{R/W}{RX transceiver configuration bitfield:\\- 1'b0: disabled\\- 1'b1: enabled}
+  \regitem{Bit 8}{TX\_ENA}{R/W}{TX transceiver configuration bitfield:\\- 1'b0: disabled\\- 1'b1: enabled}
+  \regitem{Bit 5}{CLEAN\_FIFO}{R/W}{In all mode clean the RX fifo, set 1 then set 0 to realize a reset fifo:\\- 1'b0: Stop Clean the RX FIFO.\\- 1'b1: Clean the RX FIFO.}
+  \regitem{Bit 4}{POLLING\_EN}{R/W}{When in uart read, use polling method to read the data,  read interrupt enable flag will be ignored:\\- 1'b0: Do not using polling method to read data.\\- 1'b1: Using polling method to read data. Interrupt enable flag will be ignored.}
+  \regitem{Bit 3}{STOP\_BITS}{R/W}{Stop bits length bitfield:\\- 1'b0: 1 stop bit\\- 1'b1: 2 stop bits}
+  \regitem{Bit 2 - 1}{BIT\_LENGTH}{R/W}{Character length bitfield:\\- 2'b00: 5 bits\\- 2'b01: 6 bits\\- 2'b10: 7 bits\\- 2'b11: 8 bits}
+  \regitem{Bit 0}{PARITY\_ENA}{R/W}{Parity bit generation and check configuration bitfield:\\- 1'b0: disabled\\- 1'b1: enabled}
+}
+
+
+\regdoc{0x1A1020A8}{0x00000000}{ERROR}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{14}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~RX\_ERR\_PARITY~}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~RX\_ERR\_OVERFLOW~}}
+  \end{bytefield}
+}{
+  \regitem{Bit 1}{RX\_ERR\_PARITY}{R}{RX parity error status flag:\\- 1'b0: no error\\- 1'b1: RX parity error occurred }
+  \regitem{Bit 0}{RX\_ERR\_OVERFLOW}{R}{RX overflow error status flag:\\- 1'b0: no error\\- 1'b1: RX overflow error occurred }
+}
+
+
+\regdoc{0x1A1020AC}{0x00000000}{IRQ\_EN}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{14}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~ERROR~}} \bitbox{1}{\tiny RX}
+  \end{bytefield}
+}{
+  \regitem{Bit 1}{ERROR}{R/W}{Error interrupt in enable flag:\\- 1'b0: Error IRQ disable\\- 1'b1: Error IRQ enable }
+  \regitem{Bit 0}{RX}{R/W}{Rx interrupt in enable flag:\\- 1'b0: RX IRQ disable\\- 1'b1: RX IRQ enable }
+}
+
+
+\regdoc{0x1A1020B0}{0x00000000}{VALID}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{15}{\color{lightgray}\rule{\width}{\height}} \bitbox{1}{\let\bw=\width\resizebox{\bw}{!}{~READY~}}
+  \end{bytefield}
+}{
+  \regitem{Bit 0}{READY}{R}{Used only in RX polling method to indicate data is ready for read:\\- 1'b0: Data is not ready to read\\- 1'b1: Data is ready to read}
+}
+
+
+\regdoc{0x1A1020B4}{0x00000000}{DATA}{
+  \begin{bytefield}[endianness=big,bitwidth=2em]{16}
+    \bitheader[lsb=16]{16-31} \\
+    \bitbox{16}{\color{lightgray}\rule{\width}{\height}} \\[3ex]
+    \bitheader{0-15} \\
+    \bitbox{8}{\color{lightgray}\rule{\width}{\height}} \bitbox{8}{BYTE}
+  \end{bytefield}
+}{
+  \regitem{Bit 7 - 0}{BYTE}{R}{RX read data for polling or interrupt}
+}
+

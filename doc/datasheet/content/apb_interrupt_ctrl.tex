@@ -1,14 +1,80 @@
 \section{Event/Interrupt Controller}
 
 \pulpissimo features a lightweight event and interrupt controller which supports
-vectorized interrupts and events of up to 32 lines.
-It contains a FIFO of events from the peripherals or SW events.
-When an interrupt is ready and it is enabled (not masked), the unit sends the 5bit ID to the core and the interrupt request line is raised up. If the core takes the interrupt, it replies with the ID of the interrupt taken and the acknowledge signal. The communication between the interrupt controller and the core is completly asynchronous.
-Note that the interrupt controller can change the interrupt ID anytime but it must rely
-on the ID sent by the core to know which interrupt has been taken.
-This is an important feature that covers the situation where a higher priority interrupt request prevent another one that has been already sent to the core.
-Depending on the core state and core interrupt enable, the interrupt can be accepted within a couple of clock cycles.
+vectorized interrupts and events of up to 32 lines. It contains a FIFO of events
+from the peripherals or SW events. When an interrupt is ready and it is enabled
+(not masked), the unit sends the 5-bit ID to the core and the interrupt request
+line is raised up. If the core takes the interrupt, it replies with the ID of
+the interrupt taken and the acknowledge signal. The communication between the
+interrupt controller and the core is completly asynchronous. Note that the
+interrupt controller can change the interrupt ID anytime but it must rely on the
+ID sent by the core to know which interrupt has been taken. This is an important
+feature that covers the situation where a higher priority interrupt request
+prevent another one that has been already sent to the core. Depending on the
+core state and core interrupt enable, the interrupt can be accepted within a
+couple of clock cycles.
 
+\subsection{Interrupt Lines}
+This is the current assignment of interrupt lines in \pulpissimo.
+
+{\small
+\begin{tabularx}{\textwidth}{|l|l|l|l|l|l|X|}
+  \hline
+  \textbf{Interrupt Name} & \textbf{Line Number}  & \textbf{Description} \\
+  \hline
+  8'b0                                 & $[7:0]$       &                                           \\
+  \hline
+  dma\_pe\_evt\_i;                     & $[8]$         &                                           \\
+  \hline
+  dma\_pe\_irq\_i;                     & $[9]$         &                                           \\
+  \hline
+  s\_timer\_lo\_event;                 & $[10]$        &                                           \\
+  \hline
+  s\_timer\_hi\_event;                 & $[11]$        &                                           \\
+  \hline
+  pf\_evt\_i;                          & $[12]$        &                                           \\
+  \hline
+  1'b0;                                & $[13]$        &                                           \\
+  \hline
+  s\_ref\_rise\_event or s\_ref\_fall\_event & $[14]$        & ref clock rise/fall                       \\
+  \hline
+  s\_gpio\_event;                      & $[15]$        &                                           \\
+  \hline
+  1'b0;                                & $[16]$        &                                           \\
+  \hline
+  s\_adv\_timer\_events[0];            & $[17]$        &                                           \\
+  \hline
+  s\_adv\_timer\_events[1];            & $[18]$        &                                           \\
+  \hline
+  s\_adv\_timer\_events[2];            & $[19]$        &                                           \\
+  \hline
+  s\_adv\_timer\_events[3];            & $[20]$        &                                           \\
+  \hline
+  1'b0;                                & $[21]$        &                                           \\
+  \hline
+  1'b0;                                & $[22]$        &                                           \\
+  \hline
+  1'b0;                                & $[23]$        &                                           \\
+  \hline
+  1'b0;                                & $[24]$        &                                           \\
+  \hline
+  1'b0;                                & $[25]$        &                                           \\
+  \hline
+  s\_event\_fifo\_valid                & $[26]$        & soc\_events (muxed events) from event unit \\
+  \hline
+  1'b0;                                & $[27]$        &                                           \\
+  \hline
+  1'b0;                                & $[28]$        &                                           \\
+  \hline
+  s\_fc\_err\_events;                  & $[29]$        &                                           \\
+  \hline
+  s\_fc\_hp\_events[0];                & $[30]$        &                                           \\
+  \hline
+  s\_fc\_hp\_events[1];                & $[31]$        &                                           \\
+  \hline
+  \caption{Interrupt line assignment}
+\end{tabularx}
+}
 
 \regDesc{0x1A10\_9000}{0x0000\_0000}{Mask}{
   \begin{bytefield}[rightcurly=.,endianness=big]{32}
