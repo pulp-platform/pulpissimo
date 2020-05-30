@@ -36,6 +36,8 @@ pdf: $(MAIN_SRC).pdf
 
 %.pdf: %.tex $(CONTENT_SRC) preamble/preamble.tex
 	pdflatex $(MAIN_SRC).tex
+	pdflatex $(MAIN_SRC).tex
+	pdflatex $(MAIN_SRC).tex
 
 clean: clean-figures
 	@echo "***** Cleaning the LaTeX directory structure."
