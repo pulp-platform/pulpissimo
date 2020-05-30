@@ -13,7 +13,88 @@ There are three set of masks available to do this:
 \end{enumerate}
 
 
+\subsection{SoC Event IDs}
+Brief overview of the currently assigned event IDs in \pulpissimo.
+{\small
+\begin{tabularx}{\textwidth}{|l|l|X|}
+  \hline
+  \textbf{Event Name} & \textbf{ID}  & \textbf{Description} \\
+  \hline
+  %REG\_TX\_CH0\_ADD & \texttt{0x1A102400} & 32 & Config & R/W & \texttt{0x00000000} & FILTER tx channel 0 address register\\
+  uart\_rx                & $0$              &               \\
+  \hline
+  uart\_tx                & $1$              &               \\
+  \hline
+  ...                     & ...              & ...           \\
+  \hline
+  spim0\_rx               & $4$              &               \\
+  \hline
+  spim0\_tx               & $5$              &               \\
+  \hline
+  spim0\_cmd              & $6$              &               \\
+  \hline
+  spim0\_eot              & $7$              &               \\
+  \hline
+  i2c0\_rx                & $8$              &               \\
+  \hline
+  i2c0\_tx                & $9$              &               \\
+  \hline
+  ...                     & ...              & ...           \\
+  \hline
+  i2c1\_rx                & $12$             &               \\
+  \hline
+  i2c1\_tx                & $13$             &               \\
+  \hline
+  ...                     & ...              & ...           \\
+  \hline
+  sdio\_rx                & $16$             &               \\
+  \hline
+  sdio\_tx                & $17$             &               \\
+  \hline
+  sdio\_cmd               & $18$             &               \\
+  \hline
+  sdio\_eot               & $19$             &               \\
+  \hline
+  i2s0\_rx                & $20$             &               \\
+  \hline
+  i2s0\_tx                & $21$             &               \\
+  \hline
+  ...                     & ...              & ...           \\
+  \hline
+  cpio0\_rx               & $24$             &               \\
+  \hline
+  ...                     & ...              & ...           \\
+  \hline
+  filter0\_rx             & $28$             &               \\
+  \hline
+  filter0\_tx             & $29$             &               \\
+  \hline
+  ...                     & ...              & ...           \\
+  \hline
+  s\_adv\_timer\_events[0]& $135$            & see \texttt{soc\_peripherals.sv} \\
+  \hline
+  s\_adv\_timer\_events[1]& $136$            &               \\
+  \hline
+  s\_adv\_timer\_events[2]& $137$            &               \\
+  \hline
+  s\_adv\_timer\_events[3]& $138$            &               \\
+  \hline
+  s\_gpio\_event          & $139$            &               \\
+  \hline
+  fc\_hwpe\_events\_i[0]  & $140$            &               \\
+  \hline
+  fc\_hwpe\_events\_i[1]  & $141$            &               \\
+  \hline
+  ...                     & ...              & ...           \\
+  \hline
+  apb\_event              & $[160:167]$      & lower 8-bits of write to REG\_EVENT show up \\
+  \hline
+  s\_ls\_rise             & $168$            & slow clock event \\
 
+  \hline
+  \caption{SoC Event ID assignment}
+\end{tabularx}
+}
 \subsection{SoC Event Generator Registers}
 
 {\small
