@@ -1,4 +1,4 @@
-\subsubsection{uDMA SPI Command list}
+\subsection{uDMA SPI Command list}
 The SPI module uses a third uDMA channel (appart from the TX and RX channel) to
 supply it with a stream of simple configuration commands.
 This allows to programm complex transactions without involvement of a processor
@@ -30,7 +30,7 @@ The following list contains all possible uDMA commands.
   \end{tabularx}
 }
 
-\subsubsection{SPI\_CMD\_CFG}
+\subsection{SPI\_CMD\_CFG}
 Sets the configuration for the SPI Master IP.
 \begin{center}
   \begin{bytefield}[endianness=big,bitwidth=1.5em]{32}
@@ -53,7 +53,7 @@ Sets the configuration for the SPI Master IP.
 
 
 
-\subsubsection{SPI\_CMD\_SOT}
+\subsection{SPI\_CMD\_SOT}
 Sets the Chip Select (CS).
 \begin{center}
     \begin{bytefield}[endianness=big,bitwidth=1.5em]{32}
@@ -71,7 +71,7 @@ Sets the Chip Select (CS).
     \end{itemize}
 \end{itemize}
 
-\subsubsection{SPI\_CMD\_SEND\_CMD}
+\subsection{SPI\_CMD\_SEND\_CMD}
 Transmits up to 16bits of data sent in the command.
 \begin{center}
     \begin{bytefield}[endianness=big,bitwidth=1.5em]{32}
@@ -86,7 +86,7 @@ Transmits up to 16bits of data sent in the command.
   \item \textbf{VALUE}: The data to be send. MSB must always be at bit 15 also if SIZE is lower than 16.
 \end{itemize}
 
-\subsubsection{SPI\_CMD\_DUMMY}
+\subsection{SPI\_CMD\_DUMMY}
 Receives a number of dummy bits (not sent to the rx interface)
 \begin{center}
     \begin{bytefield}[endianness=big,bitwidth=1.5em]{32}
