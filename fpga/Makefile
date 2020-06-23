@@ -39,8 +39,8 @@ clean_nexys_video: ## Removes all bitstreams, *.log files and vivado related fil
 
 nexys: ## Generates the bistream for the nexys board. Use make nexys rev=[nexys4|nexys4DDR|nexysA7-50T|nexysA7-100T]
 	$(MAKE) -C pulpissimo-nexys all
-	cp pulpissimo-nexys4/pulpissimo-nexys.runs/impl_1/xilinx_pulpissimo.bit pulpissimo_nexys.bit
-	cp pulpissimo-nexys4/pulpissimo-nexys.runs/impl_1/xilinx_pulpissimo.bin pulpissimo_nexys.bin
+	cp pulpissimo-nexys/pulpissimo-nexys.runs/impl_1/xilinx_pulpissimo.bit pulpissimo_nexys.bit
+	cp pulpissimo-nexys/pulpissimo-nexys.runs/impl_1/xilinx_pulpissimo.bin pulpissimo_nexys.bin
 	@echo "Bitstream generation for nexys board finished. The bitstream Configuration Memory File was copied to ./pulpissimo_nexys.bit and ./pulpissimo_nexys.bin"
 
 clean_nexys: ## Removes all bitstreams, *.log files and vivado related files (rm -rf vivado*) for the nexys board.
