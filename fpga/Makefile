@@ -1,8 +1,8 @@
 .DEFAULT_GOAL:=help
 
-all: genesys2 zcu104 nexys_video zedboard zcu102 ## Generates the bitstream for all supported boards board.
+all: genesys2 zcu104 nexys_video nexys zedboard zcu102 ## Generates the bitstream for all supported boards board.
 
-clean_all: clean_genesys2 clean_zcu104 clean_nexys_video clean_zedboard clean_zcu102 ## Removes synthesis output and bitstreams for all boards.
+clean_all: clean_genesys2 clean_zcu104 clean_nexys_video clean_nexys clean_zedboard clean_zcu102 ## Removes synthesis output and bitstreams for all boards.
 
 genesys2: ## Generates the bistream for the genesys2 board
 	$(MAKE) -C pulpissimo-genesys2 all
@@ -36,6 +36,17 @@ clean_nexys_video: ## Removes all bitstreams, *.log files and vivado related fil
 	$(MAKE) -C pulpissimo-nexys_video clean
 	rm -f pulpissimo_nexys_video.bit
 	rm -f pulpissimo_nexys_video.bin
+
+nexys: ## Generates the bistream for the nexys board. Use make nexys rev=[nexys4|nexys4DDR|nexysA7-50T|nexysA7-100T]
+	$(MAKE) -C pulpissimo-nexys all
+	cp pulpissimo-nexys/pulpissimo-nexys.runs/impl_1/xilinx_pulpissimo.bit pulpissimo_nexys.bit
+	cp pulpissimo-nexys/pulpissimo-nexys.runs/impl_1/xilinx_pulpissimo.bin pulpissimo_nexys.bin
+	@echo "Bitstream generation for nexys board finished. The bitstream Configuration Memory File was copied to ./pulpissimo_nexys.bit and ./pulpissimo_nexys.bin"
+
+clean_nexys: ## Removes all bitstreams, *.log files and vivado related files (rm -rf vivado*) for the nexys board.
+	$(MAKE) -C pulpissimo-nexys clean
+	rm -f pulpissimo_nexys.bit
+	rm -f pulpissimo_nexys.bin
 
 zedboard: ## Generates the bistream for the ZedBoard
 	$(MAKE) -C pulpissimo-zedboard all
