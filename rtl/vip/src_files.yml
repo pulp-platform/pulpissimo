@@ -1,3 +1,15 @@
+HYPER_model:
+  defines: [
+    SPEEDSIM,
+  ]
+  files: [
+    hyper_model/hyperram_model/s27ks0641.v,
+    hyper_model/hyperflash_model/s26ks512s.v,
+  ]
+  flags: [
+    skip_synthesis,
+  ]
+
 S25FS256_model:
   defines: [
     SPEEDSIM,
