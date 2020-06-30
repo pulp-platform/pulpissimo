@@ -39,7 +39,7 @@ module tb_pulp;
    // the following parameters can activate instantiation of the verification IPs for Hyperflash, Hyperram, SPI, I2C and I2s
    // see the instructions in rtl/vip/{i2c_eeprom,i2s,spi_flash} to download the verification IPs
    parameter  USE_HYPER_MODELS    = 0;
-   parameter  USE_S25FS256S_MODEL = 1;
+   parameter  USE_S25FS256S_MODEL = 0;
    parameter  USE_24FC1025_MODEL  = 0;
    parameter  USE_I2S_MODEL       = 0;
 
@@ -51,7 +51,7 @@ module tb_pulp;
    // In case any values are given, the debug module takes over the boot process.
    //parameter  LOAD_L2 = "STANDALONE";
    parameter  LOAD_L2 = "JTAG";
-   parameter  STIM_FROM = "SPI_FLASH";
+   parameter  STIM_FROM = "";
 
    // enable DPI-based JTAG
    parameter  ENABLE_DPI = 0;
