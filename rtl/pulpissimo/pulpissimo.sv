@@ -70,7 +70,8 @@ module pulpissimo #(
    inout wire         pad_hyper_resetn ,
 
    inout  wire        pad_reset_n,
-   inout  wire        pad_bootsel,
+   inout  wire        pad_bootsel0,
+   inout  wire        pad_bootsel1,
 
    inout  wire        pad_jtag_tck,
    inout  wire        pad_jtag_tdi,
@@ -370,7 +371,7 @@ module pulpissimo #(
   logic [EVENT_WIDTH-1:0]      s_event_dataasync;
   logic                        s_cluster_irq;
 
-  logic                        s_bootsel;
+  logic [1:0]                  s_bootsel;
 
   APB_BUS        apb_debug();
   XBAR_TCDM_BUS  lint_debug();
@@ -533,8 +534,8 @@ module pulpissimo #(
         .pad_i2c0_scl          ( pad_i2c0_scl           ),
         .pad_uart_rx           ( pad_uart_rx            ),
         .pad_uart_tx           ( pad_uart_tx            ),
-        .pad_hyper_cs_no0      ( pad_hyper_cs_no0        ),
-        .pad_hyper_cs_no1      ( pad_hyper_cs_no1        ),
+        .pad_hyper_cs_no0      ( pad_hyper_cs_no0       ),
+        .pad_hyper_cs_no1      ( pad_hyper_cs_no1       ),
         .pad_hyper_cko         ( pad_hyper_cko          ),
         .pad_hyper_ckno        ( pad_hyper_ckno         ),
         .pad_hyper_rwds        ( pad_hyper_rwds         ),
@@ -548,7 +549,8 @@ module pulpissimo #(
         .pad_hyper_dqio7       ( pad_hyper_dqio7        ),
         .pad_hyper_resetn      ( pad_hyper_resetn       ),
 
-        .pad_bootsel           ( pad_bootsel            ),
+        .pad_bootsel0          ( pad_bootsel0           ),
+        .pad_bootsel1          ( pad_bootsel1           ),
         .pad_reset_n           ( pad_reset_n            ),
         .pad_jtag_tck          ( pad_jtag_tck           ),
         .pad_jtag_tdi          ( pad_jtag_tdi           ),

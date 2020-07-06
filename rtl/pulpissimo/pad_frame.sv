@@ -141,7 +141,7 @@ module pad_frame
         output logic [7:0]      in_hyper_dq_o,
 
 
-        output logic            bootsel_o        ,
+        output logic [1:0]      bootsel_o        ,
 
         // EXT CHIP TP PADS
         inout wire              pad_sdio_clk    ,
@@ -178,7 +178,8 @@ module pad_frame
         inout wire              pad_uart_tx      ,
 
         inout wire              pad_reset_n      ,
-        inout wire              pad_bootsel      ,
+        inout wire              pad_bootsel0     ,
+        inout wire              pad_bootsel1     ,
         inout wire              pad_jtag_tck     ,
         inout wire              pad_jtag_tdi     ,
         inout wire              pad_jtag_tdo     ,
@@ -241,7 +242,8 @@ module pad_frame
     pad_functional_pu padinst_i2c0_scl   (.OEN(~oe_i2c0_scl_i  ), .I(out_i2c0_scl_i  ), .O(in_i2c0_scl_o  ), .PAD(pad_i2c0_scl  ), .PEN(~pad_cfg_i[8][0] ) );
 
 
-    pad_functional_pu padinst_bootsel    (.OEN(1'b1            ), .I(                ), .O(bootsel_o      ), .PAD(pad_bootsel   ), .PEN(1'b1             ) );
+    pad_functional_pu padinst_bootsel0    (.OEN(1'b1            ), .I(                ), .O(bootsel_o[0]      ), .PAD(pad_bootsel0   ), .PEN(1'b1             ) );
+    pad_functional_pu padinst_bootsel1    (.OEN(1'b1            ), .I(                ), .O(bootsel_o[1]      ), .PAD(pad_bootsel1   ), .PEN(1'b1             ) );
 
     pad_functional_pu padinst_hyper_csno0  (.OEN( 1'b0             ), .I( out_hyper_csn_i[0] ), .O(                  ), .PAD( pad_hyper_cs_no0 ), .PEN(1'b1 ) );
     pad_functional_pu padinst_hyper_csno1  (.OEN( 1'b0             ), .I( out_hyper_csn_i[1] ), .O(                  ), .PAD( pad_hyper_cs_no1 ), .PEN(1'b1 ) );

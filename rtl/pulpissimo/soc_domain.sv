@@ -39,7 +39,7 @@ module soc_domain #(
 
     input  logic                             mode_select_i,
 
-    input logic                              bootsel_i,
+    input  logic [1:0]                       bootsel_i,
 
     input  logic                             jtag_tck_i,
     input  logic                             jtag_trst_ni,
