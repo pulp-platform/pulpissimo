@@ -698,7 +698,7 @@ module tb_pulp;
          if (ENABLE_OPENOCD == 1) begin
             // Use openocd to interact with the simulation
 
-            s_bootsel = 2'b11;
+            s_bootsel = 2'b01;
             $display("[TB] %t - Releasing hard reset", $realtime);
             s_rst_n = 1'b1;
 
@@ -716,10 +716,10 @@ module tb_pulp;
                $display("[TB] %t - Releasing hard reset", $realtime);
                s_rst_n = 1'b1;
                s_bootsel = (STIM_FROM == "SPI_FLASH") ? 2'b00:
-                           (STIM_FROM == "HYPER_FLASH") ? 2'b01: 2'b00;
+                           (STIM_FROM == "HYPER_FLASH") ? 2'b10: 2'b00;
  
             end else if (LOAD_L2 == "JTAG") begin
-               s_bootsel = 2'b11;
+               s_bootsel = 2'b01;
             end
 
             if (LOAD_L2 == "JTAG") begin
