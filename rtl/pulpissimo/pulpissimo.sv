@@ -54,8 +54,24 @@ module pulpissimo #(
    inout  wire        pad_i2s0_sdi,
    inout  wire        pad_i2s1_sdi,
 
+   inout wire         pad_hyper_cs_no0  ,
+   inout wire         pad_hyper_cs_no1  ,
+   inout wire         pad_hyper_cko    ,
+   inout wire         pad_hyper_ckno   ,
+   inout wire         pad_hyper_rwds   ,
+   inout wire         pad_hyper_dqio0  ,
+   inout wire         pad_hyper_dqio1  ,
+   inout wire         pad_hyper_dqio2  ,
+   inout wire         pad_hyper_dqio3  ,
+   inout wire         pad_hyper_dqio4  ,
+   inout wire         pad_hyper_dqio5  ,
+   inout wire         pad_hyper_dqio6  ,
+   inout wire         pad_hyper_dqio7  ,
+   inout wire         pad_hyper_resetn ,
+
    inout  wire        pad_reset_n,
-   inout  wire        pad_bootsel,
+   inout  wire        pad_bootsel0,
+   inout  wire        pad_bootsel1,
 
    inout  wire        pad_jtag_tck,
    inout  wire        pad_jtag_tdi,
@@ -327,6 +343,18 @@ module pulpissimo #(
   logic [127:0]                s_pad_mux_soc;
   logic [383:0]                s_pad_cfg_soc;
 
+  logic [1:0]                  s_out_hyper_csn;
+  logic                        s_out_hyper_ck;
+  logic                        s_out_hyper_ckn;
+  logic                        s_out_hyper_rwds;
+  logic                        s_in_hyper_rwds;
+  logic                        s_oe_hyper_rwds;
+  logic [7:0]                  s_out_hyper_dq;
+  logic [7:0]                  s_in_hyper_dq;
+  logic                        s_oe_hyper_dq;
+  logic                        s_out_hyper_resetn;
+
+
   //***********************************************************
   //********** SOC TO CLUSTER DOMAINS SIGNALS *****************
   //***********************************************************
@@ -343,7 +371,7 @@ module pulpissimo #(
   logic [EVENT_WIDTH-1:0]      s_event_dataasync;
   logic                        s_cluster_irq;
 
-  logic                        s_bootsel;
+  logic [1:0]                  s_bootsel;
 
   APB_BUS        apb_debug();
   XBAR_TCDM_BUS  lint_debug();
@@ -395,6 +423,8 @@ module pulpissimo #(
         .oe_i2c0_scl_i         ( s_oe_i2c0_scl          ),
         .oe_uart_rx_i          ( s_oe_uart_rx           ),
         .oe_uart_tx_i          ( s_oe_uart_tx           ),
+        .oe_hyper_rwds_i       ( s_oe_hyper_rwds        ),
+        .oe_hyper_dq_i         ( s_oe_hyper_dq          ),
 
         .out_spim_sdio0_i      ( s_out_spim_sdio0       ),
         .out_spim_sdio1_i      ( s_out_spim_sdio1       ),
@@ -428,6 +458,12 @@ module pulpissimo #(
         .out_i2c0_scl_i        ( s_out_i2c0_scl         ),
         .out_uart_rx_i         ( s_out_uart_rx          ),
         .out_uart_tx_i         ( s_out_uart_tx          ),
+        .out_hyper_csn_i       ( s_out_hyper_csn        ),
+        .out_hyper_ck_i        ( s_out_hyper_ck         ),
+        .out_hyper_ckn_i       ( s_out_hyper_ckn        ),
+        .out_hyper_rwds_i      ( s_out_hyper_rwds       ),
+        .out_hyper_dq_i        ( s_out_hyper_dq         ),
+        .out_hyper_resetn_i    ( s_out_hyper_resetn     ),
 
         .in_spim_sdio0_o       ( s_in_spim_sdio0        ),
         .in_spim_sdio1_o       ( s_in_spim_sdio1        ),
@@ -461,6 +497,8 @@ module pulpissimo #(
         .in_i2c0_scl_o         ( s_in_i2c0_scl          ),
         .in_uart_rx_o          ( s_in_uart_rx           ),
         .in_uart_tx_o          ( s_in_uart_tx           ),
+        .in_hyper_rwds_o       ( s_in_hyper_rwds        ),
+        .in_hyper_dq_o         ( s_in_hyper_dq          ),
         .bootsel_o             ( s_bootsel              ),
 
         //EXT CHIP to PAD
@@ -496,8 +534,23 @@ module pulpissimo #(
         .pad_i2c0_scl          ( pad_i2c0_scl           ),
         .pad_uart_rx           ( pad_uart_rx            ),
         .pad_uart_tx           ( pad_uart_tx            ),
+        .pad_hyper_cs_no0      ( pad_hyper_cs_no0       ),
+        .pad_hyper_cs_no1      ( pad_hyper_cs_no1       ),
+        .pad_hyper_cko         ( pad_hyper_cko          ),
+        .pad_hyper_ckno        ( pad_hyper_ckno         ),
+        .pad_hyper_rwds        ( pad_hyper_rwds         ),
+        .pad_hyper_dqio0       ( pad_hyper_dqio0        ),
+        .pad_hyper_dqio1       ( pad_hyper_dqio1        ),
+        .pad_hyper_dqio2       ( pad_hyper_dqio2        ),
+        .pad_hyper_dqio3       ( pad_hyper_dqio3        ),
+        .pad_hyper_dqio4       ( pad_hyper_dqio4        ),
+        .pad_hyper_dqio5       ( pad_hyper_dqio5        ),
+        .pad_hyper_dqio6       ( pad_hyper_dqio6        ),
+        .pad_hyper_dqio7       ( pad_hyper_dqio7        ),
+        .pad_hyper_resetn      ( pad_hyper_resetn       ),
 
-        .pad_bootsel           ( pad_bootsel            ),
+        .pad_bootsel0          ( pad_bootsel0           ),
+        .pad_bootsel1          ( pad_bootsel1           ),
         .pad_reset_n           ( pad_reset_n            ),
         .pad_jtag_tck          ( pad_jtag_tck           ),
         .pad_jtag_tdi          ( pad_jtag_tdi           ),
@@ -816,6 +869,17 @@ module pulpissimo #(
         .sdio_data_o                  ( s_sdio_datao                     ),
         .sdio_data_i                  ( s_sdio_datai                     ),
         .sdio_data_oen_o              ( s_sdio_data_oen                  ),
+
+        .hyper_cs_no                  ( s_out_hyper_csn                  ),
+        .hyper_ck_o                   ( s_out_hyper_ck                   ),
+        .hyper_ck_no                  ( s_out_hyper_ckn                  ),
+        .hyper_rwds_o                 ( s_out_hyper_rwds                 ),
+        .hyper_rwds_i                 ( s_in_hyper_rwds                  ),
+        .hyper_rwds_oe_o              ( s_oe_hyper_rwds                  ),
+        .hyper_dq_i                   ( s_in_hyper_dq                    ),
+        .hyper_dq_o                   ( s_out_hyper_dq                   ),
+        .hyper_dq_oe_o                ( s_oe_hyper_dq                    ),
+        .hyper_reset_no               ( s_out_hyper_resetn               ),
 
         .cluster_busy_i               ( s_cluster_busy                   ),
 

@@ -36,8 +36,9 @@ module tb_pulp;
    // if RISCY is instantiated (CORE_TYPE == 0), RISCY_FPU enables the FPU
    parameter RISCY_FPU            = 1;
 
-   // the following parameters can activate instantiation of the verification IPs for SPI, I2C and I2s
+   // the following parameters can activate instantiation of the verification IPs for Hyperflash, Hyperram, SPI, I2C and I2s
    // see the instructions in rtl/vip/{i2c_eeprom,i2s,spi_flash} to download the verification IPs
+   parameter  USE_HYPER_MODELS    = 0;
    parameter  USE_S25FS256S_MODEL = 0;
    parameter  USE_24FC1025_MODEL  = 0;
    parameter  USE_I2S_MODEL       = 0;
@@ -45,8 +46,12 @@ module tb_pulp;
    // period of the external reference clock (32.769kHz)
    parameter  REF_CLK_PERIOD = 30517ns;
 
-   // how L2 is loaded. valid values are "JTAG" or "STANDALONE", the latter works only when USE_S25FS256S_MODEL is 1
-   parameter  LOAD_L2 = "JTAG";
+   // how L2 is loaded. valid values are "JTAG" or "STANDALONE", the latter works when USE_S25FS256S_MODEL/USE_HYPER_MODELS are 1
+   parameter  LOAD_L2 = "JTAG"; 
+
+   // STIM_FROM sets where is the image data.
+   // In case any values are not given, the debug module takes over the boot process.
+   parameter  STIM_FROM = "JTAG"; // can be "JTAG" "SPI_FLASH", "HYPER_FLASH", or ""
 
    // enable DPI-based JTAG
    parameter  ENABLE_DPI = 0;
@@ -58,13 +63,13 @@ module tb_pulp;
    parameter  ENABLE_EXTERNAL_DRIVER = 0;
 
    // enable DPI-based openocd debug bridge
-   parameter ENABLE_OPENOCD = 0;
+   parameter  ENABLE_OPENOCD = 0;
 
    // enable Debug Module Tests
-   parameter ENABLE_DM_TESTS = 0;
+   parameter  ENABLE_DM_TESTS = 0;
 
    // use the pulp tap to access the bus
-   parameter USE_PULP_BUS_ACCESS = 1;
+   parameter  USE_PULP_BUS_ACCESS = 1;
 
    // UART baud rate in bps
    parameter  BAUDRATE = 625000;
@@ -206,13 +211,20 @@ module tb_pulp;
    logic                tmp_tdo;
    logic                tmp_bridge_tdo;
 
+   // wire for HYPER BUS
+   wire                 wire_rwds;
+   wire [7:0 ]          wire_dq_io;
+   wire [1:0]           wire_cs_no;
+   wire                 wire_ck_o;
+   wire                 wire_ck_no;
+   wire                 wire_reset_no;
 
 
    wire w_master_i2s_sck;
    wire w_master_i2s_ws ;
 
-   wire w_bootsel;
-   logic s_bootsel;
+   wire  [1:0] w_bootsel;
+   logic [1:0] s_bootsel;
 
 
    logic [8:0] jtag_conf_reg, jtag_conf_rego; //22bits but actually only the last 9bits are used
@@ -356,7 +368,6 @@ module tb_pulp;
       assign w_uart_tx = w_uart_rx;
    end
 
-   // TODO: this should be set depending on the desired boot mode (JTAG, FLASH)
    assign w_bootsel = s_bootsel;
 
    /* JTAG DPI-based verification IP */
@@ -375,6 +386,48 @@ module tb_pulp;
          );
       end
    endgenerate
+
+   /* Hyperflash and Hyperram (not open-source, from Cypress) */
+   generate
+      if(USE_HYPER_MODELS == 1) begin
+         s27ks0641 #(
+            .TimingModel  ("S27KS0641DPBHI020")
+         ) hyperram_model (
+            .DQ7      ( wire_dq_io[7] ),
+            .DQ6      ( wire_dq_io[6] ),
+            .DQ5      ( wire_dq_io[5] ),
+            .DQ4      ( wire_dq_io[4] ),
+            .DQ3      ( wire_dq_io[3] ),
+            .DQ2      ( wire_dq_io[2] ),
+            .DQ1      ( wire_dq_io[1] ),
+            .DQ0      ( wire_dq_io[0] ),
+            .RWDS     ( wire_rwds     ),
+            .CSNeg    ( wire_cs_no[1] ),
+            .CK       ( wire_ck_o     ),
+            .CKNeg    ( wire_ck_no    ),
+            .RESETNeg ( wire_reset_no )
+         );
+         s26ks512s #( 
+            .TimingModel   ( "S26KS512SDPBHI000"), 
+            .mem_file_name ( "slm_files/flash_stim_hyper.slm" )
+         ) hyperflash_model (
+            .DQ7      ( wire_dq_io[7] ),
+            .DQ6      ( wire_dq_io[6] ),
+            .DQ5      ( wire_dq_io[5] ),
+            .DQ4      ( wire_dq_io[4] ),
+            .DQ3      ( wire_dq_io[3] ),
+            .DQ2      ( wire_dq_io[2] ),
+            .DQ1      ( wire_dq_io[1] ),
+            .DQ0      ( wire_dq_io[0] ),
+            .RWDS     ( wire_rwds     ),
+            .CSNeg    ( wire_cs_no[0] ),
+            .CK       ( wire_ck_o     ),
+            .CKNeg    ( wire_ck_no    ),
+            .RESETNeg ( wire_reset_no )
+         );
+      end
+   endgenerate
+
 
    /* SPI flash model (not open-source, from Spansion) */
    generate
@@ -577,8 +630,24 @@ module tb_pulp;
       .pad_i2s0_sdi       ( w_i2s0_sdi         ),
       .pad_i2s1_sdi       ( w_i2s1_sdi         ),
 
+      .pad_hyper_cs_no0   ( wire_cs_no[0]      ),
+      .pad_hyper_cs_no1   ( wire_cs_no[1]      ),
+      .pad_hyper_cko      ( wire_ck_o          ),
+      .pad_hyper_ckno     ( wire_ck_no         ),
+      .pad_hyper_rwds     ( wire_rwds          ),
+      .pad_hyper_dqio0    ( wire_dq_io[0]      ),
+      .pad_hyper_dqio1    ( wire_dq_io[1]      ),
+      .pad_hyper_dqio2    ( wire_dq_io[2]      ),
+      .pad_hyper_dqio3    ( wire_dq_io[3]      ),
+      .pad_hyper_dqio4    ( wire_dq_io[4]      ),
+      .pad_hyper_dqio5    ( wire_dq_io[5]      ),
+      .pad_hyper_dqio6    ( wire_dq_io[6]      ),
+      .pad_hyper_dqio7    ( wire_dq_io[7]      ),
+      .pad_hyper_resetn   ( wire_reset_no      ),
+
       .pad_reset_n        ( w_rst_n            ),
-      .pad_bootsel        ( w_bootsel          ),
+      .pad_bootsel0       ( w_bootsel[0]       ),
+      .pad_bootsel1       ( w_bootsel[1]       ),
 
       .pad_jtag_tck       ( w_tck              ),
       .pad_jtag_tdi       ( w_tdi              ),
@@ -628,7 +697,8 @@ module tb_pulp;
 
          if (ENABLE_OPENOCD == 1) begin
             // Use openocd to interact with the simulation
-            s_bootsel = 1'b1;
+
+            s_bootsel = 2'b01;
             $display("[TB] %t - Releasing hard reset", $realtime);
             s_rst_n = 1'b1;
 
@@ -640,11 +710,16 @@ module tb_pulp;
          end else begin
             // Use only the testbench to do the loading and running
 
-            // determine if we want to load the binary with jtag or from flash
-            if (LOAD_L2 == "STANDALONE")
-               s_bootsel = 1'b0;
-            else if (LOAD_L2 == "JTAG") begin
-               s_bootsel = 1'b1;
+            // determine if we want to simulate the stand-alone mode
+            // If JTAG is selected, the boot process will be selected according to the value of jtag_conf_reg
+            if (LOAD_L2 == "STANDALONE") begin
+               $display("[TB] %t - Releasing hard reset", $realtime);
+               s_rst_n = 1'b1;
+               s_bootsel = (STIM_FROM == "SPI_FLASH") ? 2'b00:
+                           (STIM_FROM == "HYPER_FLASH") ? 2'b10: 2'b00;
+ 
+            end else if (LOAD_L2 == "JTAG") begin
+               s_bootsel = 2'b01;
             end
 
             if (LOAD_L2 == "JTAG") begin
@@ -683,19 +758,17 @@ module tb_pulp;
 
                $display("[TB] %t - Enabling clock out via jtag", $realtime);
 
-               // we are using a bootsel based booting method:
-               // bootsel = 1'b1 means booting from jtag => bootrom makes us wait in a wfi/busy loop
-               // bootsel = 1'b1 means booting from flash => start loading image from flash
-               // This logic is handled in the bootrom which will read the bootsel signal value.
-               //
-               // This also means we are currently not relying on the jtag confreg to configure the booting behavior but it is still possible to use it.
-               // When the confreg is not set then we will boot according to bootsel.
-               // TODO: regression: we can't propgate our FLL settings like this. Needs sw changes (?)
-               //
-               // jtag_conf_reg = {USE_FLL ? 1'b0 : 1'b1, 6'b0, LOAD_L2 == "JTAG" ? 2'b10 : 2'b00};
-               // test_mode_if.set_confreg(jtag_conf_reg, jtag_conf_rego,
-               //     s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-               // $display("[TB] %t - jtag_conf_reg set to %x", $realtime, jtag_conf_reg);
+               // The boot code installed in the ROM checks the JTAG register value.
+               // If jtag_conf_reg is set to 0, the debug module will take over the boot process
+               // The image file can be loaded also from SPI flash and Hyper flash
+               // even though this is not the stand-alone boot
+
+               jtag_conf_reg = (STIM_FROM == "JTAG")           ? {1'b0, 4'b0, 3'b001, 1'b0}:
+                               (STIM_FROM == "SPI_FLASH")      ? {1'b0, 4'b0, 3'b111, 1'b0}:
+                               (STIM_FROM == "HYPER_FLASH")    ? {1'b0, 4'b0, 3'b101, 1'b0}: '0;
+               test_mode_if.set_confreg(jtag_conf_reg, jtag_conf_rego, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+               $display("[TB] %t - jtag_conf_reg set to %x", $realtime, jtag_conf_reg);
 
                $display("[TB] %t - Releasing hard reset", $realtime);
                s_rst_n = 1'b1;
@@ -719,60 +792,86 @@ module tb_pulp;
                else
                    $display("[JTAG] R/W test of L2 succeeded");
 
-               // From here on starts the actual jtag booting
 
                // Setup debug module and hart, halt hart and set dpc (return point
                // for boot).
                // Halting the fc hart transfers control of the program execution to
-               // the debug module. This might take a bit until the debug request
-               // signal is propagated so meanwhile the core is executing stuff
-               // from the bootrom. For jtag booting (what we are doing right now),
-               // bootsel is low so the code that is being executed in said bootrom
-               // is only a busy wait or wfi until the debug unit grabs control.
+               // the debug module. 
+
                debug_mode_if.init_dmi_access(s_tck, s_tms, s_trstn, s_tdi);
 
                debug_mode_if.set_dmactive(1'b1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
                debug_mode_if.set_hartsel(FC_CORE_ID, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+               
+               if(jtag_conf_reg == 0) begin
+                   $display("Jtag register is not set. The debug module takes over the boot process");
+                   $display("[TB] %t - Halting the Core", $realtime);
+                   debug_mode_if.halt_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
-               $display("[TB] %t - Halting the Core", $realtime);
-               debug_mode_if.halt_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-
-               $display("[TB] %t - Writing the boot address into dpc", $realtime);
-               debug_mode_if.write_reg_abstract_cmd(riscv::CSR_DPC, begin_l2_instr,
-                   s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+                   $display("[TB] %t - Writing the boot address into dpc", $realtime);
+                   debug_mode_if.write_reg_abstract_cmd(riscv::CSR_DPC, begin_l2_instr,
+                       s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+               end
 
                // long debug module + jtag tests
                if(ENABLE_DM_TESTS == 1) begin
-                  debug_mode_if.run_dm_tests(FC_CORE_ID, begin_l2_instr,
-                                           error, num_err, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-                  // we don't have any program to load so we finish the testing
-                  if (num_err == 0) begin
-                     exit_status = `EXIT_SUCCESS;
-                  end else begin
-                     exit_status = `EXIT_FAIL;
-                     $error("Debug Module: %d tests failed", num_err);
-                  end
-                  $stop;
-               end
+                   debug_mode_if.run_dm_tests(FC_CORE_ID, begin_l2_instr,
+                                            error, num_err, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+                   // we don't have any program to load so we finish the testing
+                   if (num_err == 0) begin
+                      exit_status = `EXIT_SUCCESS;
+                   end else begin
+                      exit_status = `EXIT_FAIL;
+                      $error("Debug Module: %d tests failed", num_err);
+                   end
+                   $stop;
+               end 
 
                $display("[TB] %t - Loading L2", $realtime);
                if (USE_PULP_BUS_ACCESS) begin
-                  // use pulp tap to load binary, put debug module in bypass
-                  pulp_tap_pkg::load_L2(num_stim, stimuli, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+                  // use pulp tap to load binary 
+                  if (jtag_conf_reg ==0) begin
+                      pulp_tap_pkg::load_L2(num_stim, stimuli, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+                  end else   
+                  if ( STIM_FROM == "JTAG") begin 
+                  // Set fc_boot_addr
+                     pulp_tap.init(s_tck, s_tms, s_trstn, s_tdi);
+                     pulp_tap.write32(32'h1a104004, 1, begin_l2_instr, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+                     $display("[TB] %t - set fc_boot_addr:%h", $realtime, begin_l2_instr);
 
+                  // JTAG boot requires handshaking between the boot code and test bench 
+                  // The while loop corresponds to the handshake.
+                     pulp_tap.init(s_tck, s_tms, s_trstn, s_tdi);
+
+                     pulp_tap.read32(32'h1a104074, 1, jtag_data,s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+                     while(!jtag_data[0][0]) begin
+                        pulp_tap.read32(32'h1a104074, 1, jtag_data,s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+                     end
+
+                     $display("[JTAG] synchronizing at the boot code %t",$realtime);
+                     jtag_conf_reg = {USE_FLL ? 1'b0 : 1'b1, 6'b0, LOAD_L2 == "JTAG" ? 2'b11 : 2'b00};
+                     pulp_tap_pkg::load_L2(num_stim, stimuli, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+                     #5us;
+                     test_mode_if.init(s_tck, s_tms, s_trstn, s_tdi);
+                     #5us;
+                     test_mode_if.set_confreg(jtag_conf_reg, jtag_conf_rego, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+                     #50us;
+
+                  end 
                end else begin
                   // use debug module to load binary
-                  debug_mode_if.load_L2(num_stim, stimuli, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-               end
+                  if (jtag_conf_reg == 0) debug_mode_if.load_L2(num_stim, stimuli, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+               end 
 
                // configure for debug module dmi access again
                debug_mode_if.init_dmi_access(s_tck, s_tms, s_trstn, s_tdi);
 
                // we have set dpc and loaded the binary, we can go now
                $display("[TB] %t - Resuming the CORE", $realtime);
-               debug_mode_if.resume_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-            end
+               if(jtag_conf_reg ==0) debug_mode_if.resume_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+            end 
 
             if (ENABLE_DPI == 1) begin
                jtag_mux = JTAG_DPI;
