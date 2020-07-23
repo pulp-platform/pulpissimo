@@ -97,7 +97,7 @@ test_sequential_bare:
     - make install
   script:
     - echo "Running sequential bare tests"
-    - make test-sequential-bare
+    - source env/ci-pulpissimo.sh && make test-sequential-bare
     - echo "Generating junit test results"
     - /usr/sepp/bin/pip3.4 install --user junit2html
     - /usr/sepp/bin/python3.4 -m junit2htmlreport tests/sequential_bare_tests/junit-reports/TEST-*.xml
@@ -120,7 +120,7 @@ test_parallel_bare:
     - make install
   script:
     - echo "Running parallel bare tests"
-    - make test-parallel-bare
+    - source env/ci-pulpissimo.sh && make test-parallel-bare
     - echo "Generating junit test results"
     - /usr/sepp/bin/pip3.4 install --user junit2html
     - /usr/sepp/bin/python3.4 -m junit2htmlreport tests/parallel_bare_tests/junit-reports/TEST-*.xml
@@ -143,7 +143,7 @@ test_pulp:
     - make install
   script:
     - echo "Running pulp tests"
-    - make test-pulp
+    - source env/ci-pulpissimo.sh && make test-pulp
     - echo "Generating junit test results"
     - /usr/sepp/bin/pip3.4 install --user junit2html
     - /usr/sepp/bin/python3.4 -m junit2htmlreport tests/pulp_tests/junit-reports/TEST-*.xml
@@ -166,7 +166,7 @@ test_ml:
     - make install
   script:
     - echo "Running ml tests"
-    - make test-ml
+    - source env/ci-pulpissimo.sh && make test-ml
     - echo "Generating junit test results"
     - /usr/sepp/bin/pip3.4 install --user junit2html
     - /usr/sepp/bin/python3.4 -m junit2htmlreport tests/ml_tests/junit-reports/TEST-*.xml
@@ -189,7 +189,7 @@ test_riscv:
     - make install
   script:
     - echo "Running riscv tests"
-    - make test-riscv
+    - source env/ci-pulpissimo.sh && make test-riscv
     - echo "Generating junit test results"
     - /usr/sepp/bin/pip3.4 install --user junit2html
     - /usr/sepp/bin/python3.4 -m junit2htmlreport tests/riscv_tests/junit-reports/TEST-*.xml
@@ -212,7 +212,7 @@ test_rt:
     - make install
   script:
     - echo "Running rt tests"
-    - make test-rt
+    - source env/ci-pulpissimo.sh && make test-rt
     - echo "Generating junit test results"
     - /usr/sepp/bin/pip3.4 install --user junit2html
     - /usr/sepp/bin/python3.4 -m junit2htmlreport tests/rt-tests/junit-reports/TEST-*.xml
@@ -236,7 +236,7 @@ test_simplified_sw:
     - make install
   script:
     - echo "Running software test"
-    - make test-runtime-gitlab
+    - source env/ci-pulpissimo.sh && make test-runtime-gitlab
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
     paths:

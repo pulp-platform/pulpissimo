@@ -134,50 +134,42 @@ test-checkout-gitlab:
 .PHONY: test-gitlab
 ## Run tests on gitlab using the latest supported sdk release
 test-gitlab: tests
-	source env/pulpissimo.sh; \
 	cd tests && plptest --threads 16 --stdout
 
 .PHONY: test-sequential-bare
 ## Run only sequential_bare tests
 test-sequential-bare:
-	source env/pulpissimo.sh; \
 	cd tests/sequential_bare_tests && plptest --threads 32 --stdout
 
 .PHONY: test-parallel-bare
 ## Run only parallel_bare tests
 test-parallel-bare:
-	source env/pulpissimo.sh; \
 	cd tests/parallel_bare_tests && plptest --threads 32 --stdout
 
 .PHONY: test-pulp
 ## Run only pulp_tests tests
 test-pulp:
-	source env/pulpissimo.sh; \
 	cd tests/pulp_tests && plptest --threads 32 --stdout
 
 .PHONY: test-ml
 ## Run only ml_tests tests
 test-ml:
-	source env/pulpissimo.sh; \
 	cd tests/ml_tests && plptest --threads 32 --stdout
 
 .PHONY: test-riscv
 ## Run only riscv_tests tests
 test-riscv:
-	source env/pulpissimo.sh; \
 	cd tests/riscv_tests && plptest --threads 32 --stdout
 
 .PHONY: test-rt
 ## Run only rt_tests tests
 test-rt:
-	source env/pulpissimo.sh; \
 	cd tests/rt-tests && plptest --threads 32 --stdout
 
 .PHONY: test-runtime-gitlab
 ## Run simplified runtime tests on gitlab using the latest supported sdk release
 test-runtime-gitlab: pulp-runtime
-	source env/pulpissimo.sh; \
-        cd tests && ../pulp-runtime/scripts/bwruntests.py --proc-verbose -v \
+	cd tests && ../pulp-runtime/scripts/bwruntests.py --proc-verbose -v \
 		--report-junit -t 3600 --yaml \
 		-o simplified-runtime.xml runtime-tests.yaml
 
