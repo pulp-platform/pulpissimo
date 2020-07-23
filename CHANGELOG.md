@@ -7,14 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
-- Bump `pulp_soc` to `v1.1.0`
+- Bump `pulp_soc` to `v1.2.0`
+- Make number of SPI and I2C peripherals parametrizable
 
 ### Added
 - CI support for pulp-runtime to run tests, using bwruntest.py and
   tests/runtime-tests.yaml
+- Point to simple runtime in `README.md`
+- Allow passing `generate-scripts` to pass arguments to vlog
 
 ### Fixed
 - Properly propagate NB_CORES
+- Mark tb as not synthesizable
 
 ## [5.0.0] - 2019-11-18
 

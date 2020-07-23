@@ -79,14 +79,64 @@ For further information on how to design and integrate such accelerators,
 see `ips/hwpe-stream/doc` and https://arxiv.org/abs/1612.05974.
 
 ## Getting Started
+We provide a [simple runtime](#simple-runtime) and a [full featured
+runtime](#software-development-kit) for PULPissimo. We recommend you try out
+first the minimal runtime and when you hit its limitations you can try the full
+runtime by installing the SDK.
 
-### Prerequisites
-To be able to use the PULPissimo platform, you need to have installed the software
-development kit for PULP/PULPissimo and have the [pulp-riscv-gcc toolchain](https://github.com/pulp-platform/pulp-riscv-gnu-toolchain/)
-installed and pointed to by setting the `PULP_RISCV_GCC_TOOLCHAIN` environment variable.
+After having chosen a runtime you can run software by either [simulating the
+hardware](#building-the-rtl-simulation-platform) or running it in a [software
+emulation](#building-and-using-the-virtual-platform).
 
-You can follow the steps outlined [here](https://github.com/pulp-platform/pulp-sdk/#standard-sdk-build)
-to build the full sdk.
+### Simple Runtime
+The simple runtime is here to get you started quickly. Using it can run and
+write programs that don't need any advanced features.
+
+First install the system dependencies indicated
+[here](https://github.com/pulp-platform/pulp-runtime/blob/master/README.md)
+
+Then make sure you have
+[pulp-riscv-gnu-toolchain](https://github.com/pulp-platform/pulp-riscv-gnu-toolchain)
+installed (either by compiling it or using one of the binary releases under
+available under the release tab) and point `PULP_RISCV_GCC_TOOLCHAIN` to it:
+
+```
+export PULP_RISCV_GCC_TOOLCHAIN=YOUR_PULP_TOOLCHAIN_PATH
+```
+
+Get the repository for the simple runtime:
+```
+git clone https://github.com/pulp-platform/pulp-runtime/
+```
+The simple runtime supports many different hardware configurations. We want PULPissimo:
+```
+cd pulp-runtime
+source configs/pulpissimo.sh
+```
+
+Now we are ready to set up the simulation environment. Normally you would want
+to simulate the hardware design running your program, so go
+[here](#building-the-rtl-simulation-platform).
+
+
+### Software Development Kit
+If you need a more complete runtime (drivers, tasks etc.) you can install the
+software development kit for PULP/PULPissimo.
+
+First install the system dependencies indicated
+[here](https://github.com/pulp-platform/pulp-builder/blob/master/README.md)
+
+In particular don't forget to set `PULP_RISCV_GCC_TOOLCHAIN`.
+
+You can now either follow the steps outlined [here](https://github.com/pulp-platform/pulp-sdk/#standard-sdk-build)
+to build the full sdk or just call
+```
+make build-pulp-sdk
+```
+and then set up the necessary environment variables with
+```
+source env/pulpissimo.sh
+```
 
 ### Building the RTL simulation platform
 To build the RTL simulation platform, start by getting the latest version of the
@@ -101,17 +151,24 @@ After having access to the SDK, you can build the simulation platform by doing
 the following:
 ```bash
 source setup/vsim.sh
-make clean build
+make build
 ```
 This command builds a version of the simulation platform with no dependencies on
 external models for peripherals. See below (Proprietary verification IPs) for
 details on how to plug in some models of real SPI, I2C, I2S peripherals.
 
-### Downloading and running tests
-Finally, you can download and run the tests; for that you can checkout the
-following repositories:
+For more advanced usage have a look at `./generate-scripts --help` and
+`update-ips --help`.
 
-Runtime tests: https://github.com/pulp-platform/pulp-rt-examples
+Also check out the output of `make help` for more useful Makefile targets.
+
+### Downloading and running examples
+Finally, you can download and run examples; for that you can checkout the
+following repositories depending on whether you use the simple runtime or the full sdk.
+
+Simple Runtime: https://github.com/pulp-platform/pulp-runtime-examples
+
+SDK: https://github.com/pulp-platform/pulp-rt-examples
 
 Now you can change directory to your favourite test e.g.: for an hello world
 test, run

@@ -172,8 +172,6 @@ module pad_frame
         inout wire              pad_jtag_tms     ,
         inout wire              pad_jtag_trst    ,
         inout wire              pad_xtal_in
-
-
     );
 
     pad_functional_pd padinst_sdio_data0 (.OEN(~oe_sdio_data0_i ), .I(out_sdio_data0_i ), .O(in_sdio_data0_o ), .PAD(pad_sdio_data0 ), .PEN(~pad_cfg_i[22][0]) );
@@ -225,7 +223,6 @@ module pad_frame
   pad_functional_pu padinst_jtag_tdi   (.OEN(1'b1            ), .I(                ), .O(jtag_tdi_o     ), .PAD(pad_jtag_tdi  ), .PEN(1'b1             ) );
   pad_functional_pu padinst_jtag_trstn (.OEN(1'b1            ), .I(                ), .O(jtag_trst_o    ), .PAD(pad_jtag_trst ), .PEN(1'b1             ) );
   pad_functional_pd padinst_jtag_tdo   (.OEN(1'b0            ), .I(jtag_tdo_i      ), .O(               ), .PAD(pad_jtag_tdo  ), .PEN(1'b1             ) );
-
 `else
   assign ref_clk_o = pad_xtal_in;
   assign rstn_o = pad_reset_n;
