@@ -84,6 +84,10 @@ runtime](#software-development-kit) for PULPissimo. We recommend you try out
 first the minimal runtime and when you hit its limitations you can try the full
 runtime by installing the SDK.
 
+After having chosen a runtime you can run software by either [simulating the
+hardware](#building-the-rtl-simulation-platform) or running it in a [software
+emulation](#building-and-using-the-virtual-platform).
+
 ### Simple Runtime
 The simple runtime is here to get you started quickly. Using it can run and
 write programs that don't need any advanced features.
@@ -124,12 +128,15 @@ First install the system dependencies indicated
 
 In particular don't forget to set `PULP_RISCV_GCC_TOOLCHAIN`.
 
-You can follow the steps outlined [here](https://github.com/pulp-platform/pulp-sdk/#standard-sdk-build)
-to build the full sdk.
-After having chosen a runtime you can run software by either [simulating the
-hardware](#building-the-rtl-simulation-platform) or running it in a [software
-emulation](#building-and-using-the-virtual-platform).
-
+You can now either follow the steps outlined [here](https://github.com/pulp-platform/pulp-sdk/#standard-sdk-build)
+to build the full sdk or just call
+```
+make build-pulp-sdk
+```
+and then set up the necessary environment variables with
+```
+source env/pulpissimo.sh
+```
 
 ### Building the RTL simulation platform
 To build the RTL simulation platform, start by getting the latest version of the
