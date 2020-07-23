@@ -64,35 +64,12 @@ import_bootcode:
 	cd sim/boot && objcopy --srec-len 1 --output-target=srec ${PULP_SDK_HOME}/install/bin/boot-pulpissimo boot-pulpissimo.s19
 	cd sim/boot && s19toboot.py boot-pulpissimo.s19 pulpissimo
 
-# # JENKIN CI
-# # continuous integration on jenkins
-# all: checkout build install vopt sdk
-
-# sdk:
-# 	if [ ! -e pulp-builder ]; then \
-# 	  git clone --recurse https://github.com/pulp-platform/pulp-builder.git; \
-# 	fi; \
-# 	cd pulp-builder; \
-# 	git checkout 83953d5ca4c545f4186bf3683d509566c3067012; \
-# 	git checkout --recurse-submodules; \
-# 	. configs/pulpissimo.sh; \
-# 	. configs/rtl.sh; \
-# 	./scripts/clean; \
-# 	./scripts/update-runtime; \
-# 	./scripts/build-runtime; \
-# 	./scripts/update-runner; \
-# 	./scripts/build-runner;
-
-# test-checkout:
-# 	./update-tests
-
-# test:
-# 	cd pulp-builder; \
-# 	. sdk-setup.sh; \
-# 	. configs/pulpissimo.sh; \
-# 	. configs/rtl.sh; \
-# 	cd ..; \
-# 	cd tests && plptest --threads 16 --stdout
+check-env-pulp-gcc:
+ifndef PULP_RISCV_GCC_TOOLCHAIN
+	$(error PULP_RISCV_GCC_TOOLCHAIN is undefined.\
+	You need to set this environment variable to point \
+	to your pulp gcc installation)
+endif
 
 check-env-art:
 ifndef PULP_ARTIFACTORY_USER
@@ -101,8 +78,17 @@ ifndef PULP_ARTIFACTORY_USER
 	to be able access the artifactory server to download the sdk)
 endif
 
+## Build the pulp SDK from source
+build-pulp-sdk: pulp-sdk
+pulp-sdk: check-env-pulp-gcc
+	git clone https://github.com/pulp-platform/pulp-sdk.git -b 2019.12.06; \
+	cd pulp-sdk; \
+	source configs/pulpissimo.sh; \
+	source configs/platform-rtl.sh; \
+	make all env
+
 ## Download the latest supported pulp sdk release
-sdk-pulp: check-env-art sdk-gitlab
+pulp-sdk-release: check-env-art sdk-gitlab
 
 ## Download pulp tests for local machine. Same as test-checkout
 get-tests: test-checkout
