@@ -151,7 +151,7 @@ After having access to the SDK, you can build the simulation platform by doing
 the following:
 ```bash
 source setup/vsim.sh
-make clean build
+make build
 ```
 This command builds a version of the simulation platform with no dependencies on
 external models for peripherals. See below (Proprietary verification IPs) for
@@ -159,6 +159,8 @@ details on how to plug in some models of real SPI, I2C, I2S peripherals.
 
 For more advanced usage have a look at `./generate-scripts --help` and
 `update-ips --help`.
+
+Also check out the output of `make help` for more useful Makefile targets.
 
 ### Downloading and running examples
 Finally, you can download and run examples; for that you can checkout the
