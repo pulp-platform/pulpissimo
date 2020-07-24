@@ -1,0 +1,25 @@
+From 970f11980720d7cb40d03d5cfe0e5f496a42b148 Mon Sep 17 00:00:00 2001
+From: bluew <bluewww@users.noreply.github.com>
+Date: Fri, 24 Jul 2020 15:12:19 +0000
+Subject: [PATCH] Disable forced isa flag for pulp
+
+---
+ sdk/2020.01.01/install/ws/python/plpflags.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/sdk/2020.01.01/install/ws/python/plpflags.py b/sdk/2020.01.01/install/ws/python/plpflags.py
+index 9c0bc5f..c05c6ba 100755
+--- a/sdk/2020.01.01/install/ws/python/plpflags.py
++++ b/sdk/2020.01.01/install/ws/python/plpflags.py
+@@ -700,7 +700,7 @@ class Arch(object):
+     elif self.chip in ['vega', 'gap9', 'pulp']:
+       c_flags = ' -mPE=8 -mFC=1'
+       ld_flags = ' -mPE=8 -mFC=1'
+-      isa='imcXgap9'
++      # isa='imcXgap9'
+     elif self.chip.find('oprecomp') != -1:
+       isa='imcXgap9'
+     elif core_config.get('version') == 'zeroriscy':   
+-- 
+2.25.0
+
