@@ -98,9 +98,11 @@ get-sdk: sdk-gitlab
 
 # GITLAB CI
 # continuous integration on gitlab
-sdk-gitlab: pkg/sdk/2019.11.03
-pkg/sdk/2019.11.03:
-	sdk-releases/get-sdk-2019.11.03-CentOS_7.py
+sdk-gitlab: pkg/sdk/2020.01.01
+pkg/sdk/2020.01.01:
+	sdk-releases/get-sdk-2020.01.01-CentOS_7.py
+	cd pkg; \
+	for f in ../sdk-releases/patches/*.patch; do patch -p1 < "$$f"; done; \
 
 # simplified runtime for PULP that doesn't need the sdk
 pulp-runtime:
