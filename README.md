@@ -298,6 +298,7 @@ platform by running the following commands within the SDK's root directory:
 source configs/pulpissimo.sh
 source configs/fpgas/pulpissimo/<board_target>.sh
 ```
+**Currently, the only available board_target in the SDK is the genesys2.sh board. However, there are no board specific settings in this file except for the clock frequency and UART baudrate that can easily be overidden (see below). You can just source the genesys2.sh target regardless of which FPGA board you are actually using and override the frequencies and baudrate in your application. The only reason you need to source the genesys2.sh configuration file instead of e.g. the rtl platform configuration is to instruct the SDK to omit all runtime initialization (the code executed before your main function is called on the core) of the FLLs that are not available in the FPGA version of PULPissimo.**
 
 If you updated the SDK don't forget to recompile the SDK and the dependencies.
 
