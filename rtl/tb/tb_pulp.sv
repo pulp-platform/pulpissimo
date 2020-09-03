@@ -619,6 +619,10 @@ module tb_pulp;
              begin_l2_instr = 32'h1C008080;
          $display("[TB] %t - Entry point is set to 0x%h", $realtime, begin_l2_instr);
 
+
+         $display("[TB] %t - PULP_OBI equal to %h", $realtime, i_dut.soc_domain_i.pulp_soc_i.fc_subsystem_i.FC_CORE.lFC_CORE.core_i.PULP_OBI);
+
+
          $display("[TB] %t - Asserting hard reset", $realtime);
          s_rst_n = 1'b0;
 
