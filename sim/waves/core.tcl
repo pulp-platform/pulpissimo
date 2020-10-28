@@ -1,6 +1,6 @@
 # add fc
 set rvcores [find instances -recursive -bydu riscv_core -nodu]
-set fpuprivate [find instances -recursive -bydu fpu_private]
+set fpuprivate [find instances -recursive -bydu fpnew_top]
 set rvpmp [find instances -recursive -bydu riscv_pmp]
 
 if {$rvcores ne ""} {
@@ -28,7 +28,7 @@ if {$rvcores ne ""} {
   add wave -group "Core"  -group "EX Stage" -group "MUL"                    $rvcores/ex_stage_i/mult_i/*
   if {$fpuprivate ne ""} {
     add wave -group "Core"  -group "EX Stage" -group "APU_DISP"             $rvcores/ex_stage_i/genblk1/apu_disp_i/*
-    add wave -group "Core"  -group "EX Stage" -group "FPU"                  $rvcores/ex_stage_i/genblk1/genblk1/fpu_i/*
+    add wave -group "Core"  -group "EX Stage" -group "FPU"               $rvcores/ex_stage_i/genblk1/genblk1/i_fpnew_bulk/*
   }
   add wave -group "Core"  -group "EX Stage"                                 $rvcores/ex_stage_i/*
   add wave -group "Core"  -group "LSU"                                      $rvcores/load_store_unit_i/*
