@@ -69,7 +69,6 @@ module pulpissimo #(
   localparam AXI_CLUSTER_SOC_DATA_WIDTH = 64;
   localparam AXI_SOC_CLUSTER_DATA_WIDTH = 32;
   localparam AXI_CLUSTER_SOC_ID_WIDTH   = 6;
-  localparam AXI_SOC_CLUSTER_ID_WIDTH   = 6;
 
   localparam AXI_USER_WIDTH             = 6;
   localparam AXI_CLUSTER_SOC_STRB_WIDTH = AXI_CLUSTER_SOC_DATA_WIDTH/8;
@@ -720,7 +719,6 @@ module pulpissimo #(
       .AXI_DATA_IN_WIDTH  ( AXI_CLUSTER_SOC_DATA_WIDTH ),
       .AXI_DATA_OUT_WIDTH ( AXI_SOC_CLUSTER_DATA_WIDTH ),
       .AXI_ID_IN_WIDTH    ( AXI_CLUSTER_SOC_ID_WIDTH   ),
-      .AXI_ID_OUT_WIDTH   ( AXI_SOC_CLUSTER_ID_WIDTH   ),
       .AXI_USER_WIDTH     ( AXI_USER_WIDTH             ),
       .AXI_STRB_IN_WIDTH  ( AXI_CLUSTER_SOC_STRB_WIDTH ),
       .AXI_STRB_OUT_WIDTH ( AXI_SOC_CLUSTER_STRB_WIDTH ),
