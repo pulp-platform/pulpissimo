@@ -284,7 +284,7 @@ test_dm:
     - echo "Running debug module testbench"
     - cd sim/ && make lib build opt simc VSIM_FLAGS=-gENABLE_DM_TESTS=1
 
-fpga_synth:
+fpga_synth_genesys2:
   stage: test
   before_script:
   script:
@@ -310,3 +310,138 @@ fpga_synth:
       - fpga/pulpissimo-genesys2/*.gdb
       - fpga/pulpissimo-genesys2/*.jou
       - fpga/pulpissimo-genesys2/*.log
+
+fpga_synth_nexys_video:
+  stage: test
+  before_script:
+  script:
+    - echo "(Re)generating scripts" # because paths might have changed
+    - ./generate-scripts
+    - echo "Starting synthesis with vivado"
+    - cd fpga/ && make nexys_video VIVADO='vivado-2019.1.1 vivado'
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - fpga/pulpissimo_nexys_video.bit
+      - fpga/pulpissimo_nexys_video.bin
+      - fpga/*.jou
+      - fpga/*.log
+      - fpga/*.str
+      - fpga/pulpissimo-nexys_video/reports
+      - fpga/pulpissimo-nexys_video/rtl
+      - fpga/pulpissimo-nexys_video/tcl
+      - fpga/pulpissimo-nexys_video/pulpissimo_nexys_video.xpr
+      - fpga/pulpissimo-nexys_video/fpga-settings.mk
+      - fpga/pulpissimo-nexys_video/*.log
+      - fpga/pulpissimo-nexys_video/*.cfg
+      - fpga/pulpissimo-nexys_video/*.gdb
+      - fpga/pulpissimo-nexys_video/*.jou
+      - fpga/pulpissimo-nexys_video/*.log
+
+fpga_synth_nexys:
+  stage: test
+  before_script:
+  script:
+    - echo "(Re)generating scripts" # because paths might have changed
+    - ./generate-scripts
+    - echo "Starting synthesis with vivado"
+    - cd fpga/ && make nexys rev=nexys4 VIVADO='vivado-2019.1.1 vivado'
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - fpga/pulpissimo_nexys.bit
+      - fpga/pulpissimo_nexys.bin
+      - fpga/*.jou
+      - fpga/*.log
+      - fpga/*.str
+      - fpga/pulpissimo-nexys/reports
+      - fpga/pulpissimo-nexys/rtl
+      - fpga/pulpissimo-nexys/tcl
+      - fpga/pulpissimo-nexys/pulpissimo_nexys.xpr
+      - fpga/pulpissimo-nexys/fpga-settings.mk
+      - fpga/pulpissimo-nexys/*.log
+      - fpga/pulpissimo-nexys/*.cfg
+      - fpga/pulpissimo-nexys/*.gdb
+      - fpga/pulpissimo-nexys/*.jou
+      - fpga/pulpissimo-nexys/*.log
+
+fpga_synth_nexys_zcu104:
+  stage: test
+  before_script:
+  script:
+    - echo "(Re)generating scripts" # because paths might have changed
+    - ./generate-scripts
+    - echo "Starting synthesis with vivado"
+    - cd fpga/ && make zcu104 VIVADO='vivado-2019.1.1 vivado'
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - fpga/pulpissimo_zcu104.bit
+      - fpga/pulpissimo_zcu104.bin
+      - fpga/*.jou
+      - fpga/*.log
+      - fpga/*.str
+      - fpga/pulpissimo-zcu104/reports
+      - fpga/pulpissimo-zcu104/rtl
+      - fpga/pulpissimo-zcu104/tcl
+      - fpga/pulpissimo-zcu104/pulpissimo_zcu104.xpr
+      - fpga/pulpissimo-zcu104/fpga-settings.mk
+      - fpga/pulpissimo-zcu104/*.log
+      - fpga/pulpissimo-zcu104/*.cfg
+      - fpga/pulpissimo-zcu104/*.gdb
+      - fpga/pulpissimo-zcu104/*.jou
+      - fpga/pulpissimo-zcu104/*.log
+
+fpga_synth_zedboard:
+  stage: test
+  before_script:
+  script:
+    - echo "(Re)generating scripts" # because paths might have changed
+    - ./generate-scripts
+    - echo "Starting synthesis with vivado"
+    - cd fpga/ && make zedboard VIVADO='vivado-2019.1.1 vivado'
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - fpga/pulpissimo_zedboard.bit
+      - fpga/pulpissimo_zedboard.bin
+      - fpga/*.jou
+      - fpga/*.log
+      - fpga/*.str
+      - fpga/pulpissimo-zedboard/reports
+      - fpga/pulpissimo-zedboard/rtl
+      - fpga/pulpissimo-zedboard/tcl
+      - fpga/pulpissimo-zedboard/pulpissimo_zedboard.xpr
+      - fpga/pulpissimo-zedboard/fpga-settings.mk
+      - fpga/pulpissimo-zedboard/*.log
+      - fpga/pulpissimo-zedboard/*.cfg
+      - fpga/pulpissimo-zedboard/*.gdb
+      - fpga/pulpissimo-zedboard/*.jou
+      - fpga/pulpissimo-zedboard/*.log
+
+fpga_synth_zcu102:
+  stage: test
+  before_script:
+  script:
+    - echo "(Re)generating scripts" # because paths might have changed
+    - ./generate-scripts
+    - echo "Starting synthesis with vivado"
+    - cd fpga/ && make zcu102 VIVADO='vivado-2019.1.1 vivado'
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - fpga/pulpissimo_zcu102.bit
+      - fpga/pulpissimo_zcu102.bin
+      - fpga/*.jou
+      - fpga/*.log
+      - fpga/*.str
+      - fpga/pulpissimo-zcu102/reports
+      - fpga/pulpissimo-zcu102/rtl
+      - fpga/pulpissimo-zcu102/tcl
+      - fpga/pulpissimo-zcu102/pulpissimo_zcu102.xpr
+      - fpga/pulpissimo-zcu102/fpga-settings.mk
+      - fpga/pulpissimo-zcu102/*.log
+      - fpga/pulpissimo-zcu102/*.cfg
+      - fpga/pulpissimo-zcu102/*.gdb
+      - fpga/pulpissimo-zcu102/*.jou
+      - fpga/pulpissimo-zcu102/*.log
