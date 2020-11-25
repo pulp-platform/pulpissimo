@@ -15,7 +15,13 @@ module pulp_clock_gating
    input  logic test_en_i,
    output logic clk_o
    );
+  logic         clk_en;
 
-   assign clk_o = clk_i;
-   
+  // Use a latch based clock gate instead of BUFGCE. Otherwise we quickly run out of BUFGCTRL cells on the FPGAs.
+  always_latch begin
+    if (clk_i == 1'b0) clk_en <= en_i | test_en_i;
+  end
+
+  assign clk_o = clk_i & clk_en;
+
 endmodule
