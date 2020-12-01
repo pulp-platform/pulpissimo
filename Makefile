@@ -41,24 +41,37 @@ INSTALL_FILES += $(shell cd sim && find waves -type f)
 
 $(foreach file, $(INSTALL_FILES), $(eval $(call declareInstallFile,$(file))))
 
+BRANCH ?= master
+
 .PHONY: checkout
+ifdef BENDER
+checkout: bender
+	./bender update
+	$(MAKE) bender-script
+else
 checkout:
-	git submodule update --init
 	./update-ips
+endif
 
 # generic clean and build targets for the platform
 .PHONY: clean
+
 ## Remove the RTL model files
 clean:
 	rm -rf $(VSIM_PATH)
-	cd sim && $(MAKE) clean
+	cd sim && $(MAKE) BENDER=$(BENDER) clean
 
 .PHONY: build
 ## Build the RTL model for vsim
 build:
+ifdef BENDER
+	@test -f Bender.lock || { echo "ERROR: Bender.lock file does not exist. Did you run make checkout in bender mode?"; exit 1; }
+	cd sim && $(MAKE) BENDER=bender all
+else
 	@[ "$$(ls -A ips/)" ] || { echo "ERROR: ips/ is an empty directory. Did you run ./update-ips?"; exit 1; }
-	cd sim && $(MAKE) lib build opt
+	cd sim && $(MAKE) all
 	cp -r rtl/tb/* $(VSIM_PATH)
+endif
 
 .PHONY: build-incisive
 ## Build the RTL model for xsim
@@ -185,6 +198,29 @@ test-gitlab2:
 	source configs/pulpissimo.sh; \
 	source configs/rtl.sh; \
 	cd ../tests && plptest --threads 16 --stdout
+
+# Bender integration
+
+VLOG_ARGS += -suppress 2583 -suppress 13314
+BENDER_BUILD_DIR = sim
+
+.PHONY: bender-script bender-build bender-rm
+bender-script: 
+	echo 'set ROOT [file normalize [file dirname [info script]]/..]' > $(BENDER_BUILD_DIR)/compile.tcl
+	./bender script vsim \
+		--vlog-arg="$(VLOG_ARGS)" --vcom-arg="" \
+		-t rtl -t test \
+		| grep -v "set ROOT" >> $(BENDER_BUILD_DIR)/compile.tcl
+
+bender:
+ifeq (,$(wildcard ./bender))
+	curl --proto '=https' --tlsv1.2 -sSf https://fabianschuiki.github.io/bender/init \
+		| bash -s -- 0.21.0
+	touch bender
+endif
+
+bender-rm:
+	rm -f bender
 
 .PHONY: help
 help: Makefile
