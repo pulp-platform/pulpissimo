@@ -42,12 +42,14 @@ clean:
 	rm -rf $(VSIM_PATH)
 	cd sim && $(MAKE) clean
 
+.PHONY: build
 ## Build the RTL model for vsim
 build:
 	@[ "$$(ls -A ips/)" ] || { echo "ERROR: ips/ is an empty directory. Did you run ./update-ips?"; exit 1; }
 	cd sim && $(MAKE) lib build opt
 	cp -r rtl/tb/* $(VSIM_PATH)
 
+.PHONY: build-incisive
 ## Build the RTL model for xsim
 build-incisive:
 	cd sim && $(MAKE) -f Makefile.incisive build-sc
@@ -60,9 +62,13 @@ vopt:
 	export VOPT_FLOW=1 && cd $(VSIM_PATH) && vsim -64 -c -do "source tcl_files/config/vsim.tcl; quit"
 
 ## Import the latest bootcode. This should not be called by the user.
-import_bootcode:
-	cd sim/boot && objcopy --srec-len 1 --output-target=srec ${PULP_SDK_HOME}/install/bin/boot-pulpissimo boot-pulpissimo.s19
-	cd sim/boot && s19toboot.py boot-pulpissimo.s19 pulpissimo
+import-bootcode: sim/boot/boot_code.cde
+
+boot_code/boot_code.cde: boot_code/boot_code.c boot_code/crt0.S boot_code/link.ld
+	$(MAKE) -C boot_code boot_code.cde
+
+sim/boot/boot_code.cde: boot_code/boot_code.cde
+	cp $< $@
 
 check-env-pulp-gcc:
 ifndef PULP_RISCV_GCC_TOOLCHAIN
