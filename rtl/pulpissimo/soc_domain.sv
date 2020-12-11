@@ -19,7 +19,7 @@ module soc_domain #(
     parameter AXI_DATA_IN_WIDTH    = 64,
     parameter AXI_DATA_OUT_WIDTH   = 32,
     parameter AXI_ID_IN_WIDTH      = 4,
-    localparam AXI_ID_OUT_WIDTH    = AXI_ID_IN_WIDTH + $clog2(5+4), //Must be large enough to accomodate the additional
+    localparam AXI_ID_OUT_WIDTH    = pkg_soc_interconnect::AXI_ID_OUT_WIDTH, //Must be large enough to accomodate the additional
                                                                   //bits for the axi XBAR ($clog2(nr_master), rightnow
                                                                   //we have 9 masters 5 for fc_data, fc_instr, udma_rx,
                                                                   //udma_tx, debug_access and 4 for the 64-bit
