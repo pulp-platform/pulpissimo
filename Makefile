@@ -61,14 +61,13 @@ install: $(INSTALL_HEADERS)
 vopt:
 	export VOPT_FLOW=1 && cd $(VSIM_PATH) && vsim -64 -c -do "source tcl_files/config/vsim.tcl; quit"
 
+.PHONY: import-bootcode
 ## Import the latest bootcode. This should not be called by the user.
-import-bootcode: sim/boot/boot_code.cde
+import-bootcode: boot_code/boot_code.cde
+	cp boot_code/boot_code.cde sim/boot/boot_code.cde
 
 boot_code/boot_code.cde: boot_code/boot_code.c boot_code/crt0.S boot_code/link.ld
 	$(MAKE) -C boot_code boot_code.cde
-
-sim/boot/boot_code.cde: boot_code/boot_code.cde
-	cp $< $@
 
 check-env-pulp-gcc:
 ifndef PULP_RISCV_GCC_TOOLCHAIN
