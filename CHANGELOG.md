@@ -6,19 +6,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.0.0] - 2020-12-11
+
 ### Changed
-- Bump `pulp_soc` to `v1.2.0`
+- Bump `pulp_soc` to `v2.0.0` which adds completely new interconnect with integrated AXI crossbar for simplified IP
+  integration
 - Make number of SPI and I2C peripherals parametrizable
+- Various FPGA tcl script enhancements
+- Various rtl code cleanups and assertion additions
 
 ### Added
+- Fixed synthesis issues. PULPissimo is now synthesizable as is.
+- Revamped datasheet & added datasheet generator
 - CI support for pulp-runtime to run tests, using bwruntest.py and
   tests/runtime-tests.yaml
+- CI target for all supported fpga boards
 - Point to simple runtime in `README.md`
 - Allow passing `generate-scripts` to pass arguments to vlog
+⁻ Add global address space header file for new SoC interconnect in `pulp_soc` `v2.0.0`
+- Embedded bootcode into repository and added new make target for it
+- FPGA support for Nexys board familly
+- Add pulp-sdk build target
 
 ### Fixed
 - Properly propagate NB_CORES
 - Mark tb as not synthesizable
+- Add proper timing constraints for CDCs in FPGA port
+- Added missing implementation of manual clock gating cells for FPGA ports
 
 ## [5.0.0] - 2019-11-18
 
@@ -37,7 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Move tests to subfolder `tests`
 - Allow setting entry point with `-gENTRY_POINT`
 - Update to sdk-release 2019.11.02
--
+
 ### Fixed
 - I2C EEPROM can now be concurrently used with I2C DPI model
 - Small quartus compatibility fixes
