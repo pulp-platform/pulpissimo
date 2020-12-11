@@ -19,8 +19,11 @@ module soc_domain #(
     parameter AXI_DATA_IN_WIDTH    = 64,
     parameter AXI_DATA_OUT_WIDTH   = 32,
     parameter AXI_ID_IN_WIDTH      = 4,
-    parameter AXI_ID_INT_WIDTH     = 8,
-    parameter AXI_ID_OUT_WIDTH     = 6,
+    localparam AXI_ID_OUT_WIDTH    = pkg_soc_interconnect::AXI_ID_OUT_WIDTH, //Must be large enough to accomodate the additional
+                                                                  //bits for the axi XBAR ($clog2(nr_master), rightnow
+                                                                  //we have 9 masters 5 for fc_data, fc_instr, udma_rx,
+                                                                  //udma_tx, debug_access and 4 for the 64-bit
+                                                                  //cluster2soc axi plug
     parameter AXI_USER_WIDTH       = 6,
     parameter AXI_STRB_IN_WIDTH    = AXI_DATA_IN_WIDTH/8,
     parameter AXI_STRB_OUT_WIDTH   = AXI_DATA_OUT_WIDTH/8,
@@ -248,7 +251,6 @@ module soc_domain #(
       .AXI_DATA_IN_WIDTH                ( AXI_DATA_IN_WIDTH  ),
       .AXI_DATA_OUT_WIDTH               ( AXI_DATA_OUT_WIDTH ),
       .AXI_ID_IN_WIDTH                  ( AXI_ID_IN_WIDTH    ),
-      .AXI_ID_OUT_WIDTH                 ( AXI_ID_OUT_WIDTH   ),
       .AXI_USER_WIDTH                   ( AXI_USER_WIDTH     ),
       .AXI_STRB_WIDTH_IN                ( AXI_STRB_IN_WIDTH  ),
       .AXI_STRB_WIDTH_OUT               ( AXI_STRB_OUT_WIDTH ),
@@ -256,13 +258,14 @@ module soc_domain #(
       .EVNT_WIDTH                       ( EVNT_WIDTH         ),
       .NB_CORES                         ( NB_CL_CORES        ),
       // .NB_HWPE_PORTS                    ( 4                   ),
-      .NGPIO                            ( 43                  ),
+      .NGPIO                            ( 32                  ),
       .NPAD                             ( 64                  ),
-      .NBIT_PADCFG                      ( 4                  ),
+      .NBIT_PADCFG                      ( 6                  ),
       .NBIT_PADMUX                      ( 2                  ),
       .N_UART                           ( N_UART             ),
       .N_SPI                            ( N_SPI              ),
-      .N_I2C                            ( N_I2C              )
+      .N_I2C                            ( N_I2C              ),
+      .ISOLATE_CLUSTER_CDC              ( 1                  )
     ) pulp_soc_i (
         // Outputs
         .boot_l2_i                   (1'b0),

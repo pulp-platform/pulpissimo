@@ -12,3 +12,6 @@ pulpissimo:
     rtc_clock.sv,
     pulpissimo.sv,
   ]
+  vlog_opts: [
+  -L pulp_soc_lib
+  ]
