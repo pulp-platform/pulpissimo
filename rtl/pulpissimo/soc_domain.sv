@@ -265,7 +265,8 @@ module soc_domain #(
       .N_UART                           ( N_UART             ),
       .N_SPI                            ( N_SPI              ),
       .N_I2C                            ( N_I2C              ),
-      .ISOLATE_CLUSTER_CDC              ( 1                  )
+      .ISOLATE_CLUSTER_CDC              ( 1                  ),
+      .USE_ZFINX                        ( 0                  )
     ) pulp_soc_i (
         // Outputs
         .boot_l2_i                   (1'b0),
