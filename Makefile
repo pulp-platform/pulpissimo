@@ -21,7 +21,6 @@ INSTALL_HEADERS += $(VSIM_PATH)/$(1)
 
 endef
 
-INSTALL_FILES += tcl_files/config/vsim_ips.tcl
 INSTALL_FILES += modelsim.ini
 INSTALL_FILES += $(shell cd sim && find boot -type f)
 INSTALL_FILES += $(shell cd sim && find tcl_files -type f)
