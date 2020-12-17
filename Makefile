@@ -29,8 +29,7 @@ INSTALL_FILES += $(shell cd sim && find waves -type f)
 
 $(foreach file, $(INSTALL_FILES), $(eval $(call declareInstallFile,$(file))))
 
-BRANCH ?= master
-
+.PHONY: checkout
 checkout:
 	git submodule update --init
 	./update-ips
@@ -93,6 +92,7 @@ pulp-sdk: check-env-pulp-gcc
 ## Download the latest supported pulp sdk release
 pulp-sdk-release: check-env-art sdk-gitlab
 
+.PHONY: get-tests
 ## Download pulp tests for local machine. Same as test-checkout
 get-tests: test-checkout
 
