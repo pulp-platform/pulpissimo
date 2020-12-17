@@ -58,8 +58,6 @@ build-incisive:
 # sdk specific targets
 install: $(INSTALL_HEADERS)
 
-vopt:
-	export VOPT_FLOW=1 && cd $(VSIM_PATH) && vsim -64 -c -do "source tcl_files/config/vsim.tcl; quit"
 
 .PHONY: import-bootcode
 ## Import the latest bootcode. This should not be called by the user.
