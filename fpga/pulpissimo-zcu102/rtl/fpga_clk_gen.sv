@@ -65,10 +65,25 @@ module fpga_clk_gen (
   assign soc_cfg_lock_o = s_locked;
   assign per_cfg_lock_o = s_locked;
 
-  assign soc_cfg_ack_o = 1'b1; //Always acknowledge without doing anything for now
-  assign per_cfg_ack_o = 1'b1;
+  // assign soc_cfg_ack_o = 1'b1; //Always acknowledge without doing anything for now
+  // assign per_cfg_ack_o = 1'b1;
+  
+  always_comb begin
+    soc_cfg_ack_o       = 1'b0;
+    per_cfg_ack_o       = 1'b0;
+    cluster_cfg_ack_o   = 1'b0;
+    if (soc_cfg_req_i) begin
+      soc_cfg_ack_o = 1'b1;
+    end
+    if (per_cfg_req_i) begin
+      per_cfg_ack_o = 1'b1;
+    end
+    if (cluster_cfg_req_i) begin
+      cluster_cfg_ack_o = 1'b1;
+    end
+  end
 
-  assign soc_cfg_r_data_o = 32'hdeadda7a;
+  assign soc_cfg_r_data_o = (soc_cfg_add_i == 2'b00 ? 32'hbeef0001 : (soc_cfg_add_i == 2'b01 ? 32'hbeef0003 : (soc_cfg_add_i == 2'b00 ? 32'hbeef0005 : 32'hbeef0007)));
   assign per_cfg_r_data_o = 32'hdeadda7a;
 
 endmodule : fpga_clk_gen
