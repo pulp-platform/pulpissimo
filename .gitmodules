@@ -1,6 +1,3 @@
-[submodule "gf22fdx"]
-	path = gf22fdx
-	url = git@github.com:QuickLogic-Corp/core-v-mcu2-gf22fdx.git
 [submodule "rtl/modules-gf22fdx"]
 	path = rtl/modules-gf22fdx
 	url = git@github.com:QuickLogic-Corp/core-v-mcu2-rtl-modules-gf22fdx.git
