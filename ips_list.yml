@@ -18,10 +18,10 @@
 #  work, make sure to checkout a branch.
 #
 
-pulp_soc:
+core-v-mcu2-soc:
   commit: v2.0.0
   server: https://github.com
-  group:  pulp-platform
+  group:  QuickLogic-Corp
 
 tbtools:
   commit: v0.1
