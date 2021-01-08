@@ -19,7 +19,7 @@
 #
 
 core-v-mcu2-soc:
-  commit: v2.0.0
+  commit: 
   server: https://github.com
   group:  QuickLogic-Corp
 
