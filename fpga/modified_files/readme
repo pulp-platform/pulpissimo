@@ -1,0 +1,20 @@
+This directory has modified files for using the cv32e40p-v1.0.0 revision the the riscv core.
+the cv32e40p repos shpould be install in the ips directory.
+and
+there are several files in the ips that need to be replaced by the contents
+in this directory.
+
+The following commands are the contents of the patch.bash script
+
+
+pushd ../../ips
+git clone https://github.com/openhwgroup/cv32e40p
+cd cv32e40p
+git checkout tags/cv32e40p_v1.0.0
+popd
+cp -r ips ../../.
+cp *.tcl ../pulpissimo/tcl
+
+
+
+

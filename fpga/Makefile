@@ -48,6 +48,10 @@ clean_nexys: ## Removes all bitstreams, *.log files and vivado related files (rm
 	rm -f pulpissimo_nexys.bit
 	rm -f pulpissimo_nexys.bin
 
+download_nexys:
+	$(MAKE) -C pulpissimo-nexys download
+
+
 zedboard: ## Generates the bistream for the ZedBoard
 	$(MAKE) -C pulpissimo-zedboard all
 	cp pulpissimo-zedboard/pulpissimo-zedboard.runs/impl_1/xilinx_pulpissimo.bit pulpissimo_zedboard.bit
