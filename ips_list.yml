@@ -20,7 +20,7 @@
 
 core-v-mcu2-soc:
   commit: master
-  server: https://github.com
+  server: git@github.com
   group:  QuickLogic-Corp
 
 tbtools:
