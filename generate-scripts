@@ -40,12 +40,6 @@ execute("rm -rf sim/vcompile/tb/*")
 execute("mkdir -p fpga/pulpissimo/tcl")
 execute("rm -rf fpga/pulpissimo/tcl/*")
 
-execute("mkdir -p sim/ncompile/ips")
-execute("rm -rf sim/ncompile/ips/*")
-execute("mkdir -p sim/ncompile/rtl")
-execute("rm -rf sim/ncompile/rtl/*")
-execute("mkdir -p sim/ncompile/tb")
-execute("rm -rf sim/ncompile/tb/*")
 
 # creates an IPApproX database
 ipdb = ipstools.IPDatabase(rtl_dir='rtl', ips_dir='ips', vsim_dir='sim',
@@ -83,10 +77,6 @@ ipdb.generate_makefile("sim/vcompile/ips.mk")
 ipdb.generate_makefile("sim/vcompile/rtl.mk", source='rtl')
 
 # generate XCELIUM compilation scripts
-ipdb.export_make(script_path="sim/ncompile/ips", simulator='ncsim')
-ipdb.export_make(script_path="sim/ncompile/rtl", simulator='ncsim', source='rtl')
-ipdb.generate_makefile("sim/ncompile/ips.mk")
-ipdb.generate_makefile("sim/ncompile/rtl.mk", source='rtl')
 ipdb.generate_ncsim_command_list(script_path="./sim/ncompile/src_ips_files.f",
                                  root='.', source='ips')
 ipdb.generate_ncsim_command_list(script_path="./sim/ncompile/src_rtl_files.f",
