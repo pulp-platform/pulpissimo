@@ -83,7 +83,8 @@ module fpga_clk_gen (
     end
   end
 
-  assign soc_cfg_r_data_o = (soc_cfg_add_i == 2'b00 ? 32'hbeef0001 : (soc_cfg_add_i == 2'b01 ? 32'hbeef0003 : (soc_cfg_add_i == 2'b00 ? 32'hbeef0005 : 32'hbeef0007)));
-  assign per_cfg_r_data_o = 32'hdeadda7a;
+  assign soc_cfg_r_data_o = (soc_cfg_add_i == 2'b00 ? 32'h00a10153 : (soc_cfg_add_i == 2'b01 ? 32'hbeef0003 : (soc_cfg_add_i == 2'b00 ? 32'hbeef0005 : 32'hbeef0007)));
+  assign per_cfg_r_data_o = 32'h00a10153;
+	assign cluster_cfg_r_data_o = 32'h00a10153;
 
 endmodule : fpga_clk_gen
