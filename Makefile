@@ -1,3 +1,16 @@
+# Copyright 2020 ETH Zurich and University of Bologna
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 SHELL=bash
 
@@ -21,7 +34,6 @@ INSTALL_HEADERS += $(VSIM_PATH)/$(1)
 
 endef
 
-INSTALL_FILES += tcl_files/config/vsim_ips.tcl
 INSTALL_FILES += modelsim.ini
 INSTALL_FILES += $(shell cd sim && find boot -type f)
 INSTALL_FILES += $(shell cd sim && find tcl_files -type f)
@@ -29,8 +41,7 @@ INSTALL_FILES += $(shell cd sim && find waves -type f)
 
 $(foreach file, $(INSTALL_FILES), $(eval $(call declareInstallFile,$(file))))
 
-BRANCH ?= master
-
+.PHONY: checkout
 checkout:
 	git submodule update --init
 	./update-ips
@@ -58,8 +69,6 @@ build-incisive:
 # sdk specific targets
 install: $(INSTALL_HEADERS)
 
-vopt:
-	export VOPT_FLOW=1 && cd $(VSIM_PATH) && vsim -64 -c -do "source tcl_files/config/vsim.tcl; quit"
 
 .PHONY: import-bootcode
 ## Import the latest bootcode. This should not be called by the user.
@@ -95,6 +104,7 @@ pulp-sdk: check-env-pulp-gcc
 ## Download the latest supported pulp sdk release
 pulp-sdk-release: check-env-art sdk-gitlab
 
+.PHONY: get-tests
 ## Download pulp tests for local machine. Same as test-checkout
 get-tests: test-checkout
 
