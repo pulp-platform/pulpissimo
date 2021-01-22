@@ -168,8 +168,8 @@ static inline unsigned int hal_core_id() {
 }
 
 static inline unsigned int hal_cluster_id() {
-  //return cluster_id();
-  return __builtin_pulp_ClusterId();
+  return cluster_id();
+  // return __builtin_pulp_ClusterId();
 }
 
 // TODO replace by compiler builtin

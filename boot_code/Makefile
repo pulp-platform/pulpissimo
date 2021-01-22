@@ -18,7 +18,7 @@
 CC      = riscv32-unknown-elf-gcc
 OBJCOPY = objcopy
 
-CFLAGS   = -Os -g -fno-jump-tables -march=rv32imfcxpulpv2
+CFLAGS   = -Os -g -fno-jump-tables -march=rv32imc -UARCHI_CORE_HAS_PULPV2 -DRV_ISA_RV32
 CPPFLAGS = -I$(CURDIR)/include
 ASFLAGS  = $(CFLAGS) -DLANGUAGE_ASSEMBLY
 LDFLAGS  = -Tlink.ld -nostdlib
