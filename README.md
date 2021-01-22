@@ -78,6 +78,13 @@ control plane.
 For further information on how to design and integrate such accelerators,
 see `ips/hwpe-stream/doc` and https://arxiv.org/abs/1612.05974.
 
+## Documentation
+
+- The [datasheet](doc/datasheet/datasheet.pdf) contains details about Memory Map, Peripherals, Registers etc.
+- PULPissimo was presented at the Week of Open Source Hardware (WOSH) 2019 at ETH Zurich.
+  - [Slides](https://pulp-platform.org/docs/riscv_workshop_zurich/schiavone_wosh2019_tutorial.pdf)
+  - [Video](https://www.youtube.com/watch?v=27tndT6cBH0)
+
 ## Getting Started
 We provide a [simple runtime](#simple-runtime) and a [full featured
 runtime](#software-development-kit) for PULPissimo. We recommend you try out
