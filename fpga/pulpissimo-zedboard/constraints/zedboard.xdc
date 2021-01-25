@@ -29,12 +29,10 @@ set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets tck_int]
 set_input_delay -clock tck -clock_fall 5.000 [get_ports pad_jtag_tdi]
 set_input_delay -clock tck -clock_fall 5.000 [get_ports pad_jtag_tms]
 set_output_delay -clock tck 5.000 [get_ports pad_jtag_tdo]
-set_false_path -from [get_ports pad_jtag_trst]
 
 set_max_delay -to [get_ports pad_jtag_tdo] 20.000
 set_max_delay -from [get_ports pad_jtag_tms] 20.000
 set_max_delay -from [get_ports pad_jtag_tdi] 20.000
-set_max_delay -from [get_ports pad_jtag_trst] 20.000
 
 set_max_delay -datapath_only -from [get_pins i_pulpissimo/soc_domain_i/pulp_soc_i/i_dmi_jtag/i_dmi_cdc/i_cdc_resp/i_src/data_src_q_reg*/C] -to [get_pins i_pulpissimo/soc_domain_i/pulp_soc_i/i_dmi_jtag/i_dmi_cdc/i_cdc_resp/i_dst/data_dst_q_reg*/D] 20.000
 set_max_delay -datapath_only -from [get_pins i_pulpissimo/soc_domain_i/pulp_soc_i/i_dmi_jtag/i_dmi_cdc/i_cdc_resp/i_src/req_src_q_reg/C] -to [get_pins i_pulpissimo/soc_domain_i/pulp_soc_i/i_dmi_jtag/i_dmi_cdc/i_cdc_resp/i_dst/req_dst_q_reg/D] 20.000
