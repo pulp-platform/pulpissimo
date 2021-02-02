@@ -15,11 +15,10 @@ package:
 dependencies:
   pulp_soc: { git: "git@github.com:micprog/pulp_soc.git", rev: "sram_update"}
   tbtools: { git: "https://github.com/pulp-platform/tbtools.git", version: 0.2.1 }
-  pulpissimo_vip: {path: "rtl/vip"}
 
 workspace:
-  package_links:
-    ips/tbtools: tbtools # symlinks for backwards compatibility with IPApprox
+  # package_links:
+  #   ips/tbtools: tbtools # symlinks for backwards compatibility with IPApprox
 #   checkout_dir: deps
 
 export_include_dirs:

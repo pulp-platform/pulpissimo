@@ -215,7 +215,7 @@ bender-script:
 bender:
 ifeq (,$(wildcard ./bender))
 	curl --proto '=https' --tlsv1.2 -sSf https://fabianschuiki.github.io/bender/init \
-		| bash -s -- 0.21.0
+		| bash -s -- 0.22.0
 	touch bender
 endif
 
