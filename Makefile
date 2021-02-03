@@ -84,6 +84,7 @@ endif
 ifdef BENDER
 build: bender
 	@test -f Bender.lock || { echo "ERROR: Bender.lock file does not exist. Did you run make checkout in bender mode?"; exit 1; }
+	@test -f sim/compile.tcl || { echo "ERROR: sim/compile.tcl file does not exist. Did you run make scripts in bender mode?"; exit 1; }
 	cd sim && $(MAKE) BENDER=bender all
 else
 build:
