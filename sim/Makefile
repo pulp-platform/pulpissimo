@@ -2,16 +2,16 @@
 
 mkfile_path := $(dir $(abspath $(firstword $(MAKEFILE_LIST))))
 
-VOPT 				?= vopt
-VSIM        ?= vsim
-VLIB      	?= vlib
+VOPT				?= vopt
+VSIM				?= vsim
+VLIB				?= vlib
 VMAP				?= vmap
-VSIM_FLAGS  = -gUSE_SDVT_SPI=0 -gUSE_SDVT_CPI=0 -gBAUDRATE=115200 \
+VSIM_FLAGS	= -gUSE_SDVT_SPI=0 -gUSE_SDVT_CPI=0 -gBAUDRATE=115200 \
 		-gENABLE_DEV_DPI=0 -gLOAD_L2=JTAG -gUSE_SDVT_I2S=0
 
 SVLIB	    =  ../rtl/tb/remote_bitbang/librbs
 
-all: clean lib build opt
+all: lib build opt
 
 # build the bitbang library, needed for simulating a jtag bridge to OpenOCD
 build-deps:

@@ -43,15 +43,18 @@ $(foreach file, $(INSTALL_FILES), $(eval $(call declareInstallFile,$(file))))
 
 BRANCH ?= master
 
+VLOG_ARGS += -suppress 2583 -suppress 13314
+BENDER_BUILD_DIR = sim
+
 .PHONY: checkout
 ifdef BENDER
 checkout: bender
 	./bender update
-	$(MAKE) bender-script
 else
 checkout:
 	./update-ips
 endif
+	$(MAKE) scripts
 
 # generic clean and build targets for the platform
 .PHONY: clean
@@ -59,15 +62,31 @@ endif
 ## Remove the RTL model files
 clean:
 	rm -rf $(VSIM_PATH)
-	cd sim && $(MAKE) BENDER=$(BENDER) clean
+	$(MAKE) -C sim BENDER=$(BENDER) clean
+
+.PHONY: scripts
+## Generate the scripts
+ifdef BENDER
+scripts: bender
+	echo 'set ROOT [file normalize [file dirname [info script]]/..]' > $(BENDER_BUILD_DIR)/compile.tcl
+	./bender script vsim \
+		--vlog-arg="$(VLOG_ARGS)" --vcom-arg="" \
+		-t rtl -t test \
+		| grep -v "set ROOT" >> $(BENDER_BUILD_DIR)/compile.tcl
+
+else
+scripts:
+	./generate-scripts
+endif
 
 .PHONY: build
 ## Build the RTL model for vsim
-build:
 ifdef BENDER
+build: bender
 	@test -f Bender.lock || { echo "ERROR: Bender.lock file does not exist. Did you run make checkout in bender mode?"; exit 1; }
 	cd sim && $(MAKE) BENDER=bender all
 else
+build:
 	@[ "$$(ls -A ips/)" ] || { echo "ERROR: ips/ is an empty directory. Did you run ./update-ips?"; exit 1; }
 	cd sim && $(MAKE) all
 	cp -r rtl/tb/* $(VSIM_PATH)
@@ -200,18 +219,6 @@ test-gitlab2:
 	cd ../tests && plptest --threads 16 --stdout
 
 # Bender integration
-
-VLOG_ARGS += -suppress 2583 -suppress 13314
-BENDER_BUILD_DIR = sim
-
-.PHONY: bender-script bender-build bender-rm
-bender-script: 
-	echo 'set ROOT [file normalize [file dirname [info script]]/..]' > $(BENDER_BUILD_DIR)/compile.tcl
-	./bender script vsim \
-		--vlog-arg="$(VLOG_ARGS)" --vcom-arg="" \
-		-t rtl -t test \
-		| grep -v "set ROOT" >> $(BENDER_BUILD_DIR)/compile.tcl
-
 bender:
 ifeq (,$(wildcard ./bender))
 	curl --proto '=https' --tlsv1.2 -sSf https://fabianschuiki.github.io/bender/init \
@@ -219,6 +226,7 @@ ifeq (,$(wildcard ./bender))
 	touch bender
 endif
 
+.PHONY: bender-rm
 bender-rm:
 	rm -f bender
 
