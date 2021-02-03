@@ -49,6 +49,6 @@ ipdb.update_ips()
 # launch generate-ips.py
 ipdb.save_database()
 
-# pass arguments and call generate script
-execute("./generate-scripts " + (' '.join(sys.argv[1:])))
+# # pass arguments and call generate script
+# execute("./generate-scripts " + (' '.join(sys.argv[1:])))
 

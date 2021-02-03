@@ -149,10 +149,10 @@ source env/pulpissimo.sh
 To build the RTL simulation platform, start by getting the latest version of the
 IPs composing the PULP system:
 ```bash
-./update-ips
+make checkout
 ```
 This will download all the required IPs, solve dependencies and generate the
-scripts by calling `./generate-scripts`.
+scripts. The default dependency management tool is IPApproX, where `./update-ips` and `./generate-scripts` are called. If the environment variable `BENDER` is set, bender is used as the dependency management tool.
 
 After having access to the SDK, you can build the simulation platform by doing
 the following:
@@ -165,7 +165,7 @@ external models for peripherals. See below (Proprietary verification IPs) for
 details on how to plug in some models of real SPI, I2C, I2S peripherals.
 
 For more advanced usage have a look at `./generate-scripts --help` and
-`update-ips --help`.
+`update-ips --help` for IPApproX, or `./bender --help` for bender.
 
 Also check out the output of `make help` for more useful Makefile targets.
 
@@ -238,7 +238,8 @@ follow the section below to generate the bitstreams yourself.
 ### Bitstream Generation
 In order to generate the PULPissimo bitstream for a supported target FPGA board
 first generate the necessary synthesis include scripts by starting the
-`update-ips` script in the pulpissimo root directory:
+`update-ips` script in the pulpissimo root directory when using IPApproX (Bender
+compatibility may not be available yet):
 
 ```Shell
 ./update-ips
@@ -516,8 +517,8 @@ repository is structured as follows:
   e.g. SPI flash and camera.
 - `rtl` could also contain other material (e.g. global includes, top-level
   files)
-- `ips` contains all IPs downloaded by `update-ips` script. Most of the actual
-  logic of the platform is located in these IPs.
+- `ips` contains all IPs downloaded by `update-ips` script when using IPApproX.
+  Most of the actual logic of the platform is located in these IPs.
 - `sim` contains the ModelSim/QuestaSim simulation platform.
 - `pulp-sdk` contains the PULP software development kit; `pulp-sdk/tests`
   contains all tests released with the SDK.
@@ -529,6 +530,13 @@ repository is structured as follows:
   this file.
 - `rtl_list.yml` contains the list of places where local RTL sources are found
   (e.g. `rtl/tb`, `rtl/vip`).
+- `Bender.yml` contains the package information used with bender. This includes
+  a list of IPs required and source files contained within this repository.
+- When using bender, other files may be relevant: `Bender.local` contains
+  configs for bender, including overrides for dependencies, `Bender.lock` is a
+  generated file used by bender, `bender` is the bender executable fetched by
+  the makefile, `.bender` directory contains the database and checkouts used by
+  bender.
 
 ## Requirements
 The RTL platform has the following requirements:
@@ -546,8 +554,8 @@ The PULP and PULPissimo platforms are highly hierarchical and the Git
 repositories for the various IPs follow the hierarchy structure to keep maximum
 flexibility.
 Most of the complexity of the IP updating system are hidden behind the
-`update-ips` and `generate-scripts` Python scripts; however, a few details are
-important to know:
+`update-ips` and `generate-scripts` Python scripts, or the bender software;
+however, a few details are important to know:
 - Do not assume that the `master` branch of an arbitrary IP is stable; many
   internal IPs could include unstable changes at a certain point of their
   history. Conversely, in top-level platforms (`pulpissimo`, `pulp`) we always
@@ -558,7 +566,8 @@ important to know:
   GitHub. However, for development it is often easier to use SSH instead,
   particularly if you want to push changes back.
   To enable this, just replace `https://github.com` with `git@github.com` in the
-  `ipstools_cfg.py` configuration file in the root of this repository.
+  `ipstools_cfg.py` configuration file in the root of this repository for IPApproX.
+  Bender compatibility may not be perfect yet.
 
 The tools used to collect IPs and create scripts for simulation have many
 features that are not necessarily intended for the end user, but can be useful
@@ -574,7 +583,7 @@ The pull request will be evaluated and checked with our regression test suite
 for possible integration.
 If you want to replace our version of an IP with your GitHub fork, just add
 `group: YOUR_GITHUB_NAMESPACE` to its entry in `ips_list.yml` or
-`ips/pulp_soc/ips_list.yml`.
+`ips/pulp_soc/ips_list.yml` when using IPApproX, or update the Bender.yml file.
 While we are quite relaxed in terms of coding style, please try to follow these
 recommendations:
 https://github.com/pulp-platform/ariane/blob/master/CONTRIBUTING.md

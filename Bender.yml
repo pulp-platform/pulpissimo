@@ -1,0 +1,83 @@
+package:
+  name: Pulpissimo
+  authors:
+    - "Robert Balas <balasr@iis.ee.ethz.ch>"
+    - "Pasquale Davide Schiavone <pschiavo@iis.ee.ethz.ch>"
+    - "Germain Haugou <haugoug@iis.ee.ethz.ch>"
+    - "Francesco Conti <f.conti@unibo.it>"
+    - "Pirmin Vogel <vogelpi@lowrisc.org>"
+    - "Stefan Mach <smach@iis.ee.ethz.ch>"
+    - "Antonio Pullini <pullinia@iis.ee.ethz.ch>"
+    - "Gianmarco Ottavi <gianmarco.ottavi@studio.unibo.it>"
+    - "Manuel Eggimann <meggiman@iis.ee.ethz.ch>"
+    - "Luca Valente <luca.valente2@unibo.it>"
+
+dependencies:
+  pulp_soc: { git: "https://github.com/pulp-platform/pulp_soc.git", version: 2.1.0 }
+  tbtools: { git: "https://github.com/pulp-platform/tbtools.git", version: 0.2.1 }
+
+workspace:
+  # package_links:
+  #   ips/tbtools: tbtools # symlinks for backwards compatibility with IPApprox
+#   checkout_dir: deps
+
+export_include_dirs:
+  - rtl/includes
+
+sources:
+  # Source files grouped in levels. Files in level 0 have no dependencies on files in this
+  # package. Files in level 1 only depend on files in level 0, files in level 2 on files in
+  # levels 1 and 0, etc. Files within a level are ordered alphabetically.
+  # Level 0
+  - rtl/pulpissimo/jtag_tap_top.sv
+  - rtl/pulpissimo/pad_frame.sv
+  - rtl/pulpissimo/pad_control.sv
+  - rtl/pulpissimo/soc_domain.sv
+  - rtl/pulpissimo/rtc_date.sv
+  - rtl/pulpissimo/rtc_clock.sv
+  - rtl/pulpissimo/safe_domain_reg_if.sv
+  # Level 1
+  - rtl/pulpissimo/safe_domain.sv
+  - rtl/pulpissimo/pulpissimo.sv
+
+  # TB sources
+  - target: any(test,simulation)
+    files:
+      - rtl/tb/riscv_pkg.sv
+      - rtl/tb/jtag_pkg.sv
+      - rtl/tb/pulp_tap_pkg.sv
+      - rtl/tb/tb_clk_gen.sv
+      - rtl/tb/tb_fs_handler.sv
+      - rtl/tb/dpi_models/dpi_models.sv
+      - rtl/tb/tb_driver/tb_driver.sv
+      - rtl/tb/tb_pulp.sv
+      - rtl/tb/SimJTAG.sv
+      - rtl/tb/SimDTM.sv
+
+  # Open models
+  - target: any(test,simulation)
+    files:
+      - rtl/vip/spi_master_padframe.sv
+      - rtl/vip/uart_tb_rx.sv
+      - rtl/vip/camera/cam_vip.sv
+
+  # S25FS256_model (SPI Flash)
+  - target: any(test,simulation)
+    defines:
+      SPEEDSIM: ~
+    files:
+      - rtl/vip/spi_flash/S25fs256s/model/s25fs256s.v
+
+  # 24FC1025 model (I2C flash)
+  - target: all(any(test,simulation), 24fc1025_vip)
+    defines:
+      SPEEDSIM: ~
+    files:
+      - rtl/vip/i2c_eeprom/24FC1025.v
+
+  # i2s model
+  - target: all(any(test,simulation), i2s_vip)
+    defines:
+      SPEEDSIM: ~
+    files:
+      - rtl/vip/spi_flash/S25fs256s/model/s25fs256s.v  

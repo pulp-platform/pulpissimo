@@ -1,0 +1,3 @@
+overrides:
+  tech_cells_generic: { git: "https://github.com/pulp-platform/tech_cells_generic.git", version: 0.2.3 }
+  axi: { git: "https://github.com/pulp-platform/axi.git", version: 0.27.0 }
