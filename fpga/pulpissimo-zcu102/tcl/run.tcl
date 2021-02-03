@@ -9,18 +9,8 @@ set CONSTRS constraints
 create_project $PROJECT . -force -part $::env(XILINX_PART)
 set_property board_part $XILINX_BOARD [current_project]
 
-# set up includes
-source ../pulpissimo/tcl/ips_inc_dirs.tcl
-set_property include_dirs $INCLUDE_DIRS [current_fileset]
-set_property include_dirs $INCLUDE_DIRS [current_fileset -simset]
-
-# setup and add IP source files
-source ../pulpissimo/tcl/ips_src_files.tcl
-source ../pulpissimo/tcl/ips_add_files.tcl
-
-# setup and add RTL source files
-source ../pulpissimo/tcl/rtl_src_files.tcl
-source ../pulpissimo/tcl/rtl_add_files.tcl
+# Add sources
+source ../pulpissimo/tcl/add_sources.tcl
 
 # Override IPSApprox default variables
 set FPGA_RTL rtl
