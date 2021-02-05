@@ -641,13 +641,17 @@ module tb_pulp;
             // Use only the testbench to do the loading and running
 
             // determine if we want to load the binary with jtag or from flash
-            if (LOAD_L2 == "STANDALONE")
+            if (LOAD_L2 == "STANDALONE") begin
                s_bootsel = 1'b0;
-            else if (LOAD_L2 == "JTAG") begin
+            end else if (LOAD_L2 == "JTAG") begin
                s_bootsel = 1'b1;
+            end else if (LOAD_L2 == "FAST_DEBUG_PRELOAD") begin
+               s_bootsel = 1'b1;
+            end else begin
+               $error("Unknown L2 loadmode: %s", LOAD_L2);
             end
 
-            if (LOAD_L2 == "JTAG") begin
+            if (LOAD_L2 == "JTAG" || LOAD_L2 == "FAST_DEBUG_PRELOAD") begin
                if (USE_FLL)
                   $display("[TB] %t - Using FLL", $realtime);
                else
@@ -756,14 +760,20 @@ module tb_pulp;
                   $stop;
                end
 
-               $display("[TB] %t - Loading L2", $realtime);
-               if (USE_PULP_BUS_ACCESS) begin
-                  // use pulp tap to load binary, put debug module in bypass
-                  pulp_tap_pkg::load_L2(num_stim, stimuli, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-
+               if (LOAD_L2 == "JTAG") begin
+                  $display("[TB] %t - Loading L2 via JTAG", $realtime);
+                  if (USE_PULP_BUS_ACCESS) begin
+                     // use pulp tap to load binary, put debug module in bypass
+                     pulp_tap_pkg::load_L2(num_stim, stimuli, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+                  end else begin
+                     // use debug module to load binary
+                     debug_mode_if.load_L2(num_stim, stimuli, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+                  end
+               end else if (LOAD_L2 == "FAST_DEBUG_PRELOAD") begin
+                  $warning("[TB] - Preloading the memory via direct simulator access. \nNEVER EVER USE THIS MODE TO VERIFY THE BOOT BEHAVIOR OF A CHIP. THIS BOOTMODE IS IMPOSSIBLE ON A PHYSICAL CHIP!!!");
+                  preload_l2(num_stim, stimuli);
                end else begin
-                  // use debug module to load binary
-                  debug_mode_if.load_L2(num_stim, stimuli, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+                  $error("Unknown L2 loading mechnism chosen (LOAD_L2 == %s)", LOAD_L2);
                end
 
                // configure for debug module dmi access again
@@ -885,6 +895,46 @@ module tb_pulp;
             is_Read[index]  = 0;
          end
       end
+
+
+  task automatic preload_l2(
+                  input int        num_stim,
+                  ref logic [95:0] stimuli [100000:0]
+                  );
+    logic                          more_stim;
+    static logic [95:0]            stim_entry;
+     more_stim = 1'b1;
+     $info("Preloading L2 with stimuli through direct access.");
+     while (more_stim == 1'b1) begin
+        @(posedge i_dut.soc_domain_i.pulp_soc_i.i_soc_interconnect_wrap.clk_i);
+        stim_entry = stimuli[num_stim];
+        force i_dut.soc_domain_i.pulp_soc_i.i_soc_interconnect_wrap.tcdm_debug.req = 1'b1;
+        force i_dut.soc_domain_i.pulp_soc_i.i_soc_interconnect_wrap.tcdm_debug.add = stim_entry[95:64];
+        force i_dut.soc_domain_i.pulp_soc_i.i_soc_interconnect_wrap.tcdm_debug.wdata = stim_entry[31:0];
+        force i_dut.soc_domain_i.pulp_soc_i.i_soc_interconnect_wrap.tcdm_debug.wen = 1'b0;
+        force i_dut.soc_domain_i.pulp_soc_i.i_soc_interconnect_wrap.tcdm_debug.be  = '1;
+        do begin
+           @(posedge i_dut.soc_domain_i.pulp_soc_i.i_soc_interconnect_wrap.clk_i);
+        end while (~i_dut.soc_domain_i.pulp_soc_i.i_soc_interconnect_wrap.tcdm_debug.gnt);
+        force i_dut.soc_domain_i.pulp_soc_i.i_soc_interconnect_wrap.tcdm_debug.add   = stim_entry[95:64]+4;
+        force i_dut.soc_domain_i.pulp_soc_i.i_soc_interconnect_wrap.tcdm_debug.wdata = stim_entry[63:32];
+        do begin
+           @(posedge i_dut.soc_domain_i.pulp_soc_i.i_soc_interconnect_wrap.clk_i);
+        end while (~i_dut.soc_domain_i.pulp_soc_i.i_soc_interconnect_wrap.tcdm_debug.gnt);
+
+        num_stim = num_stim + 1;
+        if (num_stim > $size(stimuli) || stimuli[num_stim]===96'bx ) begin // make sure we have more stimuli
+           more_stim = 0;                    // if not set variable to 0, will prevent additional stimuli to be applied
+           break;
+        end
+     end // while (more_stim == 1'b1)
+     release i_dut.soc_domain_i.pulp_soc_i.i_soc_interconnect_wrap.tcdm_debug.req;
+     release i_dut.soc_domain_i.pulp_soc_i.i_soc_interconnect_wrap.tcdm_debug.add;
+     release i_dut.soc_domain_i.pulp_soc_i.i_soc_interconnect_wrap.tcdm_debug.wdata;
+     release i_dut.soc_domain_i.pulp_soc_i.i_soc_interconnect_wrap.tcdm_debug.wen;
+     release i_dut.soc_domain_i.pulp_soc_i.i_soc_interconnect_wrap.tcdm_debug.be;
+     @(posedge i_dut.soc_domain_i.pulp_soc_i.i_soc_interconnect_wrap.clk_i);
+endtask
 
 
 endmodule // tb_pulp
