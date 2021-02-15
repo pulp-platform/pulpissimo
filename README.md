@@ -95,6 +95,18 @@ After having chosen a runtime you can run software by either [simulating the
 hardware](#building-the-rtl-simulation-platform) or running it in a [software
 emulation](#building-and-using-the-virtual-platform).
 
+### Prerequisites
+PULPissimo is a Microcontroller provided in SystemVerilog RTL description. As such,
+it can be used and evaluated with many different tools. Out of the box, we provide Makefile
+targets for RTL simulation with Mentor Questa SIM (Intel/Altera Modelsim is not supported at the moment)
+and Cadence Xcelium. Being purely written in SystemVerilog, in theory the whole design can be simulated 
+with any RTL simulator with (deccent!) SystemVerilog support. While an open source simulation target is 
+definitely on our wish- and todo-list (e.g. out-of-the box support for Verilator), this currently
+still requires more extensive modifications to the RTL and scripts.
+
+For FPGA implementation (see [FPGA Section](#FPGA)) we generate ready-made scripts for Synthesis and Implementation 
+for Xilinx Vivado for a number of different development boards.
+
 ### Simple Runtime
 The simple runtime is here to get you started quickly. Using it can run and
 write programs that don't need any advanced features.
