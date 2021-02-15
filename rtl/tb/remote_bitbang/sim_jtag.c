@@ -13,8 +13,10 @@ int jtag_tick(int port, unsigned char *jtag_TCK, unsigned char *jtag_TMS,
 
 {
     if (!init) {
-	if (port < 0 || port > UINT16_MAX)
-	    fprintf(stderr, "Port number of out range: %d\n", port);
+	if (port < 0 || port > UINT16_MAX) {
+	    fprintf(stderr, "remote_bitbang: port number of out range: %d\n", port);
+	    abort();
+	}
         init = rbs_init(port);
     }
 
