@@ -516,9 +516,9 @@ module tb_pulp;
 
     // jtag calls from dpi
     SimJTAG #(
-        .TICK_DELAY (1)
-    )
-    i_sim_jtag (
+        .TICK_DELAY (1),
+        .PORT       (4567)
+    ) i_sim_jtag (
         .clock                ( w_clk_ref            ),
         .reset                ( ~s_rst_n             ),
         .enable               ( sim_jtag_enable      ),
