@@ -1,0 +1,9 @@
+
+waive -du {  {boot_rom}  }  -msg {Design Unit 'generic_rom' has no definition; black-box behavior assumed and module interface inferred}  -rule {  {ErrorAnalyzeBBox}  }  -comment {tech specific macros} 
+waive -du {  {soc_clk_rst_gen}  }  -msg {Design Unit 'gf22_FLL' has no definition; black-box behavior assumed and module interface inferred}  -rule {  {ErrorAnalyzeBBox}  }  -comment {tech specific macros} 
+waive -du {  {pad_frame}  }  -msg {Design Unit 'pad_functional_pd' has no definition; black-box behavior assumed and module interface inferred}  -rule {  {ErrorAnalyzeBBox}  }  -comment {tech specific macros} 
+waive -du {  {pad_frame}  }  -msg {Design Unit 'pad_functional_pu' has no definition; black-box behavior assumed and module interface inferred}  -rule {  {ErrorAnalyzeBBox}  }  -comment {tech specific macros} 
+waive -du {  {riscv_id_stage}  }  -msg {Design Unit 'register_file_test_wrap' has no definition; black-box behavior assumed and module interface inferred}  -rule {  {ErrorAnalyzeBBox}  }  -comment {tech specific macros} 
+waive -du {  {l2_ram_multi_bank}  }  -msg {Design Unit 'tc_sram' (elaborated name 'tc_sram_32768_32_1') has no definition; black-box behavior assumed and module interface inferred}  -rule {  {ErrorAnalyzeBBox}  }  -comment {tech specific macros} 
+waive -du {  {l2_ram_multi_bank}  }  -msg {Design Unit 'tc_sram' (elaborated name 'tc_sram_8192_32_1_1') has no definition; black-box behavior assumed and module interface inferred}  -rule {  {ErrorAnalyzeBBox}  }  -comment {tech specific macros} 
+waive -du {  {dm_top}  }  -msg {dm_top -> Initial block is ignored for synthesis}  -severity {  {SynthesisWarning}  }  -rule {  {SYNTH_5143}  }  -comment {checks validity of parameters}  -spreadsheet -exact 
