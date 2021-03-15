@@ -101,8 +101,6 @@ build_rtl:
 
 lint:
   stage: test
-  tags:
-    - blitzstein
   script:
     - echo "Running Spyglass Lint in rtl_handoff methodology with goal lint_rtl"
     - make lint
