@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.6
 
 import argparse
 from itertools import groupby, zip_longest
