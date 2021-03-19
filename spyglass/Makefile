@@ -13,7 +13,9 @@
 # limitations under the License.
 
 PROJECT_NAME ?= pulpissimo
+PULP_PATH ?= $(shell git rev-parse --show-toplevel)
 SG_SHELL_CMD ?= spyglass-2019.06 sg_shell
+SG_GUI_CMD ?= spyglass-2019.06 spyglass
 
 .DEFAULT_GOAL := help
 
@@ -33,6 +35,11 @@ $(PULP_PATH)/spyglass/working_dir/reports/moresimple.rpt: $(PULP_PATH)/spyglass/
 # generate generate junit report from spyglass report
 $(PULP_PATH)/spyglass/working_dir/reports/lint_rtl.report.xml: $(PULP_PATH)/spyglass/working_dir/reports/moresimple.rpt
 	./convert_report_to_junit.py $(PULP_PATH)/spyglass/working_dir/reports/moresimple.rpt > $(PULP_PATH)/spyglass/working_dir/reports/lint_rtl.report.xml
+
+.PHONY: show_results
+## Open the generated lint results in Spyglass GUI
+show_results:
+	cd $(PULP_PATH)/spyglass/working_dir && $(SG_GUI_CMD) -project $(PROJECT_NAME).prj
 
 ## Delete the spyglass working directory
 clean:

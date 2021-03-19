@@ -112,6 +112,8 @@ lint:
       junit: spyglass/working_dir/reports/lint_rtl.report.xml
   dependencies:
     - fetch_ips_bender
+  needs:
+    - fetch_ips_bender
   
 
 # Use sdk-releases to run all tests

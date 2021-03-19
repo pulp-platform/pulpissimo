@@ -6,7 +6,7 @@ current_methodology $env(SPYGLASS_HOME)/GuideWare/latest/block/rtl_handoff
 read_file -type sourcelist sources.f
 
 #Read waiver files
-read_file -type awl ../pulpissimo_waiver.awl
+read_file -type awl ../waiver.awl
 
 set_option enableSV09 yes
 set_option language_mode mixed
