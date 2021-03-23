@@ -579,6 +579,8 @@ The RTL platform has the following requirements:
   `pip3 install pyyaml`).
 - The SDK has its own dependencies, listed in
   https://github.com/pulp-platform/pulp-sdk/blob/master/README.md
+- minicom to view UART output in case you use the 'run' Makefile target with the FPGA platform
+  (discouraged, you better use the approach outlined above)
 
 ## Repository organization
 The PULP and PULPissimo platforms are highly hierarchical and the Git
