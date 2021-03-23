@@ -158,6 +158,10 @@ source env/pulpissimo.sh
 ```
 
 ### Building the RTL simulation platform
+Note you need Questasim or Xcelium to do a RTL simulation of PULPissimo
+(verilator support planned, but not finished). Intel Modelsim for Intel FPGAs
+does *not* work.
+
 To build the RTL simulation platform, start by getting the latest version of the
 IPs composing the PULP system:
 ```bash
