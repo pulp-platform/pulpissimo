@@ -222,6 +222,10 @@ before starting the simulation. You will find the VCD in
 `<SRC_FILE_NAME>` is the name of the C source of the test.
 
 ### Building and using the virtual platform
+The virtual platform is a software-only model of the PULPissimo SoC (and also of
+other related SoCs). While a simulation of the hardware design is accurate it is
+also very very slow. The virtual platform helps you develop software quicker by
+providing a more or less accurate software-model of PULPissimo.
 
 Once the sdk is installed, the following commands can be executed in the sdk
 directory to use the virtual platform:
