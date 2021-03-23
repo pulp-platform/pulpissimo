@@ -243,6 +243,13 @@ make conf
 
 More information is available in the documentation here: pulp-builder/install/doc/vp/index.html
 
+### Updating the bootrom
+You can customize the bootrom, have a look at the `boot_code/` directory. To
+import a your changed version of the boot code into PULPissimo, just call
+```
+make import-bootcode
+```
+
 ## FPGA
 
 PULPissimo has been implemented on FPGA for the various Xilinx FPGA boards.
