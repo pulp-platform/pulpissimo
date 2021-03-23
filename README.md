@@ -148,7 +148,11 @@ First install the system dependencies indicated
 In particular don't forget to set `PULP_RISCV_GCC_TOOLCHAIN`.
 
 You can now either follow the steps outlined [here](https://github.com/pulp-platform/pulp-sdk/#standard-sdk-build)
-to build the full sdk or just call
+to build the full sdk or install these python dependencies
+```
+pip3 install --user artifactory twisted prettytable sqlalchemy pyelftools 'openpyxl==2.6.4' xlsxwriter pyyaml numpy configparser pyvcd sphinx
+```
+and just call
 ```
 make build-pulp-sdk
 ```
