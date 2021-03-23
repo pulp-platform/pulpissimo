@@ -25,7 +25,9 @@ default we use the PULP TAP because it is much faster in simulation.
 If you wish to interact with the testbench through GDB and OpenOCD you can do
 this by setting the `ENABLE_OPENOCD=1` parameter. Careful OpenOCD and GDB need a
 long time to establish a connection with the testbench (due to simulation being
-slow) so timeouts have to be set accordingly.
+slow) so timeouts have to be set accordingly. Note that your OpenOCD version
+needs to be compiled with bitbang support which is not enabled by default (Use
+`--enable-remote-bitbang` when running `./configure`).
 
 We recommend to do this with the following steps
 1. Compile and run your program using the pulp-sdk with the following command:

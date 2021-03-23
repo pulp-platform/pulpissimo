@@ -148,7 +148,11 @@ First install the system dependencies indicated
 In particular don't forget to set `PULP_RISCV_GCC_TOOLCHAIN`.
 
 You can now either follow the steps outlined [here](https://github.com/pulp-platform/pulp-sdk/#standard-sdk-build)
-to build the full sdk or just call
+to build the full sdk or install these python dependencies
+```
+pip3 install --user artifactory twisted prettytable sqlalchemy pyelftools 'openpyxl==2.6.4' xlsxwriter pyyaml numpy configparser pyvcd sphinx
+```
+and just call
 ```
 make build-pulp-sdk
 ```
@@ -158,6 +162,10 @@ source env/pulpissimo.sh
 ```
 
 ### Building the RTL simulation platform
+Note you need Questasim or Xcelium to do an RTL simulation of PULPissimo
+(verilator support planned, but not finished). Intel Modelsim for Intel FPGAs
+does *not* work.
+
 To build the RTL simulation platform, start by getting the latest version of the
 IPs composing the PULP system:
 ```bash
@@ -214,6 +222,10 @@ before starting the simulation. You will find the VCD in
 `<SRC_FILE_NAME>` is the name of the C source of the test.
 
 ### Building and using the virtual platform
+The virtual platform is a software-only model of the PULPissimo SoC (and also of
+other related SoCs). While a simulation of the hardware design is accurate it is
+also very very slow. The virtual platform helps you develop software quicker by
+providing a more or less accurate software-model of PULPissimo.
 
 Once the sdk is installed, the following commands can be executed in the sdk
 directory to use the virtual platform:
@@ -230,6 +242,13 @@ make conf
 ```
 
 More information is available in the documentation here: pulp-builder/install/doc/vp/index.html
+
+### Updating the bootrom
+You can customize the bootrom, have a look at the `boot_code/` directory. To
+import your changed version of the boot code into PULPissimo, just call
+```
+make import-bootcode
+```
 
 ## FPGA
 
@@ -560,6 +579,9 @@ The RTL platform has the following requirements:
   `pip3 install pyyaml`).
 - The SDK has its own dependencies, listed in
   https://github.com/pulp-platform/pulp-sdk/blob/master/README.md
+- You will need the minicom command line application to view UART output in case
+  you use the 'run' Makefile target with the FPGA platform (discouraged, you
+  better use the approach outlined above)
 
 ## Repository organization
 The PULP and PULPissimo platforms are highly hierarchical and the Git
