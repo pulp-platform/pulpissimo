@@ -162,7 +162,7 @@ source env/pulpissimo.sh
 ```
 
 ### Building the RTL simulation platform
-Note you need Questasim or Xcelium to do a RTL simulation of PULPissimo
+Note you need Questasim or Xcelium to do an RTL simulation of PULPissimo
 (verilator support planned, but not finished). Intel Modelsim for Intel FPGAs
 does *not* work.
 
@@ -245,7 +245,7 @@ More information is available in the documentation here: pulp-builder/install/do
 
 ### Updating the bootrom
 You can customize the bootrom, have a look at the `boot_code/` directory. To
-import a your changed version of the boot code into PULPissimo, just call
+import your changed version of the boot code into PULPissimo, just call
 ```
 make import-bootcode
 ```
@@ -579,8 +579,9 @@ The RTL platform has the following requirements:
   `pip3 install pyyaml`).
 - The SDK has its own dependencies, listed in
   https://github.com/pulp-platform/pulp-sdk/blob/master/README.md
-- minicom to view UART output in case you use the 'run' Makefile target with the FPGA platform
-  (discouraged, you better use the approach outlined above)
+- You will need the minicom command line application to view UART output in case
+  you use the 'run' Makefile target with the FPGA platform (discouraged, you
+  better use the approach outlined above)
 
 ## Repository organization
 The PULP and PULPissimo platforms are highly hierarchical and the Git
