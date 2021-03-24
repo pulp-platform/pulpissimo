@@ -34,7 +34,7 @@ $(PULP_PATH)/spyglass/working_dir/reports/moresimple.rpt: $(PULP_PATH)/spyglass/
 
 # generate generate junit report from spyglass report
 $(PULP_PATH)/spyglass/working_dir/reports/lint_rtl.report.xml: $(PULP_PATH)/spyglass/working_dir/reports/moresimple.rpt
-	./convert_report_to_junit.py $(PULP_PATH)/spyglass/working_dir/reports/moresimple.rpt > $(PULP_PATH)/spyglass/working_dir/reports/lint_rtl.report.xml
+	./convert_report_to_junit.py --error-level error $(PULP_PATH)/spyglass/working_dir/reports/moresimple.rpt > $(PULP_PATH)/spyglass/working_dir/reports/lint_rtl.report.xml
 
 .PHONY: show_results
 ## Open the generated lint results in Spyglass GUI

@@ -5,10 +5,13 @@ from itertools import groupby, zip_longest
 from textwrap import wrap
 from xml.dom import minidom
 import re
+import sys
 from xml.dom.minidom import Document
 
 parser = argparse.ArgumentParser(description="Converts Spyglass lint reports of the lint/lint_rtl goal in 'moresimple' format to Junit XML reports. The resuling XML is printed to STDOUT. Pipe it into a file if necessary.")
 parser.add_argument("src_report", type=argparse.FileType('r'), help="Spyglass 'moresimple' report location.")
+parser.add_argument("--error-level", type=str, choices=['warning', 'error', 'fatal'], default='warning')
+parser.add_argument("--fail-on-error", help= "Exit with return code 1 if there are lint errors. Use this for CI jobs to report failing.", action="store_true")
 
 args = parser.parse_args()
 
@@ -18,6 +21,11 @@ regex = re.compile(r"#+ (?:[\w\-]* -> \w*=)?(?P<rule_type>[\w\-/ ]+)#+ *\n\+* *\
 header_regex = re.compile(r"(?P<id>ID *)(?P<rule>Rule *)(?P<alias>Alias *)(?P<severity>Severity *)(?P<file>File *)(?P<line>Line *)(?P<wt>Wt *)(?P<message>Message *)")
 
 FIELDS = ["id", "rule", "alias", "severity", "file", "line", "wt", "message"]
+error_levels = {
+    'fatal' : ['Fatal'],
+    'error' : ['Fatal', 'Error', 'SynthesisError'],
+    'warning': ['Fatal', 'Error', 'SynthesisError', 'Warning', 'SynthesisWarning']
+}
 
 try:
     messages = []
@@ -42,11 +50,11 @@ try:
                     end_pos = len(line)
                 field_value = line[start_pos:end_pos]
                 message[field_name] = field_value.strip()
-
-            messages.append(message)
+            if message['severity'] in error_levels[args.error_level]:
+                messages.append(message)
 
     doc = Document()
-    nr_of_failures = len([message for message in messages if message['severity'] in ["Warning", "Error", "SynthesisWarning", "SynthesisError", "Fatal"]])
+    nr_of_failures = len([message for message in messages if message['severity'] in error_levels[args.error_level]])
     testsuite = doc.createElement("testsuite")
     testsuite.setAttribute("name", "lint_rtl")
     testsuite.setAttribute("failures", str(nr_of_failures))
@@ -75,11 +83,10 @@ try:
             testsuite.appendChild(testcase)
     doc.appendChild(testsuite)
     print(doc.toprettyxml())
+    sys.exit(1 if nr_of_failures and args.fail_on_error else 0)
 
 
 except Exception as e:
     # parser.error("Failed to parse the report. Error: {}".format(e))
     raise e
-
-root = minidom.Document()
 
