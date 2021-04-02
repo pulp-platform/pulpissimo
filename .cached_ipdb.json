@@ -1,0 +1,507 @@
+{
+    "fpgasim_dir": "./fpga/sim",
+    "vsim_dir": "sim",
+    "rtl_list": [
+        {
+            "name": "tb",
+            "domain": null,
+            "alternatives": null,
+            "path": "tb",
+            "server": null,
+            "commit": null,
+            "group": null
+        },
+        {
+            "name": "vip",
+            "domain": null,
+            "alternatives": null,
+            "path": "vip",
+            "server": null,
+            "commit": null,
+            "group": null
+        },
+        {
+            "name": "pulpissimo",
+            "domain": null,
+            "alternatives": null,
+            "path": "pulpissimo",
+            "server": null,
+            "commit": null,
+            "group": null
+        }
+    ],
+    "rtl_dir": "rtl",
+    "ip_list": [
+        {
+            "name": "common_verification",
+            "domain": null,
+            "alternatives": null,
+            "remote": "https://github.com/pulp-platform",
+            "path": "common_verification",
+            "server": null,
+            "commit": "v0.1.1",
+            "group": null
+        },
+        {
+            "name": "common_cells",
+            "domain": [
+                "cluster",
+                "soc"
+            ],
+            "alternatives": null,
+            "remote": "https://github.com/pulp-platform",
+            "path": "common_cells",
+            "server": null,
+            "commit": "v1.20.0",
+            "group": null
+        },
+        {
+            "name": "L2_tcdm_hybrid_interco",
+            "domain": [
+                "soc"
+            ],
+            "alternatives": null,
+            "remote": "https://github.com/pulp-platform",
+            "path": "L2_tcdm_hybrid_interco",
+            "server": null,
+            "commit": "pulpissimo-v1.0",
+            "group": null
+        },
+        {
+            "name": "cluster_interconnect",
+            "domain": [
+                "soc"
+            ],
+            "alternatives": null,
+            "remote": "https://github.com/pulp-platform",
+            "path": "cluster_interconnect",
+            "server": null,
+            "commit": "v1.1.0",
+            "group": null
+        },
+        {
+            "name": "adv_dbg_if",
+            "domain": [
+                "cluster",
+                "soc"
+            ],
+            "alternatives": null,
+            "remote": "https://github.com/pulp-platform",
+            "path": "adv_dbg_if",
+            "server": null,
+            "commit": "v0.0.1",
+            "group": null
+        },
+        {
+            "name": "apb2per",
+            "domain": [
+                "soc"
+            ],
+            "alternatives": null,
+            "remote": "https://github.com/pulp-platform",
+            "path": "apb/apb2per",
+            "server": null,
+            "commit": "v0.0.1",
+            "group": null
+        },
+        {
+            "name": "apb_adv_timer",
+            "domain": [
+                "soc"
+            ],
+            "alternatives": null,
+            "remote": "https://github.com/pulp-platform",
+            "path": "apb/apb_adv_timer",
+            "server": null,
+            "commit": "v1.0.2",
+            "group": null
+        },
+        {
+            "name": "apb_fll_if",
+            "domain": [
+                "soc"
+            ],
+            "alternatives": null,
+            "remote": "https://github.com/pulp-platform",
+            "path": "apb/apb_fll_if",
+            "server": null,
+            "commit": "pulpissimo-v1.0",
+            "group": null
+        },
+        {
+            "name": "apb_gpio",
+            "domain": [
+                "soc"
+            ],
+            "alternatives": null,
+            "remote": "https://github.com/pulp-platform",
+            "path": "apb/apb_gpio",
+            "server": null,
+            "commit": "0e9f142f2f11278445c953ad011fce1c7ed85b66",
+            "group": null
+        },
+        {
+            "name": "apb_node",
+            "domain": [
+                "soc"
+            ],
+            "alternatives": null,
+            "remote": "https://github.com/pulp-platform",
+            "path": "apb/apb_node",
+            "server": null,
+            "commit": "v0.1.1",
+            "group": null
+        },
+        {
+            "name": "apb_interrupt_cntrl",
+            "domain": [
+                "soc"
+            ],
+            "alternatives": null,
+            "remote": "https://github.com/pulp-platform",
+            "path": "apb_interrupt_cntrl",
+            "server": null,
+            "commit": "v0.0.1",
+            "group": null
+        },
+        {
+            "name": "axi",
+            "domain": [
+                "cluster",
+                "soc"
+            ],
+            "alternatives": null,
+            "remote": "https://github.com/pulp-platform",
+            "path": "axi/axi",
+            "server": null,
+            "commit": "v0.24.1",
+            "group": null
+        },
+        {
+            "name": "axi_slice",
+            "domain": [
+                "cluster",
+                "soc"
+            ],
+            "alternatives": null,
+            "remote": "https://github.com/pulp-platform",
+            "path": "axi/axi_slice",
+            "server": null,
+            "commit": "v1.1.4",
+            "group": null
+        },
+        {
+            "name": "axi_slice_dc",
+            "domain": [
+                "cluster",
+                "soc"
+            ],
+            "alternatives": null,
+            "remote": "https://github.com/pulp-platform",
+            "path": "axi/axi_slice_dc",
+            "server": null,
+            "commit": "v1.1.3",
+            "group": null
+        },
+        {
+            "name": "timer_unit",
+            "domain": [
+                "cluster",
+                "soc"
+            ],
+            "alternatives": null,
+            "remote": "https://github.com/pulp-platform",
+            "path": "timer_unit",
+            "server": null,
+            "commit": "v1.0.2",
+            "group": null
+        },
+        {
+            "name": "fpu_div_sqrt_mvp",
+            "domain": [
+                "cluster",
+                "soc"
+            ],
+            "alternatives": null,
+            "remote": "https://github.com/pulp-platform",
+            "path": "fpu_div_sqrt_mvp",
+            "server": null,
+            "commit": "v1.0.4",
+            "group": null
+        },
+        {
+            "name": "fpnew",
+            "domain": [
+                "cluster",
+                "soc"
+            ],
+            "alternatives": null,
+            "remote": "https://github.com/pulp-platform",
+            "path": "fpnew",
+            "server": null,
+            "commit": "v0.6.5",
+            "group": null
+        },
+        {
+            "name": "jtag_pulp",
+            "domain": [
+                "soc"
+            ],
+            "alternatives": null,
+            "remote": "https://github.com/pulp-platform",
+            "path": "jtag_pulp",
+            "server": null,
+            "commit": "v0.1",
+            "group": null
+        },
+        {
+            "name": "riscv",
+            "domain": [
+                "cluster",
+                "soc"
+            ],
+            "alternatives": null,
+            "remote": "https://github.com/pulp-platform",
+            "path": "riscv",
+            "server": null,
+            "commit": "pulpissimo-v3.4.0",
+            "group": null
+        },
+        {
+            "name": "ibex",
+            "domain": [
+                "soc"
+            ],
+            "alternatives": null,
+            "remote": "https://github.com/lowRISC",
+            "path": "ibex",
+            "server": null,
+            "commit": "e65a27e14dda7bb3b09cadc4e9232305fd451cec",
+            "group": "lowRISC"
+        },
+        {
+            "name": "scm",
+            "domain": [
+                "cluster",
+                "soc"
+            ],
+            "alternatives": null,
+            "remote": "https://github.com/pulp-platform",
+            "path": "scm",
+            "server": null,
+            "commit": "v1.0.1",
+            "group": null
+        },
+        {
+            "name": "generic_FLL",
+            "domain": [
+                "soc"
+            ],
+            "alternatives": null,
+            "remote": "https://github.com/pulp-platform",
+            "path": "generic_FLL",
+            "server": null,
+            "commit": "v0.1",
+            "group": null
+        },
+        {
+            "name": "tech_cells_generic",
+            "domain": [
+                "cluster",
+                "soc"
+            ],
+            "alternatives": null,
+            "remote": "https://github.com/pulp-platform",
+            "path": "tech_cells_generic",
+            "server": null,
+            "commit": "v0.1.6",
+            "group": null
+        },
+        {
+            "name": "udma_core",
+            "domain": [
+                "soc"
+            ],
+            "alternatives": null,
+            "remote": "https://github.com/pulp-platform",
+            "path": "udma/udma_core",
+            "server": null,
+            "commit": "v1.0.0",
+            "group": null
+        },
+        {
+            "name": "udma_uart",
+            "domain": [
+                "soc"
+            ],
+            "alternatives": null,
+            "remote": "https://github.com/pulp-platform",
+            "path": "udma/udma_uart",
+            "server": null,
+            "commit": "v1.0.0",
+            "group": null
+        },
+        {
+            "name": "udma_i2c",
+            "domain": [
+                "soc"
+            ],
+            "alternatives": null,
+            "remote": "https://github.com/pulp-platform",
+            "path": "udma/udma_i2c",
+            "server": null,
+            "commit": "vega_v1.0.0",
+            "group": null
+        },
+        {
+            "name": "udma_i2s",
+            "domain": [
+                "soc"
+            ],
+            "alternatives": null,
+            "remote": "https://github.com/pulp-platform",
+            "path": "udma/udma_i2s",
+            "server": null,
+            "commit": "v1.1.0",
+            "group": null
+        },
+        {
+            "name": "udma_qspi",
+            "domain": [
+                "soc"
+            ],
+            "alternatives": null,
+            "remote": "https://github.com/pulp-platform",
+            "path": "udma/udma_qspi",
+            "server": null,
+            "commit": "v1.0.0",
+            "group": null
+        },
+        {
+            "name": "udma_sdio",
+            "domain": [
+                "soc"
+            ],
+            "alternatives": null,
+            "remote": "https://github.com/pulp-platform",
+            "path": "udma/udma_sdio",
+            "server": null,
+            "commit": "vega_v1.0.5",
+            "group": null
+        },
+        {
+            "name": "udma_camera",
+            "domain": [
+                "soc"
+            ],
+            "alternatives": null,
+            "remote": "https://github.com/pulp-platform",
+            "path": "udma/udma_camera",
+            "server": null,
+            "commit": "v1.0.0",
+            "group": null
+        },
+        {
+            "name": "udma_filter",
+            "domain": [
+                "soc"
+            ],
+            "alternatives": null,
+            "remote": "https://github.com/pulp-platform",
+            "path": "udma/udma_filter",
+            "server": null,
+            "commit": "v1.0.0",
+            "group": null
+        },
+        {
+            "name": "udma_external_per",
+            "domain": [
+                "soc"
+            ],
+            "alternatives": null,
+            "remote": "https://github.com/pulp-platform",
+            "path": "udma/udma_external_per",
+            "server": null,
+            "commit": "v1.0.0",
+            "group": null
+        },
+        {
+            "name": "hwpe-ctrl",
+            "domain": null,
+            "alternatives": null,
+            "remote": "https://github.com/pulp-platform",
+            "path": "hwpe-ctrl",
+            "server": null,
+            "commit": "ec068eb",
+            "group": null
+        },
+        {
+            "name": "hwpe-stream",
+            "domain": null,
+            "alternatives": null,
+            "remote": "https://github.com/pulp-platform",
+            "path": "hwpe-stream",
+            "server": null,
+            "commit": "1a9b04f",
+            "group": null
+        },
+        {
+            "name": "hwpe-mac-engine",
+            "domain": [
+                "cluster",
+                "soc"
+            ],
+            "alternatives": null,
+            "remote": "https://github.com/pulp-platform",
+            "path": "hwpe-mac-engine",
+            "server": null,
+            "commit": "v1.2",
+            "group": null
+        },
+        {
+            "name": "riscv-dbg",
+            "domain": [
+                "soc"
+            ],
+            "alternatives": null,
+            "remote": "https://github.com/pulp-platform",
+            "path": "riscv-dbg",
+            "server": null,
+            "commit": "v0.2",
+            "group": null
+        },
+        {
+            "name": "register_interface",
+            "domain": [
+                "soc"
+            ],
+            "alternatives": null,
+            "remote": "https://github.com/pulp-platform",
+            "path": "register_interface",
+            "server": null,
+            "commit": "b1bc9c22e0c2a5801107070c022904498dbae34b",
+            "group": null
+        },
+        {
+            "name": "pulp_soc",
+            "domain": null,
+            "alternatives": null,
+            "remote": "https://github.com/pulp-platform",
+            "path": "pulp_soc",
+            "server": "https://github.com",
+            "commit": "v2.0.1",
+            "group": "pulp-platform"
+        },
+        {
+            "name": "tbtools",
+            "domain": null,
+            "alternatives": null,
+            "remote": "https://github.com/pulp-platform",
+            "path": "tbtools",
+            "server": "https://github.com",
+            "commit": "v0.1",
+            "group": "pulp-platform"
+        }
+    ],
+    "ips_dir": "ips"
+}
