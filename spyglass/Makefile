@@ -42,10 +42,11 @@ show_results:
 	cd $(PULP_PATH)/spyglass/working_dir && $(SG_GUI_CMD) -project $(PROJECT_NAME).prj
 
 ## Delete the spyglass working directory
+.PHONY: clean
 clean:
 	rm -rf $(PULP_PATH)/spyglass/working_dir
 
-.PHONY: help clean lint_rtl
+.PHONY: help
 help: Makefile
 	@printf "PULP Platform\n"
 	@printf "Available targets\n\n"
