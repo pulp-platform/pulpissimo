@@ -44,7 +44,6 @@ fetch_ips:
     - ./rtl/vip/get-vips.sh --yes --gitlab
     - echo "Generate scripts with DPI and VIP support"
     - ./generate-scripts --rt-dpi --i2c-vip --flash-vip --i2s-vip
-
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
     paths:
@@ -53,6 +52,20 @@ fetch_ips:
       - ipstools/*
       - rtl/vip/*
       - .cached_ipdb.json
+
+fetch_ips_bender:
+  stage: fetch
+  script:
+    - echo "Fetching IPs using bender"
+    - ulimit -Sn 4096
+    - BENDER=1 make checkout
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - .bender/*
+      - Bender.lock
+      - bender
+
 
 # This jobs result is too large to produce an artifact
 # fetch_sdk:
@@ -84,6 +97,24 @@ build_rtl:
                    # not relocatable (hardcoded paths)
       - rtl/tb/remote_bitbang/* # we want to reuse bitbang lib
 #      - pkg/* # sdk is too large
+
+
+lint:
+  stage: test
+  script:
+    - echo "Running Spyglass Lint in rtl_handoff methodology with goal lint_rtl"
+    - make lint
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - spyglass/working_dir/*
+    reports:
+      junit: spyglass/working_dir/reports/lint_rtl.report.xml
+  dependencies:
+    - fetch_ips_bender
+  needs:
+    - fetch_ips_bender
+  
 
 # Use sdk-releases to run all tests
 test_sequential_bare:

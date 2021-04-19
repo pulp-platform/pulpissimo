@@ -218,6 +218,11 @@ test-gitlab2:
 	source configs/rtl.sh; \
 	cd ../tests && plptest --threads 16 --stdout
 
+.PHONY: lint
+## Generate lint reports with Spyglass
+lint:
+	$(MAKE) -C spyglass lint_rtl
+
 # Bender integration
 bender:
 ifeq (,$(wildcard ./bender))
