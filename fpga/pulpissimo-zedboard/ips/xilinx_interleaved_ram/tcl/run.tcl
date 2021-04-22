@@ -22,7 +22,6 @@ set_property -dict [eval list CONFIG.Use_Byte_Write_Enable {true} \
                      CONFIG.Register_PortA_Output_of_Memory_Primitives {false} \
                     ] [get_ips $ipName]
 
-generate_target all [get_files  ./$ipName.srcs/sources_1/ip/$ipName/$ipName.xci]
-create_ip_run [get_files -of_objects [get_fileset sources_1] ./$ipName.srcs/sources_1/ip/$ipName/$ipName.xci]
+create_ip_run [get_ips $ipName]
 launch_run -jobs 8 ${ipName}_synth_1
 wait_on_run ${ipName}_synth_1
