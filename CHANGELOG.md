@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Fast virtual boot mode to accelerate simulation of software on RTL platform
+
+### Fixed
+- Resolved incompatibility with Vivao 2020.2
+
 ## [6.0.0] - 2020-12-11
 
 ### Changed
