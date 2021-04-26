@@ -30,6 +30,7 @@ set FPGA_IPS ips
 remove_files $IPS/pulp_soc/rtl/components/axi_slice_dc_slave_wrap.sv
 remove_file $IPS/pulp_soc/rtl/components/axi_slice_dc_master_wrap.sv
 remove_file $IPS/tech_cells_generic/pad_functional_xilinx.sv
+remove_file $IPS/riscv/rtl/riscv_ex_stage.sv
 
 # Set Verilog Defines.
 set DEFINES "FPGA_TARGET_XILINX=1 PULP_FPGA_EMUL=1 AXI4_XCHECK_OFF=1"
@@ -50,10 +51,10 @@ set CLK_HALFPERIOD_NS [expr ${FC_CLK_PERIOD_NS} / 2.0]
 add_files -norecurse $FPGA_RTL/xilinx_pulpissimo.v
 
 # Add Xilinx IPs
-read_ip $FPGA_IPS/xilinx_clk_mngr/ip/xilinx_clk_mngr.xci
-read_ip $FPGA_IPS/xilinx_slow_clk_mngr/ip/xilinx_slow_clk_mngr.xci
-read_ip $FPGA_IPS/xilinx_interleaved_ram/ip/xilinx_interleaved_ram.xci
-read_ip $FPGA_IPS/xilinx_private_ram/ip/xilinx_private_ram.xci
+read_ip $FPGA_IPS/xilinx_clk_mngr/xilinx_clk_mngr.srcs/sources_1/ip/xilinx_clk_mngr/xilinx_clk_mngr.xci
+read_ip $FPGA_IPS/xilinx_slow_clk_mngr/xilinx_slow_clk_mngr.srcs/sources_1/ip/xilinx_slow_clk_mngr/xilinx_slow_clk_mngr.xci
+read_ip $FPGA_IPS/xilinx_interleaved_ram/xilinx_interleaved_ram.srcs/sources_1/ip/xilinx_interleaved_ram/xilinx_interleaved_ram.xci
+read_ip $FPGA_IPS/xilinx_private_ram/xilinx_private_ram.srcs/sources_1/ip/xilinx_private_ram/xilinx_private_ram.xci
 
 # Add wrappers and xilinx specific techcells
 add_files -norecurse $FPGA_RTL/fpga_clk_gen.sv
@@ -63,6 +64,10 @@ add_files -norecurse $FPGA_RTL/fpga_private_ram.sv
 add_files -norecurse $FPGA_RTL/fpga_bootrom.sv
 add_files -norecurse $FPGA_RTL/pad_functional_xilinx.sv
 add_files -norecurse $FPGA_RTL/pulp_clock_gating_xilinx.sv
+
+# Add patched riscv_ex_stage module (This should be removed once we have a
+# patched upstream repo version)
+add_files -norecurse $FPGA_RTL/patched_riscv_ex_stage.sv
 
 
 # set pulpissimo as top

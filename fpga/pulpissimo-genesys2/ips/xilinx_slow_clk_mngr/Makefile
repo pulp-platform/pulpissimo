@@ -18,13 +18,8 @@ all gui: $(PROJECT).xpr
 $(PROJECT).xpr: ../../fpga-settings.mk tcl/run.tcl
 	$(MAKE) clean
 	$(VIVADO) -mode $(MODE) -source tcl/run.tcl
-	mkdir -p ip
-	cp -r ${PROJECT}.srcs/sources_1/ip/${PROJECT}/* ip/.
-	cp ${PROJECT}.runs/${PROJECT}_synth_1/${PROJECT}.dcp ip/.
 
 clean: ## Remove all build products
-	rm -rf ip/*
-	mkdir -p ip
 	rm -rf ${PROJECT}.*
 	rm -rf component.xml
 	rm -rf vivado*.jou
