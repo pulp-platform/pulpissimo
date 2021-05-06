@@ -48,6 +48,10 @@ module tb_pulp;
    // how L2 is loaded. valid values are "JTAG" or "STANDALONE", the latter works only when USE_S25FS256S_MODEL is 1
    parameter  LOAD_L2 = "JTAG";
 
+   // STIM_FROM sets where is the image data.
+   // In case any values are not given, the debug module takes over the boot process.
+   parameter  STIM_FROM = "JTAG"; // can be "JTAG" "SPI_FLASH", "HYPER_FLASH", or ""
+
    // enable DPI-based JTAG
    parameter  ENABLE_DPI = 0;
 
@@ -356,7 +360,7 @@ module tb_pulp;
       assign w_uart_tx = w_uart_rx;
    end
 
-   // TODO: this should be set depending on the desired boot mode (JTAG, FLASH)
+
    assign w_bootsel = s_bootsel;
 
    /* JTAG DPI-based verification IP */
@@ -381,8 +385,8 @@ module tb_pulp;
       if(USE_S25FS256S_MODEL == 1) begin
          s25fs256s #(
             .TimingModel   ( "S25FS256SAGMFI000_F_30pF" ),
-            .mem_file_name ( "slm_files/flash_stim.slm" ),
-            .UserPreload   (1)
+            .mem_file_name ( "./vectors/qspi_stim.slm" ),
+            .UserPreload   ( ( LOAD_L2 == "STANDALONE" ) ? 1 : 0 )
          ) i_spi_flash_csn0 (
             .SI       ( w_spi_master_sdio0 ),
             .SO       ( w_spi_master_sdio1 ),
@@ -642,13 +646,27 @@ module tb_pulp;
 
             // determine if we want to load the binary with jtag or from flash
             if (LOAD_L2 == "STANDALONE") begin
-               s_bootsel = 1'b0;
+               // jtag reset needed anyway
+               jtag_pkg::jtag_reset(s_tck, s_tms, s_trstn, s_tdi);
+               jtag_pkg::jtag_softreset(s_tck, s_tms, s_trstn, s_tdi);
+               #5us;
+
+               if (STIM_FROM == "HYPER_FLASH") begin
+                  $display("[TB] %t - HyperFlash boot: Setting bootsel to 2'b?", $realtime);
+                  $fatal(1, "[TB] %t - HyperFlash boot: Not supported yet", $realtime);
+               end else if (STIM_FROM == "SPI_FLASH") begin
+                  $display("[TB] %t - QSPI boot: Setting bootsel to 1'b0", $realtime);
+                  s_bootsel = 1'b0;
+               end
+
+               $display("[TB] %t - Releasing hard reset", $realtime);
+               s_rst_n = 1'b1;
+               debug_mode_if.init_dmi_access(s_tck, s_tms, s_trstn, s_tdi);
+               debug_mode_if.set_dmactive(1'b1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+               #10us;
+
             end else if (LOAD_L2 == "JTAG") begin
                s_bootsel = 1'b1;
-            end else if (LOAD_L2 == "FAST_DEBUG_PRELOAD") begin
-               s_bootsel = 1'b1;
-            end else begin
-               $error("Unknown L2 loadmode: %s", LOAD_L2);
             end
 
             if (LOAD_L2 == "JTAG" || LOAD_L2 == "FAST_DEBUG_PRELOAD") begin
@@ -687,19 +705,18 @@ module tb_pulp;
 
                $display("[TB] %t - Enabling clock out via jtag", $realtime);
 
-               // we are using a bootsel based booting method:
-               // bootsel = 1'b1 means booting from jtag => bootrom makes us wait in a wfi/busy loop
-               // bootsel = 1'b1 means booting from flash => start loading image from flash
-               // This logic is handled in the bootrom which will read the bootsel signal value.
-               //
-               // This also means we are currently not relying on the jtag confreg to configure the booting behavior but it is still possible to use it.
-               // When the confreg is not set then we will boot according to bootsel.
-               // TODO: regression: we can't propgate our FLL settings like this. Needs sw changes (?)
-               //
-               // jtag_conf_reg = {USE_FLL ? 1'b0 : 1'b1, 6'b0, LOAD_L2 == "JTAG" ? 2'b10 : 2'b00};
-               // test_mode_if.set_confreg(jtag_conf_reg, jtag_conf_rego,
-               //     s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-               // $display("[TB] %t - jtag_conf_reg set to %x", $realtime, jtag_conf_reg);
+               // The boot code installed in the ROM checks the JTAG register value.
+               // If jtag_conf_reg is set to 0, the debug module will take over the boot process
+               // The image file can be loaded also from SPI flash and Hyper flash
+               // even though this is not the stand-alone boot
+
+               jtag_conf_reg = (STIM_FROM == "JTAG")           ? {1'b0, 4'b0, 3'b001, 1'b0}:
+                               (STIM_FROM == "SPI_FLASH")      ? {1'b0, 4'b0, 3'b111, 1'b0}:
+                               (STIM_FROM == "HYPER_FLASH")    ? {1'b0, 4'b0, 3'b101, 1'b0}: '0;
+               test_mode_if.set_confreg(jtag_conf_reg, jtag_conf_rego,
+                   s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+
+               $display("[TB] %t - jtag_conf_reg set to %x", $realtime, jtag_conf_reg);
 
                $display("[TB] %t - Releasing hard reset", $realtime);
                s_rst_n = 1'b1;
