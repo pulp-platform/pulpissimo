@@ -122,16 +122,34 @@ available under the release tab) and point `PULP_RISCV_GCC_TOOLCHAIN` to it:
 ```
 export PULP_RISCV_GCC_TOOLCHAIN=YOUR_PULP_TOOLCHAIN_PATH
 ```
+Add the pulp-toolchain to your PATH variable:
+
+```
+export PATH=$PULP_RISCV_GCC_TOOLCHAIN/bin:$PATH
+```
+
 
 Get the repository for the simple runtime:
 ```
 git clone https://github.com/pulp-platform/pulp-runtime/
 ```
-The simple runtime supports many different hardware configurations. We want PULPissimo:
+The simple runtime supports many different hardware configurations. We want PULPissimo.
+
 ```
 cd pulp-runtime
+```
+Then, to use the CV32E40P (formely RI5CY) core, type:
+
+```
 source configs/pulpissimo.sh
 ```
+
+or to use the Ibex (formely zero-riscy) core:
+
+```
+source configs/pulpissimo_ibex.sh
+```
+
 
 Now we are ready to set up the simulation environment. Normally you would want
 to simulate the hardware design running your program, so go
@@ -198,10 +216,27 @@ Simple Runtime: https://github.com/pulp-platform/pulp-runtime-examples
 SDK: https://github.com/pulp-platform/pulp-rt-examples
 
 Now you can change directory to your favourite test e.g.: for an hello world
-test, run
+test for the SDK, run
 ```bash
 cd pulp-rt-examples/hello
 make clean all run
+```
+or for the Simple Runtime:
+
+```bash
+cd pulp-runtime-examples/hello
+make clean all run
+```
+
+If you want to change the compiler flags, as for example 
+if you are using CV32E40P with the XPULP extensions but you want to compile 
+using only the RV32IMC instructions to compare performance,
+you can modify the Makefile inside the pulp-runtime-examples/hello folder adding:
+
+```
+PULP_ARCH_CFLAGS    =  -march=rv32imc -DRV_ISA_RV32
+PULP_ARCH_LDFLAGS   =  -march=rv32imc
+PULP_ARCH_OBJDFLAGS = -Mmarch=rv32imc
 ```
 The open-source simulation platform relies on JTAG to emulate preloading of the
 PULP L2 memory. If you want to simulate a more realistic scenario (e.g.
