@@ -667,6 +667,10 @@ module tb_pulp;
 
             end else if (LOAD_L2 == "JTAG") begin
                s_bootsel = 1'b1;
+            end else if (LOAD_L2 == "FAST_DEBUG_PRELOAD") begin
+               s_bootsel = 1'b1;
+            end else begin
+               $error("Unknown L2 loadmode: %s", LOAD_L2);
             end
 
             if (LOAD_L2 == "JTAG" || LOAD_L2 == "FAST_DEBUG_PRELOAD") begin
