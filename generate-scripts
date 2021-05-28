@@ -5,9 +5,31 @@
 # Copyright (C) 2016-2018 ETH Zurich, University of Bologna.
 # All rights reserved.
 
-from ipstools_cfg import *
+from ipstools import ipstools
+import os
 import fileinput
 import argparse
+import subprocess
+
+
+devnull = open(os.devnull, 'wb')
+def execute(cmd, silent=False):
+    if silent:
+        stdout = devnull
+    else:
+        stdout = None
+    return subprocess.call(cmd.split(), stdout=stdout)
+
+def execute_out(cmd, silent=False):
+    p = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
+    out, err = p.communicate()
+    return out
+class tcolors:
+    OK      = '\033[92m'
+    WARNING = '\033[93m'
+    ERROR   = '\033[91m'
+    ENDC    = '\033[0m'
+
 
 parser = argparse.ArgumentParser(
     prog='PULP generate script',

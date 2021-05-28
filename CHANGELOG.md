@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Fast virtual boot mode to accelerate simulation of software on RTL platform
 
+### Changed
+- The latest version of IPApprox with semver support is now installed using setuptools
+
 ### Fixed
 - Resolved incompatibility with Vivao 2020.2
 
