@@ -4,9 +4,13 @@
 # Copyright (C) 2016-2018 ETH Zurich, University of Bologna.
 # All rights reserved.
 
-from ipstools_cfg import *
+from ipstools import ipstools
 import argparse
+import os
 import sys
+
+
+DEFAULT_SERVER = "https://github.com"
 
 parser = argparse.ArgumentParser(
     prog='PULP update script',
@@ -37,6 +41,7 @@ ipdb = ipstools.IPDatabase(
     skip_scripts=True,
     build_deps_tree=True,
     resolve_deps_conflicts=True,
+    use_semver_resolution=True,
     rtl_dir='rtl',
     ips_dir='ips',
     vsim_dir='sim',

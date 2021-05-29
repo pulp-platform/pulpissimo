@@ -51,7 +51,7 @@ ifdef BENDER
 checkout: bender
 	./bender update
 else
-checkout:
+checkout: ipstools
 	./update-ips
 endif
 	$(MAKE) scripts
@@ -222,6 +222,10 @@ test-gitlab2:
 ## Generate lint reports with Spyglass
 lint:
 	$(MAKE) -C spyglass lint_rtl
+
+# IPStools Integration
+ipstools:
+	pip install -t ipstools --upgrade git+https://github.com/pulp-platform/IPApprox.git@6b0bbc917e6be883bdb5fcc1765da59563b46d2e
 
 # Bender integration
 bender:
