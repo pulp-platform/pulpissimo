@@ -19,11 +19,11 @@
 #
 
 pulp_soc:
-  commit: v2.0.1
+  commit: v3.0.0
   server: https://github.com
   group:  pulp-platform
 
 tbtools:
-  commit: v0.1
+  commit: v0.2.1
   server: https://github.com
   group:  pulp-platform
