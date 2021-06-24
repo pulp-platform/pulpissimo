@@ -225,7 +225,9 @@ lint:
 
 # IPStools Integration
 ipstools:
-	pip install -t ipstools --upgrade git+https://github.com/pulp-platform/IPApprox.git@6b0bbc917e6be883bdb5fcc1765da59563b46d2e
+	git clone https://github.com/pulp-platform/IPApprox.git ipstools
+	cd ipstools && git checkout 6b0bbc917e6be883bdb5fcc1765da59563b46d2e
+	pip install --user semver==2.13.0 pyyaml
 
 # Bender integration
 bender:
