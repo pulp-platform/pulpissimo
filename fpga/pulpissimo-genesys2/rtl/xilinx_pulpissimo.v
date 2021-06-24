@@ -68,7 +68,6 @@ module xilinx_pulpissimo
    inout wire  pad_i2c0_scl,
 
    input wire  pad_reset_n,
-   inout wire  pad_bootsel,
 
    input wire  pad_jtag_tck,
    input wire  pad_jtag_tdi,
@@ -142,7 +141,8 @@ module xilinx_pulpissimo
        .pad_jtag_tms(pad_jtag_tms),
        .pad_jtag_trst(pad_jtag_trst),
        .pad_xtal_in(ref_clk),
-       .pad_bootsel()
+       .pad_bootsel0(),
+       .pad_bootsel1()
        );
 
 endmodule

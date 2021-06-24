@@ -93,7 +93,8 @@ set_property needs_refresh false [get_runs synth_1]
 # Remove unused IOBUF cells in padframe (they are not optimized away since the
 # pad driver also drives the input creating a datapath from pad_xy_o to pad_xy_i
 # )
-remove_cell i_pulpissimo/pad_frame_i/padinst_bootsel
+remove_cell i_pulpissimo/pad_frame_i/padinst_bootsel0
+remove_cell i_pulpissimo/pad_frame_i/padinst_bootsel1
 
 
 # Launch Implementation
