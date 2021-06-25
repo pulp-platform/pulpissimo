@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.0.0] - 2021-06-26
+
 ### Added
 - Fast virtual boot mode to accelerate simulation of software on RTL platform
 - Added support for Bender as dependency management tool
