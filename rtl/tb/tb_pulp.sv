@@ -215,8 +215,8 @@ module tb_pulp;
    wire w_master_i2s_sck;
    wire w_master_i2s_ws ;
 
-   wire w_bootsel;
-   logic s_bootsel;
+   wire [1:0] w_bootsel;
+   logic [1:0] s_bootsel;
 
 
    logic [8:0] jtag_conf_reg, jtag_conf_rego; //22bits but actually only the last 9bits are used
@@ -582,7 +582,8 @@ module tb_pulp;
       .pad_i2s1_sdi       ( w_i2s1_sdi         ),
 
       .pad_reset_n        ( w_rst_n            ),
-      .pad_bootsel        ( w_bootsel          ),
+      .pad_bootsel0        ( w_bootsel[0]      ),
+      .pad_bootsel1        ( w_bootsel[1]      ),
 
       .pad_jtag_tck       ( w_tck              ),
       .pad_jtag_tdi       ( w_tdi              ),
@@ -608,6 +609,7 @@ module tb_pulp;
          logic [6:0]  dm_addr;
          logic        error;
          int         num_err;
+         int         rd_cnt;
          automatic logic [9:0]  FC_CORE_ID = {5'd31, 5'd0};
 
          int entry_point;
@@ -615,6 +617,7 @@ module tb_pulp;
 
          error   = 1'b0;
          num_err = 0;
+         rd_cnt = 0;
 
          // read entry point from commandline
          if ($value$plusargs("ENTRY_POINT=%h", entry_point))
@@ -632,7 +635,7 @@ module tb_pulp;
 
          if (ENABLE_OPENOCD == 1) begin
             // Use openocd to interact with the simulation
-            s_bootsel = 1'b1;
+            s_bootsel = 2'b01;
             $display("[TB] %t - Releasing hard reset", $realtime);
             s_rst_n = 1'b1;
 
@@ -656,7 +659,7 @@ module tb_pulp;
                   $fatal(1, "[TB] %t - HyperFlash boot: Not supported yet", $realtime);
                end else if (STIM_FROM == "SPI_FLASH") begin
                   $display("[TB] %t - QSPI boot: Setting bootsel to 1'b0", $realtime);
-                  s_bootsel = 1'b0;
+                  s_bootsel = 2'b00;
                end
 
                $display("[TB] %t - Releasing hard reset", $realtime);
@@ -666,9 +669,9 @@ module tb_pulp;
                #10us;
 
             end else if (LOAD_L2 == "JTAG") begin
-               s_bootsel = 1'b1;
+               s_bootsel = 2'b01;
             end else if (LOAD_L2 == "FAST_DEBUG_PRELOAD") begin
-               s_bootsel = 1'b1;
+               s_bootsel = 2'b01;
             end else begin
                $error("Unknown L2 loadmode: %s", LOAD_L2);
             end
@@ -831,8 +834,17 @@ module tb_pulp;
 
             jtag_data[0] = 0;
             while(jtag_data[0][31] == 0) begin
+               // every 10th loop iteration, clear the debug module's SBA unit CSR to make
+               // sure there's no error blocking our reads. Sometimes a TCDM read
+               // request issued by the debug module takes longer than it takes
+               // for the read request to the debug module to arrive and it
+               // stores an error in the SBCS register. By clearing it
+               // periodically we make sure the test can terminate.
+               if (rd_cnt % 10 == 0) begin
+                  debug_mode_if.clear_sbcserrors(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+               end
                debug_mode_if.readMem(32'h1A1040A0, jtag_data[0], s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-
+               rd_cnt++;
                #50us;
             end
 

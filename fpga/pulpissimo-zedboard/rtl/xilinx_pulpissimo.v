@@ -134,7 +134,8 @@ module xilinx_pulpissimo (
     .pad_jtag_tms(pad_jtag_tms),
     .pad_jtag_trst(1'b1),
     .pad_xtal_in(ref_clk_int),
-    .pad_bootsel()
+    .pad_bootsel0(),
+    .pad_bootsel1()
   );
 
 endmodule

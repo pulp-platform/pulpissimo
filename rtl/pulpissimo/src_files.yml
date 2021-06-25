@@ -13,5 +13,6 @@ pulpissimo:
     pulpissimo.sv,
   ]
   vlog_opts: [
-  -L pulp_soc_lib
+  -L pulp_soc_lib,
+  -L axi_lib
   ]

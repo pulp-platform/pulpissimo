@@ -13,7 +13,7 @@
 module pulpissimo #(
     parameter CORE_TYPE   = 0, // 0 for RISCY, 1 for IBEX RV32IMC (formerly ZERORISCY), 2 for IBEX RV32EC (formerly MICRORISCY)
     parameter USE_FPU     = 1,
-    parameter USE_HWPE    = 1
+    parameter USE_HWPE    = 0
 ) (
   inout wire pad_spim_sdio0,
   inout wire pad_spim_sdio1,
@@ -54,7 +54,8 @@ module pulpissimo #(
   inout wire pad_i2s1_sdi,
 
   inout wire pad_reset_n,
-  inout wire pad_bootsel,
+  inout wire pad_bootsel0,
+  inout wire pad_bootsel1,
 
   inout wire pad_jtag_tck,
   inout wire pad_jtag_tdi,
@@ -357,16 +358,12 @@ module pulpissimo #(
   logic                        s_pf_evt_ack;
   logic                        s_pf_evt_valid;
 
-  logic [BUFFER_WIDTH-1:0]     s_event_writetoken;
-  logic [BUFFER_WIDTH-1:0]     s_event_readpointer;
-  logic [EVENT_WIDTH-1:0]      s_event_dataasync;
-  logic                        s_cluster_irq;
 
 
   //
   // OTHER PAD FRAME SIGNALS
   //
-  logic                        s_bootsel;
+  logic [1:0]                  s_bootsel;
   logic                        s_fc_fetch_en_valid;
   logic                        s_fc_fetch_en;
 
@@ -517,7 +514,8 @@ module pulpissimo #(
     .pad_uart_rx           ( pad_uart_rx            ),
     .pad_uart_tx           ( pad_uart_tx            ),
 
-    .pad_bootsel           ( pad_bootsel            ),
+    .pad_bootsel0          ( pad_bootsel0            ),
+    .pad_bootsel1          ( pad_bootsel1            ),
     .pad_reset_n           ( pad_reset_n            ),
     .pad_jtag_tck          ( pad_jtag_tck           ),
     .pad_jtag_tdi          ( pad_jtag_tdi           ),
@@ -705,8 +703,7 @@ module pulpissimo #(
         .oe_i2s0_sdi_o              ( s_oe_i2s0_sdi               ),
         .oe_i2s1_sdi_o              ( s_oe_i2s1_sdi               ),
 
-        .*
-   );
+        .*);
 
    //
    // SOC DOMAIN
@@ -720,215 +717,145 @@ module pulpissimo #(
       .AXI_DATA_OUT_WIDTH ( AXI_SOC_CLUSTER_DATA_WIDTH ),
       .AXI_ID_IN_WIDTH    ( AXI_CLUSTER_SOC_ID_WIDTH   ),
       .AXI_USER_WIDTH     ( AXI_USER_WIDTH             ),
-      .AXI_STRB_IN_WIDTH  ( AXI_CLUSTER_SOC_STRB_WIDTH ),
-      .AXI_STRB_OUT_WIDTH ( AXI_SOC_CLUSTER_STRB_WIDTH ),
-      .BUFFER_WIDTH       ( BUFFER_WIDTH               ),
+      .AXI_STRB_WIDTH_IN  ( AXI_CLUSTER_SOC_STRB_WIDTH ),
+      .AXI_STRB_WIDTH_OUT ( AXI_SOC_CLUSTER_STRB_WIDTH ),
       .EVNT_WIDTH         ( EVENT_WIDTH                ),
+      .CDC_FIFOS_LOG_DEPTH( 3                          ),
       .NB_CL_CORES        ( 0                          ),
       .N_UART             ( N_UART                     ),
       .N_SPI              ( N_SPI                      ),
       .N_I2C              ( N_I2C                      )
    ) soc_domain_i (
 
-        .ref_clk_i                    ( s_ref_clk                        ),
-        .slow_clk_i                   ( s_slow_clk                       ),
-        .test_clk_i                   ( s_test_clk                       ),
+        .ref_clk_i                   ( s_ref_clk          ),
+        .slow_clk_i                  ( s_slow_clk         ),
+        .test_clk_i                  ( s_test_clk         ),
 
-        .rstn_glob_i                  ( s_rstn_por                       ),
+        .rstn_glob_i                 ( s_rstn_por         ),
 
-        .mode_select_i                ( s_mode_select                    ),
-        .dft_cg_enable_i              ( s_dft_cg_enable                  ),
-        .dft_test_mode_i              ( s_test_mode                      ),
+        .mode_select_i               ( s_mode_select      ),
+        .dft_cg_enable_i             ( s_dft_cg_enable    ),
+        .dft_test_mode_i             ( s_test_mode        ),
 
-        .bootsel_i                    ( s_bootsel                        ),
+        .bootsel_i                   ( s_bootsel          ),
 
-        // we immediately start booting in the default setup
-        .fc_fetch_en_valid_i          ( 1'b1                             ),
-        .fc_fetch_en_i                ( 1'b1                             ),
+        // we immediately start bootin g in the default setup
+        .fc_fetch_en_valid_i         ( 1'b1               ),
+        .fc_fetch_en_i               ( 1'b1               ),
 
-        .jtag_tck_i                   ( s_jtag_tck                       ),
-        .jtag_trst_ni                 ( s_jtag_trst                      ),
-        .jtag_tms_i                   ( s_jtag_tms                       ),
-        .jtag_tdi_i                   ( s_jtag_tdi                       ),
-        .jtag_tdo_o                   ( s_jtag_tdo                       ),
+        .jtag_tck_i                  ( s_jtag_tck         ),
+        .jtag_trst_ni                ( s_jtag_trst        ),
+        .jtag_tms_i                  ( s_jtag_tms         ),
+        .jtag_tdi_i                  ( s_jtag_tdi         ),
+        .jtag_tdo_o                  ( s_jtag_tdo         ),
 
-        .pad_cfg_o                    ( s_pad_cfg_soc                    ),
-        .pad_mux_o                    ( s_pad_mux_soc                    ),
+        .pad_cfg_o                   ( s_pad_cfg_soc      ),
+        .pad_mux_o                   ( s_pad_mux_soc      ),
 
-        .gpio_in_i                    ( s_gpio_in                        ),
-        .gpio_out_o                   ( s_gpio_out                       ),
-        .gpio_dir_o                   ( s_gpio_dir                       ),
-        .gpio_cfg_o                   ( s_gpio_cfg                       ),
+        .gpio_in_i                   ( s_gpio_in          ),
+        .gpio_out_o                  ( s_gpio_out         ),
+        .gpio_dir_o                  ( s_gpio_dir         ),
+        .gpio_cfg_o                  ( s_gpio_cfg         ),
 
-        .uart_tx_o                    ( s_uart_tx                        ),
-        .uart_rx_i                    ( s_uart_rx                        ),
+        .uart_tx_o                   ( s_uart_tx          ),
+        .uart_rx_i                   ( s_uart_rx          ),
 
-        .cam_clk_i                    ( s_cam_pclk                       ),
-        .cam_data_i                   ( s_cam_data                       ),
-        .cam_hsync_i                  ( s_cam_hsync                      ),
-        .cam_vsync_i                  ( s_cam_vsync                      ),
+        .cam_clk_i                   ( s_cam_pclk         ),
+        .cam_data_i                  ( s_cam_data         ),
+        .cam_hsync_i                 ( s_cam_hsync        ),
+        .cam_vsync_i                 ( s_cam_vsync        ),
 
-        .timer_ch0_o                  ( s_timer0                         ),
-        .timer_ch1_o                  ( s_timer1                         ),
-        .timer_ch2_o                  ( s_timer2                         ),
-        .timer_ch3_o                  ( s_timer3                         ),
+        .timer_ch0_o                 ( s_timer0           ),
+        .timer_ch1_o                 ( s_timer1           ),
+        .timer_ch2_o                 ( s_timer2           ),
+        .timer_ch3_o                 ( s_timer3           ),
 
-        .i2c_scl_i                    ( s_i2c_scl_in                     ),
-        .i2c_scl_o                    ( s_i2c_scl_out                    ),
-        .i2c_scl_oe_o                 ( s_i2c_scl_oe                     ),
-        .i2c_sda_i                    ( s_i2c_sda_in                     ),
-        .i2c_sda_o                    ( s_i2c_sda_out                    ),
-        .i2c_sda_oe_o                 ( s_i2c_sda_oe                     ),
+        .i2c_scl_i                   ( s_i2c_scl_in       ),
+        .i2c_scl_o                   ( s_i2c_scl_out      ),
+        .i2c_scl_oe_o                ( s_i2c_scl_oe       ),
+        .i2c_sda_i                   ( s_i2c_sda_in       ),
+        .i2c_sda_o                   ( s_i2c_sda_out      ),
+        .i2c_sda_oe_o                ( s_i2c_sda_oe       ),
 
-        .i2s_slave_sd0_i              ( s_i2s_sd0_in                     ),
-        .i2s_slave_sd1_i              ( s_i2s_sd1_in                     ),
-        .i2s_slave_ws_i               ( s_i2s_ws_in                      ),
-        .i2s_slave_ws_o               ( s_i2s_ws0_out                    ),
-        .i2s_slave_ws_oe              ( s_i2s_slave_ws_oe                ),
-        .i2s_slave_sck_i              ( s_i2s_sck_in                     ),
-        .i2s_slave_sck_o              ( s_i2s_sck0_out                   ),
-        .i2s_slave_sck_oe             ( s_i2s_slave_sck_oe               ),
+        .i2s_slave_sd0_i             ( s_i2s_sd0_in       ),
+        .i2s_slave_sd1_i             ( s_i2s_sd1_in       ),
+        .i2s_slave_ws_i              ( s_i2s_ws_in        ),
+        .i2s_slave_ws_o              ( s_i2s_ws0_out      ),
+        .i2s_slave_ws_oe             ( s_i2s_slave_ws_oe  ),
+        .i2s_slave_sck_i             ( s_i2s_sck_in       ),
+        .i2s_slave_sck_o             ( s_i2s_sck0_out     ),
+        .i2s_slave_sck_oe            ( s_i2s_slave_sck_oe ),
 
-        .spi_clk_o                    ( s_spi_clk                        ),
-        .spi_csn_o                    ( s_spi_csn                        ),
-        .spi_oen_o                    ( s_spi_oen                        ),
-        .spi_sdo_o                    ( s_spi_sdo                        ),
-        .spi_sdi_i                    ( s_spi_sdi                        ),
+        .spi_clk_o                   ( s_spi_clk          ),
+        .spi_csn_o                   ( s_spi_csn          ),
+        .spi_oen_o                   ( s_spi_oen          ),
+        .spi_sdo_o                   ( s_spi_sdo          ),
+        .spi_sdi_i                   ( s_spi_sdi          ),
 
-        .sdio_clk_o                   ( s_sdio_clk                       ),
-        .sdio_cmd_o                   ( s_sdio_cmdo                      ),
-        .sdio_cmd_i                   ( s_sdio_cmdi                      ),
-        .sdio_cmd_oen_o               ( s_sdio_cmd_oen                   ),
-        .sdio_data_o                  ( s_sdio_datao                     ),
-        .sdio_data_i                  ( s_sdio_datai                     ),
-        .sdio_data_oen_o              ( s_sdio_data_oen                  ),
+        .sdio_clk_o                  ( s_sdio_clk         ),
+        .sdio_cmd_o                  ( s_sdio_cmdo        ),
+        .sdio_cmd_i                  ( s_sdio_cmdi        ),
+        .sdio_cmd_oen_o              ( s_sdio_cmd_oen     ),
+        .sdio_data_o                 ( s_sdio_datao       ),
+        .sdio_data_i                 ( s_sdio_datai       ),
+        .sdio_data_oen_o             ( s_sdio_data_oen    ),
 
-        .cluster_busy_i               ( s_cluster_busy                   ),
+        .cluster_busy_i              ( s_cluster_busy     ),
+        .cluster_irq_o               (                    ),
 
-        .cluster_events_wt_o          ( s_event_writetoken               ),
-        .cluster_events_rp_i          ( s_event_readpointer              ),
-        .cluster_events_da_o          ( s_event_dataasync                ),
+        .dma_pe_evt_ack_o            ( s_dma_pe_evt_ack   ),
+        .dma_pe_evt_valid_i          ( s_dma_pe_evt_valid ),
+        .dma_pe_irq_ack_o            ( s_dma_pe_irq_ack   ),
+        .dma_pe_irq_valid_i          ( s_dma_pe_irq_valid ),
+        .pf_evt_ack_o                ( s_pf_evt_ack       ),
+        .pf_evt_valid_i              ( s_pf_evt_valid     ),
 
-        .cluster_irq_o                ( s_cluster_irq                    ),
+        .cluster_pow_o               ( s_cluster_pow      ),
+        .cluster_byp_o               ( s_cluster_byp      ),
 
-        .dma_pe_evt_ack_o             ( s_dma_pe_evt_ack                 ),
-        .dma_pe_evt_valid_i           ( s_dma_pe_evt_valid               ),
-        .dma_pe_irq_ack_o             ( s_dma_pe_irq_ack                 ),
-        .dma_pe_irq_valid_i           ( s_dma_pe_irq_valid               ),
-        .pf_evt_ack_o                 ( s_pf_evt_ack                     ),
-        .pf_evt_valid_i               ( s_pf_evt_valid                   ),
 
-        .cluster_pow_o                ( s_cluster_pow                    ),
-        .cluster_byp_o                ( s_cluster_byp                    ),
+        .cluster_clk_o               (                    ),
+        .cluster_rstn_o              (                    ),
 
-        .data_slave_aw_writetoken_i   ( '0                               ),
-        .data_slave_aw_addr_i         ( '0                               ),
-        .data_slave_aw_prot_i         ( '0                               ),
-        .data_slave_aw_region_i       ( '0                               ),
-        .data_slave_aw_len_i          ( '0                               ),
-        .data_slave_aw_size_i         ( '0                               ),
-        .data_slave_aw_burst_i        ( '0                               ),
-        .data_slave_aw_lock_i         ( '0                               ),
-        .data_slave_aw_cache_i        ( '0                               ),
-        .data_slave_aw_qos_i          ( '0                               ),
-        .data_slave_aw_id_i           ( '0                               ),
-        .data_slave_aw_user_i         ( '0                               ),
-        .data_slave_aw_readpointer_o  (                                  ),
-
-        .data_slave_ar_writetoken_i   ( '0                               ),
-        .data_slave_ar_addr_i         ( '0                               ),
-        .data_slave_ar_prot_i         ( '0                               ),
-        .data_slave_ar_region_i       ( '0                               ),
-        .data_slave_ar_len_i          ( '0                               ),
-        .data_slave_ar_size_i         ( '0                               ),
-        .data_slave_ar_burst_i        ( '0                               ),
-        .data_slave_ar_lock_i         ( '0                               ),
-        .data_slave_ar_cache_i        ( '0                               ),
-        .data_slave_ar_qos_i          ( '0                               ),
-        .data_slave_ar_id_i           ( '0                               ),
-        .data_slave_ar_user_i         ( '0                               ),
-        .data_slave_ar_readpointer_o  (                                  ),
-
-        .data_slave_w_writetoken_i    ( '0                               ),
-        .data_slave_w_data_i          ( '0                               ),
-        .data_slave_w_strb_i          ( '0                               ),
-        .data_slave_w_user_i          ( '0                               ),
-        .data_slave_w_last_i          ( '0                               ),
-        .data_slave_w_readpointer_o   (                                  ),
-
-        .data_slave_r_writetoken_o    (                                  ),
-        .data_slave_r_data_o          (                                  ),
-        .data_slave_r_resp_o          (                                  ),
-        .data_slave_r_last_o          (                                  ),
-        .data_slave_r_id_o            (                                  ),
-        .data_slave_r_user_o          (                                  ),
-        .data_slave_r_readpointer_i   ( '0                               ),
-
-        .data_slave_b_writetoken_o    (                                  ),
-        .data_slave_b_resp_o          (                                  ),
-        .data_slave_b_id_o            (                                  ),
-        .data_slave_b_user_o          (                                  ),
-        .data_slave_b_readpointer_i   ( '0                               ),
-
-        .data_master_aw_writetoken_o  (                                  ),
-        .data_master_aw_addr_o        (                                  ),
-        .data_master_aw_prot_o        (                                  ),
-        .data_master_aw_region_o      (                                  ),
-        .data_master_aw_len_o         (                                  ),
-        .data_master_aw_size_o        (                                  ),
-        .data_master_aw_burst_o       (                                  ),
-        .data_master_aw_lock_o        (                                  ),
-        .data_master_aw_cache_o       (                                  ),
-        .data_master_aw_qos_o         (                                  ),
-        .data_master_aw_id_o          (                                  ),
-        .data_master_aw_user_o        (                                  ),
-        .data_master_aw_readpointer_i ( '0                               ),
-
-        .data_master_ar_writetoken_o  (                                  ),
-        .data_master_ar_addr_o        (                                  ),
-        .data_master_ar_prot_o        (                                  ),
-        .data_master_ar_region_o      (                                  ),
-        .data_master_ar_len_o         (                                  ),
-        .data_master_ar_size_o        (                                  ),
-        .data_master_ar_burst_o       (                                  ),
-        .data_master_ar_lock_o        (                                  ),
-        .data_master_ar_cache_o       (                                  ),
-        .data_master_ar_qos_o         (                                  ),
-        .data_master_ar_id_o          (                                  ),
-        .data_master_ar_user_o        (                                  ),
-        .data_master_ar_readpointer_i ( '0                               ),
-
-        .data_master_w_writetoken_o   (                                  ),
-        .data_master_w_data_o         (                                  ),
-        .data_master_w_strb_o         (                                  ),
-        .data_master_w_user_o         (                                  ),
-        .data_master_w_last_o         (                                  ),
-        .data_master_w_readpointer_i  ( '0                               ),
-
-        .data_master_r_writetoken_i   ( '0                               ),
-        .data_master_r_data_i         ( '0                               ),
-        .data_master_r_resp_i         ( '0                               ),
-        .data_master_r_last_i         ( '0                               ),
-        .data_master_r_id_i           ( '0                               ),
-        .data_master_r_user_i         ( '0                               ),
-        .data_master_r_readpointer_o  (                                  ),
-
-        .data_master_b_writetoken_i   ( '0                               ),
-        .data_master_b_resp_i         ( '0                               ),
-        .data_master_b_id_i           ( '0                               ),
-        .data_master_b_user_i         ( '0                               ),
-        .data_master_b_readpointer_o  (                                  ),
-
-        .cluster_clk_o                (                                  ),
-        .cluster_rstn_o               (                                  ),
-
-        .cluster_rtc_o                (                                  ),
-        .cluster_fetch_enable_o       (                                  ),
-        .cluster_boot_addr_o          (                                  ),
-        .cluster_test_en_o            (                                  ),
-        .cluster_dbg_irq_valid_o      (                                  ), // we dont' have a cluster
-        .*
-    );
+        .cluster_rtc_o               (                    ),
+        .cluster_fetch_enable_o      (                    ),
+        .cluster_boot_addr_o         (                    ),
+        .cluster_test_en_o           (                    ),
+        .cluster_dbg_irq_valid_o     (                    ), // we dont' have a cluster
+        .async_data_slave_aw_rptr_o  (                    ), // we don't have a cluster
+        .async_data_slave_ar_rptr_o  (                    ), // we don't have a cluster
+        .async_data_slave_w_rptr_o   (                    ), // we don't have a cluster
+        .async_data_slave_r_wptr_o   (                    ), // we don't have a cluster
+        .async_data_slave_r_data_o   (                    ), // we don't have a cluster
+        .async_data_slave_b_wptr_o   (                    ), // we don't have a cluster
+        .async_data_slave_b_data_o   (                    ), // we don't have a cluster
+        .async_data_master_aw_wptr_o (                    ), // we don't have a cluster
+        .async_data_master_aw_data_o (                    ), // we don't have a cluster
+        .async_data_master_ar_wptr_o (                    ), // we don't have a cluster
+        .async_data_master_ar_data_o (                    ), // we don't have a cluster
+        .async_data_master_w_wptr_o  (                    ), // we don't have a cluster
+        .async_data_master_w_data_o  (                    ), // we don't have a cluster
+        .async_data_master_r_rptr_o  (                    ), // we don't have a cluster
+        .async_data_master_b_rptr_o  (                    ), // we don't have a cluster
+        .async_cluster_events_wptr_o (                    ), // we don't have a cluster
+        .async_cluster_events_data_o (                    ), // we don't have a cluster
+        .async_data_slave_aw_wptr_i  ( '0                 ), // We don't have a cluster
+        .async_data_slave_aw_data_i  ( '0                 ), // We don't have a cluster
+        .async_data_slave_ar_wptr_i  ( '0                 ), // We don't have a cluster
+        .async_data_slave_ar_data_i  ( '0                 ), // We don't have a cluster
+        .async_data_slave_w_wptr_i   ( '0                 ), // We don't have a cluster
+        .async_data_slave_w_data_i   ( '0                 ), // We don't have a cluster
+        .async_data_slave_r_rptr_i   ( '0                 ), // We don't have a cluster
+        .async_data_slave_b_rptr_i   ( '0                 ), // We don't have a cluster
+        .async_data_master_aw_rptr_i ( '0                 ), // We don't have a cluster
+        .async_data_master_ar_rptr_i ( '0                 ), // We don't have a cluster
+        .async_data_master_w_rptr_i  ( '0                 ), // We don't have a cluster
+        .async_data_master_r_wptr_i  ( '0                 ), // We don't have a cluster
+        .async_data_master_r_data_i  ( '0                 ), // We don't have a cluster
+        .async_data_master_b_wptr_i  ( '0                 ), // We don't have a cluster
+        .async_data_master_b_data_i  ( '0                 ), // We don't have a cluster
+        .async_cluster_events_rptr_i ( '0                 )  // We don't have a cluster
+        );
 
 assign s_dma_pe_evt_valid               = '0;
 assign s_dma_pe_irq_valid               = '0;

@@ -41,6 +41,7 @@ set_max_delay -datapath_only -from [get_pins i_pulpissimo/soc_domain_i/pulp_soc_
 
 # reset signal
 set_false_path -from [get_ports pad_reset]
+set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets pad_reset_IBUF_inst/O]
 
 # Set ASYNC_REG attribute for ff synchronizers to place them closer together and
 # increase MTBF
