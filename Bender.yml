@@ -78,4 +78,4 @@ sources:
     defines:
       SPEEDSIM: ~
     files:
-      - rtl/vip/spi_flash/S25fs256s/model/s25fs256s.v  
+      - rtl/vip/spi_flash/S25fs256s/model/s25fs256s.v
