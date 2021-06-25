@@ -1,4 +1,5 @@
 .DEFAULT_GOAL:=help
+export BENDER
 
 all: genesys2 zcu104 nexys_video nexys zedboard zcu102 ## Generates the bitstream for all supported boards board.
 

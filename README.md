@@ -189,8 +189,13 @@ IPs composing the PULP system:
 ```bash
 make checkout
 ```
+
 This will download all the required IPs, solve dependencies and generate the
-scripts. The default dependency management tool is IPApproX, where `./update-ips` and `./generate-scripts` are called. If the environment variable `BENDER` is set, bender is used as the dependency management tool.
+scripts. The default dependency management tool is IPApproX, where
+`./update-ips` and `./generate-scripts` are called. If the environment variable
+`BENDER` is set (`export BENDER=1`),
+[Bender](https://github.com/pulp-platform/bender) is used as the dependency
+management tool which will eventually become the default in the future.
 
 After having access to the SDK, you can build the simulation platform by doing
 the following:
@@ -207,9 +212,52 @@ For more advanced usage have a look at `./generate-scripts --help` and
 
 Also check out the output of `make help` for more useful Makefile targets.
 
+### Developing your own RTL
+#### Bender How To
+With Bender developing on top of PULPissimo is getting a lot easier. The command
+line tool is installed in the project root directory if you invoke `make
+checkout BENDER=1`. It performs dependency resolution according to a manifest
+file called `Bender.yml`. The file lists all source files of the RTL project as
+well as its direct dependencies. Bender can be used to generate source file
+lists for various different tools for simulation, ASIC/FPGA synthesis etc. Have
+a look at the Bender [project
+documentation](https://github.com/pulp-platform/bender) if you want to know more
+about it. For now we will concentrate on the most important steps when
+developing on PULPissimo using Bender.
+
+#### Where are all the sub IPs (dependencies)?
+With IPApprox, all dependencies used to be checked out in a directory called
+`ips`. Instead, bender checks out the sub-ips in a hidden directory called
+`.bender/git/checkouts`. **You are not supposed to change the files in this
+directory.** If you want to get the path of a specific IP, call `./bender path
+<some ip (e.g. axi)>` to get the relative path to an IP. To list all IPs in the
+project, call `./bender packages -f`.
+
+#### Modifying an existing IP
+The hidden bender directory is not the location to introduce changes to the RTL
+of sub-ips. If you want to quickly try out changes to a sub-ip, call `./bender
+clone <ip_name>` to checkout a working copy of the ip into a directory called
+`working_dir`. Afterwards, call `./bender update` to instruct bender to update
+the IP paths in it's internal database followed by `make scripts`. Afterwards,
+every change you in the RTL of this working copy will be incorporated into the
+RTL simulation model (once you recompile it with `make build`) and the FPGA
+build (once you synthesize it).
+
+#### Adding a new IP to PULPissimo
+If you want to add new IPs to pulpissimo you most likely will have to fork the
+`pulp_soc` sub-ip since this is the main repository that contains most of the
+SoCs RTL logic. Thus, follow the steps above to create a working copy of
+pulp_soc. Then you can either add your additional source code directly to
+`pulp_soc`s source tree or, preferably, create a new repository with your source
+code, register the RTL source files in a `Bender.yml` manifest file and add this
+new repository as a dependency to `pulp_soc`'s `Bender.yml`. Then you are free
+to instantiate your new IP somewhere within pulp_soc. We make excessive use of
+this strategy throughout the pulpissimo project which is a collection of many
+different IP repositories.
+
+
 ### Downloading and running examples
-Finally, you can download and run examples; for that you can checkout the
-following repositories depending on whether you use the simple runtime or the full sdk.
+Finally, you can download and run examples; for that you can checkout the following repositories depending on whether you use the simple runtime or the full sdk.
 
 Simple Runtime: https://github.com/pulp-platform/pulp-runtime-examples
 
@@ -304,8 +352,7 @@ follow the section below to generate the bitstreams yourself.
 ### Bitstream Generation
 In order to generate the PULPissimo bitstream for a supported target FPGA board
 first generate the necessary synthesis include scripts by starting the
-`update-ips` script in the pulpissimo root directory when using IPApproX (Bender
-compatibility may not be available yet):
+`update-ips` script in the pulpissimo root directory when using IPApproX or Bender:
 
 ```Shell
 ./update-ips

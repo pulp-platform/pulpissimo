@@ -37,11 +37,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Remove timing constraints on unmapped signals for FPGA ports
 - Reduced latency of APB and AXI transactions
 
+### Removed
+- Removed support for Xilinx Zedboard. With the latest feature additions, the
+  Zedboard is no longer large enough to fit the pulpissimo design. The necessary
+  scripts to synthesize pulpissimo for the Zedboard will remain in the `fpga`
+  directory but the bitstream generation flow will fail due to insuffienct LUTs available.
+
 ## [6.0.0] - 2020-12-11
 
 ### Changed
-- Bump `pulp_soc` to `v2.0.0` which adds completely new interconnect with integrated AXI crossbar for simplified IP
-  integration
+- Bump `pulp_soc` to `v2.0.0` which adds completely new interconnect with
+  integrated AXI crossbar for simplified IP integration
 - Make number of SPI and I2C peripherals parametrizable
 - Various FPGA tcl script enhancements
 - Various rtl code cleanups and assertion additions
