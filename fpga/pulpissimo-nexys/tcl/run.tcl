@@ -53,14 +53,10 @@ add_files -norecurse $FPGA_RTL/xilinx_pulpissimo.v
 # Add Xilinx IPs
 read_ip $FPGA_IPS/xilinx_clk_mngr/xilinx_clk_mngr.srcs/sources_1/ip/xilinx_clk_mngr/xilinx_clk_mngr.xci
 read_ip $FPGA_IPS/xilinx_slow_clk_mngr/xilinx_slow_clk_mngr.srcs/sources_1/ip/xilinx_slow_clk_mngr/xilinx_slow_clk_mngr.xci
-read_ip $FPGA_IPS/xilinx_interleaved_ram/xilinx_interleaved_ram.srcs/sources_1/ip/xilinx_interleaved_ram/xilinx_interleaved_ram.xci
-read_ip $FPGA_IPS/xilinx_private_ram/xilinx_private_ram.srcs/sources_1/ip/xilinx_private_ram/xilinx_private_ram.xci
 
 # Add wrappers and xilinx specific techcells
 add_files -norecurse $FPGA_RTL/fpga_clk_gen.sv
 add_files -norecurse $FPGA_RTL/fpga_slow_clk_gen.sv
-add_files -norecurse $FPGA_RTL/fpga_interleaved_ram.sv
-add_files -norecurse $FPGA_RTL/fpga_private_ram.sv
 add_files -norecurse $FPGA_RTL/fpga_bootrom.sv
 add_files -norecurse $FPGA_RTL/pad_functional_xilinx.sv
 add_files -norecurse $FPGA_RTL/pulp_clock_gating_xilinx.sv
