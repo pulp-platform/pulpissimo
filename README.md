@@ -179,6 +179,13 @@ and then set up the necessary environment variables with
 source env/pulpissimo.sh
 ```
 
+There exists a bug in GCC 11.1.0 which fails the sdk build with the error `'this' pointer is null [-Werror=nonnull]`.
+If you encounter this bug use the following temporary workaround instead to build the SDK:
+
+```
+VP_WORKAROUND_NONNULL_BUG=yes make build-pulp-sdk
+```
+
 ### Building the RTL simulation platform
 Note you need Questasim or Xcelium to do an RTL simulation of PULPissimo
 (verilator support planned, but not finished). Intel Modelsim for Intel FPGAs
