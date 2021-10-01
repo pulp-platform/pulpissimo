@@ -1,5 +1,20 @@
 # PULPissimo
 
+## Citing
+If you are using the PULPissimo IPs for an academic publication, please cite the following paper:
+
+```
+@INPROCEEDINGS{8640145,
+  author={Schiavone, Pasquale Davide and Rossi, Davide and Pullini, Antonio and Di Mauro, Alfio and Conti, Francesco and Benini, Luca},
+  booktitle={2018 IEEE SOI-3D-Subthreshold Microelectronics Technology Unified Conference (S3S)}, 
+  title={Quentin: an Ultra-Low-Power PULPissimo SoC in 22nm FDX}, 
+  year={2018},
+  volume={},
+  number={},
+  pages={1-3},
+  doi={10.1109/S3S.2018.8640145}}
+```
+
 ![](doc/pulpissimo_archi.png)
 
 PULPissimo is the microcontroller architecture of the more recent PULP chips,
@@ -721,3 +736,4 @@ ModelSim/QuestaSim.
 ## Support & Questions
 For support on any issue related to this platform or any of the IPs, please add
 an issue to our tracker on https://github.com/pulp-platform/pulpissimo/issues
+
