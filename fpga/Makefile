@@ -49,6 +49,17 @@ clean_nexys: ## Removes all bitstreams, *.log files and vivado related files (rm
 	rm -f pulpissimo_nexys.bit
 	rm -f pulpissimo_nexys.bin
 
+vcu108: ## Generates the bistream for the vcu108 board
+	$(MAKE) -C pulpissimo-vcu108 all
+	cp pulpissimo-vcu108/pulpissimo-vcu108.runs/impl_1/xilinx_pulpissimo.bit pulpissimo_vcu108.bit
+	cp pulpissimo-vcu108/pulpissimo-vcu108.runs/impl_1/xilinx_pulpissimo.bin pulpissimo_vcu108.bin
+	@echo "Bitstream generation for vcu108 board finished. The bitstream Configuration Memory File was copied to ./pulpissimo_vcu108.bit and ./pulpissimo_vcu108.bin"
+
+clean_vcu108: ## Removes all bitstreams, *.log files and vivado related files (rm -rf vivado*) for the vcu108 board.
+	$(MAKE) -C pulpissimo-vcu108 clean
+	rm -f pulpissimo_vcu108.bit
+	rm -f pulpissimo_vcu108.bin
+
 zedboard: ## Generates the bistream for the ZedBoard
 	$(MAKE) -C pulpissimo-zedboard all
 	cp pulpissimo-zedboard/pulpissimo-zedboard.runs/impl_1/xilinx_pulpissimo.bit pulpissimo_zedboard.bit
