@@ -364,7 +364,8 @@ At the moment the following boards are supported:
 * Digilent Genesys2
 * Xilinx ZCU104
 * Xilinx ZCU102
-* Digilent Nexys Video
+* Xilinx VCU108
+* Digilent Nexys Board Family
 * ZedBoard
 
 In the release section you find precompiled bitstreams for all of the above

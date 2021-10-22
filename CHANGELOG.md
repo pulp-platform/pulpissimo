@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for ZSH for the VSIM setup script (`setup/vsim.sh`)
 - Added new HyperFlash peripheral
 - Added additional bootmode signal to accomodate for new Hyperflash boot
-
+- Support for Xilinx VCU108 FPGA board
 
 ### Changed
 - HWPE MAC unit is disabled by default
