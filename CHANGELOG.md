@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- fixed support for ibex core from top level
+
 ## [7.0.0] - 2021-06-26
 
 ### Added
