@@ -214,6 +214,7 @@ module soc_domain #(
 
 
     pulp_soc #(
+      .CORE_TYPE           ( CORE_TYPE           ),
       .USE_FPU             ( USE_FPU             ),
       .USE_HWPE            ( USE_HWPE            ),
       .USE_CLUSTER_EVENT   ( USE_CLUSTER_EVENT   ),
