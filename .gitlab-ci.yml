@@ -423,32 +423,32 @@ fpga_synth_nexys_zcu104:
       - fpga/pulpissimo-zcu104/*.jou
       - fpga/pulpissimo-zcu104/*.log
 
-fpga_synth_zedboard:
-  stage: test
-  before_script:
-  script:
-    - echo "(Re)generating scripts" # because paths might have changed
-    - ./generate-scripts
-    - echo "Starting synthesis with vivado"
-    - cd fpga/ && make zedboard VIVADO='vivado-2019.1.1 vivado'
-  artifacts:
-    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
-    paths:
-      - fpga/pulpissimo_zedboard.bit
-      - fpga/pulpissimo_zedboard.bin
-      - fpga/*.jou
-      - fpga/*.log
-      - fpga/*.str
-      - fpga/pulpissimo-zedboard/reports
-      - fpga/pulpissimo-zedboard/rtl
-      - fpga/pulpissimo-zedboard/tcl
-      - fpga/pulpissimo-zedboard/pulpissimo_zedboard.xpr
-      - fpga/pulpissimo-zedboard/fpga-settings.mk
-      - fpga/pulpissimo-zedboard/*.log
-      - fpga/pulpissimo-zedboard/*.cfg
-      - fpga/pulpissimo-zedboard/*.gdb
-      - fpga/pulpissimo-zedboard/*.jou
-      - fpga/pulpissimo-zedboard/*.log
+# fpga_synth_zedboard:
+#   stage: test
+#   before_script:
+#   script:
+#     - echo "(Re)generating scripts" # because paths might have changed
+#     - ./generate-scripts
+#     - echo "Starting synthesis with vivado"
+#     - cd fpga/ && make zedboard VIVADO='vivado-2019.1.1 vivado'
+#   artifacts:
+#     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
+#     paths:
+#       - fpga/pulpissimo_zedboard.bit
+#       - fpga/pulpissimo_zedboard.bin
+#       - fpga/*.jou
+#       - fpga/*.log
+#       - fpga/*.str
+#       - fpga/pulpissimo-zedboard/reports
+#       - fpga/pulpissimo-zedboard/rtl
+#       - fpga/pulpissimo-zedboard/tcl
+#       - fpga/pulpissimo-zedboard/pulpissimo_zedboard.xpr
+#       - fpga/pulpissimo-zedboard/fpga-settings.mk
+#       - fpga/pulpissimo-zedboard/*.log
+#       - fpga/pulpissimo-zedboard/*.cfg
+#       - fpga/pulpissimo-zedboard/*.gdb
+#       - fpga/pulpissimo-zedboard/*.jou
+#       - fpga/pulpissimo-zedboard/*.log
 
 fpga_synth_zcu102:
   stage: test
