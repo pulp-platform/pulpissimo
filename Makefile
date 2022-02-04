@@ -49,7 +49,7 @@ BENDER_FPGA_SCRIPTS_DIR = fpga/pulpissimo/tcl/generated
 
 .PHONY: checkout
 ## Checkout/update dependencies using IPApprox or Bender
-ifndef IPAPPROX
+ifneq ($(BENDER),0)
 checkout: bender
 	./bender update
 	touch Bender.lock
@@ -70,10 +70,10 @@ endif
 ## Remove the RTL model files
 clean:
 	rm -rf $(VSIM_PATH)
-	$(MAKE) -C sim IPAPPROX=$(IPAPPROX) clean
+	$(MAKE) -C sim BENDER=$(BENDER) clean
 
 .PHONY: scripts
-ifndef IPAPPROX
+ifneq ($(BENDER),0)
 ## Generate scripts for all tools
 scripts: scripts-bender-vsim scripts-bender-fpga
 
@@ -102,7 +102,7 @@ endif
 
 .PHONY: build
 ## Build the RTL model for vsim
-ifndef IPAPPROX
+ifneq ($(BENDER),0)
 build: $(BENDER_SIM_BUILD_DIR)/compile.tcl
 	@test -f Bender.lock || { echo "ERROR: Bender.lock file does not exist. Did you run make checkout in bender mode?"; exit 1; }
 	@test -f $(BENDER_SIM_BUILD_DIR)/compile.tcl || { echo "ERROR: sim/compile.tcl file does not exist. Did you run make scripts in bender mode?"; exit 1; }
@@ -111,7 +111,7 @@ build: $(BENDER_SIM_BUILD_DIR)/compile.tcl
 else
 build:
 	@[ "$$(ls -A ips/)" ] || { echo "ERROR: ips/ is an empty directory. Did you run ./update-ips?"; exit 1; }
-	cd sim && $(MAKE) IPAPPROX=ipapprox all
+	cd sim && $(MAKE) BENDER=0 all
 	cp -r rtl/tb/* $(VSIM_PATH)
 endif
 

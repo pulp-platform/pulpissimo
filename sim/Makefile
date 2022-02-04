@@ -37,14 +37,14 @@ simc:
 		-do "quit -code [examine -radix decimal sim:/tb_pulp/exit_status]"
 
 opt:
-ifndef IPAPPROX
+ifneq ($(BENDER),0)
 	$(VOPT) +acc=npr -o vopt_tb tb_pulp -floatparameters+tb_pulp -work work
 else
 	$(mkfile_path)/tcl_files/rtl_vopt.tcl
 endif
 
 build: build-deps
-ifndef IPAPPROX
+ifneq ($(BENDER),0)
 	$(VSIM) -c -do 'source compile.tcl; quit'
 else
 	@make --no-print-directory -f $(mkfile_path)/vcompile/ips.mk build
@@ -52,7 +52,7 @@ else
 endif
 
 lib:
-ifndef IPAPPROX
+ifneq ($(BENDER),0)
 	@$(VLIB) work
 	chmod +w modelsim.ini
 	$(VMAP) work $(mkfile_path)/work
@@ -62,7 +62,7 @@ else
 endif
 
 clean: clean-deps
-ifndef IPAPPROX
+ifneq ($(BENDER),0)
 	@mkdir -p work
 	rm -r work 
 else
