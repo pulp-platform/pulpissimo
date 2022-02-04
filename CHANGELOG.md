@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Default dependency management is now bender, no longer IPApproX.
+
 ### Fixed
 - fixed support for ibex core from top level
 
