@@ -213,11 +213,11 @@ make checkout
 ```
 
 This will download all the required IPs, solve dependencies and generate the
-scripts. The default dependency management tool is IPApproX, where
-`./update-ips` and `./generate-scripts` are called. If the environment variable
-`BENDER` is set (`export BENDER=1`),
-[Bender](https://github.com/pulp-platform/bender) is used as the dependency
-management tool which will eventually become the default in the future.
+scripts. The default dependency management tool is 
+[Bender](https://github.com/pulp-platform/bender). If you would like to use the
+previous (now unmaintained) dependency management IPApproX, please set the `BENDER`
+environment variable to 0 (`export BENDER=0`). IPApproX calls `./update-ips` and
+`./generate-scripts`, while bender uses integrated functionality for these features.
 
 After having access to the SDK, you can build the simulation platform by doing
 the following:
@@ -229,8 +229,8 @@ This command builds a version of the simulation platform with no dependencies on
 external models for peripherals. See below (Proprietary verification IPs) for
 details on how to plug in some models of real SPI, I2C, I2S peripherals.
 
-For more advanced usage have a look at `./generate-scripts --help` and
-`update-ips --help` for IPApproX, or `./bender --help` for bender.
+For more advanced usage have a look at `./bender --help` for bender, or 
+`./generate-scripts --help` and `update-ips --help` for IPApproX.
 
 Also check out the output of `make help` for more useful Makefile targets.
 
@@ -248,12 +248,12 @@ about it. For now we will concentrate on the most important steps when
 developing on PULPissimo using Bender.
 
 #### Where are all the sub IPs (dependencies)?
-With IPApprox, all dependencies used to be checked out in a directory called
-`ips`. Instead, bender checks out the sub-ips in a hidden directory called
+Bender checks out the sub-ips in a hidden directory called
 `.bender/git/checkouts`. **You are not supposed to change the files in this
 directory.** If you want to get the path of a specific IP, call `./bender path
 <some ip (e.g. axi)>` to get the relative path to an IP. To list all IPs in the
-project, call `./bender packages -f`.
+project, call `./bender packages -f`. With IPApprox, all dependencies used to be
+checked out in a directory called `ips`.
 
 #### Modifying an existing IP
 The hidden bender directory is not the location to introduce changes to the RTL
@@ -374,14 +374,14 @@ follow the section below to generate the bitstreams yourself.
 
 ### Bitstream Generation
 In order to generate the PULPissimo bitstream for a supported target FPGA board
-first generate the necessary synthesis include scripts by starting the
-`update-ips` script in the pulpissimo root directory when using IPApproX or Bender:
+first generate the necessary synthesis include scripts by running the
+corresponding make target.
 
 ```Shell
-./update-ips
+make scripts
 ```
 
-This will parse the ips_list.yml using the PULP IPApproX IP management tool to
+This will parse the `Bender.yml` using the PULP bender dependency management tool to
 generate tcl scripts for all the IPs used in the PULPissimo project. These files
 are later on sourced by Vivado to generate the bitstream for PULPissimo.
 
@@ -660,9 +660,9 @@ repository is structured as follows:
   contains all tests released with the SDK.
 - `ipstools` contains the utils to download and manage the IPs and their
   dependencies.
-- `ips_list.yml` contains the list of IPs required directly by the platform.
-  Notice that each of them could in turn depend on other IPs, so you will
-  typically find many more IPs in the `ips` directory than are listed in
+- `ips_list.yml` contains the list of IPs required directly by the platform when
+  using IPApproX. Notice that each of them could in turn depend on other IPs, so
+  you will typically find many more IPs in the `ips` directory than are listed in
   this file.
 - `rtl_list.yml` contains the list of places where local RTL sources are found
   (e.g. `rtl/tb`, `rtl/vip`).
@@ -692,8 +692,8 @@ The RTL platform has the following requirements:
 The PULP and PULPissimo platforms are highly hierarchical and the Git
 repositories for the various IPs follow the hierarchy structure to keep maximum
 flexibility.
-Most of the complexity of the IP updating system are hidden behind the
-`update-ips` and `generate-scripts` Python scripts, or the bender software;
+Most of the complexity of the IP updating system are hidden behind the bender
+software, or the `update-ips` and `generate-scripts` Python scripts;
 however, a few details are important to know:
 - Do not assume that the `master` branch of an arbitrary IP is stable; many
   internal IPs could include unstable changes at a certain point of their
@@ -728,11 +728,6 @@ recommendations:
 https://github.com/pulp-platform/ariane/blob/master/CONTRIBUTING.md
 
 ## Known issues
-The current version of the PULPissimo platform does not include yet an FPGA port
-or example scripts for ASIC synthesis; both things may be deployed in the
-future.
-The `ipstools` includes only partial support for simulation flows different from
-ModelSim/QuestaSim.
 
 ## Support & Questions
 For support on any issue related to this platform or any of the IPs, please add
