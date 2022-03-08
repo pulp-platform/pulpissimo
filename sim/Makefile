@@ -37,37 +37,14 @@ simc:
 		-do "quit -code [examine -radix decimal sim:/tb_pulp/exit_status]"
 
 opt:
-ifneq ($(BENDER),0)
 	$(VOPT) +acc=npr -o vopt_tb tb_pulp -floatparameters+tb_pulp -work work
-else
-	$(mkfile_path)/tcl_files/rtl_vopt.tcl
-endif
 
 build: build-deps
-ifneq ($(BENDER),0)
 	$(VSIM) -c -do 'source compile.tcl; quit'
-else
-	@make --no-print-directory -f $(mkfile_path)/vcompile/ips.mk build
-	@make --no-print-directory -f $(mkfile_path)/vcompile/rtl.mk build
-endif
 
 lib:
-ifneq ($(BENDER),0)
-	@$(VLIB) work
-	chmod +w modelsim.ini
-	$(VMAP) work $(mkfile_path)/work
-else
-	@make --no-print-directory -f $(mkfile_path)/vcompile/ips.mk lib
-	@make --no-print-directory -f $(mkfile_path)/vcompile/rtl.mk lib
-endif
+
 
 clean: clean-deps
-ifneq ($(BENDER),0)
-	@mkdir -p work
-	rm -r work 
-else
-	@make --no-print-directory -f $(mkfile_path)/vcompile/ips.mk clean
-	@make --no-print-directory -f $(mkfile_path)/vcompile/rtl.mk clean
-endif
-	@touch modelsim.ini
-	rm modelsim.ini
+	$(RM) -r work 
+	$(RM) modelsim.ini

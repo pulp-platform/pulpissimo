@@ -38,6 +38,8 @@ INSTALL_FILES += modelsim.ini
 INSTALL_FILES += $(shell cd sim && find boot -type f)
 INSTALL_FILES += $(shell cd sim && find tcl_files -type f)
 INSTALL_FILES += $(shell cd sim && find waves -type f)
+INSTALL_FILES += $(shell cd sim && find work -type f)
+INSTALL_FILES += $(shell cd sim && find fs -type f)
 
 $(foreach file, $(INSTALL_FILES), $(eval $(call declareInstallFile,$(file))))
 
@@ -49,7 +51,6 @@ BENDER_FPGA_SCRIPTS_DIR = fpga/pulpissimo/tcl/generated
 
 .PHONY: checkout
 ## Checkout/update dependencies using IPApprox or Bender
-ifneq ($(BENDER),0)
 checkout: bender
 	./bender update
 	touch Bender.lock
@@ -57,11 +58,6 @@ checkout: bender
 Bender.lock: bender
 	./bender update
 	touch Bender.lock
-
-else
-checkout: ipstools
-	./update-ips
-endif
 	$(MAKE) scripts
 
 # generic clean and build targets for the platform
@@ -70,10 +66,9 @@ endif
 ## Remove the RTL model files
 clean:
 	rm -rf $(VSIM_PATH)
-	$(MAKE) -C sim BENDER=$(BENDER) clean
+	$(MAKE) -C clean
 
 .PHONY: scripts
-ifneq ($(BENDER),0)
 ## Generate scripts for all tools
 scripts: scripts-bender-vsim scripts-bender-fpga
 
@@ -88,6 +83,13 @@ scripts-bender-vsim: | Bender.lock
 		-t rtl -t test \
 		| grep -v "set ROOT" >> $(BENDER_SIM_BUILD_DIR)/compile.tcl
 
+scripts-bender-vsim-vips: | Bender.lock
+	echo 'set ROOT [file normalize [file dirname [info script]]/..]' > $(BENDER_SIM_BUILD_DIR)/compile.tcl
+	./bender script vsim \
+		--vlog-arg="$(VLOG_ARGS)" --vcom-arg="" \
+		-t rtl -t test -t rt_dpi -t i2c_vip -t flash_vip -t i2s_vip -t use_vips \
+		| grep -v "set ROOT" >> $(BENDER_SIM_BUILD_DIR)/compile.tcl
+
 $(BENDER_SIM_BUILD_DIR)/compile.tcl: Bender.lock
 	echo 'set ROOT [file normalize [file dirname [info script]]/..]' > $(BENDER_SIM_BUILD_DIR)/compile.tcl
 	./bender script vsim \
@@ -95,25 +97,14 @@ $(BENDER_SIM_BUILD_DIR)/compile.tcl: Bender.lock
 		-t rtl -t test \
 		| grep -v "set ROOT" >> $(BENDER_SIM_BUILD_DIR)/compile.tcl
 
-else
-scripts:
-	./generate-scripts
-endif
 
 .PHONY: build
 ## Build the RTL model for vsim
-ifneq ($(BENDER),0)
 build: $(BENDER_SIM_BUILD_DIR)/compile.tcl
 	@test -f Bender.lock || { echo "ERROR: Bender.lock file does not exist. Did you run make checkout in bender mode?"; exit 1; }
 	@test -f $(BENDER_SIM_BUILD_DIR)/compile.tcl || { echo "ERROR: sim/compile.tcl file does not exist. Did you run make scripts in bender mode?"; exit 1; }
 	cd sim && $(MAKE) all
 
-else
-build:
-	@[ "$$(ls -A ips/)" ] || { echo "ERROR: ips/ is an empty directory. Did you run ./update-ips?"; exit 1; }
-	cd sim && $(MAKE) BENDER=0 all
-	cp -r rtl/tb/* $(VSIM_PATH)
-endif
 
 .PHONY: build-incisive
 ## Build the RTL model for xsim
@@ -245,11 +236,6 @@ test-gitlab2:
 ## Generate lint reports with Spyglass
 lint:
 	$(MAKE) -C spyglass lint_rtl
-
-# IPStools Integration
-ipstools:
-	git clone https://github.com/pulp-platform/IPApprox.git ipstools
-	cd ipstools && git checkout 6b0bbc917e6be883bdb5fcc1765da59563b46d2e
 
 # Bender integration
 bender:
