@@ -5,3 +5,5 @@ xrun.log
 .bender
 bender
 Bender.lock
+work/
+compile.tcl
