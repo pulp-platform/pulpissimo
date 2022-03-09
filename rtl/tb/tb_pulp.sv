@@ -37,9 +37,6 @@ module tb_pulp;
    // In case any values are not given, the debug module takes over the boot process.
    parameter  STIM_FROM = "JTAG"; // can be "JTAG" "SPI_FLASH", "HYPER_FLASH", or ""
 
-   // use the pulp tap to access the bus
-   parameter USE_PULP_BUS_ACCESS = 1;
-
    // UART baud rate in bps
    parameter  BAUDRATE = 625000;
 
@@ -713,12 +710,12 @@ module tb_pulp;
 
                if (LOAD_L2 == "JTAG") begin
                   $display("[TB] %t - Loading L2 via JTAG", $realtime);
-                  if (USE_PULP_BUS_ACCESS) begin
-                     // use pulp tap to load binary, put debug module in bypass
-                     pulp_tap_pkg::load_L2(num_stim, stimuli, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-                  end else begin
+                  if ($test$plusargs("jtag_dm_load")) begin
                      // use debug module to load binary
                      debug_mode_if.load_L2(num_stim, stimuli, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+                  end else begin
+                     // use pulp tap to load binary, put debug module in bypass
+                     pulp_tap_pkg::load_L2(num_stim, stimuli, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
                   end
                end else if (LOAD_L2 == "FAST_DEBUG_PRELOAD") begin
                   $warning("[TB] - Preloading the memory via direct simulator access. \nNEVER EVER USE THIS MODE TO VERIFY THE BOOT BEHAVIOR OF A CHIP. THIS BOOTMODE IS IMPOSSIBLE ON A PHYSICAL CHIP!!!");
