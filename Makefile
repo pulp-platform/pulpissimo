@@ -19,19 +19,11 @@ PKG_DIR ?= $(PWD)/install
 export VSIM_PATH=$(PKG_DIR)
 export PULP_PATH=$(PWD)
 
-export MSIM_LIBS_PATH=$(VSIM_PATH)/modelsim_libs
-
-export IPS_PATH=$(PULP_PATH)/fe/ips
-export RTL_PATH=$(PULP_PATH)/fe/rtl
-export TB_PATH=$(PULP_PATH)/rtl/tb
-
 define declareInstallFile
-
 $(VSIM_PATH)/$(1): sim/$(1)
 	install -v -D sim/$(1) $$@
 
 INSTALL_HEADERS += $(VSIM_PATH)/$(1)
-
 endef
 
 INSTALL_FILES += modelsim.ini
@@ -42,8 +34,6 @@ INSTALL_FILES += $(shell cd sim && find work -type f)
 INSTALL_FILES += $(shell cd sim && find fs -type f)
 
 $(foreach file, $(INSTALL_FILES), $(eval $(call declareInstallFile,$(file))))
-
-BRANCH ?= master
 
 VLOG_ARGS += -suppress 2583 -suppress 13314
 BENDER_SIM_BUILD_DIR = sim
@@ -62,7 +52,6 @@ Bender.lock: bender
 
 # generic clean and build targets for the platform
 .PHONY: clean
-
 ## Remove the RTL model files
 clean:
 	rm -rf $(VSIM_PATH)
@@ -105,12 +94,6 @@ build: $(BENDER_SIM_BUILD_DIR)/compile.tcl
 	@test -f $(BENDER_SIM_BUILD_DIR)/compile.tcl || { echo "ERROR: sim/compile.tcl file does not exist. Did you run make scripts in bender mode?"; exit 1; }
 	cd sim && $(MAKE) all
 
-
-.PHONY: build-incisive
-## Build the RTL model for xsim
-build-incisive:
-	cd sim && $(MAKE) -f Makefile.incisive build-sc
-	$(warning There is currently no SDK support for this simulator. You need to manually run your programs)
 
 # sdk specific targets
 install: $(INSTALL_HEADERS)
