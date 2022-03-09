@@ -552,7 +552,7 @@ module tb_pulp;
     else
       begin_l2_instr = 32'h1C008080;
 
-    $display("[TB] %t - Asserting hard reset", $realtime);
+    $display("[TB  ] %t - Asserting hard reset", $realtime);
     s_rst_n = 1'b0;
 
     #1ns;
@@ -561,7 +561,7 @@ module tb_pulp;
     if ($test$plusargs("jtag_openocd")) begin
       // Use openocd to interact with the simulation
       s_bootsel = 2'b01;
-      $display("[TB] %t - Releasing hard reset", $realtime);
+      $display("[TB  ] %t - Releasing hard reset", $realtime);
       s_rst_n = 1'b1;
 
     end else begin
@@ -575,14 +575,14 @@ module tb_pulp;
         #5us;
 
         if (STIM_FROM == "HYPER_FLASH") begin
-          $display("[TB] %t - HyperFlash boot: Setting bootsel to 2'b?", $realtime);
-          $fatal(1, "[TB] %t - HyperFlash boot: Not supported yet", $realtime);
+          $display("[TB  ] %t - HyperFlash boot: Setting bootsel to 2'b?", $realtime);
+          $fatal(1, "[TB  ] %t - HyperFlash boot: Not supported yet", $realtime);
         end else if (STIM_FROM == "SPI_FLASH") begin
-          $display("[TB] %t - QSPI boot: Setting bootsel to 1'b0", $realtime);
+          $display("[TB  ] %t - QSPI boot: Setting bootsel to 1'b0", $realtime);
           s_bootsel = 2'b00;
         end
 
-        $display("[TB] %t - Releasing hard reset", $realtime);
+        $display("[TB  ] %t - Releasing hard reset", $realtime);
         s_rst_n = 1'b1;
         debug_mode_if.init_dmi_access(s_tck, s_tms, s_trstn, s_tdi);
         debug_mode_if.set_dmactive(1'b1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
@@ -597,11 +597,11 @@ module tb_pulp;
       end
 
       if (LOAD_L2 == "JTAG" || LOAD_L2 == "FAST_DEBUG_PRELOAD") begin
-        if (USE_FLL) $display("[TB] %t - Using FLL", $realtime);
-        else $display("[TB] %t - Not using FLL", $realtime);
+        if (USE_FLL) $display("[TB  ] %t - Using FLL", $realtime);
+        else $display("[TB  ] %t - Not using FLL", $realtime);
 
-        if (USE_SDVT_CPI) $display("[TB] %t - Using CAM SDVT", $realtime);
-        else $display("[TB] %t - Not using CAM SDVT", $realtime);
+        if (USE_SDVT_CPI) $display("[TB  ] %t - Using CAM SDVT", $realtime);
+        else $display("[TB  ] %t - Not using CAM SDVT", $realtime);
 
         // read in the stimuli vectors  == address_value
         // we support two formats:
@@ -613,20 +613,20 @@ module tb_pulp;
         // so we don't have to supply it manully with +ENTRY_POINT. GNU objcopy
         // (part of binutils) can easily convert and elf file to this format.
         if ($value$plusargs("stimuli=%s", stimuli_path)) begin
-          $display("Loading custom stimuli from %s", stimuli_path);
+          $display("[TB  ] %t - Loading custom stimuli from %s", $realtime, stimuli_path);
           load_stim(stimuli_path, stimuli);
         end else if ($value$plusargs("srec=%s", srec_path)) begin
-          $display("[TB] %t - Loading srec from %s", $realtime, srec_path);
+          $display("[TB  ] %t - Loading srec from %s", $realtime, srec_path);
           srec_read(srec_path, records);
           srec_records_to_stimuli(records, stimuli, entry_point);
           if (!$test$plusargs("srec_ignore_entry"))
             begin_l2_instr = entry_point;
         end else begin
-          $display("Loading default stimuli");
+          $display("[TB  ] %t - Loading default stimuli", $realtime);
           load_stim("./vectors/stim.txt", stimuli);
         end
 
-        $display("[TB] %t - Entry point is set to 0x%h", $realtime, begin_l2_instr);
+        $display("[TB  ] %t - Entry point is set to 0x%h", $realtime, begin_l2_instr);
 
         // before starting the actual boot procedure we do some light
         // testing on the jtag link
@@ -642,7 +642,7 @@ module tb_pulp;
 
         test_mode_if.init(s_tck, s_tms, s_trstn, s_tdi);
 
-        $display("[TB] %t - Enabling clock out via jtag", $realtime);
+        $display("[TB  ] %t - Enabling clock out via jtag", $realtime);
 
         // The boot code installed in the ROM checks the JTAG register value.
         // If jtag_conf_reg is set to 0, the debug module will take over the boot process
@@ -655,26 +655,26 @@ module tb_pulp;
         test_mode_if.set_confreg(jtag_conf_reg, jtag_conf_rego, s_tck, s_tms, s_trstn, s_tdi,
                                  s_tdo);
 
-        $display("[TB] %t - jtag_conf_reg set to %x", $realtime, jtag_conf_reg);
+        $display("[TB  ] %t - jtag_conf_reg set to %x", $realtime, jtag_conf_reg);
 
-        $display("[TB] %t - Releasing hard reset", $realtime);
+        $display("[TB  ] %t - Releasing hard reset", $realtime);
         s_rst_n = 1'b1;
 
         //test if the PULP tap che write to the L2
         pulp_tap.init(s_tck, s_tms, s_trstn, s_tdi);
 
-        $display("[TB] %t - Init PULP TAP", $realtime);
+        $display("[TB  ] %t - Init PULP TAP", $realtime);
 
         pulp_tap.write32(begin_l2_instr, 1, 32'hABBAABBA, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
-        $display("[TB] %t - Write32 PULP TAP", $realtime);
+        $display("[TB  ] %t - Write32 PULP TAP", $realtime);
 
         #50us;
         pulp_tap.read32(begin_l2_instr, 1, jtag_data, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
         if (jtag_data[0] != 32'hABBAABBA)
-          $display("[JTAG] R/W test of L2 failed: %h != %h", jtag_data[0], 32'hABBAABBA);
-        else $display("[JTAG] R/W test of L2 succeeded");
+          $display("[JTAG] %t - R/W test of L2 failed: %h != %h", $realtime, jtag_data[0], 32'hABBAABBA);
+        else $display("[JTAG] %t - R/W test of L2 succeeded", $realtime);
 
         // From here on starts the actual jtag booting
 
@@ -692,10 +692,10 @@ module tb_pulp;
 
         debug_mode_if.set_hartsel(FC_CORE_ID, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
-        $display("[TB] %t - Halting the Core", $realtime);
+        $display("[TB  ] %t - Halting the Core", $realtime);
         debug_mode_if.halt_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
-        $display("[TB] %t - Writing the boot address into dpc", $realtime);
+        $display("[TB  ] %t - Writing the boot address into dpc", $realtime);
         debug_mode_if.write_reg_abstract_cmd(riscv::CSR_DPC, begin_l2_instr, s_tck, s_tms, s_trstn,
                                              s_tdi, s_tdo);
 
@@ -714,7 +714,7 @@ module tb_pulp;
         end
 
         if (LOAD_L2 == "JTAG") begin
-          $display("[TB] %t - Loading L2 via JTAG", $realtime);
+          $display("[TB  ] %t - Loading L2 via JTAG", $realtime);
           if (!$value$plusargs("jtag_load_tap=%s", jtag_tap_type))
             jtag_tap_type = "pulp"; // default
           if (jtag_tap_type == "riscv") begin
@@ -728,7 +728,7 @@ module tb_pulp;
           end
         end else if (LOAD_L2 == "FAST_DEBUG_PRELOAD") begin
           $warning(
-            "[TB] - Preloading the memory via direct simulator access. \nNEVER EVER USE THIS MODE TO VERIFY THE BOOT BEHAVIOR OF A CHIP. THIS BOOTMODE IS IMPOSSIBLE ON A PHYSICAL CHIP!!!");
+            "[TB  ] - Preloading the memory via direct simulator access. \nNEVER EVER USE THIS MODE TO VERIFY THE BOOT BEHAVIOR OF A CHIP. THIS BOOTMODE IS IMPOSSIBLE ON A PHYSICAL CHIP!!!");
           preload_l2(num_stim, stimuli);
         end else begin
           $error("Unknown L2 loading mechnism chosen (LOAD_L2 == %s)", LOAD_L2);
@@ -738,7 +738,7 @@ module tb_pulp;
         debug_mode_if.init_dmi_access(s_tck, s_tms, s_trstn, s_tdi);
 
         // we have set dpc and loaded the binary, we can go now
-        $display("[TB] %t - Resuming the CORE", $realtime);
+        $display("[TB  ] %t - Resuming the CORE", $realtime);
         debug_mode_if.resume_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
       end
 
@@ -748,7 +748,7 @@ module tb_pulp;
       debug_mode_if.set_sbreadonaddr(1'b1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
       // wait for end of computation signal
-      $display("[TB] %t - Waiting for end of computation", $realtime);
+      $display("[TB  ] %t - Waiting for end of computation", $realtime);
 
       jtag_data[0] = 0;
       while (jtag_data[0][31] == 0) begin
@@ -768,7 +768,7 @@ module tb_pulp;
 
       if (jtag_data[0][30:0] == 0) exit_status = EXIT_SUCCESS;
       else exit_status = EXIT_FAIL;
-      $display("[TB] %t - Received status core: 0x%h", $realtime, jtag_data[0][30:0]);
+      $display("[TB  ] %t - Received status core: 0x%h", $realtime, jtag_data[0][30:0]);
 
       $stop;
 

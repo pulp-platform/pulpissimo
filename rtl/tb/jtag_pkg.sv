@@ -90,7 +90,7 @@ package jtag_pkg;
       jtag_clock(5, s_tck); //enter RST
       s_tms   = 1'b0;
       jtag_clock(1, s_tck); // back to IDLE
-      $display("[JTAG] SoftReset Done(%t)",$realtime);
+      $display("[JTAG] %t - Soft Reset Done",$realtime);
 
    endtask
 
@@ -361,11 +361,11 @@ package jtag_pkg;
       logic [31+1:0] s_idcode;
       jtag_idcode.setIR(s_tck, s_tms, s_trstn, s_tdi);
       jtag_idcode.shift('0, s_idcode, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-      $display("[JTAG] Tap ID: %h (%t)",s_idcode[32:1], $realtime);
+      $display("[JTAG] %t - Tap ID: %h", $realtime, s_idcode[32:1]);
       if(s_idcode[32:1] !== 32'h249511C3) begin
-         $display("[JTAG] Tap ID Test FAILED (%t)", $realtime);
+         $display("[JTAG] %t - Tap ID Test FAILED", $realtime);
       end else begin
-         $display("[JTAG] Tap ID Test PASSED (%t)", $realtime);
+         $display("[JTAG] %t - Tap ID Test PASSED", $realtime);
       end
    endtask
 
@@ -383,12 +383,12 @@ package jtag_pkg;
       jtag_bypass.setIR(s_tck, s_tms, s_trstn, s_tdi);
       jtag_bypass.shift(test_data, result_data, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
       if (test_data[253:0] === result_data[255:2])
-         $display("[JTAG] Bypass Test Passed (%t)", $realtime);
+         $display("[JTAG] %t - Bypass Test Passed", $realtime);
       else
       begin
-         $display("[JTAG] Bypass Test Failed");
-         $display("[JTAG]   LSB WORD TEST = %h (%t)",test_data[31:0], $realtime);
-         $display("[JTAG]   LSB WORD RES  = %h (%t)",result_data[32:1], $realtime);
+         $display("[JTAG] %t - Bypass Test Failed", $realtime);
+         $display("[JTAG] %t -   LSB WORD TEST = %h", $realtime, test_data[31:0]);
+         $display("[JTAG] %t -   LSB WORD RES  = %h", $realtime, result_data[32:1]);
       end
    endtask
 
@@ -402,7 +402,7 @@ package jtag_pkg;
       );
          JTAG_reg #(.size(256), .instr({JTAG_SOC_BYPASS, JTAG_SOC_CONFREG})) jtag_soc_dbg = new;
          jtag_soc_dbg.setIR(s_tck, s_tms, s_trstn, s_tdi);
-         $display("[test_mode_if] %t - Init", $realtime);
+         $display("[TIF ] %t - Init", $realtime);
       endtask
 
       task set_confreg(
@@ -423,7 +423,7 @@ package jtag_pkg;
          jtag_soc_dbg.shift_nbits(9+1, confreg_int, dataout_int, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          jtag_soc_dbg.idle(s_tck, s_tms, s_trstn, s_tdi);
          dataout = dataout_int[8:0];
-         $display("[test_mode_if] %t - Setting confreg to value %X.", $realtime, confreg);
+         $display("[TIF ] %t - Setting confreg to value %X.", $realtime, confreg);
       endtask
 
       task get_confreg(
@@ -495,12 +495,12 @@ package jtag_pkg;
          dm::dmstatus_t  dmstatus;
          dtmcs_t dtmcs;
 
-         $display("[TB] %t - Init", $realtime);
+         $display("[TB  ] %t - Init", $realtime);
          this.init_dtmcs(s_tck, s_tms, s_trstn, s_tdi);
 
          this.read_dtmcs(dtmcs, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
-         $display("[TB] %t - Debug Module dtmcs %x: \n\
+         $display("[TB  ] %t - Debug Module dtmcs %x: \n\
                              dmihardreset %x \n\
                              dmireset     %x \n\
                              idle         %x \n\
@@ -515,7 +515,7 @@ package jtag_pkg;
          this.read_debug_reg(dm::DMStatus, dmstatus,
              s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
-         $display("[TB] %t - Debug Module Debug Version: \n\
+         $display("[TB  ] %t - Debug Module Debug Version: \n\
                  impebreak    %x\n\
                  allhavereset %x\n\
                  anyhavereset %x\n\
@@ -874,7 +874,7 @@ package jtag_pkg;
                              s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
 
-         $display("[TB] %t - Debug Module System Bus Access Control and Status: \n\
+         $display("[TB  ] %t - Debug Module System Bus Access Control and Status: \n\
                  sbbusy          %x\n\
                  sbreadonaddr    %x\n\
                  sbaccess        %x\n\
@@ -936,7 +936,7 @@ package jtag_pkg;
          dm::abstractcs_t abstractcs;
 
          read_debug_reg(dm::AbstractCS, abstractcs, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-         $display("[TB] %t - Abstractcs is %x (progbufsize %x, busy %x, cmderr %x, datacount %x)",
+         $display("[TB  ] %t - Abstractcs is %x (progbufsize %x, busy %x, cmderr %x, datacount %x)",
                    $realtime, abstractcs, abstractcs.progbufsize, abstractcs.busy,
                    abstractcs.cmderr, abstractcs.datacount);
 
@@ -1139,12 +1139,12 @@ package jtag_pkg;
                    s_tdo
              );
              if (dmi_op == 2'h2) begin
-                 $display("[TB] %t dmi previous operation failed, not handled", $realtime);
+                 $display("[TB  ] %t - dmi previous operation failed, not handled", $realtime);
                  dmi_op = 2'h0; // TODO: for now we just force completion
              end
 
              if (dmi_op == 2'h3) begin
-                 $display("[TB] %t retrying debug reg access", $realtime);
+                 $display("[TB  ] %t - retrying debug reg access", $realtime);
                  this.dmi_reset(s_tck,s_tms,s_trstn,s_tdi,s_tdo);
                  this.init_dmi_access(s_tck,s_tms,s_trstn,s_tdi);
              end
@@ -1206,12 +1206,12 @@ package jtag_pkg;
                    s_tdo
              );
              if (dmi_op == 2'h2) begin
-                 $display("[TB] %t dmi previous operation failed, not handled", $realtime);
+                 $display("[TB  ] %t - dmi previous operation failed, not handled", $realtime);
                  dmi_op = 2'h0; // TODO: for now we just force completion
              end
 
              if (dmi_op == 2'h3) begin
-                 $display("[TB] %t retrying debug reg access", $realtime);
+                 $display("[TB  ] %t - retrying debug reg access", $realtime);
                  this.dmi_reset(s_tck,s_tms,s_trstn,s_tdi,s_tdo);
                  this.init_dmi_access(s_tck,s_tms,s_trstn,s_tdi);
              end
@@ -1504,7 +1504,7 @@ package jtag_pkg;
          this.set_sbreadonaddr(1'b0, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          this.set_sbautoincrement(1'b0, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
-         $display("[JTAG] Loading L2 with debug module jtag interface");
+         $display("[JTAG] %t - Loading L2 with debug module jtag interface", $realtime);
 
          spi_addr_old = spi_addr - 32'h8;
 
@@ -1578,7 +1578,7 @@ package jtag_pkg;
                   s_tdo
                );
             end
-            $display("[JTAG] Loading L2 - Written up to %x (%t)", spi_addr[31:0]+4, $realtime);
+            $display("[JTAG] %t - Loading L2 - Written up to %x", $realtime, spi_addr[31:0]+4);
 
          end
          this.set_sbreadonaddr(1'b1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
@@ -1615,7 +1615,7 @@ package jtag_pkg;
          this.read_debug_reg(dm::DMControl, dmcontrol,
                              s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
-         $display("[TB] %t hartsel bits usuable %x",
+         $display("[TB  ] %t - hartsel bits usuable %x",
                   $realtime, {dmcontrol.hartselhi, dmcontrol.hartsello});
 
          // some simulators don't like direct indexing
@@ -1899,7 +1899,7 @@ package jtag_pkg;
                   s_tdi,
                   s_tdo
                );
-            //$display("[TB] %t Access Register at regno %d",$realtime(), regno[4:0]);
+            //$display("[TB  ] %t Access Register at regno %d",$realtime(), regno[4:0]);
 
          end
 
@@ -1977,7 +1977,7 @@ package jtag_pkg;
                   s_tdi,
                   s_tdo
                );
-               //$display("[TB] %t Store of the value in reg %d",$realtime(), regno[4:0]);
+               //$display("[TB  ] %t Store of the value in reg %d",$realtime(), regno[4:0]);
          end
 
          //Now read them from memory the previous store values
@@ -1985,7 +1985,7 @@ package jtag_pkg;
          error = 1'b0;
          for (int incAddr = 2; incAddr < 32; incAddr=incAddr+1) begin
             this.readMem(address_i + (incAddr-2)*4, dm_data, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-            // $display("[TB] %t Read %x from %x",$realtime(), dm_data, address_i + (incAddr-2)*4);
+            // $display("[TB  ] %t Read %x from %x",$realtime(), dm_data, address_i + (incAddr-2)*4);
             assert(dm_data === key_word + incAddr)
                 else begin
                    $error("read %x from %x instead of %x",
@@ -2654,14 +2654,14 @@ package jtag_pkg;
          num_err = 0;
 
          dump_dm_info(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-         // $display("[TB] %t - TEST discover harts", $realtime);
+         // $display("[TB  ] %t - TEST discover harts", $realtime);
          // debug_mode_if.test_discover_harts(dm_data[0],
          //                                   s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          // if (error) begin
-         //     $display("[TB] %t FAIL", $realtime);
+         //     $display("[TB  ] %t FAIL", $realtime);
          //     num_err++;
          // end else
-         //     $display("[TB] %t OK", $realtime);
+         //     $display("[TB  ] %t OK", $realtime);
 
          set_hartsel(fc_core_id, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
@@ -2677,10 +2677,10 @@ package jtag_pkg;
          writeMem(begin_l2_instr, {25'b0, 7'b1101111},
              s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
-         $display("[TB] %t - Resuming the CORE", $realtime);
+         $display("[TB  ] %t - Resuming the CORE", $realtime);
          resume_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
-         $display("[TB] %t - Halting the Core", $realtime);
+         $display("[TB  ] %t - Halting the Core", $realtime);
          halt_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
          // simple check whether we can read abstractcs and if progbufsize and
@@ -2688,127 +2688,127 @@ package jtag_pkg;
          test_read_abstractcs(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
          // for the following tests we need the cpu to be fetching and running
-         $display("[TB] %t - TEST halt resume functionality", $realtime);
+         $display("[TB  ] %t - TEST halt resume functionality", $realtime);
          test_halt_resume(error, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          if (error) begin
-             $display("[TB] %t FAIL", $realtime);
+             $display("[TB  ] %t FAIL", $realtime);
              num_err++;
          end else
-             $display("[TB] %t OK", $realtime);
+             $display("[TB  ] %t OK", $realtime);
 
-         $display("[TB] %t - TEST wfi wake up logic",$realtime);
+         $display("[TB  ] %t - TEST wfi wake up logic",$realtime);
          test_wfi_wakeup(error, begin_l2_instr,
              s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-         $display("[TB] %t OK", $realtime); //otherwise we wouldn't get here
+         $display("[TB  ] %t OK", $realtime); //otherwise we wouldn't get here
 
-         $display("[TB] %t - TEST read/write gpr with abstract command and proper waiting logic",
+         $display("[TB  ] %t - TEST read/write gpr with abstract command and proper waiting logic",
                   $realtime);
          test_gpr_read_write_abstract_high_level(error, s_tck, s_tms,
              s_trstn, s_tdi, s_tdo);
          if (error) begin
-             $display("[TB] %t FAIL", $realtime);
+             $display("[TB  ] %t FAIL", $realtime);
              num_err++;
          end else
-             $display("[TB] %t OK", $realtime);
+             $display("[TB  ] %t OK", $realtime);
 
-         $display("[TB] %t - TEST dumping register values using abstract command", $realtime);
+         $display("[TB  ] %t - TEST dumping register values using abstract command", $realtime);
          read_reg_abstract_cmd(riscv::CSR_DCSR, dm_data, s_tck, s_tms,
              s_trstn, s_tdi, s_tdo);
-         $display("[TB] %t dcsr is %x", $realtime, dm_data);
+         $display("[TB  ] %t dcsr is %x", $realtime, dm_data);
          read_reg_abstract_cmd(riscv::CSR_DPC, dm_data, s_tck, s_tms,
              s_trstn, s_tdi, s_tdo);
-         $display("[TB] %t dpc is %x", $realtime, dm_data);
+         $display("[TB  ] %t dpc is %x", $realtime, dm_data);
          read_reg_abstract_cmd(riscv::CSR_MTVEC, dm_data, s_tck, s_tms,
              s_trstn, s_tdi, s_tdo);
-         $display("[TB] %t mtvec is %x", $realtime, dm_data);
+         $display("[TB  ] %t mtvec is %x", $realtime, dm_data);
          read_reg_abstract_cmd(riscv::CSR_MCAUSE, dm_data, s_tck, s_tms,
              s_trstn, s_tdi, s_tdo);
-         $display("[TB] %t mcause is %x", $realtime, dm_data);
+         $display("[TB  ] %t mcause is %x", $realtime, dm_data);
          read_reg_abstract_cmd('h1002, dm_data, s_tck, s_tms,
              s_trstn, s_tdi, s_tdo);
-         $display("[TB] %t x2 is %x", $realtime, dm_data);
+         $display("[TB  ] %t x2 is %x", $realtime, dm_data);
 
-         $display("[TB] %t - TEST bad abstract command (aarsize > 2)", $realtime);
+         $display("[TB  ] %t - TEST bad abstract command (aarsize > 2)", $realtime);
          test_bad_aarsize (error, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          if(error) begin
-             $display("[TB] %t FAIL", $realtime);
+             $display("[TB  ] %t FAIL", $realtime);
              num_err++;
          end else
-             $display("[TB] %t OK", $realtime);
+             $display("[TB  ] %t OK", $realtime);
 
-         $display("[TB] %t - TEST abstract commands and program buffer", $realtime);
+         $display("[TB  ] %t - TEST abstract commands and program buffer", $realtime);
          test_abstract_cmds_prog_buf(error, begin_l2_instr,
              s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          if(error) begin
-             $display("[TB] %t FAIL", $realtime);
+             $display("[TB  ] %t FAIL", $realtime);
              num_err++;
          end else
-             $display("[TB] %t OK", $realtime);
+             $display("[TB  ] %t OK", $realtime);
 
-         $display("[TB] %t - TEST read/write dpc" , $realtime);
+         $display("[TB  ] %t - TEST read/write dpc" , $realtime);
          test_read_write_dpc(error, s_tck, s_tms,
              s_trstn, s_tdi, s_tdo);
          if(error) begin
-             $display("[TB] %t FAIL", $realtime);
+             $display("[TB  ] %t FAIL", $realtime);
              num_err++;
          end else
-             $display("[TB] %t OK", $realtime);
+             $display("[TB  ] %t OK", $realtime);
 
-         $display("[TB] %t - TEST read/write csr" , $realtime);
+         $display("[TB  ] %t - TEST read/write csr" , $realtime);
          test_read_write_csr(error, s_tck, s_tms,
              s_trstn, s_tdi, s_tdo);
 
-         $display("[TB] %t - TEST read/write csr with program buffer (TODO)", $realtime);
-         $display("[TB] %t - TEST dret outside debug mode (TODO)", $realtime);
+         $display("[TB  ] %t - TEST read/write csr with program buffer (TODO)", $realtime);
+         $display("[TB  ] %t - TEST dret outside debug mode (TODO)", $realtime);
 
-         $display("[TB] %t - TEST ebreak in program buffer", $realtime);
+         $display("[TB  ] %t - TEST ebreak in program buffer", $realtime);
          test_ebreak_in_program_buffer(error,
              s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          if(error) begin
-             $display("[TB] %t FAIL", $realtime);
+             $display("[TB  ] %t FAIL", $realtime);
              num_err++;
          end else
-             $display("[TB] %t OK", $realtime);
+             $display("[TB  ] %t OK", $realtime);
 
 
-         $display("[TB] %t - TEST debug cause values", $realtime);
+         $display("[TB  ] %t - TEST debug cause values", $realtime);
          test_debug_cause_values(error, begin_l2_instr,
              s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          if(error) begin
-             $display("[TB] %t FAIL", $realtime);
+             $display("[TB  ] %t FAIL", $realtime);
              num_err++;
          end else
-             $display("[TB] %t OK", $realtime);
+             $display("[TB  ] %t OK", $realtime);
 
-         $display("[TB] %t - TEST single stepping", $realtime);
+         $display("[TB  ] %t - TEST single stepping", $realtime);
          test_single_stepping_abstract_cmd(error, begin_l2_instr,
              s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          if(error) begin
-             $display("[TB] %t FAIL", $realtime);
+             $display("[TB  ] %t FAIL", $realtime);
              num_err++;
          end else
-             $display("[TB] %t OK", $realtime);
+             $display("[TB  ] %t OK", $realtime);
 
-         $display("[TB] %t - TEST single stepping edge cases", $realtime);
+         $display("[TB  ] %t - TEST single stepping edge cases", $realtime);
          test_single_stepping_edge_cases(error, begin_l2_instr,
              s_tck, s_tms, s_trstn, s_tdi, s_tdo);
          if(error) begin
-             $display("[TB] %t FAIL", $realtime);
+             $display("[TB  ] %t FAIL", $realtime);
              num_err++;
          end else
-             $display("[TB] %t OK", $realtime);
+             $display("[TB  ] %t OK", $realtime);
 
-         $display("[TB] %t - TEST wfi in program buffer", $realtime);
+         $display("[TB  ] %t - TEST wfi in program buffer", $realtime);
          test_wfi_in_program_buffer(error, s_tck, s_tms,
              s_trstn, s_tdi, s_tdo);
-         $display("[TB] %t OK", $realtime); //otherwise we wouldn't get here
+         $display("[TB  ] %t OK", $realtime); //otherwise we wouldn't get here
 
-         $display("[TB] %t - TEST halt request during wfi (TODO)", $realtime);
+         $display("[TB  ] %t - TEST halt request during wfi (TODO)", $realtime);
 
 
          // allows the jtag booting process to smoothly continue once we leave
          // this test
-         $display("[TB] %t - Writing the boot address into dpc", $realtime);
+         $display("[TB  ] %t - Writing the boot address into dpc", $realtime);
          write_reg_abstract_cmd(riscv::CSR_DPC, begin_l2_instr,
              s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
