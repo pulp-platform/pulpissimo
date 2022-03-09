@@ -24,8 +24,8 @@ module tb_pulp;
 
    // Choose your core: 0 for RISCY, 1 for IBEX RV32IMC (formerly ZERORISCY), 2 for IBEX RV32EC (formerly MICRORISCY)
    parameter CORE_TYPE            = 0;
-   // if RISCY is instantiated (CORE_TYPE == 0), RISCY_FPU enables the FPU
-   parameter RISCY_FPU            = 1;
+   // if RI5CY is instantiated (CORE_TYPE == 0), USE_FPU enables the FPU
+   parameter USE_FPU            = 1;
 
    // period of the external reference clock (32.769kHz)
    parameter  REF_CLK_PERIOD = 30517ns;
@@ -468,7 +468,7 @@ module tb_pulp;
    // PULPissimo chip (design under test)
    pulpissimo #(
       .CORE_TYPE ( CORE_TYPE ),
-      .USE_FPU   ( RISCY_FPU )
+      .USE_FPU   ( USE_FPU )
    )
    i_dut (
       .pad_spim_sdio0     ( w_spi_master_sdio0 ),
