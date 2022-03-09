@@ -538,11 +538,10 @@ module tb_pulp;
     logic [31:0] begin_l2_instr;
     automatic logic [9:0] FC_CORE_ID;
     automatic srec_record_t records[$];
+    automatic string jtag_tap_type;
 
-    FC_CORE_ID = {5'd31, 5'd0};
-
+    FC_CORE_ID    = {5'd31, 5'd0};
     uart_tb_rx_en = 1'b1;  // enable uart rx in testbench
-
     error         = 1'b0;
     num_err       = 0;
     rd_cnt        = 0;
@@ -716,12 +715,16 @@ module tb_pulp;
 
         if (LOAD_L2 == "JTAG") begin
           $display("[TB] %t - Loading L2 via JTAG", $realtime);
-          if ($test$plusargs("jtag_dm_load")) begin
+          if (!$value$plusargs("jtag_load_tap=%s", jtag_tap_type))
+            jtag_tap_type = "pulp"; // default
+          if (jtag_tap_type == "riscv") begin
             // use debug module to load binary
             debug_mode_if.load_L2(num_stim, stimuli, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-          end else begin
+          end else if (jtag_tap_type == "pulp") begin
             // use pulp tap to load binary, put debug module in bypass
             pulp_tap_pkg::load_L2(num_stim, stimuli, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+          end else begin
+            $fatal(1, "Unknown tap type +jtag_load_tap=%s", jtag_tap_type);
           end
         end else if (LOAD_L2 == "FAST_DEBUG_PRELOAD") begin
           $warning(
