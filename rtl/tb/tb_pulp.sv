@@ -185,7 +185,8 @@ module tb_pulp;
    logic [8:0] jtag_conf_reg, jtag_conf_rego; //22bits but actually only the last 9bits are used
 
 
-   `ifdef USE_DPI
+`ifdef TARGET_RT_DPI
+`define USE_DPI
    generate
       if (CONFIG_FILE != "NONE") begin
 
@@ -259,7 +260,7 @@ module tb_pulp;
       end
 
    endgenerate
-   `endif
+`endif
 
 
 
