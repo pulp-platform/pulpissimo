@@ -69,14 +69,13 @@ module tb_pulp;
   localparam logic [1:0] SPI_QUAD_TX = 2'b01;
   localparam logic [1:0] SPI_QUAD_RX = 2'b10;
 
-  // contains the program code
-  string stimuli_file;
-
   // simulation variables & flags
   logic uart_tb_rx_en = 1'b0;
 
+  // contains the program code
+  string stimuli_path;
   int num_stim;
-  logic [95:0] stimuli[100000:0];  // array for the stimulus vectors
+  logic [95:0] stimuli[$];  // array for the stimulus vectors
 
   logic dev_dpi_en = 0;
 
@@ -527,16 +526,18 @@ module tb_pulp;
   // testbench driver process
   initial begin
 
-    logic [1:0] dm_op;
+    logic [1:0]  dm_op;
+    logic [6:0]  dm_addr;
     logic [31:0] dm_data;
-    logic [6:0] dm_addr;
     logic error;
-    int num_err;
-    int rd_cnt;
-    automatic logic [9:0] FC_CORE_ID = {5'd31, 5'd0};
+    int   num_err;
+    int   rd_cnt;
 
-    int entry_point;
+    int          entry_point;
     logic [31:0] begin_l2_instr;
+    automatic logic [9:0] FC_CORE_ID;
+
+    FC_CORE_ID = {5'd31, 5'd0};
 
     uart_tb_rx_en = 1'b1;  // enable uart rx in testbench
 
@@ -601,12 +602,12 @@ module tb_pulp;
         else $display("[TB] %t - Not using CAM SDVT", $realtime);
 
         // read in the stimuli vectors  == address_value
-        if ($value$plusargs("stimuli=%s", stimuli_file)) begin
-          $display("Loading custom stimuli from %s", stimuli_file);
-          $readmemh(stimuli_file, stimuli);
+        if ($value$plusargs("stimuli=%s", stimuli_path)) begin
+          $display("Loading custom stimuli from %s", stimuli_path);
+          load_stim(stimuli_path, stimuli);
         end else begin
           $display("Loading default stimuli");
-          $readmemh("./vectors/stim.txt", stimuli);
+          load_stim("./vectors/stim.txt", stimuli);
         end
 
         // before starting the actual boot procedure we do some light
@@ -752,7 +753,23 @@ module tb_pulp;
     end
   end
 
-  task automatic preload_l2(input int num_stim, ref logic [95:0] stimuli[100000:0]);
+  task load_stim(input string stim, output logic [95:0] stimuli[$]);
+    int stim_fd, ret;
+    logic [95:0] rdata;
+    stim_fd = $fopen(stim, "r");
+
+    if (stim_fd == 0)
+      $fatal(1, "Could not open stimuli file!");
+
+    while (!$feof(stim_fd)) begin
+      ret= $fscanf(stim_fd, "%h\n", rdata);
+      stimuli.push_back(rdata);
+    end
+
+    $fclose(stim_fd);
+  endtask  // load_stim
+
+  task automatic preload_l2(input int num_stim, ref logic [95:0] stimuli[$]);
     logic more_stim;
     static logic [95:0] stim_entry;
     more_stim = 1'b1;
@@ -775,9 +792,7 @@ module tb_pulp;
       end while (~i_dut.soc_domain_i.pulp_soc_i.i_soc_interconnect_wrap.tcdm_debug.gnt);
 
       num_stim = num_stim + 1;
-      if (num_stim > $size(
-          stimuli
-        ) || stimuli[num_stim] === 96'bx) begin  // make sure we have more stimuli
+      if (num_stim > $size(stimuli) || stimuli[num_stim] === 96'bx) begin  // make sure we have more stimuli
         more_stim = 0;  // if not set variable to 0, will prevent additional stimuli to be applied
         break;
       end
