@@ -66,7 +66,7 @@ Bender.lock: bender
 ## Remove the RTL model files
 clean:
 	rm -rf $(VSIM_PATH)
-	$(MAKE) -C clean
+	$(MAKE) -C sim clean
 
 .PHONY: scripts
 ## Generate scripts for all tools
