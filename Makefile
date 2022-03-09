@@ -39,6 +39,10 @@ VLOG_ARGS += -suppress 2583 -suppress 13314
 BENDER_SIM_BUILD_DIR = sim
 BENDER_FPGA_SCRIPTS_DIR = fpga/pulpissimo/tcl/generated
 
+.PHONY: all
+## Checkout, generate scripts and build rtl
+all: build
+
 .PHONY: checkout
 ## Checkout/update dependencies using IPApprox or Bender
 checkout: bender
