@@ -49,9 +49,6 @@ module tb_pulp;
    // enable DPI-based peripherals
    parameter  ENABLE_DEV_DPI = 0;
 
-   // enable DPI-based custom debug bridge
-   parameter  ENABLE_EXTERNAL_DRIVER = 0;
-
    // enable DPI-based openocd debug bridge
    parameter ENABLE_OPENOCD = 0;
 
@@ -90,22 +87,14 @@ module tb_pulp;
    parameter logic[1:0] SPI_QUAD_TX = 2'b01;
    parameter logic[1:0] SPI_QUAD_RX = 2'b10;
 
-   // JTAG mux configuration, do not change
-   parameter logic[1:0] JTAG_DPI    = 2'b01;
-   parameter logic[1:0] JTAG_BRIDGE = 2'b10;
-
    // contains the program code
    string stimuli_file;
 
    /* simulation variables & flags */
    logic                 uart_tb_rx_en = 1'b0;
-   logic                 uart_vip_rx_en = 1'b0;
-   string                uart_drv_mon_sel = "TB";
 
    int                   num_stim;
    logic [95:0]          stimuli  [100000:0];                // array for the stimulus vectors
-
-   logic [1:0]           jtag_mux = 2'b00;
 
    logic                 dev_dpi_en = 0;
 
@@ -143,8 +132,6 @@ module tb_pulp;
 
    tri                   w_i2c1_scl;
    tri                   w_i2c1_sda;
-
-   logic [1:0]           s_padmode_spi_master = SPI_STD;
 
    tri                   w_uart_rx;
    tri                   w_uart_tx;
@@ -306,17 +293,7 @@ module tb_pulp;
    always_comb begin
       sim_jtag_enable = 1'b0;
 
-      if (ENABLE_EXTERNAL_DRIVER) begin
-         tmp_rst_n      = s_rst_dpi_n;
-         tmp_clk_ref    = s_clk_ref;
-         tmp_trstn      = w_bridge_trstn;
-         tmp_tck        = w_bridge_tck;
-         tmp_tdi        = w_bridge_tdi;
-         tmp_tms        = w_bridge_tms;
-         tmp_tdo        = w_tdo;
-         tmp_bridge_tdo = w_tdo;
-
-      end else if (ENABLE_OPENOCD) begin
+      if (ENABLE_OPENOCD) begin
          tmp_rst_n         = s_rst_n;
          tmp_clk_ref       = s_clk_ref;
          tmp_trstn         = sim_jtag_trstn;
@@ -360,24 +337,7 @@ module tb_pulp;
 
    assign w_bootsel = s_bootsel;
 
-   /* JTAG DPI-based verification IP */
-   generate
-      if(ENABLE_DPI == 1) begin
-         jtag_dpi #(
-            .TIMEOUT_COUNT ( 6'h2 )
-         ) i_jtag (
-            .clk_i    ( w_clk_ref          ),
-            .enable_i ( jtag_mux == JTAG_DPI ),
-            .tms_o    ( s_vpi_tms    ),
-            .tck_o    ( s_vpi_tck    ),
-            .trst_o   ( s_vpi_trstn  ),
-            .tdi_o    ( s_vpi_tdi    ),
-            .tdo_i    ( s_tdo        )
-         );
-      end
-   endgenerate
-
-   /* SPI flash model (not open-source, from Spansion) */
+   // SPI flash model (not open-source, from Spansion)
    generate
       if(USE_S25FS256S_MODEL == 1) begin
          s25fs256s #(
@@ -612,6 +572,8 @@ module tb_pulp;
          int entry_point;
          logic [31:0] begin_l2_instr;
 
+         uart_tb_rx_en  = 1'b1; // enable uart rx in testbench
+
          error   = 1'b0;
          num_err = 0;
          rd_cnt = 0;
@@ -628,18 +590,12 @@ module tb_pulp;
 
          #1ns
 
-         uart_tb_rx_en  = 1'b1; // enable uart rx in testbench
 
          if (ENABLE_OPENOCD == 1) begin
             // Use openocd to interact with the simulation
             s_bootsel = 2'b01;
             $display("[TB] %t - Releasing hard reset", $realtime);
             s_rst_n = 1'b1;
-
-         end else if (ENABLE_EXTERNAL_DRIVER == 1) begin
-            // Use the pulp bridge to interact with the simulation
-            #1us
-               dev_dpi_en <= 1;
 
          end else begin
             // Use only the testbench to do the loading and running
@@ -805,23 +761,7 @@ module tb_pulp;
                debug_mode_if.resume_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
             end
 
-            if (ENABLE_DPI == 1) begin
-               jtag_mux = JTAG_DPI;
-            end
-
-
             #500us;
-
-            // Select UART driver/monitor
-            if ($value$plusargs("uart_drv_mon=%s", uart_drv_mon_sel)) begin
-               if (uart_drv_mon_sel == "VIP") begin
-                  uart_tb_rx_en = 1'b0;
-                  uart_vip_rx_en = 1'b1;
-               end
-            end
-
-            // make sure that we can drive the SSPI lines when not in use
-            s_padmode_spi_master = SPI_QUAD_RX;
 
             // enable sb access for subsequent readMem calls
             debug_mode_if.set_sbreadonaddr(1'b1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
