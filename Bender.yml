@@ -60,14 +60,14 @@ sources:
       - rtl/vip/camera/cam_vip.sv
 
   # S25FS256_model (SPI Flash)
-  - target: any(test,simulation)
+  - target: all(any(test,simulation), flash_vip)
     defines:
       SPEEDSIM: ~
     files:
       - rtl/vip/spi_flash/S25fs256s/model/s25fs256s.v
 
   # 24FC1025 model (I2C flash)
-  - target: all(any(test,simulation), 24fc1025_vip)
+  - target: all(any(test,simulation), i2c_vip)
     defines:
       SPEEDSIM: ~
     files:
@@ -78,4 +78,6 @@ sources:
     defines:
       SPEEDSIM: ~
     files:
-      - rtl/vip/spi_flash/S25fs256s/model/s25fs256s.v
+      - rtl/vip/i2s/i2c_if.v
+      - rtl/vip/i2s/i2s_vip_channel.sv
+      - rtl/vip/i2s/i2s_vip.sv

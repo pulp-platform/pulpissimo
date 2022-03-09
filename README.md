@@ -213,11 +213,8 @@ make checkout
 ```
 
 This will download all the required IPs, solve dependencies and generate the
-scripts. The default dependency management tool is 
-[Bender](https://github.com/pulp-platform/bender). If you would like to use the
-previous (now unmaintained) dependency management IPApproX, please set the `BENDER`
-environment variable to 0 (`export BENDER=0`). IPApproX calls `./update-ips` and
-`./generate-scripts`, while bender uses integrated functionality for these features.
+scripts. The dependency management tool is
+[Bender](https://github.com/pulp-platform/bender).
 
 After having access to the SDK, you can build the simulation platform by doing
 the following:
@@ -229,8 +226,8 @@ This command builds a version of the simulation platform with no dependencies on
 external models for peripherals. See below (Proprietary verification IPs) for
 details on how to plug in some models of real SPI, I2C, I2S peripherals.
 
-For more advanced usage have a look at `./bender --help` for bender, or 
-`./generate-scripts --help` and `update-ips --help` for IPApproX.
+For more advanced usage have a look at `./bender --help` for bender.
+
 
 Also check out the output of `make help` for more useful Makefile targets.
 
@@ -238,7 +235,7 @@ Also check out the output of `make help` for more useful Makefile targets.
 #### Bender How To
 With Bender developing on top of PULPissimo is getting a lot easier. The command
 line tool is installed in the project root directory if you invoke `make
-checkout BENDER=1`. It performs dependency resolution according to a manifest
+checkout`. It performs dependency resolution according to a manifest
 file called `Bender.yml`. The file lists all source files of the RTL project as
 well as its direct dependencies. Bender can be used to generate source file
 lists for various different tools for simulation, ASIC/FPGA synthesis etc. Have
@@ -252,8 +249,7 @@ Bender checks out the sub-ips in a hidden directory called
 `.bender/git/checkouts`. **You are not supposed to change the files in this
 directory.** If you want to get the path of a specific IP, call `./bender path
 <some ip (e.g. axi)>` to get the relative path to an IP. To list all IPs in the
-project, call `./bender packages -f`. With IPApprox, all dependencies used to be
-checked out in a directory called `ips`.
+project, call `./bender packages -f`.
 
 #### Modifying an existing IP
 The hidden bender directory is not the location to introduce changes to the RTL
@@ -653,19 +649,9 @@ repository is structured as follows:
   e.g. SPI flash and camera.
 - `rtl` could also contain other material (e.g. global includes, top-level
   files)
-- `ips` contains all IPs downloaded by `update-ips` script when using IPApproX.
-  Most of the actual logic of the platform is located in these IPs.
 - `sim` contains the ModelSim/QuestaSim simulation platform.
 - `pulp-sdk` contains the PULP software development kit; `pulp-sdk/tests`
   contains all tests released with the SDK.
-- `ipstools` contains the utils to download and manage the IPs and their
-  dependencies.
-- `ips_list.yml` contains the list of IPs required directly by the platform when
-  using IPApproX. Notice that each of them could in turn depend on other IPs, so
-  you will typically find many more IPs in the `ips` directory than are listed in
-  this file.
-- `rtl_list.yml` contains the list of places where local RTL sources are found
-  (e.g. `rtl/tb`, `rtl/vip`).
 - `Bender.yml` contains the package information used with bender. This includes
   a list of IPs required and source files contained within this repository.
 - When using bender, other files may be relevant: `Bender.local` contains
@@ -688,41 +674,14 @@ The RTL platform has the following requirements:
   you use the 'run' Makefile target with the FPGA platform (discouraged, you
   better use the approach outlined above)
 
-## Repository organization
-The PULP and PULPissimo platforms are highly hierarchical and the Git
-repositories for the various IPs follow the hierarchy structure to keep maximum
-flexibility.
-Most of the complexity of the IP updating system are hidden behind the bender
-software, or the `update-ips` and `generate-scripts` Python scripts;
-however, a few details are important to know:
-- Do not assume that the `master` branch of an arbitrary IP is stable; many
-  internal IPs could include unstable changes at a certain point of their
-  history. Conversely, in top-level platforms (`pulpissimo`, `pulp`) we always
-  use *stable* versions of the IPs. Therefore, you should be able to use the
-  `master` branch of `pulpissimo` safely.
-- By default, the IPs will be collected from GitHub using HTTPS. This makes it
-  possible for everyone to clone them without first uploading an SSH key to
-  GitHub. However, for development it is often easier to use SSH instead,
-  particularly if you want to push changes back.
-  To enable this, just replace `https://github.com` with `git@github.com` in the
-  `ipstools_cfg.py` configuration file in the root of this repository for IPApproX.
-  Bender compatibility may not be perfect yet.
-
-The tools used to collect IPs and create scripts for simulation have many
-features that are not necessarily intended for the end user, but can be useful
-for developers; if you want more information, e.g. to integrate your own
-repository into the flow, you can find documentation at
-https://github.com/pulp-platform/IPApproX/blob/master/README.md
-
 ## External contributions
 The supported way to provide external contributions is by forking one of our
 repositories, applying your patch and submitting a pull request where you
 describe your changes in detail, along with motivations.
 The pull request will be evaluated and checked with our regression test suite
 for possible integration.
-If you want to replace our version of an IP with your GitHub fork, just add
-`group: YOUR_GITHUB_NAMESPACE` to its entry in `ips_list.yml` or
-`ips/pulp_soc/ips_list.yml` when using IPApproX, or update the Bender.yml file.
+If you want to replace our version of an IP with your GitHub fork, just 
+update the Bender.yml file.
 While we are quite relaxed in terms of coding style, please try to follow these
 recommendations:
 https://github.com/pulp-platform/ariane/blob/master/CONTRIBUTING.md
