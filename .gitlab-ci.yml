@@ -288,7 +288,7 @@ test_dm:
     - echo "Setting up vsim path"
     - source setup/vsim.sh
     - echo "Running debug module testbench"
-    - cd sim/ && make all simc VSIM_FLAGS=-gENABLE_DM_TESTS=1
+    - cd sim/ && make all simc VSIM_FLAGS=+jtag_dm_tests
 
 fpga_synth_genesys2:
   stage: test

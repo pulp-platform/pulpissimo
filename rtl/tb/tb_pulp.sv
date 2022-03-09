@@ -16,15 +16,6 @@
  * Robert Balas <balasr@iis.ee.ethz.ch>
  */
 
-// timeunit 1ps;
-// timeprecision 1ps;
-
-`define EXIT_SUCCESS  0
-`define EXIT_FAIL     1
-`define EXIT_ERROR   -1
-//`define USE_DPI      1
-
-
 module tb_pulp;
 
    parameter CONFIG_FILE = "NONE";
@@ -33,42 +24,18 @@ module tb_pulp;
 
    // Choose your core: 0 for RISCY, 1 for IBEX RV32IMC (formerly ZERORISCY), 2 for IBEX RV32EC (formerly MICRORISCY)
    parameter CORE_TYPE            = 0;
-   // if RISCY is instantiated (CORE_TYPE == 0), RISCY_FPU enables the FPU
-   parameter RISCY_FPU            = 1;
-
-   // the following parameters can activate instantiation of the verification IPs for SPI, I2C and I2s
-   // see the instructions in rtl/vip/{i2c_eeprom,i2s,spi_flash} to download the verification IPs
-   parameter  USE_S25FS256S_MODEL = 0;
-   parameter  USE_24FC1025_MODEL  = 0;
-   parameter  USE_I2S_MODEL       = 0;
+   // if RI5CY is instantiated (CORE_TYPE == 0), USE_FPU enables the FPU
+   parameter USE_FPU            = 1;
 
    // period of the external reference clock (32.769kHz)
    parameter  REF_CLK_PERIOD = 30517ns;
 
-   // how L2 is loaded. valid values are "JTAG" or "STANDALONE", the latter works only when USE_S25FS256S_MODEL is 1
+   // how L2 is loaded. valid values are "JTAG" or "STANDALONE", the latter works only when the S25FS256S flash model is enabled
    parameter  LOAD_L2 = "JTAG";
 
    // STIM_FROM sets where is the image data.
    // In case any values are not given, the debug module takes over the boot process.
    parameter  STIM_FROM = "JTAG"; // can be "JTAG" "SPI_FLASH", "HYPER_FLASH", or ""
-
-   // enable DPI-based JTAG
-   parameter  ENABLE_DPI = 0;
-
-   // enable DPI-based peripherals
-   parameter  ENABLE_DEV_DPI = 0;
-
-   // enable DPI-based custom debug bridge
-   parameter  ENABLE_EXTERNAL_DRIVER = 0;
-
-   // enable DPI-based openocd debug bridge
-   parameter ENABLE_OPENOCD = 0;
-
-   // enable Debug Module Tests
-   parameter ENABLE_DM_TESTS = 0;
-
-   // use the pulp tap to access the bus
-   parameter USE_PULP_BUS_ACCESS = 1;
 
    // UART baud rate in bps
    parameter  BAUDRATE = 625000;
@@ -80,42 +47,40 @@ module tb_pulp;
    parameter  USE_SDVT_CPI = 0;
 
    // files to be used to load the I2S verification IP, if instantiated
-   parameter  I2S_FILENAME_0 = "i2s_buffer_0.hex";
-   parameter  I2S_FILENAME_1 = "i2s_buffer_1.hex";
-   parameter  I2S_FILENAME_2 = "i2s_buffer_2.hex";
-   parameter  I2S_FILENAME_3 = "i2s_buffer_3.hex";
+   localparam I2S_FILENAME_0 = "i2s_buffer_0.hex";
+   localparam I2S_FILENAME_1 = "i2s_buffer_1.hex";
+   localparam I2S_FILENAME_2 = "i2s_buffer_2.hex";
+   localparam I2S_FILENAME_3 = "i2s_buffer_3.hex";
 
    // for PULPissimo, 1 core
-   parameter NB_CORES = 1;
+   localparam int NB_CORES = 1;
+
+   // exit
+   localparam int EXIT_SUCCESS = 0;
+   localparam int EXIT_FAIL = 1;
+   localparam int EXIT_ERROR = -1;
+
 
    // SPI standards, do not change
-   parameter logic[1:0] SPI_STD     = 2'b00;
-   parameter logic[1:0] SPI_QUAD_TX = 2'b01;
-   parameter logic[1:0] SPI_QUAD_RX = 2'b10;
-
-   // JTAG mux configuration, do not change
-   parameter logic[1:0] JTAG_DPI    = 2'b01;
-   parameter logic[1:0] JTAG_BRIDGE = 2'b10;
+   localparam logic[1:0] SPI_STD     = 2'b00;
+   localparam logic[1:0] SPI_QUAD_TX = 2'b01;
+   localparam logic[1:0] SPI_QUAD_RX = 2'b10;
 
    // contains the program code
    string stimuli_file;
 
    /* simulation variables & flags */
    logic                 uart_tb_rx_en = 1'b0;
-   logic                 uart_vip_rx_en = 1'b0;
-   string                uart_drv_mon_sel = "TB";
 
    int                   num_stim;
    logic [95:0]          stimuli  [100000:0];                // array for the stimulus vectors
-
-   logic [1:0]           jtag_mux = 2'b00;
 
    logic                 dev_dpi_en = 0;
 
    logic [255:0][31:0]   jtag_data;
 
 
-   int                   exit_status = `EXIT_ERROR; // modelsim exit code, will be overwritten when successfull
+   int                   exit_status = EXIT_ERROR; // modelsim exit code, will be overwritten when successfull
 
    jtag_pkg::test_mode_if_t   test_mode_if = new;
    jtag_pkg::debug_mode_if_t  debug_mode_if = new;
@@ -146,8 +111,6 @@ module tb_pulp;
 
    tri                   w_i2c1_scl;
    tri                   w_i2c1_sda;
-
-   logic [1:0]           s_padmode_spi_master = SPI_STD;
 
    tri                   w_uart_rx;
    tri                   w_uart_tx;
@@ -222,7 +185,8 @@ module tb_pulp;
    logic [8:0] jtag_conf_reg, jtag_conf_rego; //22bits but actually only the last 9bits are used
 
 
-   `ifdef USE_DPI
+`ifdef TARGET_RT_DPI
+`define USE_DPI
    generate
       if (CONFIG_FILE != "NONE") begin
 
@@ -296,7 +260,7 @@ module tb_pulp;
       end
 
    endgenerate
-   `endif
+`endif
 
 
 
@@ -309,17 +273,7 @@ module tb_pulp;
    always_comb begin
       sim_jtag_enable = 1'b0;
 
-      if (ENABLE_EXTERNAL_DRIVER) begin
-         tmp_rst_n      = s_rst_dpi_n;
-         tmp_clk_ref    = s_clk_ref;
-         tmp_trstn      = w_bridge_trstn;
-         tmp_tck        = w_bridge_tck;
-         tmp_tdi        = w_bridge_tdi;
-         tmp_tms        = w_bridge_tms;
-         tmp_tdo        = w_tdo;
-         tmp_bridge_tdo = w_tdo;
-
-      end else if (ENABLE_OPENOCD) begin
+      if ($test$plusargs("jtag_openocd")) begin
          tmp_rst_n         = s_rst_n;
          tmp_clk_ref       = s_clk_ref;
          tmp_trstn         = sim_jtag_trstn;
@@ -363,160 +317,135 @@ module tb_pulp;
 
    assign w_bootsel = s_bootsel;
 
-   /* JTAG DPI-based verification IP */
-   generate
-      if(ENABLE_DPI == 1) begin
-         jtag_dpi #(
-            .TIMEOUT_COUNT ( 6'h2 )
-         ) i_jtag (
-            .clk_i    ( w_clk_ref          ),
-            .enable_i ( jtag_mux == JTAG_DPI ),
-            .tms_o    ( s_vpi_tms    ),
-            .tck_o    ( s_vpi_tck    ),
-            .trst_o   ( s_vpi_trstn  ),
-            .tdi_o    ( s_vpi_tdi    ),
-            .tdo_i    ( s_tdo        )
-         );
-      end
-   endgenerate
+   // SPI flash model (not open-source, from Spansion)
+`ifdef TARGET_FLASH_VIP
+   s25fs256s #(
+      .TimingModel   ( "S25FS256SAGMFI000_F_30pF" ),
+      .mem_file_name ( "./vectors/qspi_stim.slm" ),
+      .UserPreload   ( ( LOAD_L2 == "STANDALONE" ) ? 1 : 0 )
+   ) i_spi_flash_csn0 (
+      .SI       ( w_spi_master_sdio0 ),
+      .SO       ( w_spi_master_sdio1 ),
+      .SCK      ( w_spi_master_sck   ),
+      .CSNeg    ( w_spi_master_csn0  ),
+      .WPNeg    ( w_spi_master_sdio2 ),
+      .RESETNeg ( w_spi_master_sdio3 )
+   );
+`else
+   assign w_spi_master_sdio1 = 'z;
+`endif
 
-   /* SPI flash model (not open-source, from Spansion) */
-   generate
-      if(USE_S25FS256S_MODEL == 1) begin
-         s25fs256s #(
-            .TimingModel   ( "S25FS256SAGMFI000_F_30pF" ),
-            .mem_file_name ( "./vectors/qspi_stim.slm" ),
-            .UserPreload   ( ( LOAD_L2 == "STANDALONE" ) ? 1 : 0 )
-         ) i_spi_flash_csn0 (
-            .SI       ( w_spi_master_sdio0 ),
-            .SO       ( w_spi_master_sdio1 ),
-            .SCK      ( w_spi_master_sck   ),
-            .CSNeg    ( w_spi_master_csn0  ),
-            .WPNeg    ( w_spi_master_sdio2 ),
-            .RESETNeg ( w_spi_master_sdio3 )
-         );
-      end
-      else begin
-         assign w_spi_master_sdio1 = 'z;
-      end
-   endgenerate
+   // UART receiver
+   uart_tb_rx #(
+      .BAUD_RATE ( BAUDRATE   ),
+      .PARITY_EN ( 0          )
+   ) i_rx_mod (
+      .rx        ( w_uart_rx       ),
+      .rx_en     ( uart_tb_rx_en ),
+      .word_done (               )
+   );
 
-   if (CONFIG_FILE == "NONE") begin
-      /* UART receiver */
-      uart_tb_rx #(
-         .BAUD_RATE ( BAUDRATE   ),
-         .PARITY_EN ( 0          )
-      ) i_rx_mod (
-         .rx        ( w_uart_rx       ),
-         .rx_en     ( uart_tb_rx_en ),
-         .word_done (               )
+   // I2C memory models
+`ifdef TARGET_I2C_VIP
+   M24FC1025 i_i2c_mem_0 (
+      .A0    ( 1'b0       ),
+      .A1    ( 1'b0       ),
+      .A2    ( 1'b1       ),
+      .WP    ( 1'b0       ),
+      .SDA   ( w_i2c0_sda ),
+      .SCL   ( w_i2c0_scl ),
+      .RESET ( 1'b0       )
+   );
+
+   M24FC1025 i_i2c_mem_1 (
+      .A0    ( 1'b1       ),
+      .A1    ( 1'b0       ),
+      .A2    ( 1'b1       ),
+      .WP    ( 1'b0       ),
+      .SDA   ( w_i2c0_sda ),
+      .SCL   ( w_i2c0_scl ),
+      .RESET ( 1'b0       )
+   );
+`endif
+
+   // CPI verification IP
+   if (!USE_SDVT_CPI) begin
+      cam_vip #(
+         .HRES       ( 320 ),
+         .VRES       ( 240 )
+      ) i_cam_vip (
+         .cam_pclk_o  ( w_cam_pclk  ),
+         .cam_vsync_o ( w_cam_vsync ),
+         .cam_href_o  ( w_cam_hsync ),
+         .cam_data_o  ( w_cam_data  )
       );
    end
 
-   /* I2C memory models */
-   if (USE_24FC1025_MODEL == 1) begin
-      M24FC1025 i_i2c_mem_0 (
-         .A0    ( 1'b0       ),
-         .A1    ( 1'b0       ),
-         .A2    ( 1'b1       ),
-         .WP    ( 1'b0       ),
-         .SDA   ( w_i2c0_sda ),
-         .SCL   ( w_i2c0_scl ),
-         .RESET ( 1'b0       )
+   // I2S verification IPs
+`ifdef TARGET_I2S_VIP
+   i2s_vip #(
+      .I2S_CHAN ( 0              ),
+      .FILENAME ( I2S_FILENAME_0 )
+   ) i_i2s_vip_ch0 (
+      .A0     ( 1'b0          ),
+      .A1     ( 1'b1          ),
+      .SDA    ( w_i2c0_sda    ),
+      .SCL    ( w_i2c0_scl    ),
+      .sck_i  ( w_i2s_sck     ),
+      .ws_i   ( w_i2s_ws      ),
+      .data_o ( w_i2s_data[0] ),
+      .sck_o  (               ),
+      .ws_o   (               )
+   );
+
+   i2s_vip #(
+      .I2S_CHAN ( 1              ),
+      .FILENAME ( I2S_FILENAME_1 )
+   )
+   i_i2s_vip_ch1 (
+      .A0     ( 1'b1          ),
+      .A1     ( 1'b1          ),
+      .SDA    ( w_i2c0_sda    ),
+      .SCL    ( w_i2c0_scl    ),
+      .sck_i  ( w_i2s_sck     ),
+      .ws_i   ( w_i2s_ws      ),
+      .data_o ( w_i2s_data[1] ),
+      .sck_o  (               ),
+      .ws_o   (               )
+   );
+
+   i2s_vip #(
+      .I2S_CHAN ( 2              ),
+      .FILENAME ( I2S_FILENAME_2 )
+   ) i_i2s_CAM_MASTER_SLAVE (
+      .A0     ( 1'b0              ),
+      .A1     ( 1'b0              ),
+      .SDA    ( w_i2c0_sda        ),
+      .SCL    ( w_i2c0_scl        ),
+      .sck_i  ( w_i2s_sck         ),
+      .ws_i   ( w_i2s_ws          ),
+      .data_o ( s_master_i2s_sdi0 ),
+      .sck_o  ( w_master_i2s_sck  ),
+      .ws_o   ( w_master_i2s_ws   )
+   );
+
+   i2s_vip #(
+      .I2S_CHAN ( 3              ),
+      .FILENAME ( I2S_FILENAME_3 )
+   )
+   i_i2s_CAM_SLAVE
+      (
+         .A0     ( 1'b1             ),
+         .A1     ( 1'b0             ),
+         .SDA    ( w_i2c0_sda       ),
+         .SCL    ( w_i2c0_scl       ),
+         .sck_i  ( s_slave_i2s_sck  ),
+         .ws_i   ( s_slave_i2s_ws   ),
+         .data_o ( s_slave_i2s_sdi1 ),
+         .sck_o  (                  ),
+         .ws_o   (                  )
       );
-      M24FC1025 i_i2c_mem_1 (
-         .A0    ( 1'b1       ),
-         .A1    ( 1'b0       ),
-         .A2    ( 1'b1       ),
-         .WP    ( 1'b0       ),
-         .SDA   ( w_i2c0_sda ),
-         .SCL   ( w_i2c0_scl ),
-         .RESET ( 1'b0       )
-      );
-   end
-
-   if (!ENABLE_DEV_DPI && CONFIG_FILE == "NONE") begin
-
-      /* CPI verification IP */
-      if (!USE_SDVT_CPI) begin
-         cam_vip #(
-            .HRES       ( 320 ),
-            .VRES       ( 240 )
-         ) i_cam_vip (
-            .cam_pclk_o  ( w_cam_pclk  ),
-            .cam_vsync_o ( w_cam_vsync ),
-            .cam_href_o  ( w_cam_hsync ),
-            .cam_data_o  ( w_cam_data  )
-         );
-      end
-
-      /* I2S verification IPs */
-      if(USE_I2S_MODEL) begin
-         i2s_vip #(
-            .I2S_CHAN ( 0              ),
-            .FILENAME ( I2S_FILENAME_0 )
-         ) i_i2s_vip_ch0 (
-            .A0     ( 1'b0          ),
-            .A1     ( 1'b1          ),
-            .SDA    ( w_i2c0_sda    ),
-            .SCL    ( w_i2c0_scl    ),
-            .sck_i  ( w_i2s_sck     ),
-            .ws_i   ( w_i2s_ws      ),
-            .data_o ( w_i2s_data[0] ),
-            .sck_o  (               ),
-            .ws_o   (               )
-         );
-
-         i2s_vip #(
-            .I2S_CHAN ( 1              ),
-            .FILENAME ( I2S_FILENAME_1 )
-         )
-         i_i2s_vip_ch1 (
-            .A0     ( 1'b1          ),
-            .A1     ( 1'b1          ),
-            .SDA    ( w_i2c0_sda    ),
-            .SCL    ( w_i2c0_scl    ),
-            .sck_i  ( w_i2s_sck     ),
-            .ws_i   ( w_i2s_ws      ),
-            .data_o ( w_i2s_data[1] ),
-            .sck_o  (               ),
-            .ws_o   (               )
-         );
-
-         i2s_vip #(
-            .I2S_CHAN ( 2              ),
-            .FILENAME ( I2S_FILENAME_2 )
-         ) i_i2s_CAM_MASTER_SLAVE (
-            .A0     ( 1'b0              ),
-            .A1     ( 1'b0              ),
-            .SDA    ( w_i2c0_sda        ),
-            .SCL    ( w_i2c0_scl        ),
-            .sck_i  ( w_i2s_sck         ),
-            .ws_i   ( w_i2s_ws          ),
-            .data_o ( s_master_i2s_sdi0 ),
-            .sck_o  ( w_master_i2s_sck  ),
-            .ws_o   ( w_master_i2s_ws   )
-         );
-
-         i2s_vip #(
-            .I2S_CHAN ( 3              ),
-            .FILENAME ( I2S_FILENAME_3 )
-         )
-         i_i2s_CAM_SLAVE
-            (
-               .A0     ( 1'b1             ),
-               .A1     ( 1'b0             ),
-               .SDA    ( w_i2c0_sda       ),
-               .SCL    ( w_i2c0_scl       ),
-               .sck_i  ( s_slave_i2s_sck  ),
-               .ws_i   ( s_slave_i2s_ws   ),
-               .data_o ( s_slave_i2s_sdi1 ),
-               .sck_o  (                  ),
-               .ws_o   (                  )
-            );
-      end
-
-   end
+`endif
 
     // jtag calls from dpi
     SimJTAG #(
@@ -540,7 +469,7 @@ module tb_pulp;
    // PULPissimo chip (design under test)
    pulpissimo #(
       .CORE_TYPE ( CORE_TYPE ),
-      .USE_FPU   ( RISCY_FPU )
+      .USE_FPU   ( USE_FPU )
    )
    i_dut (
       .pad_spim_sdio0     ( w_spi_master_sdio0 ),
@@ -615,6 +544,8 @@ module tb_pulp;
          int entry_point;
          logic [31:0] begin_l2_instr;
 
+         uart_tb_rx_en  = 1'b1; // enable uart rx in testbench
+
          error   = 1'b0;
          num_err = 0;
          rd_cnt = 0;
@@ -631,18 +562,12 @@ module tb_pulp;
 
          #1ns
 
-         uart_tb_rx_en  = 1'b1; // enable uart rx in testbench
 
-         if (ENABLE_OPENOCD == 1) begin
+         if ($test$plusargs("jtag_openocd")) begin
             // Use openocd to interact with the simulation
             s_bootsel = 2'b01;
             $display("[TB] %t - Releasing hard reset", $realtime);
             s_rst_n = 1'b1;
-
-         end else if (ENABLE_EXTERNAL_DRIVER == 1) begin
-            // Use the pulp bridge to interact with the simulation
-            #1us
-               dev_dpi_en <= 1;
 
          end else begin
             // Use only the testbench to do the loading and running
@@ -771,14 +696,14 @@ module tb_pulp;
                    s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
                // long debug module + jtag tests
-               if(ENABLE_DM_TESTS == 1) begin
+               if($test$plusargs("jtag_dm_tests")) begin
                   debug_mode_if.run_dm_tests(FC_CORE_ID, begin_l2_instr,
                                            error, num_err, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
                   // we don't have any program to load so we finish the testing
                   if (num_err == 0) begin
-                     exit_status = `EXIT_SUCCESS;
+                     exit_status = EXIT_SUCCESS;
                   end else begin
-                     exit_status = `EXIT_FAIL;
+                     exit_status = EXIT_FAIL;
                      $error("Debug Module: %d tests failed", num_err);
                   end
                   $stop;
@@ -786,12 +711,12 @@ module tb_pulp;
 
                if (LOAD_L2 == "JTAG") begin
                   $display("[TB] %t - Loading L2 via JTAG", $realtime);
-                  if (USE_PULP_BUS_ACCESS) begin
-                     // use pulp tap to load binary, put debug module in bypass
-                     pulp_tap_pkg::load_L2(num_stim, stimuli, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
-                  end else begin
+                  if ($test$plusargs("jtag_dm_load")) begin
                      // use debug module to load binary
                      debug_mode_if.load_L2(num_stim, stimuli, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
+                  end else begin
+                     // use pulp tap to load binary, put debug module in bypass
+                     pulp_tap_pkg::load_L2(num_stim, stimuli, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
                   end
                end else if (LOAD_L2 == "FAST_DEBUG_PRELOAD") begin
                   $warning("[TB] - Preloading the memory via direct simulator access. \nNEVER EVER USE THIS MODE TO VERIFY THE BOOT BEHAVIOR OF A CHIP. THIS BOOTMODE IS IMPOSSIBLE ON A PHYSICAL CHIP!!!");
@@ -808,23 +733,7 @@ module tb_pulp;
                debug_mode_if.resume_harts(s_tck, s_tms, s_trstn, s_tdi, s_tdo);
             end
 
-            if (ENABLE_DPI == 1) begin
-               jtag_mux = JTAG_DPI;
-            end
-
-
             #500us;
-
-            // Select UART driver/monitor
-            if ($value$plusargs("uart_drv_mon=%s", uart_drv_mon_sel)) begin
-               if (uart_drv_mon_sel == "VIP") begin
-                  uart_tb_rx_en = 1'b0;
-                  uart_vip_rx_en = 1'b1;
-               end
-            end
-
-            // make sure that we can drive the SSPI lines when not in use
-            s_padmode_spi_master = SPI_QUAD_RX;
 
             // enable sb access for subsequent readMem calls
             debug_mode_if.set_sbreadonaddr(1'b1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
@@ -849,9 +758,9 @@ module tb_pulp;
             end
 
             if (jtag_data[0][30:0] == 0)
-               exit_status = `EXIT_SUCCESS;
+               exit_status = EXIT_SUCCESS;
             else
-               exit_status = `EXIT_FAIL;
+               exit_status = EXIT_FAIL;
             $display("[TB] %t - Received status core: 0x%h", $realtime, jtag_data[0][30:0]);
 
             $stop;
