@@ -46,6 +46,7 @@ sources:
       - rtl/tb/riscv_pkg.sv
       - rtl/tb/jtag_pkg.sv
       - rtl/tb/pulp_tap_pkg.sv
+      - rtl/tb/srec/srec_pkg.sv
       - rtl/tb/tb_clk_gen.sv
       - rtl/tb/tb_pulp.sv
       - rtl/tb/SimJTAG.sv

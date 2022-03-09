@@ -6,6 +6,7 @@ tb:
     riscv_pkg.sv,
     jtag_pkg.sv,
     pulp_tap_pkg.sv,
+    srec/srec_pkg.sv,
     tb_clk_gen.sv,
     tb_fs_handler.sv,
     dpi_models/dpi_models.sv,

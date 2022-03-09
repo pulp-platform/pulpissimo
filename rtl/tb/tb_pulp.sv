@@ -16,6 +16,7 @@
 
 
 module tb_pulp;
+  import srec_pkg::*;
 
   parameter CONFIG_FILE = "NONE";
 
@@ -73,7 +74,7 @@ module tb_pulp;
   logic uart_tb_rx_en = 1'b0;
 
   // contains the program code
-  string stimuli_path;
+  string stimuli_path, srec_path;
   int num_stim;
   logic [95:0] stimuli[$];  // array for the stimulus vectors
 
@@ -536,6 +537,7 @@ module tb_pulp;
     int          entry_point;
     logic [31:0] begin_l2_instr;
     automatic logic [9:0] FC_CORE_ID;
+    automatic srec_record_t records[$];
 
     FC_CORE_ID = {5'd31, 5'd0};
 
@@ -546,9 +548,10 @@ module tb_pulp;
     rd_cnt        = 0;
 
     // read entry point from commandline
-    if ($value$plusargs("ENTRY_POINT=%h", entry_point)) begin_l2_instr = entry_point;
-    else begin_l2_instr = 32'h1C008080;
-    $display("[TB] %t - Entry point is set to 0x%h", $realtime, begin_l2_instr);
+    if ($value$plusargs("ENTRY_POINT=%h", entry_point))
+      begin_l2_instr = entry_point;
+    else
+      begin_l2_instr = 32'h1C008080;
 
     $display("[TB] %t - Asserting hard reset", $realtime);
     s_rst_n = 1'b0;
@@ -602,13 +605,29 @@ module tb_pulp;
         else $display("[TB] %t - Not using CAM SDVT", $realtime);
 
         // read in the stimuli vectors  == address_value
+        // we support two formats:
+        //
+        // 1. stim.txt where each text line is 96 bits encoded in ascii. The
+        // first 32 bits are the address the remaining 64 bits the data payload
+        // 2. *.srec. Srecords is a standardized format to represent binary data
+        // in ascii text format. Notably, it also encodes also the entry point
+        // so we don't have to supply it manully with +ENTRY_POINT. GNU objcopy
+        // (part of binutils) can easily convert and elf file to this format.
         if ($value$plusargs("stimuli=%s", stimuli_path)) begin
           $display("Loading custom stimuli from %s", stimuli_path);
           load_stim(stimuli_path, stimuli);
+        end else if ($value$plusargs("srec=%s", srec_path)) begin
+          $display("[TB] %t - Loading srec from %s", $realtime, srec_path);
+          srec_read(srec_path, records);
+          srec_records_to_stimuli(records, stimuli, entry_point);
+          if (!$test$plusargs("srec_ignore_entry"))
+            begin_l2_instr = entry_point;
         end else begin
           $display("Loading default stimuli");
           load_stim("./vectors/stim.txt", stimuli);
         end
+
+        $display("[TB] %t - Entry point is set to 0x%h", $realtime, begin_l2_instr);
 
         // before starting the actual boot procedure we do some light
         // testing on the jtag link
