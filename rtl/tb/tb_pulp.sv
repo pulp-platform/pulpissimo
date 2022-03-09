@@ -47,13 +47,13 @@ module tb_pulp;
    parameter  USE_SDVT_CPI = 0;
 
    // files to be used to load the I2S verification IP, if instantiated
-   parameter  I2S_FILENAME_0 = "i2s_buffer_0.hex";
-   parameter  I2S_FILENAME_1 = "i2s_buffer_1.hex";
-   parameter  I2S_FILENAME_2 = "i2s_buffer_2.hex";
-   parameter  I2S_FILENAME_3 = "i2s_buffer_3.hex";
+   localparam I2S_FILENAME_0 = "i2s_buffer_0.hex";
+   localparam I2S_FILENAME_1 = "i2s_buffer_1.hex";
+   localparam I2S_FILENAME_2 = "i2s_buffer_2.hex";
+   localparam I2S_FILENAME_3 = "i2s_buffer_3.hex";
 
    // for PULPissimo, 1 core
-   parameter NB_CORES = 1;
+   localparam int NB_CORES = 1;
 
    // exit
    localparam int EXIT_SUCCESS = 0;
@@ -62,9 +62,9 @@ module tb_pulp;
 
 
    // SPI standards, do not change
-   parameter logic[1:0] SPI_STD     = 2'b00;
-   parameter logic[1:0] SPI_QUAD_TX = 2'b01;
-   parameter logic[1:0] SPI_QUAD_RX = 2'b10;
+   localparam logic[1:0] SPI_STD     = 2'b00;
+   localparam logic[1:0] SPI_QUAD_TX = 2'b01;
+   localparam logic[1:0] SPI_QUAD_RX = 2'b10;
 
    // contains the program code
    string stimuli_file;
