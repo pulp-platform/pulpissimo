@@ -7,6 +7,22 @@ three execution modes:
 - Execute preloaded programs on flash
 - Load no program and wait for OpenOCD to connect
 
+## Runtime arguments to Testbench
+The testbench accepts a few runtime arguments (through SystemVerilog
+`$plusargs`) to control various settings e.g. what program to load, what jtag
+tap to use etc. Here is a list of a few of those:
+
+
+| plusarg             | effect                                                                        | default value        |
+|---------------------|-------------------------------------------------------------------------------|----------------------|
+| +srec=SREC_PATH     | Load a srecord (format for executable)from SREC_PATH into the simulator       | -                    |
+| +srec\_ignore_entry  | Ignore the entry point information in the srec                                | -                    |
+| +ENTRY\_POINT=VALUE  | Set entry point (first insn we execute) to VALUE                              | 32'h1C008080         |
+| +stimuli=STIM_PATH  | Load a stimuli file (format for executable) from STIM_PATH into the simulator | "./vectors/stim.txt" |
+| +jtag\_openocd       | Boot from jtag waiting for external OpenOCD to connect to simulator           | -                    |
+| +jtag\_dm_tests      | Do not load an executable and run debug module self-tests                     | -                    |
+| +jtag\_load_tap=TYPE | Use TYPE tap to load binary into L2 memory. TYPE={riscv, pulp}                | pulp                 |
+
 ## JTAG TAPs and Flash
 When running tests or developing programs, we normally use the first mode to do
 that. No special configuration is required to do that, just follow the PULP-SDK
