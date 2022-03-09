@@ -49,9 +49,6 @@ module tb_pulp;
    // enable DPI-based peripherals
    parameter  ENABLE_DEV_DPI = 0;
 
-   // enable DPI-based openocd debug bridge
-   parameter ENABLE_OPENOCD = 0;
-
    // enable Debug Module Tests
    parameter ENABLE_DM_TESTS = 0;
 
@@ -293,7 +290,7 @@ module tb_pulp;
    always_comb begin
       sim_jtag_enable = 1'b0;
 
-      if (ENABLE_OPENOCD) begin
+      if ($test$plusargs("jtag_openocd")) begin
          tmp_rst_n         = s_rst_n;
          tmp_clk_ref       = s_clk_ref;
          tmp_trstn         = sim_jtag_trstn;
@@ -591,7 +588,7 @@ module tb_pulp;
          #1ns
 
 
-         if (ENABLE_OPENOCD == 1) begin
+         if ($test$plusargs("jtag_openocd")) begin
             // Use openocd to interact with the simulation
             s_bootsel = 2'b01;
             $display("[TB] %t - Releasing hard reset", $realtime);
