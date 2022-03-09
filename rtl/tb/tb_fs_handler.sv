@@ -26,7 +26,8 @@
 module tb_fs_handler #(
   parameter ADDR_WIDTH = 32,
   parameter DATA_WIDTH = 64,
-  parameter NB_CORES   = 4
+  parameter NB_CORES   = 4,
+  parameter OPEN_FILES = 0
 ) (
   input  logic                      clk,
   input  logic                      rst_n,
@@ -83,6 +84,7 @@ module tb_fs_handler #(
     .DATA_WIDTH  (32),
     .NB_CORES    (NB_CORES),
     .CLUSTER_ID  (0),
+    .OPEN_FILES  (OPEN_FILES),
     .DEBUG_TYPE  ("PE"),      // FS || PE
     .SILENT_MODE ("OFF"),     // ON || OFF
     .COLORED_MODE("OFF")      // ON || OFF
@@ -99,6 +101,7 @@ module tb_fs_handler #(
     .DATA_WIDTH  (32),
     .NB_CORES    (NB_CORES),
     .CLUSTER_ID  (0),
+    .OPEN_FILES  (OPEN_FILES),
     .DEBUG_TYPE  ("FS"),      // FS || PE
     .SILENT_MODE ("ON"),      // ON || OFF
     .COLORED_MODE("OFF")      // ON || OFF
@@ -115,6 +118,7 @@ module tb_fs_handler #(
     .DATA_WIDTH  (32),
     .NB_CORES    (NB_CORES),
     .CLUSTER_ID  (31),
+    .OPEN_FILES  (OPEN_FILES),
     .DEBUG_TYPE  ("PE"),      // FS || PE
     .SILENT_MODE ("OFF"),     // ON || OFF
     .COLORED_MODE("OFF")      // ON || OFF
@@ -131,6 +135,7 @@ module tb_fs_handler #(
     .DATA_WIDTH  (32),
     .NB_CORES    (1),
     .CLUSTER_ID  (31),
+    .OPEN_FILES  (OPEN_FILES),
     .DEBUG_TYPE  ("FS"),  // FS || PE
     .SILENT_MODE ("ON"),  // ON || OFF
     .COLORED_MODE("OFF")  // ON || OFF
@@ -216,6 +221,7 @@ module tb_fs_handler_debug #(
   parameter DATA_WIDTH   = 32,
   parameter NB_CORES     = 4,
   parameter CLUSTER_ID   = 0,
+  parameter OPEN_FILES   = 0,
   parameter DEBUG_TYPE   = "FS",   // FS || PE
   parameter SILENT_MODE  = "OFF",  // ON || OFF
   parameter FULL_LINE    = "ON",   // ON || OFF  Print only full lines of fake stdout
@@ -245,7 +251,8 @@ module tb_fs_handler_debug #(
         "FS": FILENAME[core_index] = {"fs/file_", CLUSTER_ID_STR, "_", FILE_ID, ".txt"};
         "PE": FILENAME[core_index] = {"stdout/stdout_fake_pe", CLUSTER_ID_STR, "_", FILE_ID};
       endcase
-      IOFILE[core_index]      = $fopen(FILENAME[core_index], "w");
+      if (OPEN_FILES)
+        IOFILE[core_index]      = $fopen(FILENAME[core_index], "w");
 
       LINE_BUFFER[core_index] = "";
     end
@@ -258,7 +265,8 @@ module tb_fs_handler_debug #(
         if (NB_CORES > 1) core_index = add_i[3:0];
         else core_index = 0;
 
-        $fwrite(IOFILE[core_index], "%s", dat_i[7:0]);
+        if (OPEN_FILES)
+          $fwrite(IOFILE[core_index], "%s", dat_i[7:0]);
 
         if (SILENT_MODE == "OFF") begin
           if (COLORED_MODE == "ON") begin
@@ -325,7 +333,8 @@ module tb_fs_handler_debug #(
         end
 
         if ((dat_i[7:0] == 10) || (dat_i == 0)) begin
-          $fflush(IOFILE[core_index]);
+          if (OPEN_FILES)
+            $fflush(IOFILE[core_index]);
 
           if (SILENT_MODE == "OFF") begin
             if (FULL_LINE == "ON") begin
