@@ -50,6 +50,11 @@
 //`define DEM_PER_BEFORE_TCDM_TS
 
 
+// Debugging
+// Log uart output
+`define LOG_UART_SIM
+// Log sim stdout to files
+//`define LOG_SIM_STDOUT
 
 // uncomment if FPGA emulator
 // `define PULP_FPGA_EMUL 1

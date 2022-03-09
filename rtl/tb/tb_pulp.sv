@@ -23,8 +23,12 @@ module tb_pulp;
 
   // Choose your core: 0 for RISCY, 1 for IBEX RV32IMC (formerly ZERORISCY), 2 for IBEX RV32EC (formerly MICRORISCY)
   parameter CORE_TYPE = 0;
+
   // if RI5CY is instantiated (CORE_TYPE == 0), USE_FPU enables the FPU
   parameter USE_FPU = 1;
+
+  // if we are using a simulated stdout
+  parameter SIM_STDOUT = 1;
 
   // period of the external reference clock (32.769kHz)
   parameter REF_CLK_PERIOD = 30517ns;
@@ -455,7 +459,9 @@ module tb_pulp;
   // PULPissimo chip (design under test)
   pulpissimo #(
     .CORE_TYPE(CORE_TYPE),
-    .USE_FPU  (USE_FPU)
+    .USE_FPU  (USE_FPU),
+    .USE_HWPE  (0),
+    .SIM_STDOUT  (SIM_STDOUT)
   ) i_dut (
     .pad_spim_sdio0(w_spi_master_sdio0),
     .pad_spim_sdio1(w_spi_master_sdio1),
@@ -745,75 +751,6 @@ module tb_pulp;
 
     end
   end
-
-
-`ifndef USE_NETLIST
-  // File System access
-  logic r_stdout_pready;
-
-  logic fs_clk;
-  logic fs_rst_n;
-  logic fs_wen;
-  logic [0:0] fs_csn;
-  logic [31:0] fs_add;
-  logic [3:0] fs_be;
-  logic [31:0] fs_wdata;
-  logic [31:0] fs_rdata;
-
-  assign fs_clk = i_dut.soc_domain_i.pulp_soc_i.s_soc_clk;
-  assign fs_rst_n = i_dut.soc_domain_i.pulp_soc_i.s_soc_rstn;
-
-  assign fs_csn   = ~(i_dut.soc_domain_i.pulp_soc_i.soc_peripherals_i.s_stdout_bus.psel &
-         i_dut.soc_domain_i.pulp_soc_i.soc_peripherals_i.s_stdout_bus.penable &
-         r_stdout_pready);
-  assign fs_wen = ~i_dut.soc_domain_i.pulp_soc_i.soc_peripherals_i.s_stdout_bus.pwrite;
-  assign fs_add = i_dut.soc_domain_i.pulp_soc_i.soc_peripherals_i.s_stdout_bus.paddr;
-  assign fs_wdata = i_dut.soc_domain_i.pulp_soc_i.soc_peripherals_i.s_stdout_bus.pwdata;
-  assign fs_be = 4'hF;
-  assign i_dut.soc_domain_i.pulp_soc_i.soc_peripherals_i.s_stdout_bus.pready = r_stdout_pready;
-  assign i_dut.soc_domain_i.pulp_soc_i.soc_peripherals_i.s_stdout_bus.pslverr = 1'b0;
-  assign i_dut.soc_domain_i.pulp_soc_i.soc_peripherals_i.s_stdout_bus.prdata = fs_rdata;
-
-  always_ff @(posedge fs_clk or negedge fs_rst_n) begin
-    if (~fs_rst_n) begin
-      r_stdout_pready <= 0;
-    end else begin
-      r_stdout_pready <= (i_dut.soc_domain_i.pulp_soc_i.soc_peripherals_i.s_stdout_bus.psel & i_dut.soc_domain_i.pulp_soc_i.soc_peripherals_i.s_stdout_bus.penable);
-    end
-  end
-
-  tb_fs_handler #(
-    .ADDR_WIDTH(32),
-    .DATA_WIDTH(32),
-    .NB_CORES  (NB_CORES)
-  ) i_fs_handler (
-    .clk  (fs_clk),
-    .rst_n(fs_rst_n),
-    .CSN  (fs_csn),
-    .WEN  (fs_wen),
-    .ADDR (fs_add),
-    .WDATA(fs_wdata),
-    .BE   (fs_be),
-    .RDATA(fs_rdata)
-  );
-`endif
-
-  // tracing
-  integer IOFILE[NB_CORES];
-  string FILENAME[NB_CORES];
-  string FILE_ID;
-
-  logic is_Read[NB_CORES];
-
-  initial begin
-    for (int index = 0; index < NB_CORES; index++) begin : _CREATE_IO_FILES_
-      FILE_ID.itoa(index);
-      FILENAME[index] = {"CORE_", FILE_ID, ".txt"};
-      IOFILE[index]   = $fopen(FILENAME[index], "w");
-      is_Read[index]  = 0;
-    end
-  end
-
 
   task automatic preload_l2(input int num_stim, ref logic [95:0] stimuli[100000:0]);
     logic more_stim;
