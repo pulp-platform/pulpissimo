@@ -16,15 +16,6 @@
  * Robert Balas <balasr@iis.ee.ethz.ch>
  */
 
-// timeunit 1ps;
-// timeprecision 1ps;
-
-`define EXIT_SUCCESS  0
-`define EXIT_FAIL     1
-`define EXIT_ERROR   -1
-//`define USE_DPI      1
-
-
 module tb_pulp;
 
    parameter CONFIG_FILE = "NONE";
@@ -88,6 +79,12 @@ module tb_pulp;
    // for PULPissimo, 1 core
    parameter NB_CORES = 1;
 
+   // exit
+   localparam int EXIT_SUCCESS = 0;
+   localparam int EXIT_FAIL = 1;
+   localparam int EXIT_ERROR = -1;
+
+
    // SPI standards, do not change
    parameter logic[1:0] SPI_STD     = 2'b00;
    parameter logic[1:0] SPI_QUAD_TX = 2'b01;
@@ -115,7 +112,7 @@ module tb_pulp;
    logic [255:0][31:0]   jtag_data;
 
 
-   int                   exit_status = `EXIT_ERROR; // modelsim exit code, will be overwritten when successfull
+   int                   exit_status = EXIT_ERROR; // modelsim exit code, will be overwritten when successfull
 
    jtag_pkg::test_mode_if_t   test_mode_if = new;
    jtag_pkg::debug_mode_if_t  debug_mode_if = new;
@@ -776,9 +773,9 @@ module tb_pulp;
                                            error, num_err, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
                   // we don't have any program to load so we finish the testing
                   if (num_err == 0) begin
-                     exit_status = `EXIT_SUCCESS;
+                     exit_status = EXIT_SUCCESS;
                   end else begin
-                     exit_status = `EXIT_FAIL;
+                     exit_status = EXIT_FAIL;
                      $error("Debug Module: %d tests failed", num_err);
                   end
                   $stop;
@@ -849,9 +846,9 @@ module tb_pulp;
             end
 
             if (jtag_data[0][30:0] == 0)
-               exit_status = `EXIT_SUCCESS;
+               exit_status = EXIT_SUCCESS;
             else
-               exit_status = `EXIT_FAIL;
+               exit_status = EXIT_FAIL;
             $display("[TB] %t - Received status core: 0x%h", $realtime, jtag_data[0][30:0]);
 
             $stop;
