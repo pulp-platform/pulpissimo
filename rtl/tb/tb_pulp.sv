@@ -37,9 +37,6 @@ module tb_pulp;
    // In case any values are not given, the debug module takes over the boot process.
    parameter  STIM_FROM = "JTAG"; // can be "JTAG" "SPI_FLASH", "HYPER_FLASH", or ""
 
-   // enable Debug Module Tests
-   parameter ENABLE_DM_TESTS = 0;
-
    // use the pulp tap to access the bus
    parameter USE_PULP_BUS_ACCESS = 1;
 
@@ -701,7 +698,7 @@ module tb_pulp;
                    s_tck, s_tms, s_trstn, s_tdi, s_tdo);
 
                // long debug module + jtag tests
-               if(ENABLE_DM_TESTS == 1) begin
+               if($test$plusargs("jtag_dm_tests")) begin
                   debug_mode_if.run_dm_tests(FC_CORE_ID, begin_l2_instr,
                                            error, num_err, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
                   // we don't have any program to load so we finish the testing
