@@ -1,4 +1,4 @@
-// Copyright 2018 ETH Zurich and University of Bologna.
+// Copyright 2022 ETH Zurich and University of Bologna.
 // Copyright and related rights are licensed under the Solderpad Hardware
 // License, Version 0.51 (the "License"); you may not use this file except in
 // compliance with the License.  You may obtain a copy of the License at
@@ -8,19 +8,18 @@
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 
-/*
- * tb_pulp.sv
- * Francesco Conti <fconti@iis.ee.ethz.ch>
- * Antonio Pullini <pullinia@iis.ee.ethz.ch>
- * Igor Loi <igor.loi@unibo.it>
- * Robert Balas <balasr@iis.ee.ethz.ch>
- */
+// tb_pulp.sv
+// Francesco Conti <fconti@iis.ee.ethz.ch>
+// Antonio Pullini <pullinia@iis.ee.ethz.ch>
+// Igor Loi <igor.loi@unibo.it>
+// Robert Balas <balasr@iis.ee.ethz.ch>
+
 
 module tb_pulp;
 
   parameter CONFIG_FILE = "NONE";
 
-  /* simulation platform parameters */
+  // simulation platform parameters
 
   // Choose your core: 0 for RISCY, 1 for IBEX RV32IMC (formerly ZERORISCY), 2 for IBEX RV32EC (formerly MICRORISCY)
   parameter CORE_TYPE = 0;
@@ -69,7 +68,7 @@ module tb_pulp;
   // contains the program code
   string stimuli_file;
 
-  /* simulation variables & flags */
+  // simulation variables & flags
   logic uart_tb_rx_en = 1'b0;
 
   int num_stim;
@@ -86,7 +85,7 @@ module tb_pulp;
   jtag_pkg::debug_mode_if_t debug_mode_if = new;
   pulp_tap_pkg::pulp_tap_if_soc_t pulp_tap = new;
 
-  /* system wires */
+  // system wires
   // the w_/s_ prefixes are used to mean wire/tri-type and logic-type (respectively)
 
   logic s_rst_n = 1'b0;
@@ -189,7 +188,6 @@ module tb_pulp;
   `define USE_DPI
   generate
     if (CONFIG_FILE != "NONE") begin
-
       CTRL ctrl ();
       JTAG jtag ();
       UART uart ();
@@ -236,11 +234,8 @@ module tb_pulp;
 
       assign w_sdio_data0       = gpio_22.data_out;
 
-
       initial begin
-
         automatic tb_driver::tb_driver i_tb_driver = new;
-
         qspi_0.data_0_out = 'bz;
         qspi_0.data_1_out = 'bz;
         qspi_0.data_2_out = 'bz;
@@ -253,11 +248,8 @@ module tb_pulp;
         i_tb_driver.register_ctrl_itf(0, ctrl);
         i_tb_driver.register_gpio_itf(22, gpio_22);
         i_tb_driver.build_from_json(CONFIG_FILE);
-
       end
-
     end
-
   endgenerate
 `endif
 
@@ -282,7 +274,6 @@ module tb_pulp;
       tmp_tdo         = w_tdo;
       tmp_bridge_tdo  = w_tdo;
       sim_jtag_enable = 1'b1;
-
     end else begin
       tmp_rst_n      = s_rst_n;
       tmp_clk_ref    = s_clk_ref;
@@ -293,7 +284,6 @@ module tb_pulp;
       tmp_tms        = s_tms;
       tmp_tdo        = w_tdo;
       tmp_bridge_tdo = w_tdo;
-
     end
   end
 
@@ -518,7 +508,11 @@ module tb_pulp;
     .pad_xtal_in(w_clk_ref)
   );
 
-  tb_clk_gen #(.CLK_PERIOD(REF_CLK_PERIOD)) i_ref_clk_gen (.clk_o(s_clk_ref));
+  tb_clk_gen #(
+    .CLK_PERIOD(REF_CLK_PERIOD)
+  ) i_ref_clk_gen (
+    .clk_o(s_clk_ref)
+  );
 
   initial begin : timing_format
     $timeformat(-9, 0, "ns", 9);
@@ -754,7 +748,7 @@ module tb_pulp;
 
 
 `ifndef USE_NETLIST
-  /* File System access */
+  // File System access
   logic r_stdout_pready;
 
   logic fs_clk;
@@ -804,7 +798,7 @@ module tb_pulp;
   );
 `endif
 
-  /* tracing */
+  // tracing
   integer IOFILE[NB_CORES];
   string FILENAME[NB_CORES];
   string FILE_ID;
@@ -861,7 +855,3 @@ module tb_pulp;
 
 
 endmodule  // tb_pulp
-
-// Local Variables:
-// verilog-indent-level: 3
-// End:
