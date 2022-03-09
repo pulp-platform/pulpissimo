@@ -55,7 +55,7 @@ sources:
   - target: any(test,simulation)
     files:
       - rtl/vip/spi_master_padframe.sv
-      - rtl/vip/uart_tb_rx.sv
+      - rtl/vip/uart_sim.sv
       - rtl/vip/camera/cam_vip.sv
 
   # S25FS256_model (SPI Flash)

@@ -329,13 +329,13 @@ module tb_pulp;
 `endif
 
   // UART receiver
-  uart_tb_rx #(
+  uart_sim #(
     .BAUD_RATE(BAUDRATE),
     .PARITY_EN(0)
-  ) i_rx_mod (
+  ) i_uart_sim (
     .rx       (w_uart_rx),
     .rx_en    (uart_tb_rx_en),
-    .word_done()
+    .tx()
   );
 
   // I2C memory models
