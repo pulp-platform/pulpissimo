@@ -13,7 +13,8 @@
 module pulpissimo #(
     parameter CORE_TYPE   = 0, // 0 for RISCY, 1 for IBEX RV32IMC (formerly ZERORISCY), 2 for IBEX RV32EC (formerly MICRORISCY)
     parameter USE_FPU     = 1,
-    parameter USE_HWPE    = 0
+    parameter USE_HWPE    = 0,
+    parameter SIM_STDOUT  = 0
 ) (
   inout wire pad_spim_sdio0,
   inout wire pad_spim_sdio1,
@@ -724,7 +725,8 @@ module pulpissimo #(
       .NB_CL_CORES        ( 0                          ),
       .N_UART             ( N_UART                     ),
       .N_SPI              ( N_SPI                      ),
-      .N_I2C              ( N_I2C                      )
+      .N_I2C              ( N_I2C                      ),
+      .SIM_STDOUT         ( SIM_STDOUT                 )
    ) soc_domain_i (
 
         .ref_clk_i                   ( s_ref_clk          ),

@@ -36,7 +36,7 @@ i2s_model:
 open_models:
   files: [
     spi_master_padframe.sv,
-    uart_tb_rx.sv,
+    uart_sim.sv,
     camera/cam_vip.sv
   ]
   flags: [
