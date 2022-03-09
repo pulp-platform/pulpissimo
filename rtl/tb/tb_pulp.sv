@@ -27,27 +27,15 @@ module tb_pulp;
    // if RISCY is instantiated (CORE_TYPE == 0), RISCY_FPU enables the FPU
    parameter RISCY_FPU            = 1;
 
-   // the following parameters can activate instantiation of the verification IPs for SPI, I2C and I2s
-   // see the instructions in rtl/vip/{i2c_eeprom,i2s,spi_flash} to download the verification IPs
-   parameter  USE_S25FS256S_MODEL = 0;
-   parameter  USE_24FC1025_MODEL  = 0;
-   parameter  USE_I2S_MODEL       = 0;
-
    // period of the external reference clock (32.769kHz)
    parameter  REF_CLK_PERIOD = 30517ns;
 
-   // how L2 is loaded. valid values are "JTAG" or "STANDALONE", the latter works only when USE_S25FS256S_MODEL is 1
+   // how L2 is loaded. valid values are "JTAG" or "STANDALONE", the latter works only when the S25FS256S flash model is enabled
    parameter  LOAD_L2 = "JTAG";
 
    // STIM_FROM sets where is the image data.
    // In case any values are not given, the debug module takes over the boot process.
    parameter  STIM_FROM = "JTAG"; // can be "JTAG" "SPI_FLASH", "HYPER_FLASH", or ""
-
-   // enable DPI-based JTAG
-   parameter  ENABLE_DPI = 0;
-
-   // enable DPI-based peripherals
-   parameter  ENABLE_DEV_DPI = 0;
 
    // enable Debug Module Tests
    parameter ENABLE_DM_TESTS = 0;
@@ -335,142 +323,134 @@ module tb_pulp;
    assign w_bootsel = s_bootsel;
 
    // SPI flash model (not open-source, from Spansion)
-   generate
-      if(USE_S25FS256S_MODEL == 1) begin
-         s25fs256s #(
-            .TimingModel   ( "S25FS256SAGMFI000_F_30pF" ),
-            .mem_file_name ( "./vectors/qspi_stim.slm" ),
-            .UserPreload   ( ( LOAD_L2 == "STANDALONE" ) ? 1 : 0 )
-         ) i_spi_flash_csn0 (
-            .SI       ( w_spi_master_sdio0 ),
-            .SO       ( w_spi_master_sdio1 ),
-            .SCK      ( w_spi_master_sck   ),
-            .CSNeg    ( w_spi_master_csn0  ),
-            .WPNeg    ( w_spi_master_sdio2 ),
-            .RESETNeg ( w_spi_master_sdio3 )
-         );
-      end
-      else begin
-         assign w_spi_master_sdio1 = 'z;
-      end
-   endgenerate
+`ifdef TARGET_FLASH_VIP
+   s25fs256s #(
+      .TimingModel   ( "S25FS256SAGMFI000_F_30pF" ),
+      .mem_file_name ( "./vectors/qspi_stim.slm" ),
+      .UserPreload   ( ( LOAD_L2 == "STANDALONE" ) ? 1 : 0 )
+   ) i_spi_flash_csn0 (
+      .SI       ( w_spi_master_sdio0 ),
+      .SO       ( w_spi_master_sdio1 ),
+      .SCK      ( w_spi_master_sck   ),
+      .CSNeg    ( w_spi_master_csn0  ),
+      .WPNeg    ( w_spi_master_sdio2 ),
+      .RESETNeg ( w_spi_master_sdio3 )
+   );
+`else
+   assign w_spi_master_sdio1 = 'z;
+`endif
 
-   if (CONFIG_FILE == "NONE") begin
-      /* UART receiver */
-      uart_tb_rx #(
-         .BAUD_RATE ( BAUDRATE   ),
-         .PARITY_EN ( 0          )
-      ) i_rx_mod (
-         .rx        ( w_uart_rx       ),
-         .rx_en     ( uart_tb_rx_en ),
-         .word_done (               )
+   // UART receiver
+   uart_tb_rx #(
+      .BAUD_RATE ( BAUDRATE   ),
+      .PARITY_EN ( 0          )
+   ) i_rx_mod (
+      .rx        ( w_uart_rx       ),
+      .rx_en     ( uart_tb_rx_en ),
+      .word_done (               )
+   );
+
+   // I2C memory models
+`ifdef TARGET_I2C_VIP
+   M24FC1025 i_i2c_mem_0 (
+      .A0    ( 1'b0       ),
+      .A1    ( 1'b0       ),
+      .A2    ( 1'b1       ),
+      .WP    ( 1'b0       ),
+      .SDA   ( w_i2c0_sda ),
+      .SCL   ( w_i2c0_scl ),
+      .RESET ( 1'b0       )
+   );
+
+   M24FC1025 i_i2c_mem_1 (
+      .A0    ( 1'b1       ),
+      .A1    ( 1'b0       ),
+      .A2    ( 1'b1       ),
+      .WP    ( 1'b0       ),
+      .SDA   ( w_i2c0_sda ),
+      .SCL   ( w_i2c0_scl ),
+      .RESET ( 1'b0       )
+   );
+`endif
+
+   // CPI verification IP
+   if (!USE_SDVT_CPI) begin
+      cam_vip #(
+         .HRES       ( 320 ),
+         .VRES       ( 240 )
+      ) i_cam_vip (
+         .cam_pclk_o  ( w_cam_pclk  ),
+         .cam_vsync_o ( w_cam_vsync ),
+         .cam_href_o  ( w_cam_hsync ),
+         .cam_data_o  ( w_cam_data  )
       );
    end
 
-   /* I2C memory models */
-   if (USE_24FC1025_MODEL == 1) begin
-      M24FC1025 i_i2c_mem_0 (
-         .A0    ( 1'b0       ),
-         .A1    ( 1'b0       ),
-         .A2    ( 1'b1       ),
-         .WP    ( 1'b0       ),
-         .SDA   ( w_i2c0_sda ),
-         .SCL   ( w_i2c0_scl ),
-         .RESET ( 1'b0       )
+   // I2S verification IPs
+`ifdef TARGET_I2S_VIP
+   i2s_vip #(
+      .I2S_CHAN ( 0              ),
+      .FILENAME ( I2S_FILENAME_0 )
+   ) i_i2s_vip_ch0 (
+      .A0     ( 1'b0          ),
+      .A1     ( 1'b1          ),
+      .SDA    ( w_i2c0_sda    ),
+      .SCL    ( w_i2c0_scl    ),
+      .sck_i  ( w_i2s_sck     ),
+      .ws_i   ( w_i2s_ws      ),
+      .data_o ( w_i2s_data[0] ),
+      .sck_o  (               ),
+      .ws_o   (               )
+   );
+
+   i2s_vip #(
+      .I2S_CHAN ( 1              ),
+      .FILENAME ( I2S_FILENAME_1 )
+   )
+   i_i2s_vip_ch1 (
+      .A0     ( 1'b1          ),
+      .A1     ( 1'b1          ),
+      .SDA    ( w_i2c0_sda    ),
+      .SCL    ( w_i2c0_scl    ),
+      .sck_i  ( w_i2s_sck     ),
+      .ws_i   ( w_i2s_ws      ),
+      .data_o ( w_i2s_data[1] ),
+      .sck_o  (               ),
+      .ws_o   (               )
+   );
+
+   i2s_vip #(
+      .I2S_CHAN ( 2              ),
+      .FILENAME ( I2S_FILENAME_2 )
+   ) i_i2s_CAM_MASTER_SLAVE (
+      .A0     ( 1'b0              ),
+      .A1     ( 1'b0              ),
+      .SDA    ( w_i2c0_sda        ),
+      .SCL    ( w_i2c0_scl        ),
+      .sck_i  ( w_i2s_sck         ),
+      .ws_i   ( w_i2s_ws          ),
+      .data_o ( s_master_i2s_sdi0 ),
+      .sck_o  ( w_master_i2s_sck  ),
+      .ws_o   ( w_master_i2s_ws   )
+   );
+
+   i2s_vip #(
+      .I2S_CHAN ( 3              ),
+      .FILENAME ( I2S_FILENAME_3 )
+   )
+   i_i2s_CAM_SLAVE
+      (
+         .A0     ( 1'b1             ),
+         .A1     ( 1'b0             ),
+         .SDA    ( w_i2c0_sda       ),
+         .SCL    ( w_i2c0_scl       ),
+         .sck_i  ( s_slave_i2s_sck  ),
+         .ws_i   ( s_slave_i2s_ws   ),
+         .data_o ( s_slave_i2s_sdi1 ),
+         .sck_o  (                  ),
+         .ws_o   (                  )
       );
-      M24FC1025 i_i2c_mem_1 (
-         .A0    ( 1'b1       ),
-         .A1    ( 1'b0       ),
-         .A2    ( 1'b1       ),
-         .WP    ( 1'b0       ),
-         .SDA   ( w_i2c0_sda ),
-         .SCL   ( w_i2c0_scl ),
-         .RESET ( 1'b0       )
-      );
-   end
-
-   if (!ENABLE_DEV_DPI && CONFIG_FILE == "NONE") begin
-
-      /* CPI verification IP */
-      if (!USE_SDVT_CPI) begin
-         cam_vip #(
-            .HRES       ( 320 ),
-            .VRES       ( 240 )
-         ) i_cam_vip (
-            .cam_pclk_o  ( w_cam_pclk  ),
-            .cam_vsync_o ( w_cam_vsync ),
-            .cam_href_o  ( w_cam_hsync ),
-            .cam_data_o  ( w_cam_data  )
-         );
-      end
-
-      /* I2S verification IPs */
-      if(USE_I2S_MODEL) begin
-         i2s_vip #(
-            .I2S_CHAN ( 0              ),
-            .FILENAME ( I2S_FILENAME_0 )
-         ) i_i2s_vip_ch0 (
-            .A0     ( 1'b0          ),
-            .A1     ( 1'b1          ),
-            .SDA    ( w_i2c0_sda    ),
-            .SCL    ( w_i2c0_scl    ),
-            .sck_i  ( w_i2s_sck     ),
-            .ws_i   ( w_i2s_ws      ),
-            .data_o ( w_i2s_data[0] ),
-            .sck_o  (               ),
-            .ws_o   (               )
-         );
-
-         i2s_vip #(
-            .I2S_CHAN ( 1              ),
-            .FILENAME ( I2S_FILENAME_1 )
-         )
-         i_i2s_vip_ch1 (
-            .A0     ( 1'b1          ),
-            .A1     ( 1'b1          ),
-            .SDA    ( w_i2c0_sda    ),
-            .SCL    ( w_i2c0_scl    ),
-            .sck_i  ( w_i2s_sck     ),
-            .ws_i   ( w_i2s_ws      ),
-            .data_o ( w_i2s_data[1] ),
-            .sck_o  (               ),
-            .ws_o   (               )
-         );
-
-         i2s_vip #(
-            .I2S_CHAN ( 2              ),
-            .FILENAME ( I2S_FILENAME_2 )
-         ) i_i2s_CAM_MASTER_SLAVE (
-            .A0     ( 1'b0              ),
-            .A1     ( 1'b0              ),
-            .SDA    ( w_i2c0_sda        ),
-            .SCL    ( w_i2c0_scl        ),
-            .sck_i  ( w_i2s_sck         ),
-            .ws_i   ( w_i2s_ws          ),
-            .data_o ( s_master_i2s_sdi0 ),
-            .sck_o  ( w_master_i2s_sck  ),
-            .ws_o   ( w_master_i2s_ws   )
-         );
-
-         i2s_vip #(
-            .I2S_CHAN ( 3              ),
-            .FILENAME ( I2S_FILENAME_3 )
-         )
-         i_i2s_CAM_SLAVE
-            (
-               .A0     ( 1'b1             ),
-               .A1     ( 1'b0             ),
-               .SDA    ( w_i2c0_sda       ),
-               .SCL    ( w_i2c0_scl       ),
-               .sck_i  ( s_slave_i2s_sck  ),
-               .ws_i   ( s_slave_i2s_ws   ),
-               .data_o ( s_slave_i2s_sdi1 ),
-               .sck_o  (                  ),
-               .ws_o   (                  )
-            );
-      end
-
-   end
+`endif
 
     // jtag calls from dpi
     SimJTAG #(
