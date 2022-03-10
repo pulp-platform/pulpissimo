@@ -39,6 +39,26 @@ VLOG_ARGS += -suppress 2583 -suppress 13314
 BENDER_SIM_BUILD_DIR = sim
 BENDER_FPGA_SCRIPTS_DIR = fpga/pulpissimo/tcl/generated
 
+# make variables visible in submake
+# don't export variable if undefined/empty
+define export_if_def
+  ifneq ($(strip $(1)),)
+    export $(1)
+  endif
+endef
+
+export VSIM_PATH
+
+$(export_if_def VSIM)
+$(export_if_def VSIM_FLAGS)
+$(export_if_def VLOG)
+$(export_if_def VLOG_FLAGS)
+$(export_if_def SIM_TOP)
+$(export_if_def VERILATOR)
+$(export_if_def QUESTA)
+
+.DEFAULT_GOAL := all
+
 .PHONY: all
 ## Checkout, generate scripts and build rtl
 all: build
@@ -105,11 +125,11 @@ install: $(INSTALL_HEADERS)
 
 .PHONY: import-bootcode
 ## Import the latest bootcode. This should not be called by the user.
-import-bootcode: boot_code/boot_code.cde
-	cp boot_code/boot_code.cde sim/boot/boot_code.cde
+import-bootcode: boot/boot_code_asic.cde
+	cp $^ sim/boot/boot_code.cde
 
-boot_code/boot_code.cde: boot_code/boot_code.c boot_code/crt0.S boot_code/link.ld
-	$(MAKE) -C boot_code boot_code.cde
+boot_code/boot_code_asic.cde:
+	$(MAKE) -C boot boot_code.cde
 
 check-env-pulp-gcc:
 ifndef PULP_RISCV_GCC_TOOLCHAIN
@@ -235,6 +255,18 @@ endif
 .PHONY: bender-rm
 bender-rm:
 	rm -f bender
+
+.PHONY: TAGS
+## Generate emacs TAGS file
+TAGS:
+	$(CTAGS) -R -e --language=systemverilog --exclude=boot/* \
+		--exclude=freertos/* --exclude=fw/* --exclude=pkg/* \
+		--exclude=pulp-runtime/* --exclude=pulp-sdk/* \
+		--exclude=sdk-releases/* --exclude=tests/* \
+		--exclude=util/* --exclude=install/* --exclude=env/* \
+		--exclude=synth/* \
+		--exclude=*.patch --exclude=*.md --exclude=*.log \
+		--exclude=*.vds --exclude=*.adoc .
 
 .PHONY: help
 help: Makefile

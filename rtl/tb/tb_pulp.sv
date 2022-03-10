@@ -42,7 +42,7 @@ module tb_pulp;
   parameter STIM_FROM = "JTAG";  // can be "JTAG" "SPI_FLASH", "HYPER_FLASH", or ""
 
   // UART baud rate in bps
-  parameter BAUDRATE = 625000;
+  parameter BAUDRATE = 115200;
 
   // use frequency-locked loop to generate internal clock
   parameter USE_FLL = 1;
@@ -578,8 +578,8 @@ module tb_pulp;
           $display("[TB  ] %t - HyperFlash boot: Setting bootsel to 2'b?", $realtime);
           $fatal(1, "[TB  ] %t - HyperFlash boot: Not supported yet", $realtime);
         end else if (STIM_FROM == "SPI_FLASH") begin
-          $display("[TB  ] %t - QSPI boot: Setting bootsel to 1'b0", $realtime);
-          s_bootsel = 2'b00;
+          $display("[TB  ] %t - QSPI boot: Setting bootsel to 1'b10", $realtime);
+          s_bootsel = 2'b10;
         end
 
         $display("[TB  ] %t - Releasing hard reset", $realtime);
