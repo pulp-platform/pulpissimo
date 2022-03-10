@@ -57,6 +57,8 @@ $(export_if_def SIM_TOP)
 $(export_if_def VERILATOR)
 $(export_if_def QUESTA)
 
+.DEFAULT_GOAL := all
+
 .PHONY: all
 ## Checkout, generate scripts and build rtl
 all: build
@@ -253,6 +255,18 @@ endif
 .PHONY: bender-rm
 bender-rm:
 	rm -f bender
+
+.PHONY: TAGS
+## Generate emacs TAGS file
+TAGS:
+	$(CTAGS) -R -e --language=systemverilog --exclude=boot/* \
+		--exclude=freertos/* --exclude=fw/* --exclude=pkg/* \
+		--exclude=pulp-runtime/* --exclude=pulp-sdk/* \
+		--exclude=sdk-releases/* --exclude=tests/* \
+		--exclude=util/* --exclude=install/* --exclude=env/* \
+		--exclude=synth/* \
+		--exclude=*.patch --exclude=*.md --exclude=*.log \
+		--exclude=*.vds --exclude=*.adoc .
 
 .PHONY: help
 help: Makefile
