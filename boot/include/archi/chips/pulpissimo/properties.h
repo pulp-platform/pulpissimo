@@ -156,6 +156,11 @@
 #define ARCHI_SOC_EVENT_SPIM0_TX          5
 #define ARCHI_SOC_EVENT_SPIM0_CMD         6
 #define ARCHI_SOC_EVENT_SPIM0_EOT         7
+#define ARCHI_SOC_EVENT_SPIM_RX(id)       4
+#define ARCHI_SOC_EVENT_SPIM_TX(id)       5
+#define ARCHI_SOC_EVENT_SPIM_CMD(id)      6
+#define ARCHI_SOC_EVENT_SPIM_EOT(id)      7
+
 
 #define ARCHI_SOC_EVENT_I2C0_RX           8
 #define ARCHI_SOC_EVENT_I2C0_TX           9

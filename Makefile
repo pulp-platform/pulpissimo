@@ -105,11 +105,11 @@ install: $(INSTALL_HEADERS)
 
 .PHONY: import-bootcode
 ## Import the latest bootcode. This should not be called by the user.
-import-bootcode: boot_code/boot_code.cde
-	cp boot_code/boot_code.cde sim/boot/boot_code.cde
+import-bootcode: boot/boot_code_asic.cde
+	cp $^ sim/boot/boot_code.cde
 
-boot_code/boot_code.cde: boot_code/boot_code.c boot_code/crt0.S boot_code/link.ld
-	$(MAKE) -C boot_code boot_code.cde
+boot_code/boot_code_asic.cde:
+	$(MAKE) -C boot boot_code.cde
 
 check-env-pulp-gcc:
 ifndef PULP_RISCV_GCC_TOOLCHAIN

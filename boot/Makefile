@@ -79,7 +79,7 @@ OBJS =  boot_code.o crt0.o \
 all: $(BOOTCODE) $(BOOTCODE_FPGA) boot.rtl boot.gvsoc
 
 # ASIC bootrom 100 MHz periph freq
-$(BOOTCODE):      CPPFLAGS += -DPERIPH_FREQUENCY=100000000
+$(BOOTCODE):      CPPFLAGS += -DPERIPH_FREQUENCY=50000000
 $(BOOTCODE):      $(OBJS)
 
 # FPGA bootrom 10 MHz periph freq

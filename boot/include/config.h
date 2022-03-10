@@ -19,10 +19,10 @@
 
 #include "archi/pulp_defs.h"
 
-#define PULP_CHIP CHIP_CONTROL_PULP
-#define PULP_CHIP_FAMILY CHIP_CONTROL_PULP
+#define PULP_CHIP CHIP_PULPISSIMO
+#define PULP_CHIP_FAMILY CHIP_PULPISSIMO
 #define CONFIG_PULP 1
-#define PULP_CHIP_STR control-pulp
-#define PULP_CHIP_FAMILY_STR control-pulp
+#define PULP_CHIP_STR pulpissimo
+#define PULP_CHIP_FAMILY_STR pulpissimo
 
 #endif
