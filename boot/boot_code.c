@@ -464,7 +464,7 @@ void __attribute__((noreturn)) main(void)
 #endif
 #ifdef ENABLE_ZFORTH_BOOT
         boot_zforth();
-#else
+#elif ENABLE_UART_BOOT
         boot_srec_uart();
 #endif
         break;
@@ -472,7 +472,9 @@ void __attribute__((noreturn)) main(void)
         boot_jtag_openocd();
         break;
     case BOOT_MODE_QSPI:
+#ifdef ENABLE_QSPI_BOOT
         boot_qspi(0, 1);
+#endif
         break;
     case BOOT_MODE_PRELOADED:
         boot_preloaded();

@@ -41,6 +41,13 @@ CFLAGS  += -mno-save-restore
 # remove -DENABLE_ZFORTH_BOOT to disable the forth fallback boot mode. This
 # makes the bootrom somewhat smaller
 CPPFLAGS  += -DENABLE_ZFORTH_BOOT
+# remove -DENABLE_QSPIBOOT to disable the QSPI boot mode. This makes the bootrom
+# somewhat smaller
+CPPFLAGS  += -DENABLE_QSPI_BOOT
+# remove -DENABLE_UART_BOOT to disable the uart boot mode. This makes the
+# bootrom somewhat smaller
+CPPFLAGS  += -DENABLE_UART_BOOT
+
 # UDMA UART periperal id and desired baudrate
 CPPFLAGS  += -DUART_ID=0
 CPPFLAGS  += -DUART_BAUDRATE=115200
