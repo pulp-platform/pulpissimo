@@ -39,6 +39,24 @@ VLOG_ARGS += -suppress 2583 -suppress 13314
 BENDER_SIM_BUILD_DIR = sim
 BENDER_FPGA_SCRIPTS_DIR = fpga/pulpissimo/tcl/generated
 
+# make variables visible in submake
+# don't export variable if undefined/empty
+define export_if_def
+  ifneq ($(strip $(1)),)
+    export $(1)
+  endif
+endef
+
+export VSIM_PATH
+
+$(export_if_def VSIM)
+$(export_if_def VSIM_FLAGS)
+$(export_if_def VLOG)
+$(export_if_def VLOG_FLAGS)
+$(export_if_def SIM_TOP)
+$(export_if_def VERILATOR)
+$(export_if_def QUESTA)
+
 .PHONY: all
 ## Checkout, generate scripts and build rtl
 all: build
