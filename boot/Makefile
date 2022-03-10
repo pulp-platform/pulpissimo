@@ -74,12 +74,12 @@ BOOTCODE_FPGA = boot_code_fpga
 
 OBJS =  boot_code.o crt0.o \
 	zforth-riscv/zforth-main.o zforth-riscv/libc.o zforth-riscv/udma.o \
-	zforth-riscv/setjmp.o zforth/zforth.o kk_srec.o
+	zforth-riscv/setjmp.o zforth/zforth.o kk_srec.o fll-v1.o
 
 all: $(BOOTCODE) $(BOOTCODE_FPGA) boot.rtl boot.gvsoc
 
 # ASIC bootrom 100 MHz periph freq
-$(BOOTCODE):      CPPFLAGS += -DPERIPH_FREQUENCY=50000000
+$(BOOTCODE):      CPPFLAGS += -DPERIPH_FREQUENCY=18000000 -DCONFIG_FLL
 $(BOOTCODE):      $(OBJS)
 
 # FPGA bootrom 10 MHz periph freq

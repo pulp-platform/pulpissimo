@@ -126,7 +126,9 @@
 */
 
 #define ARCHI_NB_FLL  2
-
+#define POS_FLL_CL 2
+#define POS_FLL_PERIPH 1
+#define POS_FLL_FC 0
 
 
 /*

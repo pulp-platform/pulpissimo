@@ -43,6 +43,10 @@ when using SPI boot."
 void *memcpy(void *dest, const void *src, size_t n);
 int __attribute__((noreturn)) zforth_main(void);
 
+void pos_fll_constructor();
+unsigned int pos_fll_set_freq(int fll, unsigned int frequency);
+unsigned int pos_fll_init(int fll);
+
 typedef struct {
     unsigned char flash_buffer[FLASH_BLOCK_SIZE];
     unsigned int udma_buffer[256];
@@ -428,11 +432,11 @@ static void __attribute__((noreturn)) boot_zforth(void)
 {
     zforth_main();
 }
-/* TODO: some default */
+/* some default */
 #define BOOT_MODE_DEFAULT 0
 /* trigger fetch enable, busy loop. OpenOCD can take over the hart safely */
 #define BOOT_MODE_JTAG_OPENOCD 1
-/* TODO: trigger fetch enable, read binary from qspi, read entry point from
+/* trigger fetch enable, read binary from qspi, read entry point from
  * binary, execute */
 #define BOOT_MODE_QSPI 2
 /* preload the memory with binary, write entry point to BOOTADDR register,
@@ -452,6 +456,12 @@ void __attribute__((noreturn)) main(void)
 
     switch (apb_soc_bootsel_get(ARCHI_APB_SOC_CTRL_ADDR) & 3) {
     case BOOT_MODE_DEFAULT:
+#ifdef CONFIG_FLL
+	/* zforth/srec need a stable periperal frequency */
+	pos_fll_constructor();
+	pos_fll_init(POS_FLL_PERIPH);
+	pos_fll_set_freq(POS_FLL_PERIPH, PERIPH_FREQUENCY);
+#endif
 #ifdef ENABLE_ZFORTH_BOOT
         boot_zforth();
 #else
