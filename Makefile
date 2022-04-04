@@ -35,7 +35,7 @@ INSTALL_FILES += $(shell cd sim && find fs -type f)
 
 $(foreach file, $(INSTALL_FILES), $(eval $(call declareInstallFile,$(file))))
 
-VLOG_ARGS += -suppress 2583 -suppress 13314
+VLOG_ARGS += -suppress 2583 -suppress 13314 \"+incdir+\$$ROOT/rtl/includes\"
 BENDER_SIM_BUILD_DIR = sim
 BENDER_FPGA_SCRIPTS_DIR = fpga/pulpissimo/tcl/generated
 
@@ -247,8 +247,8 @@ lint:
 # Bender integration
 bender:
 ifeq (,$(wildcard ./bender))
-	curl --proto '=https' --tlsv1.2 -sSf https://fabianschuiki.github.io/bender/init \
-		| bash -s -- 0.23.2
+	curl --proto '=https' --tlsv1.2 -sSf https://pulp-platform.github.io/bender/init \
+		| bash -s -- 0.24.0
 	touch bender
 endif
 
