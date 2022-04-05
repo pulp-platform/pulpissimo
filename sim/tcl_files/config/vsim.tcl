@@ -38,10 +38,12 @@ if {[info exists ::env(PULP_SIMCHECKER)]} {
   set sdkLib "-sv_lib $::env(PULP_SDK_HOME)/install/ws/lib/libri5cyv2sim $sdkLib"
 }
 
+# TODO: The suppress 8386 is too broad and doesnt apply to all questa versions
 quietly set warning_args "\
   +nowarnTRAN \
   +nowarnTSCALE \
   +nowarnTFMPC \
+  -suppress 8386\
   "
 
 quietly set define_args "\
