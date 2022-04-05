@@ -16,7 +16,7 @@ mkfile_path := $(dir $(abspath $(firstword $(MAKEFILE_LIST))))
 
 VSIM            ?= vsim
 VSIM_FLAGS	= -gLOAD_L2=JTAG
-VSIM_SUPPRESS   = -suppress vsim-3009 -suppress vsim-8683
+VSIM_SUPPRESS   = -suppress vsim-3009 -suppress vsim-8683 -suppress vsim-8386
 
 VLOG            ?= vlog
 VLOG_FLAGS      =
