@@ -15,12 +15,15 @@
 mkfile_path := $(dir $(abspath $(firstword $(MAKEFILE_LIST))))
 
 VSIM            ?= vsim
-VSIM_FLAGS	= -gUSE_SDVT_SPI=0 -gUSE_SDVT_CPI=0 -gBAUDRATE=115200 \
-		-gENABLE_DEV_DPI=0 -gLOAD_L2=JTAG -gUSE_SDVT_I2S=0
+VSIM_FLAGS	= -gLOAD_L2=JTAG
+VSIM_SUPPRESS   = -suppress vsim-3009 -suppress vsim-8683
 
 VLOG            ?= vlog
 VLOG_FLAGS      =
+
 VOPT            ?= vopt
+VOPT_FLAGS      ?= +acc -floatparameters+tb_pulp
+
 VLIB            ?= vlib
 VMAP            ?= vmap
 
@@ -45,16 +48,16 @@ clean-deps:
 .PHONY: sim
 ## Simulate RTL with Questasim (GUI)
 sim:
-	$(VSIM) -64 -gui vopt_tb -L models_lib -L vip_lib \
-		-suppress vsim-3009 -suppress vsim-8683 \
+	$(VSIM) -64 -gui vopt_tb \
+		$(VSIM_SUPPRESS) \
 		+UVM_NO_RELNOTES -stats -t ps \
 		-sv_lib $(SVLIB) $(VSIM_FLAGS) \
 		-do "set StdArithNoWarnings 1; set NumericStdNoWarnings 1"
 .PHONY: simc
 ## Simulate RTL with Questasim
 simc:
-	$(VSIM) -64 -c vopt_tb -L models_lib -L vip_lib \
-		-suppress vsim-3009 -suppress vsim-8683 \
+	$(VSIM) -64 -c vopt_tb \
+		$(VSIM_SUPPRESS) \
 		+UVM_NO_RELNOTES -stats -t ps \
 		-sv_lib $(SVLIB) $(VSIM_FLAGS) \
 		-do "set StdArithNoWarnings 1; set NumericStdNoWarnings 1" \
@@ -63,7 +66,7 @@ simc:
 
 .PHONY: opt
 opt:
-	$(VOPT) +acc -o vopt_tb $(SIM_TOP) -floatparameters+tb_pulp -work work
+	$(VOPT) $(VOPT_FLAGS) -o vopt_tb $(SIM_TOP) -work work
 
 .PHONY: opt
 build: build-deps
