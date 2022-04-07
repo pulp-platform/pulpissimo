@@ -52,11 +52,6 @@ add_files -norecurse $FPGA_RTL/pad_functional_xilinx.sv
 add_files -norecurse $FPGA_RTL/pulp_clock_gating_xilinx.sv
 add_files -norecurse $FPGA_RTL/cv32e40p_clock_gate_xilinx.sv
 
-# Add patched riscv_ex_stage module (This should be removed once we have a
-# patched upstream repo version)
-add_files -norecurse $FPGA_RTL/patched_riscv_ex_stage.sv
-
-
 # set pulpissimo as top
 set_property top xilinx_pulpissimo [current_fileset]; #
 
