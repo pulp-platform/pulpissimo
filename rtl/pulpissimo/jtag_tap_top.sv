@@ -63,9 +63,13 @@ module jtag_tap_top
         .memory_sel_o      ( axireg_sel_o       ),
         .fifo_sel_o        (                    ),
         .confreg_sel_o     ( confreg_sel        ),
+        .observ_sel_o      (                    ),
+        .clk_byp_sel_o     (                    ),
 
         .scan_in_o         ( s_scan_i           ),
 
+        .observ_out_i      ( 1'b0               ),
+        .clk_byp_out_i     ( 1'b0               ),
         .memory_out_i      ( dbg_axi_scan_out_i ),
         .fifo_out_i        ( 1'b0               ),
         .confreg_out_i     ( confscan           )
