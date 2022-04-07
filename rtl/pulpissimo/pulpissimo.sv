@@ -804,6 +804,18 @@ module pulpissimo #(
         .sdio_data_i                 ( s_sdio_datai       ),
         .sdio_data_oen_o             ( s_sdio_data_oen    ),
 
+         // TODO: wire up if needed
+        .hyper_cs_no                 (                    ),
+        .hyper_ck_o                  (                    ),
+        .hyper_ck_no                 (                    ),
+        .hyper_rwds_o                (                    ),
+        .hyper_rwds_i                ( '0                 ),
+        .hyper_rwds_oe_o             (                    ),
+        .hyper_dq_i                  ( '0                 ),
+        .hyper_dq_o                  (                    ),
+        .hyper_dq_oe_o               (                    ),
+        .hyper_reset_no              (                    ),
+
         .cluster_busy_i              ( s_cluster_busy     ),
         .cluster_irq_o               (                    ),
 
