@@ -28,6 +28,9 @@ module tb_pulp;
   // if RI5CY is instantiated (CORE_TYPE == 0), USE_FPU enables the FPU
   parameter USE_FPU = 1;
 
+  // if RI5CY uses ZFINX (merged float and integer register files)
+  parameter USE_ZFINX = 0;
+
   // if we are using a simulated stdout
   parameter SIM_STDOUT = 1;
 
@@ -460,6 +463,7 @@ module tb_pulp;
   pulpissimo #(
     .CORE_TYPE(CORE_TYPE),
     .USE_FPU  (USE_FPU),
+    .USE_ZFINX (USE_ZFINX),
     .USE_HWPE  (0),
     .SIM_STDOUT  (SIM_STDOUT)
   ) i_dut (
