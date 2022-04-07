@@ -143,28 +143,28 @@ test_sequential_bare:
 #     reports:
 #       junit: tests/parallel_bare_tests/junit-reports/TEST-*.xml
 
-test_pulp:
-  stage: test
-  before_script:
-    - echo "Fetching SDK from releases and setting up paths"
-    - make sdk-gitlab
-    - echo "Compiling RTL model and DPI libraries"
-    - make scripts-bender-vsim-vips
-    - make build
-    - echo "Installing scripts"
-    - make install
-  script:
-    - echo "Running pulp tests"
-    - source env/ci-pulpissimo.sh && make test-pulp
-    - echo "Generating junit test results"
-    - /usr/sepp/bin/python3.4 -m junit2htmlreport tests/pulp_tests/junit-reports/TEST-*.xml
-  artifacts:
-    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
-    paths:
-      - tests/pulp_tests/junit-reports/TEST-*.html
-      - tests/pulp_tests/junit-reports/TEST-*.xml
-    reports:
-      junit: tests/pulp_tests/junit-reports/TEST-*.xml
+# test_pulp:
+#   stage: test
+#   before_script:
+#     - echo "Fetching SDK from releases and setting up paths"
+#     - make sdk-gitlab
+#     - echo "Compiling RTL model and DPI libraries"
+#     - make scripts-bender-vsim-vips
+#     - make build
+#     - echo "Installing scripts"
+#     - make install
+#   script:
+#     - echo "Running pulp tests"
+#     - source env/ci-pulpissimo.sh && make test-pulp
+#     - echo "Generating junit test results"
+#     - /usr/sepp/bin/python3.4 -m junit2htmlreport tests/pulp_tests/junit-reports/TEST-*.xml
+#   artifacts:
+#     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
+#     paths:
+#       - tests/pulp_tests/junit-reports/TEST-*.html
+#       - tests/pulp_tests/junit-reports/TEST-*.xml
+#     reports:
+#       junit: tests/pulp_tests/junit-reports/TEST-*.xml
 
 test_ml:
   stage: test
@@ -210,28 +210,28 @@ test_riscv:
     reports:
       junit: tests/riscv_tests/junit-reports/TEST-*.xml
 
-test_rt:
-  stage: test
-  before_script:
-    - echo "Fetching SDK from releases and setting up paths"
-    - make sdk-gitlab
-    - echo "Compiling RTL model and DPI libraries"
-    - make scripts-bender-vsim-vips
-    - make build
-    - echo "Installing scripts"
-    - make install
-  script:
-    - echo "Running rt tests"
-    - source env/ci-pulpissimo.sh && make test-rt
-    - echo "Generating junit test results"
-    - /usr/sepp/bin/python3.4 -m junit2htmlreport tests/rt-tests/junit-reports/TEST-*.xml
-  artifacts:
-    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
-    paths:
-      - tests/rt-tests/junit-reports/TEST-*.html
-      - tests/rt-tests/junit-reports/TEST-*.xml
-    reports:
-      junit: tests/rt-tests/junit-reports/TEST-*.xml
+# test_rt:
+#   stage: test
+#   before_script:
+#     - echo "Fetching SDK from releases and setting up paths"
+#     - make sdk-gitlab
+#     - echo "Compiling RTL model and DPI libraries"
+#     - make scripts-bender-vsim-vips
+#     - make build
+#     - echo "Installing scripts"
+#     - make install
+#   script:
+#     - echo "Running rt tests"
+#     - source env/ci-pulpissimo.sh && make test-rt
+#     - echo "Generating junit test results"
+#     - /usr/sepp/bin/python3.4 -m junit2htmlreport tests/rt-tests/junit-reports/TEST-*.xml
+#   artifacts:
+#     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
+#     paths:
+#       - tests/rt-tests/junit-reports/TEST-*.html
+#       - tests/rt-tests/junit-reports/TEST-*.xml
+#     reports:
+#       junit: tests/rt-tests/junit-reports/TEST-*.xml
 
 # Use simplified pulp-runtime to run a subset of tests
 # test_simplified_sw:
