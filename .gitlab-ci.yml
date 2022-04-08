@@ -289,7 +289,8 @@ test_dm:
     - echo "Setting up vsim path"
     - source setup/vsim.sh
     - echo "Running debug module testbench"
-    - cd sim/ && make all simc VSIM_FLAGS=+jtag_dm_tests
+    # Note that the program is irrelevant we just put something for it to not complain
+    - cd sim/ && make all simc VSIM_FLAGS="+jtag_dm_tests +srec=../rtl/tb/srec/min.srec"
 
 fpga_synth_genesys2:
   stage: test
