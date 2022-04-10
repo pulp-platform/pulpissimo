@@ -210,6 +210,24 @@ test_riscv:
     reports:
       junit: tests/riscv_tests/junit-reports/TEST-*.xml
 
+freertos_helloworld:
+  stage: test
+  before_script:
+    - export RISCV=/usr/pack/riscv-1.0-kgf/pulp-gcc-2.5.0
+    - git clone https://github.com/pulp-platform/pulp-freertos.git
+    - cd pulp-freertos
+    - git checkout d6966cae9471b7a592bd09b7acfd5b832666e3b5
+    - git submodule update --init --recursive
+    - cd ..
+  script:
+    - make scripts
+    - make clean build
+    - source setup/vsim.sh
+    - cd pulp-freertos
+    - source env/pulpissimo-cv32e40p.sh
+    - cd tests/hello_world_pmsis
+    - make all run
+
 # test_rt:
 #   stage: test
 #   before_script:
