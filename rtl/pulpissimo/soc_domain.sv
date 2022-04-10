@@ -13,6 +13,7 @@
 module soc_domain #(
     parameter CORE_TYPE            = 0,
     parameter USE_FPU              = 1,
+    parameter USE_ZFINX            = 1,
     parameter USE_HWPE             = 1,
     parameter USE_CLUSTER_EVENT    = 1,
     parameter SIM_STDOUT           = 1,
@@ -237,7 +238,7 @@ module soc_domain #(
       .N_UART              ( N_UART              ),
       .N_SPI               ( N_SPI               ),
       .N_I2C               ( N_I2C               ),
-      .USE_ZFINX           ( 0                   )
+      .USE_ZFINX           ( USE_ZFINX           )
     ) pulp_soc_i (
       .ref_clk_i,
       .slow_clk_i,

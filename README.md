@@ -130,7 +130,7 @@ First install the system dependencies indicated
 [here](https://github.com/pulp-platform/pulp-runtime/blob/master/README.md)
 
 Then make sure you have
-[pulp-riscv-gnu-toolchain](https://github.com/pulp-platform/pulp-riscv-gnu-toolchain)
+[riscv-gnu-toolchain](https://github.com/pulp-platform/riscv-gnu-toolchain)
 installed (either by compiling it or using one of the binary releases under
 available under the release tab) and point `PULP_RISCV_GCC_TOOLCHAIN` to it:
 
@@ -170,8 +170,52 @@ Now we are ready to set up the simulation environment. Normally you would want
 to simulate the hardware design running your program, so go
 [here](#building-the-rtl-simulation-platform).
 
+### PULP FreeRTOS
+PULP FreeRTOS allows you to build applications using the FreeRTOS kernel. You
+can also choose to not use the FreeRTOS kernel and build a baremetal
+application, though in that case driver support is not yet fully fleshed out.
 
-### Software Development Kit
+First make sure you have
+[riscv-gnu-toolchain](https://github.com/pulp-platform/riscv-gnu-toolchain)
+installed (either by compiling it or using one of the binary releases under
+available under the release tab) and point your `RISCV` environment variable to
+it.
+
+Also we need to set up the simulation environment. Normally you would want to
+simulate the hardware design running your program, so go
+[here](#building-the-rtl-simulation-platform) to do that.
+
+
+Then get the repository for the pulp-freertos:
+```
+git clone https://github.com/pulp-platform/pulp-freertos/
+```
+
+There are multiple hardware configuration supported. Select PULPissimo using the
+CV32E40P core.
+So enter the directory of pulp-freertos:
+
+```
+cd pulp-freertos
+```
+
+and select the correct configuration:
+
+```
+source env/pulpissimo-cv32e40p.sh
+```
+
+You then can run a simple freertos hello world like this:
+
+```
+cd tests/hello_world_pmsis
+make all run
+```
+
+There are other tests in `tests/` you can run.
+
+### ~~Software Development Kit~~ (UNSUPPORTED WITH CURRENT RELEASE)
+
 If you need a more complete runtime (drivers, tasks etc.) you can install the
 software development kit for PULP/PULPissimo.
 

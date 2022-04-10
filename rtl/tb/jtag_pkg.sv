@@ -893,10 +893,10 @@ package jtag_pkg;
          assert(sbcs.sbasize == 6'd32)
              else $error("sbasize is not XLEN=32");
          assert(sbcs.sbaccess32 == 1'b1)
-             else $error("sbaccess32 is should be supported");
-         assert(sbcs.sbaccess16 == 1'b0)
+             else $error("sbaccess32 should be supported");
+         assert(sbcs.sbaccess16 == 1'b1)
              else $error("sbaccess16 is signaled as supported");
-         assert(sbcs.sbaccess8 == 1'b0)
+         assert(sbcs.sbaccess8 == 1'b1)
              else $error("sbaccess8 is signaled as supported");
 
       endtask

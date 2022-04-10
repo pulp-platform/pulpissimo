@@ -248,7 +248,7 @@ lint:
 bender:
 ifeq (,$(wildcard ./bender))
 	curl --proto '=https' --tlsv1.2 -sSf https://pulp-platform.github.io/bender/init \
-		| bash -s -- 0.24.0
+		| bash -s -- 0.25.0
 	touch bender
 endif
 

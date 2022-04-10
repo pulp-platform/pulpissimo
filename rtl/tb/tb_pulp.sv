@@ -28,18 +28,14 @@ module tb_pulp;
   // if RI5CY is instantiated (CORE_TYPE == 0), USE_FPU enables the FPU
   parameter USE_FPU = 1;
 
+  // if RI5CY uses ZFINX (merged float and integer register files)
+  parameter USE_ZFINX = 0;
+
   // if we are using a simulated stdout
   parameter SIM_STDOUT = 1;
 
   // period of the external reference clock (32.769kHz)
   parameter REF_CLK_PERIOD = 30517ns;
-
-  // how L2 is loaded. valid values are "JTAG" or "STANDALONE", the latter works only when the S25FS256S flash model is enabled
-  parameter LOAD_L2 = "JTAG";
-
-  // STIM_FROM sets where is the image data.
-  // In case any values are not given, the debug module takes over the boot process.
-  parameter STIM_FROM = "JTAG";  // can be "JTAG" "SPI_FLASH", "HYPER_FLASH", or ""
 
   // UART baud rate in bps
   parameter BAUDRATE = 115200;
@@ -71,6 +67,7 @@ module tb_pulp;
   localparam logic [1:0] SPI_QUAD_RX = 2'b10;
 
   // simulation variables & flags
+  string bootmode;
   logic uart_tb_rx_en = 1'b0;
 
   // contains the program code
@@ -315,7 +312,7 @@ module tb_pulp;
   s25fs256s #(
     .TimingModel  ("S25FS256SAGMFI000_F_30pF"),
     .mem_file_name("./vectors/qspi_stim.slm"),
-    .UserPreload  ((LOAD_L2 == "STANDALONE") ? 1 : 0)
+    .UserPreload  ((bootmode == "spi_flash") ? 1 : 0)
   ) i_spi_flash_csn0 (
     .SI      (w_spi_master_sdio0),
     .SO      (w_spi_master_sdio1),
@@ -460,6 +457,7 @@ module tb_pulp;
   pulpissimo #(
     .CORE_TYPE(CORE_TYPE),
     .USE_FPU  (USE_FPU),
+    .USE_ZFINX (USE_ZFINX),
     .USE_HWPE  (0),
     .SIM_STDOUT  (SIM_STDOUT)
   ) i_dut (
@@ -546,7 +544,11 @@ module tb_pulp;
     num_err       = 0;
     rd_cnt        = 0;
 
+    // read boot mode from commandline
     // read entry point from commandline
+    if (!$value$plusargs("bootmode=%s", bootmode))
+      bootmode = "jtag";
+
     if ($value$plusargs("ENTRY_POINT=%h", entry_point))
       begin_l2_instr = entry_point;
     else
@@ -568,16 +570,16 @@ module tb_pulp;
       // Use only the testbench to do the loading and running
 
       // determine if we want to load the binary with jtag or from flash
-      if (LOAD_L2 == "STANDALONE") begin
+      if (bootmode == "spi_flash" || bootmode == "hyper_flash") begin
         // jtag reset needed anyway
         jtag_pkg::jtag_reset(s_tck, s_tms, s_trstn, s_tdi);
         jtag_pkg::jtag_softreset(s_tck, s_tms, s_trstn, s_tdi);
         #5us;
 
-        if (STIM_FROM == "HYPER_FLASH") begin
+        if (bootmode == "hyper_flash") begin
           $display("[TB  ] %t - HyperFlash boot: Setting bootsel to 2'b?", $realtime);
           $fatal(1, "[TB  ] %t - HyperFlash boot: Not supported yet", $realtime);
-        end else if (STIM_FROM == "SPI_FLASH") begin
+        end else if (bootmode == "spi_flash") begin
           $display("[TB  ] %t - QSPI boot: Setting bootsel to 1'b10", $realtime);
           s_bootsel = 2'b10;
         end
@@ -588,15 +590,15 @@ module tb_pulp;
         debug_mode_if.set_dmactive(1'b1, s_tck, s_tms, s_trstn, s_tdi, s_tdo);
         #10us;
 
-      end else if (LOAD_L2 == "JTAG") begin
+      end else if (bootmode == "jtag") begin
         s_bootsel = 2'b01;
-      end else if (LOAD_L2 == "FAST_DEBUG_PRELOAD") begin
+      end else if (bootmode == "fast_debug_preload") begin
         s_bootsel = 2'b01;
       end else begin
-        $error("Unknown L2 loadmode: %s", LOAD_L2);
+        $error("Unknown bootmode: %s", bootmode);
       end
 
-      if (LOAD_L2 == "JTAG" || LOAD_L2 == "FAST_DEBUG_PRELOAD") begin
+      if (bootmode == "jtag" || bootmode == "fast_debug_preload") begin
         if (USE_FLL) $display("[TB  ] %t - Using FLL", $realtime);
         else $display("[TB  ] %t - Not using FLL", $realtime);
 
@@ -644,16 +646,17 @@ module tb_pulp;
 
         $display("[TB  ] %t - Enabling clock out via jtag", $realtime);
 
+        // TODO: currently no supported in the bootrom
         // The boot code installed in the ROM checks the JTAG register value.
         // If jtag_conf_reg is set to 0, the debug module will take over the boot process
         // The image file can be loaded also from SPI flash and Hyper flash
         // even though this is not the stand-alone boot
 
-        jtag_conf_reg = (STIM_FROM == "JTAG")           ? {1'b0, 4'b0, 3'b001, 1'b0}:
-                               (STIM_FROM == "SPI_FLASH")      ? {1'b0, 4'b0, 3'b111, 1'b0}:
-                               (STIM_FROM == "HYPER_FLASH")    ? {1'b0, 4'b0, 3'b101, 1'b0}: '0;
-        test_mode_if.set_confreg(jtag_conf_reg, jtag_conf_rego, s_tck, s_tms, s_trstn, s_tdi,
-                                 s_tdo);
+        // jtag_conf_reg = (STIM_FROM == "JTAG")           ? {1'b0, 4'b0, 3'b001, 1'b0}:
+        //                        (STIM_FROM == "SPI_FLASH")      ? {1'b0, 4'b0, 3'b111, 1'b0}:
+        //                        (STIM_FROM == "HYPER_FLASH")    ? {1'b0, 4'b0, 3'b101, 1'b0}: '0;
+        // test_mode_if.set_confreg(jtag_conf_reg, jtag_conf_rego, s_tck, s_tms, s_trstn, s_tdi,
+        //                          s_tdo);
 
         $display("[TB  ] %t - jtag_conf_reg set to %x", $realtime, jtag_conf_reg);
 
@@ -713,7 +716,7 @@ module tb_pulp;
           $stop;
         end
 
-        if (LOAD_L2 == "JTAG") begin
+        if (bootmode == "jtag") begin
           $display("[TB  ] %t - Loading L2 via JTAG", $realtime);
           if (!$value$plusargs("jtag_load_tap=%s", jtag_tap_type))
             jtag_tap_type = "pulp"; // default
@@ -726,12 +729,12 @@ module tb_pulp;
           end else begin
             $fatal(1, "Unknown tap type +jtag_load_tap=%s", jtag_tap_type);
           end
-        end else if (LOAD_L2 == "FAST_DEBUG_PRELOAD") begin
+        end else if (bootmode == "fast_debug_preload") begin
           $warning(
             "[TB  ] - Preloading the memory via direct simulator access. \nNEVER EVER USE THIS MODE TO VERIFY THE BOOT BEHAVIOR OF A CHIP. THIS BOOTMODE IS IMPOSSIBLE ON A PHYSICAL CHIP!!!");
           preload_l2(num_stim, stimuli);
         end else begin
-          $error("Unknown L2 loading mechnism chosen (LOAD_L2 == %s)", LOAD_L2);
+          $error("Unknown L2 loading mechnism chosen (bootmode == %s)", bootmode);
         end
 
         // configure for debug module dmi access again

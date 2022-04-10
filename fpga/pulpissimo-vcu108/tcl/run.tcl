@@ -17,10 +17,10 @@ set FPGA_RTL rtl
 set FPGA_IPS ips
 
 # remove duplicate incompatible modules
-remove_files $IPS/pulp_soc/rtl/components/axi_slice_dc_slave_wrap.sv
-remove_file $IPS/pulp_soc/rtl/components/axi_slice_dc_master_wrap.sv
-remove_file $IPS/tech_cells_generic/pad_functional_xilinx.sv
-remove_file $IPS/riscv/rtl/riscv_ex_stage.sv
+# remove_files $IPS/pulp_soc/rtl/components/axi_slice_dc_slave_wrap.sv
+# remove_file $IPS/pulp_soc/rtl/components/axi_slice_dc_master_wrap.sv
+# remove_file $IPS/tech_cells_generic/pad_functional_xilinx.sv
+# remove_file $IPS/riscv/rtl/riscv_ex_stage.sv
 
 # Set Verilog Defines.
 set DEFINES "FPGA_TARGET_XILINX=1 PULP_FPGA_EMUL=1 AXI4_XCHECK_OFF=1"
@@ -50,11 +50,7 @@ add_files -norecurse $FPGA_RTL/fpga_slow_clk_gen.sv
 add_files -norecurse $FPGA_RTL/fpga_bootrom.sv
 add_files -norecurse $FPGA_RTL/pad_functional_xilinx.sv
 add_files -norecurse $FPGA_RTL/pulp_clock_gating_xilinx.sv
-
-# Add patched riscv_ex_stage module (This should be removed once we have a
-# patched upstream repo version)
-add_files -norecurse $FPGA_RTL/patched_riscv_ex_stage.sv
-
+add_files -norecurse $FPGA_RTL/cv32e40p_clock_gate_xilinx.sv
 
 # set pulpissimo as top
 set_property top xilinx_pulpissimo [current_fileset]; #

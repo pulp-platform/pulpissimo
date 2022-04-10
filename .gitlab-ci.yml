@@ -143,28 +143,28 @@ test_sequential_bare:
 #     reports:
 #       junit: tests/parallel_bare_tests/junit-reports/TEST-*.xml
 
-test_pulp:
-  stage: test
-  before_script:
-    - echo "Fetching SDK from releases and setting up paths"
-    - make sdk-gitlab
-    - echo "Compiling RTL model and DPI libraries"
-    - make scripts-bender-vsim-vips
-    - make build
-    - echo "Installing scripts"
-    - make install
-  script:
-    - echo "Running pulp tests"
-    - source env/ci-pulpissimo.sh && make test-pulp
-    - echo "Generating junit test results"
-    - /usr/sepp/bin/python3.4 -m junit2htmlreport tests/pulp_tests/junit-reports/TEST-*.xml
-  artifacts:
-    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
-    paths:
-      - tests/pulp_tests/junit-reports/TEST-*.html
-      - tests/pulp_tests/junit-reports/TEST-*.xml
-    reports:
-      junit: tests/pulp_tests/junit-reports/TEST-*.xml
+# test_pulp:
+#   stage: test
+#   before_script:
+#     - echo "Fetching SDK from releases and setting up paths"
+#     - make sdk-gitlab
+#     - echo "Compiling RTL model and DPI libraries"
+#     - make scripts-bender-vsim-vips
+#     - make build
+#     - echo "Installing scripts"
+#     - make install
+#   script:
+#     - echo "Running pulp tests"
+#     - source env/ci-pulpissimo.sh && make test-pulp
+#     - echo "Generating junit test results"
+#     - /usr/sepp/bin/python3.4 -m junit2htmlreport tests/pulp_tests/junit-reports/TEST-*.xml
+#   artifacts:
+#     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
+#     paths:
+#       - tests/pulp_tests/junit-reports/TEST-*.html
+#       - tests/pulp_tests/junit-reports/TEST-*.xml
+#     reports:
+#       junit: tests/pulp_tests/junit-reports/TEST-*.xml
 
 test_ml:
   stage: test
@@ -210,28 +210,46 @@ test_riscv:
     reports:
       junit: tests/riscv_tests/junit-reports/TEST-*.xml
 
-test_rt:
+freertos_helloworld:
   stage: test
   before_script:
-    - echo "Fetching SDK from releases and setting up paths"
-    - make sdk-gitlab
-    - echo "Compiling RTL model and DPI libraries"
-    - make scripts-bender-vsim-vips
-    - make build
-    - echo "Installing scripts"
-    - make install
+    - export RISCV=/usr/pack/riscv-1.0-kgf/pulp-gcc-2.5.0
+    - git clone https://github.com/pulp-platform/pulp-freertos.git
+    - cd pulp-freertos
+    - git checkout d6966cae9471b7a592bd09b7acfd5b832666e3b5
+    - git submodule update --init --recursive
+    - cd ..
   script:
-    - echo "Running rt tests"
-    - source env/ci-pulpissimo.sh && make test-rt
-    - echo "Generating junit test results"
-    - /usr/sepp/bin/python3.4 -m junit2htmlreport tests/rt-tests/junit-reports/TEST-*.xml
-  artifacts:
-    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
-    paths:
-      - tests/rt-tests/junit-reports/TEST-*.html
-      - tests/rt-tests/junit-reports/TEST-*.xml
-    reports:
-      junit: tests/rt-tests/junit-reports/TEST-*.xml
+    - make scripts
+    - make clean build
+    - source setup/vsim.sh
+    - cd pulp-freertos
+    - source env/pulpissimo-cv32e40p.sh
+    - cd tests/hello_world_pmsis
+    - make all run
+
+# test_rt:
+#   stage: test
+#   before_script:
+#     - echo "Fetching SDK from releases and setting up paths"
+#     - make sdk-gitlab
+#     - echo "Compiling RTL model and DPI libraries"
+#     - make scripts-bender-vsim-vips
+#     - make build
+#     - echo "Installing scripts"
+#     - make install
+#   script:
+#     - echo "Running rt tests"
+#     - source env/ci-pulpissimo.sh && make test-rt
+#     - echo "Generating junit test results"
+#     - /usr/sepp/bin/python3.4 -m junit2htmlreport tests/rt-tests/junit-reports/TEST-*.xml
+#   artifacts:
+#     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
+#     paths:
+#       - tests/rt-tests/junit-reports/TEST-*.html
+#       - tests/rt-tests/junit-reports/TEST-*.xml
+#     reports:
+#       junit: tests/rt-tests/junit-reports/TEST-*.xml
 
 # Use simplified pulp-runtime to run a subset of tests
 # test_simplified_sw:
@@ -289,7 +307,8 @@ test_dm:
     - echo "Setting up vsim path"
     - source setup/vsim.sh
     - echo "Running debug module testbench"
-    - cd sim/ && make all simc VSIM_FLAGS=+jtag_dm_tests
+    # Note that the program is irrelevant we just put something for it to not complain
+    - cd sim/ && make all simc VSIM_FLAGS="+jtag_dm_tests +srec=../rtl/tb/srec/min.srec"
 
 fpga_synth_genesys2:
   stage: test
@@ -484,7 +503,7 @@ sim_questa_multivers:
     - export VMAP="${QUESTA_PREFIX/vsim/vmap}"
     - export VCOM="${QUESTA_PREFIX/vsim/vcom}"
     - export PULP_RISCV_GCC_TOOLCHAIN=/usr/pack/riscv-1.0-kgf/pulp-gcc-1.0.16
-    - git clone https://github.com/pulp-platform/pulp-runtime.git -b v0.0.14
+    - git clone https://github.com/pulp-platform/pulp-runtime.git -b v0.0.15
     - mkdir hello
     - printf "#include <stdio.h>\nint main(){\n  printf(\"Hello World\\\n\");\n  return 0;\n}\n" > hello/hello.c
     - printf "PULP_APP = hello\nPULP_APP_FC_SRCS = hello.c\nPULP_APP_HOST_SRCS = hello.c\nPULP_CFLAGS = -O3 -g\n\ninclude \$(PULP_SDK_HOME)/install/rules/pulp_rt.mk\n" > hello/Makefile

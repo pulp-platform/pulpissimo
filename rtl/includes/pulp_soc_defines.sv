@@ -51,6 +51,10 @@
 
 
 // Debugging
+// Trace CV32E40P core execution
+//`define CV32E40P_TRACE_EXECUTION
+// Trace CV32E40P offload interface
+// `define CV32E40P_APU_TRACE
 // Log uart output
 `define LOG_UART_SIM
 // Log sim stdout to files

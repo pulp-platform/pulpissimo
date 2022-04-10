@@ -13,6 +13,7 @@
 module pulpissimo #(
     parameter CORE_TYPE   = 0, // 0 for RISCY, 1 for IBEX RV32IMC (formerly ZERORISCY), 2 for IBEX RV32EC (formerly MICRORISCY)
     parameter USE_FPU     = 1,
+    parameter USE_ZFINX   = 1,
     parameter USE_HWPE    = 0,
     parameter SIM_STDOUT  = 0
 ) (
@@ -712,6 +713,7 @@ module pulpissimo #(
    soc_domain #(
       .CORE_TYPE          ( CORE_TYPE                  ),
       .USE_FPU            ( USE_FPU                    ),
+      .USE_ZFINX          ( USE_ZFINX                  ),
       .USE_HWPE           ( USE_HWPE                   ),
       .AXI_ADDR_WIDTH     ( AXI_ADDR_WIDTH             ),
       .AXI_DATA_IN_WIDTH  ( AXI_CLUSTER_SOC_DATA_WIDTH ),
@@ -801,6 +803,18 @@ module pulpissimo #(
         .sdio_data_o                 ( s_sdio_datao       ),
         .sdio_data_i                 ( s_sdio_datai       ),
         .sdio_data_oen_o             ( s_sdio_data_oen    ),
+
+         // TODO: wire up if needed
+        .hyper_cs_no                 (                    ),
+        .hyper_ck_o                  (                    ),
+        .hyper_ck_no                 (                    ),
+        .hyper_rwds_o                (                    ),
+        .hyper_rwds_i                ( '0                 ),
+        .hyper_rwds_oe_o             (                    ),
+        .hyper_dq_i                  ( '0                 ),
+        .hyper_dq_o                  (                    ),
+        .hyper_dq_oe_o               (                    ),
+        .hyper_reset_no              (                    ),
 
         .cluster_busy_i              ( s_cluster_busy     ),
         .cluster_irq_o               (                    ),

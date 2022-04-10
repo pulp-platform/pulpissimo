@@ -22,7 +22,7 @@ VLOG            ?= vlog
 VLOG_FLAGS      =
 
 VOPT            ?= vopt
-VOPT_FLAGS      ?= +acc -floatparameters+tb_pulp
+VOPT_FLAGS      ?= +acc
 
 VLIB            ?= vlib
 VMAP            ?= vmap
