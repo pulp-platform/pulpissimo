@@ -299,11 +299,10 @@ project, call `./bender packages -f`.
 The hidden bender directory is not the location to introduce changes to the RTL
 of sub-ips. If you want to quickly try out changes to a sub-ip, call `./bender
 clone <ip_name>` to checkout a working copy of the ip into a directory called
-`working_dir`. Afterwards, call `./bender update` to instruct bender to update
-the IP paths in it's internal database followed by `make scripts`. Afterwards,
-every change you in the RTL of this working copy will be incorporated into the
-RTL simulation model (once you recompile it with `make build`) and the FPGA
-build (once you synthesize it).
+`working_dir`. Call `make scripts` to update the source files in the scripts.
+Afterwards, every change you make in the RTL of this working copy will be
+incorporated into the RTL simulation model (once you recompile it with
+`make build`) and the FPGA build (once you synthesize it).
 
 #### Adding a new IP to PULPissimo
 If you want to add new IPs to pulpissimo you most likely will have to fork the
@@ -725,7 +724,7 @@ describe your changes in detail, along with motivations.
 The pull request will be evaluated and checked with our regression test suite
 for possible integration.
 If you want to replace our version of an IP with your GitHub fork, just 
-update the Bender.yml file.
+update the Bender.yml file and run `./bender update`.
 While we are quite relaxed in terms of coding style, please try to follow these
 recommendations:
 https://github.com/pulp-platform/ariane/blob/master/CONTRIBUTING.md
