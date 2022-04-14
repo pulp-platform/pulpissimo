@@ -66,13 +66,13 @@ all: build
 .PHONY: checkout
 ## Checkout/update dependencies using IPApprox or Bender
 checkout: bender
-	./bender update
-	touch Bender.lock
-
-Bender.lock: bender
-	./bender update
+	./bender checkout
 	touch Bender.lock
 	$(MAKE) scripts
+
+Bender.lock: bender
+	./bender checkout
+	touch Bender.lock
 
 # generic clean and build targets for the platform
 .PHONY: clean
@@ -248,7 +248,7 @@ lint:
 bender:
 ifeq (,$(wildcard ./bender))
 	curl --proto '=https' --tlsv1.2 -sSf https://pulp-platform.github.io/bender/init \
-		| bash -s -- 0.25.0
+		| bash -s -- 0.25.2
 	touch bender
 endif
 
