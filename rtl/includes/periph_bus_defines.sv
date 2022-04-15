@@ -13,6 +13,8 @@
  * specific language governing permissions and limitations under the License.
  *
  */
+`ifndef PERIPH_BUS_DEFINES
+`define PERIPH_BUS_DEFINES
 
 // SOC PERIPHERALS APB BUS PARAMETRES
 `define NB_MASTER  11
@@ -71,3 +73,5 @@
     assign rhs.pslverr  = lhs.pslverr
 
 `define APB_ASSIGN_MASTER(lhs, rhs) `APB_ASSIGN_SLAVE(rhs, lhs)
+
+`endif
