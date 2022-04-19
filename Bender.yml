@@ -1,5 +1,5 @@
 package:
-  name: Pulpissimo
+  name: pulpissimo
   authors:
     - "Robert Balas <balasr@iis.ee.ethz.ch>"
     - "Pasquale Davide Schiavone <pschiavo@iis.ee.ethz.ch>"
@@ -14,10 +14,12 @@ package:
 
 dependencies:
   common_cells: { git: "https://github.com/pulp-platform/common_cells.git", version: 1.21.0 }
+  apb: { git: "https://github.com/pulp-platform/apb.git", rev: "bb7b49a0a10c375ae3e05fa4756071eb964f0274" } # Point to open PR #8 (needed for the apb_demux and apb_err_slv IP)
   jtag_pulp: { git: "https://github.com/pulp-platform/jtag_pulp.git", version: 0.2.0 }
   pulp_soc: { git: "https://github.com/pulp-platform/pulp_soc.git", version: 4.4.0 }
   tbtools: { git: "https://github.com/pulp-platform/tbtools.git", version: 0.2.1 }
   tech_cells_generic: { git: "https://github.com/pulp-platform/tech_cells_generic.git", version: 0.2.3 }
+  pulpissimo_padframe_rtl_sim: { path: "rtl/pulpissimo/padframe/pulpissimo_padframe_rtl_sim_autogen" }
 
 workspace:
   # package_links:
@@ -84,3 +86,14 @@ sources:
       - rtl/vip/i2s/i2c_if.v
       - rtl/vip/i2s/i2s_vip_channel.sv
       - rtl/vip/i2s/i2s_vip.sv
+
+external_import:
+  # Import the GPIO repository directly. Since we have to regenerate the RTL
+  # when we change the number GPIOs we cannot just depend on it as a regular
+  # dependency but actually need a modifyable copy in the source tree.
+  - name: gpio
+    target_dir: vendored_ips/gpio
+    patch_dir: vendored_ips/patches/gpio
+    upstream: { git: "https://github.com/pulp-platform/gpio.git", rev: "a6d5c08f4b16c2b9b30c81fc79bd7abda837d953"} #v0.1.2
+    mapping:
+      - {from: '', to: ''}

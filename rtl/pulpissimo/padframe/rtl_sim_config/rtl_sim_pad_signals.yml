@@ -1,0 +1,43 @@
+# Definition of pad signals that are common to all target platforms.
+- name: pad
+  description: "The inout wire of the IO pad that connect to the toplevel port of the SoC"
+  size: 1
+  kind: pad
+
+- name: chip2pad
+  description: "Connects to pad's TX driver"
+  size: 1
+  kind: input
+  conn_type: dynamic
+  default_reset_value: 0
+  default_static_value: 1'b0
+
+- name: pad2chip
+  description: "The signal that connects to the pad's RX buffer"
+  size: 1
+  kind: output
+  conn_type: dynamic
+
+- name: rx_en
+  description: "RX enable, active high"
+  size: 1
+  kind: input
+  conn_type: dynamic
+  default_reset_value: 1
+  default_static_value: 1'b1
+
+- name: tx_en
+  description: "TX driver enable, active high"
+  size: 1
+  kind: input
+  conn_type: dynamic
+  default_reset_value: 0
+  default_static_value: 1'b0
+
+- name: pull_en
+  description: "Enable pull up/down (depends on the selected IO pad) resistor, active-high"
+  size: 1
+  kind: input
+  conn_type: dynamic
+  default_reset_value: 0
+  default_static_value: 1'b0

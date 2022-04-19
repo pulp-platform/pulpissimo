@@ -41,6 +41,7 @@ VLOG_ARGS += -suppress 2583 -suppress 13314 \"+incdir+\$$ROOT/rtl/includes\"
 BENDER_SIM_BUILD_DIR = sim
 BENDER_FPGA_SCRIPTS_DIR = fpga/pulpissimo/tcl/generated
 
+
 # make variables visible in submake
 # don't export variable if undefined/empty
 define export_if_def
@@ -133,31 +134,24 @@ import-bootcode: boot/boot_code_asic.cde
 boot_code/boot_code_asic.cde:
 	$(MAKE) -C boot boot_code.cde
 
-check-env-pulp-gcc:
-ifndef PULP_RISCV_GCC_TOOLCHAIN
-	$(error PULP_RISCV_GCC_TOOLCHAIN is undefined.\
-	You need to set this environment variable to point \
-	to your pulp gcc installation)
-endif
 
-check-env-art:
-ifndef PULP_ARTIFACTORY_USER
-	$(error PULP_ARTIFACTORY_USER is undefined.\
-	You need to set this environment variable to username:password \
-	to be able access the artifactory server to download the sdk)
-endif
+GPIOS?=32
+.PHONY: reconfigure-padframe
 
-## Build the pulp SDK from source
-build-pulp-sdk: pulp-sdk
-pulp-sdk: check-env-pulp-gcc
-	git clone https://github.com/pulp-platform/pulp-sdk.git -b 2019.12.06; \
-	cd pulp-sdk; \
-	source configs/pulpissimo.sh; \
-	source configs/platform-rtl.sh; \
-	make all env
+## Regenerate the padframe from the padframe configuration file using padrick. You can change the number of GPIOs with 'make reconfigure_padframe GPIOS=xy '
+reconfigure_padframe: clean_padframe reconfigure_gpio_count rtl/pulpissimo/padframe/pulpissimo_padframe_rtl_sim_autogen
 
-## Download the latest supported pulp sdk release
-pulp-sdk-release: check-env-art sdk-gitlab
+reconfigure_gpio_count:
+	$(MAKE) -C vendored_ips/gpio reconfigure GPIOS=$(GPIOS)
+	echo $GPIO_COUNT 
+	@echo "Rencofigured the padframe to contain $(GPIOS) gpios and $(GPIOS) muxed pads to match them."
+
+rtl/pulpissimo/padframe/pulpissimo_padframe_rtl_sim_autogen: | padrick
+	cd rtl/pulpissimo/padframe/ && $(PULP_PATH)/padrick generate -s padrick_generator_settings.yml rtl -o pulpissimo_padframe_rtl_sim_autogen rtl_sim_padframe_config_top.yml
+
+.PHONY: clean_padframe
+clean_padframe:
+	rm -rf rtl/pulpissimo/padframe/pulpissimo_padframe_rtl_sim_autogen
 
 .PHONY: get-tests
 ## Download pulp tests for local machine. Same as test-checkout
@@ -250,9 +244,25 @@ lint:
 bender:
 ifeq (,$(wildcard ./bender))
 	curl --proto '=https' --tlsv1.2 -sSf https://pulp-platform.github.io/bender/init \
-		| bash -s -- 0.25.2
+		| bash -s -- 0.26.1
 	touch bender
 endif
+
+# Padrick Integration
+padrick:
+ifeq (,$(widlcard ./padrick))
+	curl https://api.github.com/repos/pulp-platform/padrick/releases/tags/v0.3.3 \
+    | grep "browser_download_url.*Padrick-x86_64.AppImage" \
+    | cut -d : -f 2,3 \
+    | tr -d \" \
+    | wget -qi -
+	mv Padrick-x86_64.AppImage padrick
+	chmod a+x padrick
+endif
+
+.PHONY: padrick-rm
+padrick-rm:
+	rm -f padrick
 
 .PHONY: bender-rm
 bender-rm:
