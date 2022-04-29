@@ -108,6 +108,18 @@ module safe_domain_reg_if
    logic [31:0] s_rtc_date;
    logic [16:0] s_rtc_timer;
 
+   logic        s_rtc_date_select;
+   logic        s_rtc_clock_select;
+   logic        s_rtc_timer_select;
+   logic        s_rtc_alarm_select;
+
+   logic        s_rtc_date_update;
+   logic        s_rtc_clock_update;
+   logic        s_rtc_timer_update;
+   logic        s_rtc_alarm_update;
+
+   logic        s_rtc_update_day;
+
 
    pulp_sync_wedge i_sync
      (
