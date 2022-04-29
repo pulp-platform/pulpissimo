@@ -61,6 +61,7 @@ module	rtc_clock(
 	logic r_alarm_match;
 	logic s_alarm_event;
 	logic s_timer_event;
+	logic s_timer_match;
 
 	logic [16:0] r_timer;
 	logic [16:0] r_timer_target;
