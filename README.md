@@ -156,7 +156,7 @@ cd pulp-runtime
 Then, to use the CV32E40P (formely RI5CY) core, type:
 
 ```
-source configs/pulpissimo.sh
+source configs/pulpissimo_cv32.sh
 ```
 
 or to use the Ibex (formely zero-riscy) core:
