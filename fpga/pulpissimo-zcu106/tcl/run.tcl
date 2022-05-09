@@ -24,7 +24,8 @@ set FPGA_IPS ips
 
 # Set Verilog Defines.
 set DEFINES "FPGA_TARGET_XILINX=1 PULP_FPGA_EMUL=1 AXI4_XCHECK_OFF=1"
-if { $BOARD == "zcu104" } {
+if { $BOARD == "zcu106" } {
+	# Reuse the board specifics in RTL for the ZCU104
     set DEFINES "$DEFINES ZCU104=1"
 }
 set_property verilog_define $DEFINES [current_fileset]
