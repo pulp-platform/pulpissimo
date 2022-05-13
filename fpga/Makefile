@@ -1,7 +1,7 @@
 .DEFAULT_GOAL:=help
 export BENDER
 
-all: genesys2 zcu104 nexys_video nexys zedboard zcu102 ## Generates the bitstream for all supported boards board.
+all: genesys2 zcu104 nexys_video nexys zedboard zcu102 zcu106 ## Generates the bitstream for all supported boards board.
 
 clean_all: clean_genesys2 clean_zcu104 clean_nexys_video clean_nexys clean_zedboard clean_zcu102 ## Removes synthesis output and bitstreams for all boards.
 
@@ -26,6 +26,17 @@ clean_zcu104: ## Removes all bitstreams, *.log files and vivado related files (r
 	$(MAKE) -C pulpissimo-zcu104 clean
 	rm -f pulpissimo_zcu104.bit
 	rm -f pulpissimo_zcu104.bin
+
+zcu106: ## Generates the bistream for the zcu104 board
+	$(MAKE) -C pulpissimo-zcu106 all
+	cp pulpissimo-zcu106/pulpissimo-zcu106.runs/impl_1/xilinx_pulpissimo.bit pulpissimo_zcu106.bit
+	cp pulpissimo-zcu106/pulpissimo-zcu106.runs/impl_1/xilinx_pulpissimo.bin pulpissimo_zcu106.bin
+	@echo "Bitstream generation for zcu106 board finished. The bitstream Configuration Memory File was copied to ./pulpissimo_zcu106.bit and ./pulpissimo_zcu106.bin"
+
+clean_zcu106: ## Removes all bitstreams, *.log files and vivado related files (rm -rf vivado*) for the zcu104 board.
+	$(MAKE) -C pulpissimo-zcu106 clean
+	rm -f pulpissimo_zcu106.bit
+	rm -f pulpissimo_zcu106.bin
 
 nexys_video: ## Generates the bistream for the nexys_video board
 	$(MAKE) -C pulpissimo-nexys_video all
