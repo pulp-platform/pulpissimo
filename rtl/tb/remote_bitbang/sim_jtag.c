@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include "remote_bitbang.h"
+#include "sim_jtag.h"
 
 int init = 0;
 
