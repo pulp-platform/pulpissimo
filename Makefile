@@ -14,6 +14,8 @@
 
 SHELL=bash
 
+CTAGS=ctags
+
 PKG_DIR ?= $(PWD)/install
 
 export VSIM_PATH=$(PKG_DIR)
