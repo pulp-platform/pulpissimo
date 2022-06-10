@@ -517,3 +517,17 @@ sim_questa_multivers:
     - fetch_ips_bender
   needs:
     - fetch_ips_bender
+
+spi_boot:
+  stage: test
+  before_script:
+    - git clone https://github.com/pulp-platform/pulp-runtime.git -b v0.0.15
+    - mkdir hello
+    - export PULP_RISCV_GCC_TOOLCHAIN=/usr/pack/riscv-1.0-kgf/pulp-gcc-2.5.0
+    - printf "#include <stdio.h>\nint main(){\n  printf(\"Hello World\\\n\");\n  return 0;\n}\n" > hello/hello.c
+    - printf "PULP_APP = hello\nPULP_APP_FC_SRCS = hello.c\nPULP_APP_HOST_SRCS = hello.c\nPULP_CFLAGS = -O3 -g\n\ninclude \$(PULP_SDK_HOME)/install/rules/pulp_rt.mk\n" > hello/Makefile
+  script:
+    - make scripts-bender-vsim-vips all
+    - source setup/vsim.sh
+    - source pulp-runtime/configs/pulpissimo_cv32.sh
+    - make -C hello clean all run bootmode=spi PULP_RUNTIME_GCC_TOOLCHAIN=/usr/pack/riscv-1.0-kgf/pulp-gcc-2.5.0
