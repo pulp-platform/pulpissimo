@@ -511,7 +511,7 @@ sim_questa_multivers:
     - make scripts
     - make clean build
     - source setup/vsim.sh
-    - source pulp-runtime/configs/pulpissimo.sh
+    - source pulp-runtime/configs/pulpissimo_cv32.sh
     - make -C hello clean all run
   dependencies:
     - fetch_ips_bender
