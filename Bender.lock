@@ -1,11 +1,5 @@
 ---
 packages:
-  L2_tcdm_hybrid_interco:
-    revision: fa55e72859dcfb117a2788a77352193bef94ff2b
-    version: 1.0.0
-    source:
-      Git: "https://github.com/pulp-platform/L2_tcdm_hybrid_interco.git"
-    dependencies: []
   adv_dbg_if:
     revision: 19eeef8cae1cbec7413877b3f29fe0bd078748d7
     version: 0.0.2
@@ -95,7 +89,7 @@ packages:
       Git: "https://github.com/pulp-platform/common_verification.git"
     dependencies: []
   cv32e40p:
-    revision: 443ce5e5db2535dcbf6e50143aa4482e4101856f
+    revision: 800a09d97a1e9418e127e8bbf1763c1d1097c92f
     version: ~
     source:
       Git: "https://github.com/pulp-platform/cv32e40p.git"
@@ -118,7 +112,7 @@ packages:
       Git: "https://github.com/pulp-platform/fpu_div_sqrt_mvp.git"
     dependencies:
       - common_cells
-  generic_FLL:
+  generic_fll:
     revision: 1c92dc73a940392182fd4cb7b86f35649b349595
     version: ~
     source:
@@ -159,13 +153,18 @@ packages:
     source:
       Git: "https://github.com/pulp-platform/jtag_pulp.git"
     dependencies: []
+  l2_tcdm_hybrid_interco:
+    revision: fa55e72859dcfb117a2788a77352193bef94ff2b
+    version: 1.0.0
+    source:
+      Git: "https://github.com/pulp-platform/L2_tcdm_hybrid_interco.git"
+    dependencies: []
   pulp_soc:
-    revision: b3e0bc676399124e3ba50f983cb668b2ed3f95a7
-    version: 4.3.0
+    revision: 0573a85c8ec502ff5e3ef06946a75eaf567ce16a
+    version: 4.4.0
     source:
       Git: "https://github.com/pulp-platform/pulp_soc.git"
     dependencies:
-      - L2_tcdm_hybrid_interco
       - adv_dbg_if
       - apb
       - apb2per
@@ -180,10 +179,11 @@ packages:
       - common_cells
       - cv32e40p
       - fpnew
-      - generic_FLL
+      - generic_fll
       - hwpe-mac-engine
       - ibex
       - jtag_pulp
+      - l2_tcdm_hybrid_interco
       - register_interface
       - riscv-dbg
       - scm
