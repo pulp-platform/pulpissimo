@@ -312,7 +312,7 @@ module tb_pulp;
   s25fs256s #(
     .TimingModel  ("S25FS256SAGMFI000_F_30pF"),
     .mem_file_name("./vectors/qspi_stim.slm"),
-    .UserPreload  ((bootmode == "spi_flash") ? 1 : 0)
+    .UserPreload  (1)
   ) i_spi_flash_csn0 (
     .SI      (w_spi_master_sdio0),
     .SO      (w_spi_master_sdio1),
