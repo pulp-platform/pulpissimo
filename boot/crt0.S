@@ -41,7 +41,7 @@ _start:
 /* TODO: load data from ROM */
 
 /* call main */
-	lw a0, 0(sp)                    /* a0 = argc */
+	li a0, 0                        /* a0 = argc */
 	addi a1, sp, __SIZEOF_POINTER__ /* a1 = argv */
 	li a2, 0                        /* a2 = envp = NULL */
 	call main
