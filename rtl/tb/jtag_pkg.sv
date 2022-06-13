@@ -1512,6 +1512,10 @@ package jtag_pkg;
 
             jtag_addr = stimuli[num_stim][95:64];
             for (int i=0;i<256;i=i+2) begin
+               if (num_stim > $size(stimuli) || stimuli[num_stim]===96'bx ) begin // make sure we have more stimuli
+                  more_stim = 0;                    // if not set variable to 0, will prevent additional stimuli to be applied
+                  break;
+               end
                spi_addr       = stimuli[num_stim][95:64]; // assign address
                jtag_data[0]   = stimuli[num_stim][31:0];  // assign data
                jtag_data[1]   = stimuli[num_stim][63:32]; // assign data
@@ -1523,10 +1527,6 @@ package jtag_pkg;
                   end
                else begin
                   num_stim = num_stim + 1;
-               end
-               if (num_stim > $size(stimuli) || stimuli[num_stim]===96'bx ) begin // make sure we have more stimuli
-                  more_stim = 0;                    // if not set variable to 0, will prevent additional stimuli to be applied
-                  break;
                end
                spi_addr_old = spi_addr;
 
