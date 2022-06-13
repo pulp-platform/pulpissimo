@@ -454,6 +454,10 @@ void __attribute__((noreturn)) main(void)
      *  2'b3        preloaded boot (jump to address in bootaddr register)
      */
 
+    /* On the cv32e40p, we need to enable all interrupts in the core because we
+     * intend to only use the apb_interrupt_cntrl to manage interrupts */
+    hal_spr_write(CSR_MIE, 0xffffffff);
+
     switch (apb_soc_bootsel_get(ARCHI_APB_SOC_CTRL_ADDR) & 3) {
     case BOOT_MODE_DEFAULT:
 #ifdef CONFIG_FLL

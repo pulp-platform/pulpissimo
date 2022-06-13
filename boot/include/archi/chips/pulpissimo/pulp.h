@@ -23,7 +23,7 @@
 
 //#include "archi/periph_v2.h"
 //#include "archi/gpio/gpio_v3.h"
-//#include "archi/riscv/priv_1_10.h"
+#include "archi/riscv/priv_1_12.h"
 //#include "archi/riscv/pcer_v2.h"
 
 #include "archi/chips/pulpissimo/memory_map.h"
