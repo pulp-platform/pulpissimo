@@ -1617,8 +1617,8 @@ default_handler:
 1a00103a:	0291                	addi	t0,t0,4
 	bltu t0, t1, 1b
 1a00103c:	fe62ede3          	bltu	t0,t1,1a001036 <_start+0x20>
-	lw a0, 0(sp)                    /* a0 = argc */
-1a001040:	4502                	lw	a0,0(sp)
+	li a0, 0                        /* a0 = argc */
+1a001040:	4501                	li	a0,0
 	addi a1, sp, __SIZEOF_POINTER__ /* a1 = argv */
 1a001042:	004c                	addi	a1,sp,4
 	li a2, 0                        /* a2 = envp = NULL */
