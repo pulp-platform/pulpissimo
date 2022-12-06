@@ -41,7 +41,7 @@ package pkg_pulpissimo_padframe;
       logic        jtag_tck;
       logic        jtag_tdi;
       logic        jtag_tms;
-      logic        jtag_trst;
+      logic        jtag_trstn;
       logic        ref_clk;
       logic        rst_n;
      } pad_domain_all_pads_static_connection_signals_pad2soc_t;

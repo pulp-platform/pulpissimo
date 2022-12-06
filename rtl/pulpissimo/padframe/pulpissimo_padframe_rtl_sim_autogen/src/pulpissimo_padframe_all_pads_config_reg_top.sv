@@ -714,7 +714,7 @@ module pulpissimo_padframe_all_pads_config_reg_top #(
   prim_subreg #(
     .DW      (6),
     .SWACCESS("RW"),
-    .RESVAL  (6'h0)
+    .RESVAL  (6'he)
   ) u_pad_io00_mux_sel (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -847,7 +847,7 @@ module pulpissimo_padframe_all_pads_config_reg_top #(
   prim_subreg #(
     .DW      (6),
     .SWACCESS("RW"),
-    .RESVAL  (6'h0)
+    .RESVAL  (6'he)
   ) u_pad_io01_mux_sel (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -980,7 +980,7 @@ module pulpissimo_padframe_all_pads_config_reg_top #(
   prim_subreg #(
     .DW      (6),
     .SWACCESS("RW"),
-    .RESVAL  (6'h0)
+    .RESVAL  (6'he)
   ) u_pad_io02_mux_sel (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -1113,7 +1113,7 @@ module pulpissimo_padframe_all_pads_config_reg_top #(
   prim_subreg #(
     .DW      (6),
     .SWACCESS("RW"),
-    .RESVAL  (6'h0)
+    .RESVAL  (6'he)
   ) u_pad_io03_mux_sel (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -1246,7 +1246,7 @@ module pulpissimo_padframe_all_pads_config_reg_top #(
   prim_subreg #(
     .DW      (6),
     .SWACCESS("RW"),
-    .RESVAL  (6'h0)
+    .RESVAL  (6'he)
   ) u_pad_io04_mux_sel (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -1379,7 +1379,7 @@ module pulpissimo_padframe_all_pads_config_reg_top #(
   prim_subreg #(
     .DW      (6),
     .SWACCESS("RW"),
-    .RESVAL  (6'h0)
+    .RESVAL  (6'he)
   ) u_pad_io05_mux_sel (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -1512,7 +1512,7 @@ module pulpissimo_padframe_all_pads_config_reg_top #(
   prim_subreg #(
     .DW      (6),
     .SWACCESS("RW"),
-    .RESVAL  (6'h0)
+    .RESVAL  (6'he)
   ) u_pad_io06_mux_sel (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -1645,7 +1645,7 @@ module pulpissimo_padframe_all_pads_config_reg_top #(
   prim_subreg #(
     .DW      (6),
     .SWACCESS("RW"),
-    .RESVAL  (6'h0)
+    .RESVAL  (6'he)
   ) u_pad_io07_mux_sel (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -1778,7 +1778,7 @@ module pulpissimo_padframe_all_pads_config_reg_top #(
   prim_subreg #(
     .DW      (6),
     .SWACCESS("RW"),
-    .RESVAL  (6'h0)
+    .RESVAL  (6'he)
   ) u_pad_io08_mux_sel (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -1911,7 +1911,7 @@ module pulpissimo_padframe_all_pads_config_reg_top #(
   prim_subreg #(
     .DW      (6),
     .SWACCESS("RW"),
-    .RESVAL  (6'h0)
+    .RESVAL  (6'he)
   ) u_pad_io09_mux_sel (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -2044,7 +2044,7 @@ module pulpissimo_padframe_all_pads_config_reg_top #(
   prim_subreg #(
     .DW      (6),
     .SWACCESS("RW"),
-    .RESVAL  (6'h0)
+    .RESVAL  (6'he)
   ) u_pad_io10_mux_sel (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -2177,7 +2177,7 @@ module pulpissimo_padframe_all_pads_config_reg_top #(
   prim_subreg #(
     .DW      (6),
     .SWACCESS("RW"),
-    .RESVAL  (6'h0)
+    .RESVAL  (6'he)
   ) u_pad_io11_mux_sel (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -2310,7 +2310,7 @@ module pulpissimo_padframe_all_pads_config_reg_top #(
   prim_subreg #(
     .DW      (6),
     .SWACCESS("RW"),
-    .RESVAL  (6'h0)
+    .RESVAL  (6'he)
   ) u_pad_io12_mux_sel (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -2443,7 +2443,7 @@ module pulpissimo_padframe_all_pads_config_reg_top #(
   prim_subreg #(
     .DW      (6),
     .SWACCESS("RW"),
-    .RESVAL  (6'h0)
+    .RESVAL  (6'he)
   ) u_pad_io13_mux_sel (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -2576,7 +2576,7 @@ module pulpissimo_padframe_all_pads_config_reg_top #(
   prim_subreg #(
     .DW      (6),
     .SWACCESS("RW"),
-    .RESVAL  (6'h0)
+    .RESVAL  (6'he)
   ) u_pad_io14_mux_sel (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -2709,7 +2709,7 @@ module pulpissimo_padframe_all_pads_config_reg_top #(
   prim_subreg #(
     .DW      (6),
     .SWACCESS("RW"),
-    .RESVAL  (6'h0)
+    .RESVAL  (6'he)
   ) u_pad_io15_mux_sel (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -2842,7 +2842,7 @@ module pulpissimo_padframe_all_pads_config_reg_top #(
   prim_subreg #(
     .DW      (6),
     .SWACCESS("RW"),
-    .RESVAL  (6'h0)
+    .RESVAL  (6'he)
   ) u_pad_io16_mux_sel (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -2975,7 +2975,7 @@ module pulpissimo_padframe_all_pads_config_reg_top #(
   prim_subreg #(
     .DW      (6),
     .SWACCESS("RW"),
-    .RESVAL  (6'h0)
+    .RESVAL  (6'he)
   ) u_pad_io17_mux_sel (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -3108,7 +3108,7 @@ module pulpissimo_padframe_all_pads_config_reg_top #(
   prim_subreg #(
     .DW      (6),
     .SWACCESS("RW"),
-    .RESVAL  (6'h0)
+    .RESVAL  (6'he)
   ) u_pad_io18_mux_sel (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -3241,7 +3241,7 @@ module pulpissimo_padframe_all_pads_config_reg_top #(
   prim_subreg #(
     .DW      (6),
     .SWACCESS("RW"),
-    .RESVAL  (6'h0)
+    .RESVAL  (6'he)
   ) u_pad_io19_mux_sel (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -3374,7 +3374,7 @@ module pulpissimo_padframe_all_pads_config_reg_top #(
   prim_subreg #(
     .DW      (6),
     .SWACCESS("RW"),
-    .RESVAL  (6'h0)
+    .RESVAL  (6'he)
   ) u_pad_io20_mux_sel (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -3507,7 +3507,7 @@ module pulpissimo_padframe_all_pads_config_reg_top #(
   prim_subreg #(
     .DW      (6),
     .SWACCESS("RW"),
-    .RESVAL  (6'h0)
+    .RESVAL  (6'he)
   ) u_pad_io21_mux_sel (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -3640,7 +3640,7 @@ module pulpissimo_padframe_all_pads_config_reg_top #(
   prim_subreg #(
     .DW      (6),
     .SWACCESS("RW"),
-    .RESVAL  (6'h0)
+    .RESVAL  (6'he)
   ) u_pad_io22_mux_sel (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -3773,7 +3773,7 @@ module pulpissimo_padframe_all_pads_config_reg_top #(
   prim_subreg #(
     .DW      (6),
     .SWACCESS("RW"),
-    .RESVAL  (6'h0)
+    .RESVAL  (6'he)
   ) u_pad_io23_mux_sel (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -3906,7 +3906,7 @@ module pulpissimo_padframe_all_pads_config_reg_top #(
   prim_subreg #(
     .DW      (6),
     .SWACCESS("RW"),
-    .RESVAL  (6'h0)
+    .RESVAL  (6'he)
   ) u_pad_io24_mux_sel (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -4039,7 +4039,7 @@ module pulpissimo_padframe_all_pads_config_reg_top #(
   prim_subreg #(
     .DW      (6),
     .SWACCESS("RW"),
-    .RESVAL  (6'h0)
+    .RESVAL  (6'he)
   ) u_pad_io25_mux_sel (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -4172,7 +4172,7 @@ module pulpissimo_padframe_all_pads_config_reg_top #(
   prim_subreg #(
     .DW      (6),
     .SWACCESS("RW"),
-    .RESVAL  (6'h0)
+    .RESVAL  (6'he)
   ) u_pad_io26_mux_sel (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -4305,7 +4305,7 @@ module pulpissimo_padframe_all_pads_config_reg_top #(
   prim_subreg #(
     .DW      (6),
     .SWACCESS("RW"),
-    .RESVAL  (6'h0)
+    .RESVAL  (6'he)
   ) u_pad_io27_mux_sel (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -4438,7 +4438,7 @@ module pulpissimo_padframe_all_pads_config_reg_top #(
   prim_subreg #(
     .DW      (6),
     .SWACCESS("RW"),
-    .RESVAL  (6'h0)
+    .RESVAL  (6'he)
   ) u_pad_io28_mux_sel (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -4571,7 +4571,7 @@ module pulpissimo_padframe_all_pads_config_reg_top #(
   prim_subreg #(
     .DW      (6),
     .SWACCESS("RW"),
-    .RESVAL  (6'h0)
+    .RESVAL  (6'he)
   ) u_pad_io29_mux_sel (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -4704,7 +4704,7 @@ module pulpissimo_padframe_all_pads_config_reg_top #(
   prim_subreg #(
     .DW      (6),
     .SWACCESS("RW"),
-    .RESVAL  (6'h0)
+    .RESVAL  (6'he)
   ) u_pad_io30_mux_sel (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -4837,7 +4837,7 @@ module pulpissimo_padframe_all_pads_config_reg_top #(
   prim_subreg #(
     .DW      (6),
     .SWACCESS("RW"),
-    .RESVAL  (6'h0)
+    .RESVAL  (6'he)
   ) u_pad_io31_mux_sel (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),

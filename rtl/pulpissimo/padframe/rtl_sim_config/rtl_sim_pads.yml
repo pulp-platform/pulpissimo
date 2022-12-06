@@ -53,12 +53,12 @@
     rx_en: 1'b1
     tx_en: 1'b0
 
-- name: pad_jtag_trst
-  description: "JTAG interface reset"
+- name: pad_jtag_trstn
+  description: "JTAG interface reset (active-low)"
   pad_type: pull_up_pad
   is_static: true
   connections:
-    pad2chip: jtag_trst
+    pad2chip: jtag_trstn
     rx_en: 1'b1
     tx_en: 1'b0
 
@@ -153,5 +153,6 @@
   multiple: !include gpio_count.txt
   pad_type: pull_up_pad
   is_static: false
+  default_port: gpio.gpio{i:2d}
   user_attr:
     custom_toplevel_connection: True

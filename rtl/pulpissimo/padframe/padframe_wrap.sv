@@ -36,7 +36,7 @@ module padframe_wrap #(
   inout wire               pad_bootsel0,
   inout wire               pad_bootsel1,
   inout wire               pad_jtag_tck,
-  inout wire               pad_jtag_trst,
+  inout wire               pad_jtag_trstn,
   inout wire               pad_jtag_tms,
   inout wire               pad_jtag_tdi,
   inout wire               pad_jtag_tdo,
@@ -163,7 +163,7 @@ module padframe_wrap #(
   assign jtag_tck_o   = s_static_connections_pad2soc.all_pads.jtag_tck;
   assign jtag_tdi_o   = s_static_connections_pad2soc.all_pads.jtag_tdi;
   assign jtag_tms_o   = s_static_connections_pad2soc.all_pads.jtag_tms;
-  assign jtag_trst_no = s_static_connections_pad2soc.all_pads.jtag_trst;
+  assign jtag_trst_no = s_static_connections_pad2soc.all_pads.jtag_trstn;
   assign s_static_connections_soc2pad.all_pads.jtag_tdo = jtag_tdo_i;
   // HyperFlash/HyperRAM
   assign s_static_connections_soc2pad.all_pads.hyper_ck       = hyper_to_pad_i.hyper_ck;
@@ -271,7 +271,7 @@ module padframe_wrap #(
     .pad_bootsel0,
     .pad_bootsel1,
     .pad_jtag_tck,
-    .pad_jtag_trst,
+    .pad_jtag_trstn,
     .pad_jtag_tms,
     .pad_jtag_tdi,
     .pad_jtag_tdo,

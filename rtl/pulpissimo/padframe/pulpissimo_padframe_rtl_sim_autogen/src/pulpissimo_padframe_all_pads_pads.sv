@@ -16,7 +16,7 @@ module pulpissimo_padframe_all_pads_pads
   inout wire logic pad_pad_bootsel0_pad,
   inout wire logic pad_pad_bootsel1_pad,
   inout wire logic pad_pad_jtag_tck_pad,
-  inout wire logic pad_pad_jtag_trst_pad,
+  inout wire logic pad_pad_jtag_trstn_pad,
   inout wire logic pad_pad_jtag_tms_pad,
   inout wire logic pad_pad_jtag_tdi_pad,
   inout wire logic pad_pad_jtag_tdo_pad,
@@ -111,12 +111,12 @@ module pulpissimo_padframe_all_pads_pads
     .I(1'b0),
     .O(static_connection_signals_pad2soc.jtag_tck)
   );
-   pad_functional_pu i_pad_jtag_trst (
-    .PAD(pad_pad_jtag_trst_pad),
+   pad_functional_pu i_pad_jtag_trstn (
+    .PAD(pad_pad_jtag_trstn_pad),
     .OEN(~1'b0),
     .PEN(~1'b0),
     .I(1'b0),
-    .O(static_connection_signals_pad2soc.jtag_trst)
+    .O(static_connection_signals_pad2soc.jtag_trstn)
   );
    pad_functional_pu i_pad_jtag_tms (
     .PAD(pad_pad_jtag_tms_pad),
