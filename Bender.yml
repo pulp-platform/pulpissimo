@@ -34,15 +34,8 @@ sources:
   # package. Files in level 1 only depend on files in level 0, files in level 2 on files in
   # levels 1 and 0, etc. Files within a level are ordered alphabetically.
   # Level 0
-  - rtl/pulpissimo/jtag_tap_top.sv
-  - rtl/pulpissimo/pad_frame.sv
-  - rtl/pulpissimo/pad_control.sv
+  - rtl/pulpissimo/clock_gen_asic.sv
   - rtl/pulpissimo/soc_domain.sv
-  - rtl/pulpissimo/rtc_date.sv
-  - rtl/pulpissimo/rtc_clock.sv
-  - rtl/pulpissimo/safe_domain_reg_if.sv
-  # Level 1
-  - rtl/pulpissimo/safe_domain.sv
   - rtl/pulpissimo/pulpissimo.sv
 
   # TB sources
