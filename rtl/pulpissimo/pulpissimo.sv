@@ -38,29 +38,36 @@ module pulpissimo #(
   // Some platforms (e.g. Verilator) require to feed the clock externally. With
   // the EXTERNAL_CLOCK define we remove all internall clock generation logic.
 `ifdef EXTERNAL_CLOCK
-  input logic ext_slow_clk_i,
-  input logic ext_soc_clk_i,
-  input logic ext_per_clk_i,
+  input logic              ext_slow_clk_i,
+  input logic              ext_soc_clk_i,
+  input logic              ext_per_clk_i,
 `else
    // Reference clock for clock internal clock generation
-  inout wire pad_refclk_in,
+  inout wire               pad_refclk_in,
 `endif
   // Active-low Asynchronous hard-reset
-  inout wire pad_reset_n,
+  inout wire               pad_reset_n,
   // Clock Bypass enable. If asserted (active-high) peripheral and soc clock
   // domain will be driven directly by pad_refclk_in (or verilator_slow_clk_i if
   // in built for VERILATOR).
-  inout wire pad_clk_byp_en,
+  inout wire               pad_clk_byp_en,
   // Boot mode selection. Check bootcode repository for mapping of bootsel
   // values to actual boot mode.
-  inout wire pad_bootsel0,
-  inout wire pad_bootsel1,
+  inout wire               pad_bootsel0,
+  inout wire               pad_bootsel1,
   // JTAG in-system debug interface
-  inout wire pad_jtag_tck,
-  inout wire pad_jtag_tdi,
-  inout wire pad_jtag_tdo,
-  inout wire pad_jtag_tms,
-  inout wire pad_jtag_trst,
+  inout wire               pad_jtag_tck,
+  inout wire               pad_jtag_tdi,
+  inout wire               pad_jtag_tdo,
+  inout wire               pad_jtag_tms,
+  inout wire               pad_jtag_trstn,
+  // HyperFlash/HyperRAM Pads
+  inout wire               pad_hyper_csn,
+  inout wire               pad_hyper_reset_n,
+  inout wire               pad_hyper_ck,
+  inout wire               pad_hyper_ckn,
+  inout wire [7:0]         pad_hyper_dq,
+  inout wire               pad_hyper_rwds,
   // general purpose pads, since PULPissimo v8.0 any peripheral including
   // GPIO) can be mapped to any pad any-to-any muxing. Check the latest
   // README.md on description and how to modify the pad count)
@@ -304,7 +311,7 @@ module pulpissimo #(
     .pad_bootsel0,
     .pad_bootsel1,
     .pad_jtag_tck,
-    .pad_jtag_trst,
+    .pad_jtag_trstn,
     .pad_jtag_tms,
     .pad_jtag_tdi,
     .pad_jtag_tdo,

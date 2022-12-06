@@ -137,7 +137,7 @@ module clock_gen #(
     .test_mode_en_i ( dft_test_en_i              ),
     .div_i          ( 256                        ),
     .div_valid_i    ( 1'b0                       ), // We don't use the dynamic config port and only use the
-                         // default div value. Should be optimized away.
+                                                    // default div value. Should be optimized away.
     .div_ready_o    (                            ),
     .clk_o          ( s_slow_clock               ),
     .cycl_count_o   (                            )
