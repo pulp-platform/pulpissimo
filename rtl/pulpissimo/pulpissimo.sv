@@ -163,7 +163,7 @@ module pulpissimo #(
 
   // Config. Interfaces
   APB #(.ADDR_WIDTH(32), .DATA_WIDTH(32)) s_apb_chip_ctrl_bus();
-  APB #(.ADDR_WIDTH(8), .DATA_WIDTH(32)) s_apb_fll_ctrl_bus();
+  APB #(.ADDR_WIDTH(10), .DATA_WIDTH(32)) s_apb_fll_ctrl_bus();
   APB #(.ADDR_WIDTH(32), .DATA_WIDTH(32)) s_apb_pads_ctrl_bus();
 
   ////////////////////////////
@@ -265,8 +265,8 @@ module pulpissimo #(
   localparam int unsigned N_CHIP_CTRL_DEMUX_SLAVES = 2;
   localparam int unsigned APB_DEMUX_SELECT_WIDTH = $clog2(N_CHIP_CTRL_DEMUX_SLAVES);
   localparam addr_rule_t[N_CHIP_CTRL_DEMUX_SLAVES-1:0] APB_DEMUX_ADDR_RULES = '{
-       '{ idx: 0, start_addr: `SOC_MEM_MAP_CHIP_CTRL_FLL_START_ADDR, end_addr: `SOC_MEM_MAP_CHIP_CTRL_FLL_END_ADDR},
-       '{ idx: 1, start_addr: `SOC_MEM_MAP_CHIP_CTRL_PAD_CFG_START_ADDR, end_addr: `SOC_MEM_MAP_CHIP_CTRL_PAD_CFG_END_ADDR}
+       '{ idx: 1, start_addr: `SOC_MEM_MAP_CHIP_CTRL_FLL_START_ADDR, end_addr: `SOC_MEM_MAP_CHIP_CTRL_FLL_END_ADDR},
+       '{ idx: 2, start_addr: `SOC_MEM_MAP_CHIP_CTRL_PAD_CFG_START_ADDR, end_addr: `SOC_MEM_MAP_CHIP_CTRL_PAD_CFG_END_ADDR}
   };
 
   logic [N_CHIP_CTRL_DEMUX_SLAVES-1:0] s_apb_demux_sel;
