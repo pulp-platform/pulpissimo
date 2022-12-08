@@ -102,23 +102,22 @@ module soc_domain #(
 );
 
     pulp_soc #(
-      .CORE_TYPE           ( CORE_TYPE           ),
-      .USE_FPU             ( USE_FPU             ),
-      .USE_HWPE            ( USE_HWPE            ),
-      .USE_CLUSTER_EVENT   ( USE_CLUSTER_EVENT   ),
-      .SIM_STDOUT          ( SIM_STDOUT          ),
-      .AXI_ADDR_WIDTH      ( AXI_ADDR_WIDTH      ),
-      .AXI_DATA_IN_WIDTH   ( AXI_DATA_IN_WIDTH   ),
-      .AXI_DATA_OUT_WIDTH  ( AXI_DATA_OUT_WIDTH  ),
-      .AXI_ID_IN_WIDTH     ( AXI_ID_IN_WIDTH     ),
-      .AXI_USER_WIDTH      ( AXI_USER_WIDTH      ),
-      .AXI_STRB_WIDTH_IN   ( AXI_STRB_WIDTH_IN   ),
-      .AXI_STRB_WIDTH_OUT  ( AXI_STRB_WIDTH_OUT  ),
-      .CDC_FIFOS_LOG_DEPTH ( CDC_FIFOS_LOG_DEPTH ),
-      .EVNT_WIDTH          ( EVNT_WIDTH          ),
-      .NB_CORES            ( NB_CL_CORES         ),
-      .USE_ZFINX           ( USE_ZFINX           )
-    ) pulp_soc_i (
+      .CORE_TYPE           ( CORE_TYPE  ),
+      .USE_FPU             ( USE_FPU    ),
+      .USE_HWPE            ( USE_HWPE   ),
+      .SIM_STDOUT          ( SIM_STDOUT ),
+      .USE_ZFINX           ( USE_ZFINX  ),
+      // We don't really care about the following parameter since they are only
+      // relevant if you were to attach a cluster to the SoC
+      .AXI_ADDR_WIDTH      ( 32         ),
+      .AXI_DATA_IN_WIDTH   ( 64         ),
+      .AXI_DATA_OUT_WIDTH  ( 32         ),
+      .AXI_ID_IN_WIDTH     ( 6          ),
+      .AXI_USER_WIDTH      ( 6          ),
+      .CDC_FIFOS_LOG_DEPTH ( 3          ),
+      .EVNT_WIDTH          ( 8          ),
+      .NB_CORES            ( 8          )
+    ) i_pulp_soc (
       .slow_clk_i,
       .slow_clk_rstn_synced_i,
       .soc_clk_i,

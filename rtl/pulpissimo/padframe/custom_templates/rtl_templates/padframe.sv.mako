@@ -87,12 +87,14 @@ module ${padframe.name}
    .port_signals_soc2pad_i(port_signals_soc2pad.${pad_domain.name}),
 % endif
 % for pad in pad_domain.pad_list:
-% for i in range(pad.multiple):
-<% pad_suffix = i if pad.multiple > 1 else "" %>\
+% if not(pad.user_attr and 'custom_toplevel_connection' in pad.user_attr and pad.user_attr['custom_toplevel_connection']):
 % for signal in pad.landing_pads:
-   .pad_${pad.name}${pad_suffix}_${signal.name}(pad_${pad_domain.name}_${pad.name}${pad_suffix}_${signal.name}),
+   .pad_${pad.name}_${signal.name}(${pad.name}),
 % endfor
+% endif
 % endfor
+% for i in range(padframe.user_attr['num_gpios']):
+   .pad_pad_io${f'{i:02d}'}_${signal.name}(pad_io[${i}]),
 % endfor
    .config_req_i(${pad_domain.name}_config_req),
    .config_rsp_o(${pad_domain.name}_config_resp)

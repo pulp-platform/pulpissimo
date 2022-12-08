@@ -1,4 +1,4 @@
-manifest_version: 2
+manifest_version: 3
 rtl_templates:
   bender_project_file:
     name: Bender.yml Project file
@@ -25,3 +25,20 @@ rtl_templates:
     target_file_name: '{padframe.name}.sv'
     template: custom_templates/rtl_templates/padframe.sv.mako
     skip_generation: false
+driver_templates:
+  regfile_hjson:
+    name: Register File Specification for {pad_domain.name}
+    target_file_name: '{padframe.name}_{pad_domain.name}_regs.hjson'
+    template: custom_templates/driver_templates/regfile.hjson.mako
+    skip_generation: false
+  driver_header:
+    name: Driver header file
+    target_file_name: '{padframe.name}.h'
+    template: ""
+    skip_generation: true
+  driver_source:
+    name: Driver implementation file
+    target_file_name: '{padframe.name}.c'
+    template: ""
+    skip_generation: true
+

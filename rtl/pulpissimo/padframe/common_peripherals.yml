@@ -159,14 +159,14 @@
   ports:
     - name: master_sck
       connections:
-        chip2pad: master_sck_o
-        master_sck_i: pad2chip
+        chip2pad: master_sck_out
+        master_sck_in: pad2chip
         rx_en: ~master_sck_oe
         tx_en: master_sck_oe
     - name: master_ws
       connections:
-        chip2pad: master_ws_o
-        master_ws_i: pad2chip
+        chip2pad: master_ws_out
+        master_ws_in: pad2chip
         rx_en: ~master_ws_oe
         tx_en: master_ws_oe
     - name: master_sd{i:1d}

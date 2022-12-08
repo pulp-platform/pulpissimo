@@ -8,12 +8,12 @@
     rx_en: 1'b1
     tx_en: 1'b0
 
-- name: pad_clk_byp
+- name: pad_clk_byp_en
   description: "PLL clock bypass enable, active-high. If asserted the PLLs VCO is bypassed and the system uses the ref_clk directly"
   pad_type: pull_up_pad
   is_static: true
   connections:
-    pad2chip: clk_byp
+    pad2chip: clk_byp_en
     rx_en: 1'b1
     tx_en: 1'b0
 
@@ -153,6 +153,11 @@
   multiple: !include gpio_count.txt
   pad_type: pull_up_pad
   is_static: false
-  default_port: gpio.gpio{i:2d}
+  default_port:
+    '*': gpio.gpio{i:2d}
+    pad_io00: uart0.tx
+    pad_io01: uart0.rx
   user_attr:
     custom_toplevel_connection: True
+
+

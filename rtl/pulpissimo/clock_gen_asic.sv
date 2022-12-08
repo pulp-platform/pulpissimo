@@ -78,7 +78,7 @@ module clock_gen #(
   logic        s_clk_per_ungated;
 
   // Convert APB interface to FLL native interface
-  FLL_BUS fll_bus[2];
+  FLL_BUS fll_bus[2](.clk_i(cfg_clk_i));
 
   apb_to_fll #(.APB_ADDR_WIDTH(APB_ADDR_WIDTH), .NR_FLLS(2)) apb2fll_if_i (
     .clk_i    ( cfg_clk_i     ),
@@ -101,7 +101,7 @@ module clock_gen #(
     .LOCK   ( fll_bus[0].lock     ),
     .CFGREQ ( fll_bus[0].req      ),
     .CFGACK ( fll_bus[0].ack      ),
-    .CFGAD  ( fll_bus[0].add[1:0] ),
+    .CFGAD  ( fll_bus[0].addr[1:0] ),
     .CFGD   ( fll_bus[0].wdata    ),
     .CFGQ   ( fll_bus[0].rdata    ),
     .CFGWEB ( fll_bus[0].wrn      ),
@@ -142,7 +142,7 @@ module clock_gen #(
     .LOCK   ( fll_bus[1].lock     ),
     .CFGREQ ( fll_bus[1].req      ),
     .CFGACK ( fll_bus[1].ack      ),
-    .CFGAD  ( fll_bus[1].add[1:0] ),
+    .CFGAD  ( fll_bus[1].addr[1:0] ),
     .CFGD   ( fll_bus[1].wdata    ),
     .CFGQ   ( fll_bus[1].rdata    ),
     .CFGWEB ( fll_bus[1].wrn      ),
@@ -184,5 +184,5 @@ module clock_gen #(
   );
 
   // This implementation does not need the bypass signal since slow clock already == ref_clk
-  unread i_unused_slo_clk_bypass_en(d_i(slow_clk_byp_en_i));
+  unread i_unused_slo_clk_bypass_en(.d_i(slow_clk_byp_en_i));
 endmodule

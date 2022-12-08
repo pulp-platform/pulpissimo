@@ -16,10 +16,11 @@ dependencies:
   common_cells: { git: "https://github.com/pulp-platform/common_cells.git", version: 1.21.0 }
   apb: { git: "https://github.com/pulp-platform/apb.git", rev: "bb7b49a0a10c375ae3e05fa4756071eb964f0274" } # Point to open PR #8 (needed for the apb_demux and apb_err_slv IP)
   jtag_pulp: { git: "https://github.com/pulp-platform/jtag_pulp.git", version: 0.2.0 }
-  pulp_soc: { git: "https://github.com/pulp-platform/pulp_soc.git", version: 4.4.0 }
+  pulp_soc: { git: "https://github.com/pulp-platform/pulp_soc.git", rev: v5.0.0-draft }
   tbtools: { git: "https://github.com/pulp-platform/tbtools.git", version: 0.2.1 }
   tech_cells_generic: { git: "https://github.com/pulp-platform/tech_cells_generic.git", version: 0.2.3 }
   pulpissimo_padframe_rtl_sim: { path: "rtl/pulpissimo/padframe/pulpissimo_padframe_rtl_sim_autogen" }
+  register_interface:  { git: "https://github.com/pulp-platform/register_interface.git", version: 0.3.2 }
 
 workspace:
   # package_links:
@@ -36,6 +37,7 @@ sources:
   # Level 0
   - rtl/pulpissimo/clock_gen_asic.sv
   - rtl/pulpissimo/soc_domain.sv
+  - rtl/pulpissimo/padframe/padframe_adapter.sv
   - rtl/pulpissimo/pulpissimo.sv
 
   # TB sources
@@ -46,7 +48,7 @@ sources:
       - rtl/tb/pulp_tap_pkg.sv
       - rtl/tb/srec/srec_pkg.sv
       - rtl/tb/tb_clk_gen.sv
-      - rtl/tb/tb_pulp.sv
+      - rtl/tb/tb_pulp_simple.sv
       - rtl/tb/SimJTAG.sv
       - rtl/tb/SimDTM.sv
 
@@ -86,7 +88,7 @@ external_import:
   # dependency but actually need a modifyable copy in the source tree.
   - name: gpio
     target_dir: vendored_ips/gpio
+    upstream: { git: "https://github.com/pulp-platform/gpio.git", rev: "f2aa015d3f0d6f14e2f7828e18b4343b18f8e9df"} #v0.1.3-draft with 32 gpios support in TB code
     patch_dir: vendored_ips/patches/gpio
-    upstream: { git: "https://github.com/pulp-platform/gpio.git", rev: "a6d5c08f4b16c2b9b30c81fc79bd7abda837d953"} #v0.1.2
     mapping:
       - {from: '', to: ''}

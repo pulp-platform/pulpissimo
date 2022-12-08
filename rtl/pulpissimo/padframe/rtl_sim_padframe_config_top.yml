@@ -30,7 +30,7 @@
 # SPDX-License-Identifier: SHL-0.51
 # -----------------------------------------------------------------------------
 
-manifest_version: 2
+manifest_version: 3
 name: pulpissimo_padframe
 user_attr:
   target_platform: rtl_sim

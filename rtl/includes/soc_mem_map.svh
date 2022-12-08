@@ -74,10 +74,10 @@
 
 // Chip Control Address Region (This region is implementation specific)
 `define SOC_MEM_MAP_CHIP_CTRL_FLL_START_ADDR           32'h1A12_0000
-`define SOC_MEM_MAP_CHIP_CTRL_FLL_END_ADDR             32'h1A12_0400
+`define SOC_MEM_MAP_CHIP_CTRL_FLL_END_ADDR             32'h1A12_1000
 
-`define SOC_MEM_MAP_CHIP_CTRL_PAD_CFG_START_ADDR       32'h1A12_0400
-`define SOC_MEM_MAP_CHIP_CTRL_PAD_CFG_ADDR             32'h1A12_0C00
+`define SOC_MEM_MAP_CHIP_CTRL_PAD_CFG_START_ADDR       32'h1A12_1000
+`define SOC_MEM_MAP_CHIP_CTRL_PAD_CFG_END_ADDR         32'h1A12_2000
 
 
 // Cluster Address Regions

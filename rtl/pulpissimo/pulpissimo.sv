@@ -28,7 +28,7 @@
 // -----------------------------------------------------------------------------
 
 module pulpissimo #(
-  parameter  CORE_TYPE    = 0, // TODO check if still up-to date 0 for RISCY, 1 for IBEX RV32IMC (formerly ZERORISCY), 2 for IBEX RV32EC (formerly MICRORISCY)
+  parameter  CORE_TYPE    = 0, // 0 for CV32E40P with XPULP Extensions, 1 for IBEX RV32IMC (formerly ZERORISCY), 2 for IBEX RV32EC (formerly MICRORISCY)
   parameter  USE_FPU      = 1,
   parameter  USE_ZFINX    = 1,
   parameter  USE_HWPE     = 0,
@@ -43,7 +43,7 @@ module pulpissimo #(
   input logic              ext_per_clk_i,
 `else
    // Reference clock for clock internal clock generation
-  inout wire               pad_refclk_in,
+  inout wire               pad_ref_clk,
 `endif
   // Active-low Asynchronous hard-reset
   inout wire               pad_reset_n,
@@ -62,7 +62,7 @@ module pulpissimo #(
   inout wire               pad_jtag_tms,
   inout wire               pad_jtag_trstn,
   // HyperFlash/HyperRAM Pads
-  inout wire               pad_hyper_csn,
+  inout wire [1:0]         pad_hyper_csn,
   inout wire               pad_hyper_reset_n,
   inout wire               pad_hyper_ck,
   inout wire               pad_hyper_ckn,
@@ -73,7 +73,7 @@ module pulpissimo #(
   // README.md on description and how to modify the pad count)
   inout wire [IO_PAD_COUNT-1:0] pad_io
 );
-
+`include "soc_mem_map.svh"
 `include "apb/assign.svh"
 `include "register_interface/typedef.svh"
 `include "register_interface/assign.svh"
@@ -82,7 +82,7 @@ module pulpissimo #(
   // Wiring Signals //
   ////////////////////
   // Clock, Bootmode & Reset Signals
-  logic s_bootsel[1:0];
+  logic [1:0] s_bootsel;
   logic s_ref_clk;
   // Clock bypass control signals
   logic s_pad_global_clk_byp_en; // Controlled by dedicated IO Pad
@@ -162,17 +162,28 @@ module pulpissimo #(
   hyper_pkg::pad_to_hyper_t [udma_cfg_pkg::N_HYPER-1:0] s_pad_to_hyper;
 
   // Config. Interfaces
-  APB #(.ADDR_WIDTH(32), .DATA_WIDTH(32)) s_apb_chip_ctrl_bus;
-  APB #(.ADDR_WIDTH(8), .DATA_WIDTH(32)) s_apb_fll_ctrl_bus;
-  APB #(.ADDR_WIDTH(32), .DATA_WIDTH(32)) s_apb_pads_ctrl_bus;
+  APB #(.ADDR_WIDTH(32), .DATA_WIDTH(32)) s_apb_chip_ctrl_bus();
+  APB #(.ADDR_WIDTH(8), .DATA_WIDTH(32)) s_apb_fll_ctrl_bus();
+  APB #(.ADDR_WIDTH(32), .DATA_WIDTH(32)) s_apb_pads_ctrl_bus();
+
+  ////////////////////////////
+  // Chip Control Registers //
+  ////////////////////////////
+  // TODO Actually add some register file here to control high level aspects of
+  // the SoC
+  assign s_soc_clk_en = 1'b1;
+  assign s_soc_clk_byp_en =1'b0;
+  assign s_per_clk_en = 1'b1;
+  assign s_per_clk_byp_en =1'b0;
+  assign s_slow_clk_en = 1'b1;
+  assign s_slow_clk_byp_en =1'b0;
 
   //////////////////////////////
   // Clock & Reset Generation //
   //////////////////////////////
 `ifndef EXTERNAL_CLOCK
   clock_gen #(
-    .APB_ADDR_WIDTH(8),
-    .APB_DATA_WIDTH(32)
+    .APB_ADDR_WIDTH(8)
   ) i_clock_gen(
     .ref_clk_i         ( s_ref_clk                                                              ),
     .rst_ni            ( s_global_rst_n                                                         ),
@@ -210,27 +221,27 @@ module pulpissimo #(
 
 
   rstgen i_rstgen_slow_clk (
-    .clk_i     ( s_slow_clk             ),
-    .rst_ni    ( s_global_rst_n         ),
-    .test_mode ( s_dft_test_en          ),
-    .rst_no    ( s_slow_clk_rstn_synced ), // This reset is only needed for IPs
-    .init_no   (                        ) // Unused
+    .clk_i       ( s_slow_clk             ),
+    .rst_ni      ( s_global_rst_n         ),
+    .test_mode_i ( s_dft_test_en          ),
+    .rst_no      ( s_slow_clk_rstn_synced ), // This reset is only needed for IPs
+    .init_no     (                        ) // Unused
   );
 
   rstgen i_rstgen_soc_clk (
-    .clk_i     ( s_soc_clk         ),
-    .rst_ni    ( s_global_rst_n    ),
-    .test_mode ( s_dft_test_en     ),
-    .rst_no    ( s_soc_rstn_synced ), // This reset is only needed for IPs
-    .init_no   (                   ) // Unused
+    .clk_i       ( s_soc_clk         ),
+    .rst_ni      ( s_global_rst_n    ),
+    .test_mode_i ( s_dft_test_en     ),
+    .rst_no      ( s_soc_rstn_synced ), // This reset is only needed for IPs
+    .init_no     (                   ) // Unused
   );
 
   rstgen i_rstgen_per_clk (
-    .clk_i     ( s_per_clk         ),
-    .rst_ni    ( s_global_rst_n    ),
-    .test_mode ( s_dft_test_en     ),
-    .rst_no    ( s_per_rstn_synced ), // This reset is only needed for IPs
-    .init_no   (                   ) // Unused
+    .clk_i       ( s_per_clk         ),
+    .rst_ni      ( s_global_rst_n    ),
+    .test_mode_i ( s_dft_test_en     ),
+    .rst_no      ( s_per_rstn_synced ), // This reset is only needed for IPs
+    .init_no     (                   ) // Unused
   );
 
 
@@ -242,11 +253,10 @@ module pulpissimo #(
   // - Clock Control
   // - Pad Multiplexer Control
 
-  logic [N_CHIP_CTRL_DEMUX_SLAVES-1:0] s_apb_demux_sel;
   typedef logic [31:0] addr_t;
   typedef logic [31:0] data_t;
 
-  typedef struct {
+  typedef struct packed {
     int unsigned idx;
     addr_t start_addr;
     addr_t end_addr;
@@ -259,6 +269,7 @@ module pulpissimo #(
        '{ idx: 1, start_addr: `SOC_MEM_MAP_CHIP_CTRL_PAD_CFG_START_ADDR, end_addr: `SOC_MEM_MAP_CHIP_CTRL_PAD_CFG_END_ADDR}
   };
 
+  logic [N_CHIP_CTRL_DEMUX_SLAVES-1:0] s_apb_demux_sel;
   APB #(.ADDR_WIDTH(32), .DATA_WIDTH(32)) s_apb_demuxed[N_CHIP_CTRL_DEMUX_SLAVES:0](); // +1 for error responses
 
   addr_decode #(
@@ -267,13 +278,13 @@ module pulpissimo #(
     .addr_t    ( addr_t                     ),
     .rule_t    ( addr_rule_t                )
   ) i_apb_demux_addr_decode (
-    .addr_i         ( s_apb_chip_ctrl_bus.paddr ),
-    .addr_map_i     ( APB_DEMUX_ADDR_RULES      ),
-    .idx_o          ( s_apb_demux_sel           ),
-    .dec_valid_o    (                           ), // Ignored
-    .dec_error_o    (                           ), // Ignored, we use a default error slave
-    .en_default_idx ( 1'b1                      ),
-    .default_idx_i  ( N_CHIP_CTRL_DEMUX_SLAVES  )
+    .addr_i           ( s_apb_chip_ctrl_bus.paddr ),
+    .addr_map_i       ( APB_DEMUX_ADDR_RULES      ),
+    .idx_o            ( s_apb_demux_sel           ),
+    .dec_valid_o      (                           ), // Ignored
+    .dec_error_o      (                           ), // Ignored, we use a default error slave
+    .en_default_idx_i ( 1'b1                      ),
+    .default_idx_i    ( '0                        )
   );
 
   apb_demux_intf #(
@@ -290,23 +301,23 @@ module pulpissimo #(
     .APB_ADDR_WIDTH(32),
     .APB_DATA_WIDTH(32)
   ) i_err_slv (
-    .slv(s_apb_demuxed[N_CHIP_CTRL_DEMUX_SLAVES])
+    .slv(s_apb_demuxed[0])
   );
 
-  `APB_ASSIGN(s_apb_fll_ctrl_bus, s_apb_demuxed[0])
-  `APB_ASSIGN(s_apb_pads_ctrl_bus, s_apb_demuxed[1])
+  `APB_ASSIGN(s_apb_fll_ctrl_bus, s_apb_demuxed[1])
+  `APB_ASSIGN(s_apb_pads_ctrl_bus, s_apb_demuxed[2])
 
   /////////////////////
   // Pad Multiplexer //
   /////////////////////
-  pulpissimo_padframe_wrap i_padframe(
-    // Config INterface
+  padframe_adapter i_padframe(
+    // Config Interface
     .soc_clk_i        ( s_soc_clk                  ),
-    .rst_ni           ( s_global_rst_n             ),
-    .apb_cfg_slave    ( s_apb_pads_ctrl_bus.Master ),
+    .soc_rstn_synced_i( s_soc_rstn_synced          ),
+    .apb_cfg_slave    ( s_apb_pads_ctrl_bus        ),
     //IO Pads
     .pad_ref_clk,
-    .pad_clk_byp,
+    .pad_clk_byp_en,
     .pad_reset_n,
     .pad_bootsel0,
     .pad_bootsel1,
@@ -332,15 +343,15 @@ module pulpissimo #(
     .jtag_trst_no     ( s_jtag_trst_n           ),
     .jtag_tms_o       ( s_jtag_tms              ),
     .jtag_tdi_o       ( s_jtag_tdi              ),
-    .jtag_tdo_o       ( s_jtag_tdo              ),
+    .jtag_tdo_i       ( s_jtag_tdo              ),
     // Timers
     .timer_ch0_i      ( s_timer_ch0             ),
     .timer_ch1_i      ( s_timer_ch1             ),
     .timer_ch2_i      ( s_timer_ch2             ),
     .timer_ch3_i      ( s_timer_ch3             ),
     // GPIOs
-    .gpio_o           ( s_gpio_out              ),
-    .gpio_i           ( s_gpio_in               ),
+    .gpio_o           ( s_gpio_in               ),
+    .gpio_i           ( s_gpio_out              ),
     .gpio_tx_en_i     ( s_gpio_tx_en            ),
     // UART
     .uart_to_pad_i    ( s_uart_to_pad           ),
@@ -426,8 +437,8 @@ module pulpissimo #(
     .pad_to_cpi_i ( s_pad_to_cpi ),
 
     // HyperFlash/HyperRAM
-    .hyper_to_pad_o ( s_pad_to_hyper ),
-    .pad_to_hyper_i ( s_hyper_to_pad ),
+    .hyper_to_pad_o ( s_hyper_to_pad ),
+    .pad_to_hyper_i ( s_pad_to_hyper ),
 
     // fll bypass bit in legacy pulp JTAG TAP. Can be used to control FLL
     // bypassing via JTAG instead of dedicated pad
@@ -443,7 +454,7 @@ module pulpissimo #(
     .jtag_tck_i   ( s_jtag_tck    ),
     .jtag_trst_ni ( s_jtag_trst_n ),
     .jtag_tms_i   ( s_jtag_tms    ),
-    .jtg_tdi_i    ( s_jtag_tdi    ),
+    .jtag_tdi_i   ( s_jtag_tdi    ),
     .jtag_tdo_o   ( s_jtag_tdo    )
   );
 

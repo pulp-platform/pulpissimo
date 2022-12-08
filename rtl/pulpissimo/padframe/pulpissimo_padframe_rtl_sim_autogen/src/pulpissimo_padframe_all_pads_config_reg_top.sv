@@ -714,7 +714,7 @@ module pulpissimo_padframe_all_pads_config_reg_top #(
   prim_subreg #(
     .DW      (6),
     .SWACCESS("RW"),
-    .RESVAL  (6'he)
+    .RESVAL  (6'h39)
   ) u_pad_io00_mux_sel (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),
@@ -847,7 +847,7 @@ module pulpissimo_padframe_all_pads_config_reg_top #(
   prim_subreg #(
     .DW      (6),
     .SWACCESS("RW"),
-    .RESVAL  (6'he)
+    .RESVAL  (6'h38)
   ) u_pad_io01_mux_sel (
     .clk_i   (clk_i    ),
     .rst_ni  (rst_ni  ),

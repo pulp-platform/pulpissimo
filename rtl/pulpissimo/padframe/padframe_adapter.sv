@@ -20,18 +20,17 @@
 // specific language governing permissions and limitations under the License.
 //-----------------------------------------------------------------------------
 
-module padframe_wrap #(
-  localparam NGPIO = gpio_reg_pkg::GPIOCount; // Have a look at the README in
+module padframe_adapter #(
+  localparam NGPIO = gpio_reg_pkg::GPIOCount  // Have a look at the README in
                                               // the GPIO repo in order to
                                               // change the number of GPIOs.
-
 )(
   input logic              soc_clk_i,
-  input logic              rst_ni,
+  input logic              soc_rstn_synced_i,
   APB.Slave                apb_cfg_slave,
   // IO Pad Signals
   inout wire               pad_ref_clk,
-  inout wire               pad_clk_byp,
+  inout wire               pad_clk_byp_en,
   inout wire               pad_reset_n,
   inout wire               pad_bootsel0,
   inout wire               pad_bootsel1,
@@ -40,13 +39,13 @@ module padframe_wrap #(
   inout wire               pad_jtag_tms,
   inout wire               pad_jtag_tdi,
   inout wire               pad_jtag_tdo,
-  inout wire               pad_hyper_csn,
+  inout wire [1:0]         pad_hyper_csn,
   inout wire               pad_hyper_reset_n,
   inout wire               pad_hyper_ck,
   inout wire               pad_hyper_ckn,
   inout wire [7:0]         pad_hyper_dq,
   inout wire               pad_hyper_rwds,
-  inout wire [NGPIO-1:0]   pad_io
+  inout wire [NGPIO-1:0]   pad_io,
   // SoC IO Signals
   output logic             ref_clk_o,
   output logic             global_rst_no,
@@ -93,32 +92,34 @@ module padframe_wrap #(
 );
   import pkg_pulpissimo_padframe::*;
   `include "pulpissimo_padframe/assign.svh"
+  `include "register_interface/typedef.svh"
+  `include "register_interface/assign.svh"
 
   // Convert APB to regbus
   typedef logic [31:0] addr_t;
   typedef logic [31:0] data_t;
   typedef logic [3:0]  strb_t;
   `REG_BUS_TYPEDEF_ALL(regbus, addr_t, data_t, strb_t);
-  regbus_req_t cfg_regbus_req;
-  regbus_rsp_t cfg_regbus_rsp;
+  regbus_req_t s_cfg_regbus_req;
+  regbus_rsp_t s_cfg_regbus_rsp;
 
-  REG_BUS #(.ADDR_WIDTH(32), .DATA_WIDTH(32)) s_cfg_regbus();
+  REG_BUS #(.ADDR_WIDTH(32), .DATA_WIDTH(32)) s_cfg_regbus(.clk_i(soc_clk_i));
   apb_to_reg i_apb_to_regbus (
-    .clk_i,
-    .rst_ni    ( rst_ni           ),
-    .penable_i ( cfg_slv.penable  ),
-    .pwrite_i  ( cfg_slv.pwrite   ),
-    .paddr_i   ( cfg_slv.paddr    ),
-    .psel_i    ( cfg_slv.psel     ),
-    .pwdata_i  ( cfg_slv.pwdata   ),
-    .prdata_o  ( cfg_slv.prdata   ),
-    .pready_o  ( cfg_slv.pready   ),
-    .pslverr_o ( cfg_slv.pslverr  ),
-    .reg_o     ( s_cfg_regbus.out )
+    .clk_i     ( soc_clk_i           ),
+    .rst_ni    ( soc_rstn_synced_i   ),
+    .penable_i ( apb_cfg_slave.penable ),
+    .pwrite_i  ( apb_cfg_slave.pwrite  ),
+    .paddr_i   ( apb_cfg_slave.paddr   ),
+    .psel_i    ( apb_cfg_slave.psel    ),
+    .pwdata_i  ( apb_cfg_slave.pwdata  ),
+    .prdata_o  ( apb_cfg_slave.prdata  ),
+    .pready_o  ( apb_cfg_slave.pready  ),
+    .pslverr_o ( apb_cfg_slave.pslverr ),
+    .reg_o     ( s_cfg_regbus.out    )
   );
 
-  `REG_BUS_ASSIGN_TO_REQ(cfg_regbus_req, s_cfg_regbus)
-  `REG_BUS_ASSIGN_FROM_RSP(s_cfg_regbus, cfg_regbus_rsp)
+  `REG_BUS_ASSIGN_TO_REQ(s_cfg_regbus_req, s_cfg_regbus)
+  `REG_BUS_ASSIGN_FROM_RSP(s_cfg_regbus, s_cfg_regbus_rsp)
 
   // Assign signals to structs Here we make use of the autogenerates assign
   // macros from padrick. To use them we occasionally have to create
@@ -154,7 +155,7 @@ module padframe_wrap #(
   static_connection_signals_soc2pad_t s_static_connections_soc2pad;
   static_connection_signals_pad2soc_t s_static_connections_pad2soc;
   // Static Connections
-  assign global_clk_byp_o = s_static_connections_pad2soc.all_pads.clk_byp;
+  assign global_clk_byp_o = s_static_connections_pad2soc.all_pads.clk_byp_en;
   assign global_rst_no    = s_static_connections_pad2soc.all_pads.rst_n;
   assign ref_clk_o        = s_static_connections_pad2soc.all_pads.ref_clk;
   assign bootsel_o[0]     = s_static_connections_pad2soc.all_pads.bootsel0;
@@ -166,88 +167,88 @@ module padframe_wrap #(
   assign jtag_trst_no = s_static_connections_pad2soc.all_pads.jtag_trstn;
   assign s_static_connections_soc2pad.all_pads.jtag_tdo = jtag_tdo_i;
   // HyperFlash/HyperRAM
-  assign s_static_connections_soc2pad.all_pads.hyper_ck       = hyper_to_pad_i.hyper_ck;
-  assign s_static_connections_soc2pad.all_pads.hyper_ckn      = hyper_to_pad_i.hyper_ckn;
-  assign s_static_connections_soc2pad.all_pads.hyper_cs0_no   = hyper_to_pad_i.hyper_cs0_no;
-  assign s_static_connections_soc2pad.all_pads.hyper_cs1_no   = hyper_to_pad_i.hyper_cs1_no;
-  assign s_static_connections_soc2pad.all_pads.hyper_dq0_o    = hyper_to_pad_i.hyper_dq0_o;
-  assign s_static_connections_soc2pad.all_pads.hyper_dq1_o    = hyper_to_pad_i.hyper_dq1_o;
-  assign s_static_connections_soc2pad.all_pads.hyper_dq2_o    = hyper_to_pad_i.hyper_dq2_o;
-  assign s_static_connections_soc2pad.all_pads.hyper_dq3_o    = hyper_to_pad_i.hyper_dq3_o;
-  assign s_static_connections_soc2pad.all_pads.hyper_dq4_o    = hyper_to_pad_i.hyper_dq4_o;
-  assign s_static_connections_soc2pad.all_pads.hyper_dq5_o    = hyper_to_pad_i.hyper_dq5_o;
-  assign s_static_connections_soc2pad.all_pads.hyper_dq6_o    = hyper_to_pad_i.hyper_dq6_o;
-  assign s_static_connections_soc2pad.all_pads.hyper_dq7_o    = hyper_to_pad_i.hyper_dq7_o;
-  assign s_static_connections_soc2pad.all_pads.hyper_dq_oe    = hyper_to_pad_i.hyper_dq_oe;
-  assign s_static_connections_soc2pad.all_pads.hyper_reset_no = hyper_to_pad_i.hyper_reset_no;
-  assign s_static_connections_soc2pad.all_pads.hyper_rwds_o   = hyper_to_pad_i.hyper_rwds_o;
-  assign s_static_connections_soc2pad.all_pads.hyper_rwds_oe  = hyper_to_pad_i.hyper_rwds_oe;
-  assign pad_to_hyper_o.hyper_dq0_i                           = s_static_connections_pad2soc.all_pads.hyper_dq0_i;
-  assign pad_to_hyper_o.hyper_dq1_i                           = s_static_connections_pad2soc.all_pads.hyper_dq1_i;
-  assign pad_to_hyper_o.hyper_dq2_i                           = s_static_connections_pad2soc.all_pads.hyper_dq2_i;
-  assign pad_to_hyper_o.hyper_dq3_i                           = s_static_connections_pad2soc.all_pads.hyper_dq3_i;
-  assign pad_to_hyper_o.hyper_dq4_i                           = s_static_connections_pad2soc.all_pads.hyper_dq4_i;
-  assign pad_to_hyper_o.hyper_dq5_i                           = s_static_connections_pad2soc.all_pads.hyper_dq5_i;
-  assign pad_to_hyper_o.hyper_dq6_i                           = s_static_connections_pad2soc.all_pads.hyper_dq6_i;
-  assign pad_to_hyper_o.hyper_dq7_i                           = s_static_connections_pad2soc.all_pads.hyper_dq7_i;
-  assign pad_to_hyper_o.hyper_rwds_i                          = s_static_connections_pad2soc.all_pads.hyper_rwds_i;
+  assign s_static_connections_soc2pad.all_pads.hyper_ck       = hyper_to_pad_i[0].hyper_ck_o;
+  assign s_static_connections_soc2pad.all_pads.hyper_ckn      = hyper_to_pad_i[0].hyper_ck_no;
+  assign s_static_connections_soc2pad.all_pads.hyper_cs0_no   = hyper_to_pad_i[0].hyper_cs0_no;
+  assign s_static_connections_soc2pad.all_pads.hyper_cs1_no   = hyper_to_pad_i[0].hyper_cs1_no;
+  assign s_static_connections_soc2pad.all_pads.hyper_dq0_o    = hyper_to_pad_i[0].hyper_dq0_o;
+  assign s_static_connections_soc2pad.all_pads.hyper_dq1_o    = hyper_to_pad_i[0].hyper_dq1_o;
+  assign s_static_connections_soc2pad.all_pads.hyper_dq2_o    = hyper_to_pad_i[0].hyper_dq2_o;
+  assign s_static_connections_soc2pad.all_pads.hyper_dq3_o    = hyper_to_pad_i[0].hyper_dq3_o;
+  assign s_static_connections_soc2pad.all_pads.hyper_dq4_o    = hyper_to_pad_i[0].hyper_dq4_o;
+  assign s_static_connections_soc2pad.all_pads.hyper_dq5_o    = hyper_to_pad_i[0].hyper_dq5_o;
+  assign s_static_connections_soc2pad.all_pads.hyper_dq6_o    = hyper_to_pad_i[0].hyper_dq6_o;
+  assign s_static_connections_soc2pad.all_pads.hyper_dq7_o    = hyper_to_pad_i[0].hyper_dq7_o;
+  assign s_static_connections_soc2pad.all_pads.hyper_dq_oe    = hyper_to_pad_i[0].hyper_dq_oe;
+  assign s_static_connections_soc2pad.all_pads.hyper_reset_no = hyper_to_pad_i[0].hyper_reset_no;
+  assign s_static_connections_soc2pad.all_pads.hyper_rwds_o   = hyper_to_pad_i[0].hyper_rwds_o;
+  assign s_static_connections_soc2pad.all_pads.hyper_rwds_oe  = hyper_to_pad_i[0].hyper_rwds_oe;
+  assign pad_to_hyper_o[0].hyper_dq0_i                           = s_static_connections_pad2soc.all_pads.hyper_dq0_i;
+  assign pad_to_hyper_o[0].hyper_dq1_i                           = s_static_connections_pad2soc.all_pads.hyper_dq1_i;
+  assign pad_to_hyper_o[0].hyper_dq2_i                           = s_static_connections_pad2soc.all_pads.hyper_dq2_i;
+  assign pad_to_hyper_o[0].hyper_dq3_i                           = s_static_connections_pad2soc.all_pads.hyper_dq3_i;
+  assign pad_to_hyper_o[0].hyper_dq4_i                           = s_static_connections_pad2soc.all_pads.hyper_dq4_i;
+  assign pad_to_hyper_o[0].hyper_dq5_i                           = s_static_connections_pad2soc.all_pads.hyper_dq5_i;
+  assign pad_to_hyper_o[0].hyper_dq6_i                           = s_static_connections_pad2soc.all_pads.hyper_dq6_i;
+  assign pad_to_hyper_o[0].hyper_dq7_i                           = s_static_connections_pad2soc.all_pads.hyper_dq7_i;
+  assign pad_to_hyper_o[0].hyper_rwds_i                          = s_static_connections_pad2soc.all_pads.hyper_rwds_i;
 
   // Muxed Signals
-  port_signals_pad2soc_t s_port_signals_pad2soc.all_pads;
-  port_signals_soc2pad s_port_signals_soc2pad.all_pads.;
+  port_signals_pad2soc_t s_port_signals_pad2soc;
+  port_signals_soc2pad_t s_port_signals_soc2pad;
 
   // GPIO Signals
-  struct packaged {
+  struct packed {
     logic [NGPIO-1:0] gpio_in;
   } gpio_pad2soc_load;
 
-  `ASSIGN_ALL_PADS_GPIO_SOC2PAD(gpio_pad2soc_load, s_port_signals_pad2soc.all_pads.gpio)
+  `ASSIGN_GPIO_PAD2SOC(gpio_pad2soc_load, s_port_signals_pad2soc.all_pads.gpio)
   assign gpio_o = gpio_pad2soc_load.gpio_in;
-  struct packaged {
+  struct packed {
     logic [NGPIO-1:0] gpio_out;
     logic [NGPIO-1:0] gpio_tx_en;
   } gpio_soc2pad_driver;
 
   assign gpio_soc2pad_driver.gpio_out = gpio_i;
   assign gpio_soc2pad_driver.gpio_tx_en = gpio_tx_en_i;
-  `ASSIGN_GPIO_SOC2PAD(s_port_signals_soc2pad.all_pads..gpio, gpio_soc2pad_driver)
+  `ASSIGN_GPIO_SOC2PAD(s_port_signals_soc2pad.all_pads.gpio, gpio_soc2pad_driver)
 
   // Timer Channels
-  typedef struct {
+  typedef struct packed {
     logic [3:0]  out;
   } timer_soc2pad_driver_t;
 
-  timer_soc2pad_driver_t[3:0] timer0_soc2pad_driver;
+  timer_soc2pad_driver_t[3:0] timer_soc2pad_driver;
   assign timer_soc2pad_driver[0].out = timer_ch0_i;
   assign timer_soc2pad_driver[1].out = timer_ch1_i;
   assign timer_soc2pad_driver[2].out = timer_ch2_i;
   assign timer_soc2pad_driver[3].out = timer_ch3_i;
-  `ASSIGN_TIMER0_SOC2PAD(s_port_signals_pad2soc.all_pads.timer0, timer_soc2pad_driver[0])
-  `ASSIGN_TIMER1_SOC2PAD(s_port_signals_pad2soc.all_pads.timer1, timer_soc2pad_driver[1])
-  `ASSIGN_TIMER2_SOC2PAD(s_port_signals_pad2soc.all_pads.timer2, timer_soc2pad_driver[2])
-  `ASSIGN_TIMER3_SOC2PAD(s_port_signals_pad2soc.all_pads.timer3, timer_soc2pad_driver[3])
+  `ASSIGN_TIMER0_SOC2PAD(s_port_signals_soc2pad.all_pads.timer0, timer_soc2pad_driver[0])
+  `ASSIGN_TIMER1_SOC2PAD(s_port_signals_soc2pad.all_pads.timer1, timer_soc2pad_driver[1])
+  `ASSIGN_TIMER2_SOC2PAD(s_port_signals_soc2pad.all_pads.timer2, timer_soc2pad_driver[2])
+  `ASSIGN_TIMER3_SOC2PAD(s_port_signals_soc2pad.all_pads.timer3, timer_soc2pad_driver[3])
 
   // UART
-  assign s_port_signals_soc2pad.all_pads..tx_o = uart_to_pad_i.tx_o;
-  assign pad_to_uart_o.rx_i = s_port_signals_pad2soc.all_pads.rx_i;
+  assign s_port_signals_soc2pad.all_pads.uart0.tx_o = uart_to_pad_i[0].tx_o;
+  assign pad_to_uart_o[0].rx_i = s_port_signals_pad2soc.all_pads.uart0.rx_i;
 
   //I2C
-  `ASSIGN_I2C0_PAD2SOC(pad_to_i2c_o, s_port_signals_pad2soc.all_pads.i2c0)
+  `ASSIGN_I2C0_PAD2SOC(pad_to_i2c_o[0], s_port_signals_pad2soc.all_pads.i2c0)
 
   //SDIO
-  `ASSIGN_SDIO0_PAD2SOC(pad_to_sdio_o, s_port_signals_pad2soc.all_pads.sdio0)
-  `ASSIGN_SDIO0_SOC2PAD(s_port_signals_soc2pad.all_pads..sdio0, sdio_to_pad_i)
+  `ASSIGN_SDIO0_PAD2SOC(pad_to_sdio_o[0], s_port_signals_pad2soc.all_pads.sdio0)
+  `ASSIGN_SDIO0_SOC2PAD(s_port_signals_soc2pad.all_pads.sdio0, sdio_to_pad_i[0])
 
   //I2S
-  `ASSIGN_I2S0_PAD2SOC(pad_to_i2s_o, s_port_signals_pad2soc.all_pads.i2s0)
-  `ASSIGN_I2S0_SOC2PAD(s_port_signals_soc2pad.all_pads..i2s0, i2s_to_pad_i)
+  `ASSIGN_I2S0_PAD2SOC(pad_to_i2s_o[0], s_port_signals_pad2soc.all_pads.i2s0)
+  `ASSIGN_I2S0_SOC2PAD(s_port_signals_soc2pad.all_pads.i2s0, i2s_to_pad_i[0])
 
   //QSPI Master
-  `ASSIGN_QSPIM0_PAD2SOC(pad_to_qspi_o, s_port_signals_pad2soc.all_pads.qspim0)
-  `ASSIGN_SQPIM0_SOC2PAD(s_port_signals_soc2pad.all_pads..qspim0, qspi_to_pad_i)
+  `ASSIGN_QSPIM0_PAD2SOC(pad_to_qspi_o[0], s_port_signals_pad2soc.all_pads.qspim0)
+  `ASSIGN_QSPIM0_SOC2PAD(s_port_signals_soc2pad.all_pads.qspim0, qspi_to_pad_i[0])
 
   //CPI
-  `ASSIGN_CPI0_PAD2SOC(pad_to_cpi_o, s_port_signals_pad2soc.all_pads.cpi0)
+  `ASSIGN_CPI0_PAD2SOC(pad_to_cpi_o[0], s_port_signals_pad2soc.all_pads.cpi0)
 
   /////////////////////////////////////////
   // Instantiate Auto-generated Padframe //
@@ -260,13 +261,15 @@ module padframe_wrap #(
     .resp_t ( regbus_rsp_t )
   ) i_pulpissimo_pads (
     .clk_i                             ( soc_clk_i                    ),
-    .rst_ni                            ( rst_ni                       ),
+    .rst_ni                            ( soc_rstn_synced_i            ),
+    .config_req_i                      ( s_cfg_regbus_req             ),
+    .config_rsp_o                      ( s_cfg_regbus_rsp             ),
     .static_connection_signals_pad2soc ( s_static_connections_pad2soc ),
     .static_connection_signals_soc2pad ( s_static_connections_soc2pad ),
     .port_signals_pad2soc              ( s_port_signals_pad2soc       ),
     .port_signals_soc2pad              ( s_port_signals_soc2pad       ),
     .pad_ref_clk,
-    .pad_clk_byp,
+    .pad_clk_byp_en,
     .pad_reset_n,
     .pad_bootsel0,
     .pad_bootsel1,
@@ -275,18 +278,19 @@ module padframe_wrap #(
     .pad_jtag_tms,
     .pad_jtag_tdi,
     .pad_jtag_tdo,
-    .pad_hyper_csn,
+    .pad_hyper_csn0                    ( pad_hyper_csn[0]             ),
+    .pad_hyper_csn1                    ( pad_hyper_csn[1]             ),
     .pad_hyper_reset_n,
     .pad_hyper_ck,
     .pad_hyper_ckn,
-    .pad_hyper_dq0,
-    .pad_hyper_dq1,
-    .pad_hyper_dq2,
-    .pad_hyper_dq3,
-    .pad_hyper_dq4,
-    .pad_hyper_dq5,
-    .pad_hyper_dq6,
-    .pad_hyper_dq7,
+    .pad_hyper_dq0                     ( pad_hyper_dq[0]              ),
+    .pad_hyper_dq1                     ( pad_hyper_dq[1]              ),
+    .pad_hyper_dq2                     ( pad_hyper_dq[2]              ),
+    .pad_hyper_dq3                     ( pad_hyper_dq[3]              ),
+    .pad_hyper_dq4                     ( pad_hyper_dq[4]              ),
+    .pad_hyper_dq5                     ( pad_hyper_dq[5]              ),
+    .pad_hyper_dq6                     ( pad_hyper_dq[6]              ),
+    .pad_hyper_dq7                     ( pad_hyper_dq[7]              ),
     .pad_hyper_rwds,
     .pad_io
   );
@@ -294,4 +298,4 @@ module padframe_wrap #(
 
 
 
-endmodule : padframw_wrap_wrap
+endmodule

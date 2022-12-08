@@ -96,7 +96,7 @@ scripts-bender-vsim: | Bender.lock
 	echo 'set ROOT [file normalize [file dirname [info script]]/..]' > $(BENDER_SIM_BUILD_DIR)/compile.tcl
 	./bender script vsim \
 		--vlog-arg="$(VLOG_ARGS)" --vcom-arg="" \
-		-t rtl -t test \
+		-t rtl -t test -t rtl_sim \
 		| grep -v "set ROOT" >> $(BENDER_SIM_BUILD_DIR)/compile.tcl
 
 scripts-bender-vsim-vips: | Bender.lock
@@ -143,11 +143,12 @@ reconfigure_padframe: clean_padframe reconfigure_gpio_count rtl/pulpissimo/padfr
 
 reconfigure_gpio_count:
 	$(MAKE) -C vendored_ips/gpio reconfigure GPIOS=$(GPIOS)
-	echo $GPIO_COUNT 
 	@echo "Rencofigured the padframe to contain $(GPIOS) gpios and $(GPIOS) muxed pads to match them."
 
 rtl/pulpissimo/padframe/pulpissimo_padframe_rtl_sim_autogen: | padrick
 	cd rtl/pulpissimo/padframe/ && $(PULP_PATH)/padrick generate -s padrick_generator_settings.yml rtl -o pulpissimo_padframe_rtl_sim_autogen rtl_sim_padframe_config_top.yml
+	cd rtl/pulpissimo/padframe/ && $(PULP_PATH)/padrick generate -s padrick_generator_settings.yml driver -o $(PULP_PATH)/pulp-runtime/drivers/pulpissimo/rtl_sim/io_mux/ rtl_sim_padframe_config_top.yml
+	rm -rf pulp-runtime/drivers/pulpissimo/rtl_sim/io_mux/include/bitfield.h
 
 .PHONY: clean_padframe
 clean_padframe:
@@ -251,7 +252,7 @@ endif
 # Padrick Integration
 padrick:
 ifeq (,$(widlcard ./padrick))
-	curl https://api.github.com/repos/pulp-platform/padrick/releases/tags/v0.3.3 \
+	curl https://api.github.com/repos/pulp-platform/padrick/releases/tags/v0.3.4 \
     | grep "browser_download_url.*Padrick-x86_64.AppImage" \
     | cut -d : -f 2,3 \
     | tr -d \" \
@@ -284,7 +285,7 @@ TAGS:
 help: Makefile
 	@printf "PULP Platform\n"
 	@printf "Available targets\n\n"
-	@awk '/^[a-zA-Z\-\_0-9]+:/ { \
+	@awk '/^[a-zA-Z\-_0-9]+:/ { \
 		helpMessage = match(lastLine, /^## (.*)/); \
 		if (helpMessage) { \
 			helpCommand = substr($$1, 0, index($$1, ":")-1); \
