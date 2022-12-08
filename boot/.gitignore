@@ -9,3 +9,4 @@ rom.bin
 *.o.2
 *.s19
 *.map
+.venv
