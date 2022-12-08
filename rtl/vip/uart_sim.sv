@@ -26,10 +26,12 @@ module uart_sim #(
     output logic tx,
     input  logic rx_en
 );
+  timeunit 1ns;
+  timeprecision 1ns;
 
 /* pragma translate_off */
 `ifndef VERILATOR
-  localparam time BIT_PERIOD = (1000000000 / BAUD_RATE) * 1ns;
+  localparam realtime BIT_PERIOD = 1s / BAUD_RATE;
 
   bit               newline;
   logic [7:0]       character;

@@ -265,11 +265,6 @@ module tb_pulp_simple;
     srec_records_to_stimuli(records, stimuli, entry_point);
     $display("[TB] %t: Finished loading stimuli from SREC file. Binary contains %0d words and has entrypoint %08h", $realtime, stimuli.size(), entry_point);
 
-    // Content
-    foreach(stimuli[i]) begin
-      $display("Stimuli: %h", stimuli[i]);
-    end
-
     case (BOOTMODE)
       "jtag_legacy", "jtag_openocd": begin
         s_bootsel = 2'd1;

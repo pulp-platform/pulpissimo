@@ -15,7 +15,7 @@
  */
 
 module tb_clk_gen #(
-   parameter time CLK_PERIOD = 1.0ns
+   parameter realtime CLK_PERIOD = 1.0ns
 ) (
    output logic   clk_o
 );
