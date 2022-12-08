@@ -15,10 +15,12 @@
  */
 
 module tb_clk_gen #(
-   parameter CLK_PERIOD = 1.0
+   parameter time CLK_PERIOD = 1.0ns
 ) (
    output logic   clk_o
 );
+  timeunit 1ns;
+  timeprecision 1ps;
 
    initial
    begin
