@@ -113,7 +113,7 @@
           '''
           swaccess: "rw"
           hwaccess: "hro"
-          resval: 57
+          resval: 14
           fields: [
               {
                   bits: "5:0"
@@ -239,7 +239,7 @@
           '''
           swaccess: "rw"
           hwaccess: "hro"
-          resval: 56
+          resval: 14
           fields: [
               {
                   bits: "5:0"

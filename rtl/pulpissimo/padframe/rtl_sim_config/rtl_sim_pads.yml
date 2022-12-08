@@ -153,10 +153,7 @@
   multiple: !include gpio_count.txt
   pad_type: pull_up_pad
   is_static: false
-  default_port:
-    '*': gpio.gpio{i:2d}
-    pad_io00: uart0.tx
-    pad_io01: uart0.rx
+  default_port: gpio.gpio{i:2d}
   user_attr:
     custom_toplevel_connection: True
 
