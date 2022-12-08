@@ -15,15 +15,23 @@
 # SPDX-License-Identifier: Apache-2.0
 # Author: Robert Balas (balasr@iis.ee.ethz.ch)
 
-# -flto, normal			text 4378 rodata 394	4772
-# withouth no-jump-tables	text 4144 rodata 562	4706
-# with save-restore			text 4156 rodata 546	4702
+# -flto, normal     text 4378 rodata 394  4772
+# withouth no-jump-tables text 4144 rodata 562  4706
+# with save-restore     text 4156 rodata 546  4702
 
-PYTHON  = python3.6
+.DEFAULT_GOAL := help
+
 CTAGS   = ctags
 
-RISCV		?= $(HOME)/.riscv
-RISCV_PREFIX	?= $(RISCV)/bin/riscv32-unknown-elf-
+VENVDIR?=$(WORKDIR)/.venv
+REQUIREMENTS_TXT?=$(wildcard requirements.txt)
+include Makefile.venv
+
+
+ifdef $(RISCV)
+RISCV_BIN_PATH ?= $(RISCV)/bin/
+endif
+RISCV_PREFIX	?= $(RISCV_BIN_PATH)riscv32-unknown-elf-
 CC		= $(RISCV_PREFIX)gcc
 OBJCOPY		= $(RISCV_PREFIX)objcopy
 OBJDUMP		= $(RISCV_PREFIX)objdump
@@ -118,16 +126,16 @@ $(BOOTCODE_FPGA): $(addsuffix .2,$(OBJS))
 %_fpga: %.o.2
 	$(CC) $(LDFLAGS) $(TARGET_ARCH) $^ $(LOADLIBES) $(LDLIBS) -o $@
 
+## gvsoc bootrom
 boot.gvsoc: rom.bin
 
-# gvsoc bootrom
 rom.bin: $(BOOTCODE)
-	./stim_utils.py  \
+	$(VENV)/python stim_utils.py  \
 		--binary=$(BOOTCODE) \
 		--stim-bin=rom.bin \
 		--area=0x1a000000:0x01000000
 
-# The rtl bootrom is just a verilog dump of the elf file
+## Generates bootcode dump files boot_code_asic.cde and the boot_code_fpga.cde for use with ROM generators
 boot.rtl: boot_code_asic.cde boot_code_fpga.cde
 
 boot_code_asic.objdump: $(BOOTCODE)
@@ -136,30 +144,54 @@ boot_code_asic.objdump: $(BOOTCODE)
 boot_code_fpga.objdump: $(BOOTCODE)
 	$(OBJDUMP) -Sr boot_code > $@
 
-boot_code_asic.cde: $(BOOTCODE) boot_code_asic.objdump
+boot_code_asic.cde: $(BOOTCODE) boot_code_asic.objdump | venv
 	$(OBJCOPY) --srec-len 1 --output-target=srec $(BOOTCODE) $(BOOTCODE).s19
-	./s19toboot.py $(BOOTCODE).s19 boot_code_asic.cde pulpissimo
+	$(VENV)/python s19toboot.py $(BOOTCODE).s19 boot_code_asic.cde pulpissimo
 	$(SIZE) -A $(BOOTCODE)
 
-boot_code_fpga.cde: $(BOOTCODE_FPGA) boot_code_fpga.objdump
+boot_code_fpga.cde: $(BOOTCODE_FPGA) boot_code_fpga.objdump | venv
 	$(OBJCOPY) --srec-len 1 --output-target=srec $(BOOTCODE_FPGA) $(BOOTCODE_FPGA).s19
-	./s19toboot.py $(BOOTCODE_FPGA).s19 boot_code_fpga.cde pulpissimo
+	$(VENV)/python s19toboot.py $(BOOTCODE_FPGA).s19 boot_code_fpga.cde pulpissimo
 	$(SIZE) -A $(BOOTCODE_FPGA)
 
-asic_autogen_rom.sv: boot_code_asic.cde
-	$(PYTHON) gen_rom.py boot_code_asic.cde $@ --title "ASIC Bootrom for control_pulp"
+## Synthesizable bootrom for ASICs
+asic_autogen_rom.sv: boot_code_asic.cde | venv
+	$(VENV)/python gen_rom.py boot_code_asic.cde $@ --title "ASIC Bootrom for control_pulp"
 
-fpga_autogen_rom.sv: boot_code_fpga.cde
-	$(PYTHON) gen_rom.py boot_code_fpga.cde $@ --title "FPGA Bootrom for control_pulp"
+## Synthesizable bootrom for FPGA
+fpga_autogen_rom.sv: boot_code_fpga.cde | venv
+	$(VENV)/python gen_rom.py boot_code_fpga.cde $@ --title "FPGA Bootrom for control_pulp"
 
+## Generate disassembly of the bootcode
+dis:
+	$(OBJDUMP) -d -S boot_code
 
 .PHONY: clean
+## Delete all build files
 clean:
 	$(RM) $(BOOTCODE) $(BOOTCODE_FPGA) $(OBJS) $(addsuffix .2,$(OBJS)) \
 		boot_code.cde boot_code.sv boot_code.s19 rom.bin \
 		boot_code_asic.cde boot_code_fpga.cde \
-		boot_code.map asic_autogen_rom.sv fpga_autogen_rom.sv
+		boot_code.map asic_autogen_rom.sv fpga_autogen_rom.sv \
+	  boot_code_asic.objdump boot_code_fpga.objdump boot_code_fpga.s19 bootcode.s
+
 
 .PHONY: TAGS
 TAGS:
 	$(CTAGS) -R -e .
+
+
+.PHONY: help
+help: Makefile
+	@printf "Pulpissimo Bootcode Generation\n"
+	@printf "Use this Makefile to regenerate the bootcode for Pulpissimo in output formats suitable for  simulation, FPGA implementation and ASIC synthesis.\n\n"
+	@printf "Available targets\n\n"
+	@awk '/^[a-zA-Z\-_\.0-9]+:/ { \
+		helpMessage = match(lastLine, /^## (.*)/); \
+		if (helpMessage) { \
+			helpCommand = substr($$1, 0, index($$1, ":")-1); \
+			helpMessage = substr(lastLine, RSTART + 3, RLENGTH); \
+			printf "%-15s %s\n", helpCommand, helpMessage; \
+		} \
+	} \
+	{ lastLine = $$0 }' $(MAKEFILE_LIST)
