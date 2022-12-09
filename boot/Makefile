@@ -59,9 +59,17 @@ CPPFLAGS  += -DENABLE_UART_BOOT
 # UDMA UART periperal id and desired baudrate
 CPPFLAGS  += -DUART_ID=0
 CPPFLAGS  += -DUART_BAUDRATE=115200
+# IO Pads to use for UART functions in bootmode
+CPPFLAGS  += -DUART_TX_PAD=PAD_GPIO00
+CPPFLAGS  += -DUART_RX_PAD=PAD_GPIO01
 # UDMA SPI periperhal id and max supported clock frequency
 CPPFLAGS  += -DSPI_ID=7
 CPPFLAGS  += -DSPI_MAX_CLK=25000000
+# IO Pads to use for spi booting
+CPPFLAGS  += -DSPI_SCK_PAD=PAD_GPIO02
+CPPFLAGS  += -DSPI_CSN_PAD=PAD_GPIO03
+CPPFLAGS  += -DSPI_MOSI_PAD=PAD_GPIO04
+CPPFLAGS  += -DSPI_MISO_PAD=PAD_GPIO05
 
 CPPFLAGS  += -DEXIT_REG_ADDR=0x1a1040a0
 # Make error message more verbose instead of the default single letter error
@@ -73,7 +81,7 @@ CPPFLAGS  += -DZF_VERBOSE_ERRORS
 
 CPPFLAGS += -I$(CURDIR) -I$(CURDIR)/include -I$(CURDIR)/include/hal \
 	-I$(CURDIR)/include/archi -I$(CURDIR)/zforth \
-	-I$(CURDIR)/zforth-riscv
+	-I$(CURDIR)/zforth-riscv -I$(CURDIR)/io_mux/include
 
 ASFLAGS  = $(CFLAGS) -DLANGUAGE_ASSEMBLY
 
@@ -89,7 +97,7 @@ BOOTCODE_FPGA = boot_code_fpga
 
 OBJS =  boot_code.o crt0.o \
 	zforth-riscv/zforth-main.o zforth-riscv/libc.o zforth-riscv/udma.o \
-	zforth-riscv/setjmp.o zforth/zforth.o kk_srec.o fll-v1.o
+	zforth-riscv/setjmp.o zforth/zforth.o kk_srec.o fll-v1.o io_mux/src/io_mux.o
 
 all: $(BOOTCODE) $(BOOTCODE_FPGA) boot.rtl boot.gvsoc
 

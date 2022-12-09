@@ -83,22 +83,22 @@ typedef enum {
 
 static inline unsigned int GetFllStatus(int Fll)
 {
-    return (unsigned int) IP_READ((int *) ARCHI_SOC_PERIPHERALS_ADDR, (int) (FLL_STATUS_OFFSET));
+    return (unsigned int) IP_READ((int *) ARCHI_FLL_ADDR, (int) (FLL_STATUS_OFFSET));
 }
 
 static inline unsigned int GetFllConfiguration(int Fll, hal_fll_config_e Reg) {
         int Offset = (int) (FLL_CONF1_OFFSET + Reg*4 + Fll*ARCHI_FLL_AREA_SIZE);
-        return (unsigned int) IP_READ(ARCHI_SOC_PERIPHERALS_ADDR, Offset);
+        return (unsigned int) IP_READ(ARCHI_FLL_ADDR, Offset);
 }
 
 static inline void SetFllConfiguration(int Fll, hal_fll_config_e Reg, unsigned int Value) {
-        IP_WRITE(ARCHI_SOC_PERIPHERALS_ADDR, FLL_CONF1_OFFSET + Reg*4 + Fll*ARCHI_FLL_AREA_SIZE, Value);
+        IP_WRITE(ARCHI_FLL_ADDR, FLL_CONF1_OFFSET + Reg*4 + Fll*ARCHI_FLL_AREA_SIZE, Value);
 }
 
 static inline unsigned int hal_fll_status_reg_get(int fll)
 {
   return IP_READ(
-    ARCHI_SOC_PERIPHERALS_ADDR, 
+    ARCHI_FLL_ADDR, 
     FLL_STATUS_OFFSET + fll*ARCHI_FLL_AREA_SIZE
   );
 }
@@ -106,7 +106,7 @@ static inline unsigned int hal_fll_status_reg_get(int fll)
 static inline void hal_fll_conf_reg1_set(int fll, unsigned int value)
 {
   IP_WRITE(
-    ARCHI_SOC_PERIPHERALS_ADDR, 
+    ARCHI_FLL_ADDR, 
     FLL_CONF1_OFFSET + fll*ARCHI_FLL_AREA_SIZE,
     value
   );
@@ -115,7 +115,7 @@ static inline void hal_fll_conf_reg1_set(int fll, unsigned int value)
 static inline unsigned int hal_fll_conf_reg1_get(int fll)
 {
   return IP_READ(
-    ARCHI_SOC_PERIPHERALS_ADDR, 
+    ARCHI_FLL_ADDR, 
     FLL_CONF1_OFFSET + fll*ARCHI_FLL_AREA_SIZE
   );
 }
@@ -123,7 +123,7 @@ static inline unsigned int hal_fll_conf_reg1_get(int fll)
 static inline void hal_fll_conf_reg2_set(int fll, unsigned int value)
 {
   IP_WRITE(
-    ARCHI_SOC_PERIPHERALS_ADDR, 
+    ARCHI_FLL_ADDR, 
     FLL_CONF2_OFFSET + fll*ARCHI_FLL_AREA_SIZE,
     value
   );
@@ -132,7 +132,7 @@ static inline void hal_fll_conf_reg2_set(int fll, unsigned int value)
 static inline unsigned int hal_fll_conf_reg2_get(int fll)
 {
   return IP_READ(
-    ARCHI_SOC_PERIPHERALS_ADDR, 
+    ARCHI_FLL_ADDR, 
     FLL_CONF2_OFFSET + fll*ARCHI_FLL_AREA_SIZE
   );
 }
@@ -140,7 +140,7 @@ static inline unsigned int hal_fll_conf_reg2_get(int fll)
 static inline void hal_fll_integrator_set(int fll, unsigned int value)
 {
   IP_WRITE(
-    ARCHI_SOC_PERIPHERALS_ADDR, 
+    ARCHI_FLL_ADDR, 
     FLL_INTEGRATOR_OFFSET + fll*ARCHI_FLL_AREA_SIZE,
     value
   );
@@ -149,7 +149,7 @@ static inline void hal_fll_integrator_set(int fll, unsigned int value)
 static inline unsigned int hal_fll_integrator_get(int fll)
 {
   return IP_READ(
-    ARCHI_SOC_PERIPHERALS_ADDR, 
+    ARCHI_FLL_ADDR, 
     FLL_INTEGRATOR_OFFSET + fll*ARCHI_FLL_AREA_SIZE
   );
 }

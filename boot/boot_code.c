@@ -25,9 +25,41 @@
 #include "libc.h"
 #include "udma.h"
 #include "kk_srec.h"
+#include "io_mux.h"
 
 #define BOOT_STACK_SIZE 1024
 #define MAX_NB_AREA 16
+
+#ifndef UART_TX_PAD
+#define UART_TX_PAD PAD_GPIO00
+#endif
+#ifndef UART_RX_PAD
+#define UART_RX_PAD PAD_GPIO01
+#endif
+#ifndef SPI_SCK_PAD
+#define SPI_SCK_PAD PAD_GPIO02
+#endif
+#ifndef SPI_CSN_PAD
+#define SPI_CSN_PAD PAD_GPIO03
+#endif
+#ifndef SPI_MOSI_PAD
+#define SPI_MOSI_PAD PAD_GPIO04
+#endif
+#ifndef SPI_MISO_PAD
+#define SPI_MISO_PAD PAD_GPIO05
+#endif
+
+void io_mux_expose_uart() {
+  io_mux_mode_set(UART_TX_PAD, PAD_MODE_UART0_TX);
+  io_mux_mode_set(UART_RX_PAD, PAD_MODE_UART0_RX);
+}
+
+void io_mux_expose_spi() {
+  io_mux_mode_set(SPI_SCK_PAD, PAD_MODE_QSPIM0_SCK);
+  io_mux_mode_set(SPI_CSN_PAD, PAD_MODE_QSPIM0_CSN0);
+  io_mux_mode_set(SPI_MOSI_PAD, PAD_MODE_QSPIM0_SDIO0);
+  io_mux_mode_set(SPI_MISO_PAD, PAD_MODE_QSPIM0_SDIO1);
+}
 
 #if FLASH_BLOCK_SIZE > HYPER_FLASH_BLOCK_SIZE
 #    define BLOCK_SIZE FLASH_BLOCK_SIZE
@@ -230,8 +262,10 @@ static void flash_init(boot_code_t *data)
     data->step = 0;
 
 #ifdef DEBUG_BOOTROM
-    plp_udma_cg_set((1 << UDMA_UART_ID(0)));
-    plp_uart_setup(0, UART_CLK_DIVIDER);
+    // Expose UART
+    io_mux_expose_uart();
+    /* boot a srec dump of a binary over udma uart */
+    uart_open(UART_ID, UART_BAUDRATE);
 #endif
 
     plp_udma_cg_set(plp_udma_cg_get() | (1 << ARCHI_UDMA_SPIM_ID(SPI_ID)));
@@ -461,14 +495,18 @@ void __attribute__((noreturn)) main(void)
     switch (apb_soc_bootsel_get(ARCHI_APB_SOC_CTRL_ADDR) & 3) {
     case BOOT_MODE_DEFAULT:
 #ifdef CONFIG_FLL
-	/* zforth/srec need a stable periperal frequency */
-	pos_fll_constructor();
-	pos_fll_init(POS_FLL_PERIPH);
-	pos_fll_set_freq(POS_FLL_PERIPH, PERIPH_FREQUENCY);
+	      /* zforth/srec need a stable periperal frequency */
+        pos_fll_constructor();
+        pos_fll_init(POS_FLL_PERIPH);
+        pos_fll_set_freq(POS_FLL_PERIPH, PERIPH_FREQUENCY);
 #endif
 #ifdef ENABLE_ZFORTH_BOOT
+        // Both, zforth and uart boot need the UART peripheral to be exposed. Configure the padmux
+        io_mux_expose_uart();
         boot_zforth();
 #elif ENABLE_UART_BOOT
+        // Both, zforth and uart boot need the UART peripheral to be exposed. Configure the padmux
+        io_mux_expose_uart();
         boot_srec_uart();
 #endif
         break;
@@ -477,6 +515,8 @@ void __attribute__((noreturn)) main(void)
         break;
     case BOOT_MODE_QSPI:
 #ifdef ENABLE_QSPI_BOOT
+        // Expose to QSPI Pads
+        io_mux_expose_spi();
         boot_qspi(0, 1);
 #endif
         break;
