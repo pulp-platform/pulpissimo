@@ -95,7 +95,7 @@ module tb_pulp_simple;
   // period of the external reference clock (32.769kHz)
   localparam time REF_CLK_PERIOD = 30517ns;
   localparam IO_PAD_COUNT = gpio_reg_pkg::GPIOCount; // Check the README on how
-                                // to modify the pad count
+                                                     // to modify the pad count
   localparam logic [9:0] FC_CORE_ID = {5'd31, 5'd0};
   localparam             EXIT_SUCCESS = 0;
   localparam             EXIT_FAIL = 1;
@@ -302,7 +302,7 @@ module tb_pulp_simple;
       end
 
       default: begin
-        boot_jtag_legacy(entry_point, stimuli, s_jtag_tck, s_jtag_tms, s_jtag_trstn, s_jtag_tdi, s_jtag_tdo);
+        //boot_jtag_legacy(entry_point, stimuli, s_jtag_tck, s_jtag_tms, s_jtag_trstn, s_jtag_tdi, s_jtag_tdo);
       end
     endcase
 
