@@ -17,6 +17,8 @@
 
 module tb_pulp;
   import srec_pkg::*;
+  timeunit 1ns;
+  timeprecision 100ps;
 
   parameter CONFIG_FILE = "NONE";
 
@@ -35,7 +37,7 @@ module tb_pulp;
   parameter SIM_STDOUT = 1;
 
   // period of the external reference clock (32.769kHz)
-  parameter REF_CLK_PERIOD = 30517ns;
+  parameter realtime REF_CLK_PERIOD = 30517ns;
 
   // UART baud rate in bps
   parameter BAUDRATE = 115200;
@@ -66,6 +68,10 @@ module tb_pulp;
   localparam logic [1:0] SPI_QUAD_TX = 2'b01;
   localparam logic [1:0] SPI_QUAD_RX = 2'b10;
 
+
+  // Check the README on how to modify the pad count
+  localparam IO_PAD_COUNT = gpio_reg_pkg::GPIOCount; 
+
   // simulation variables & flags
   string bootmode;
   logic uart_tb_rx_en = 1'b0;
@@ -95,25 +101,28 @@ module tb_pulp;
 
   logic s_clk_ref;
   wire w_clk_ref;
+  wire w_clk_byp_en;
+  assign w_clk_byp_en = 1'b0;
 
-  tri w_spi_master_sdio0;
-  tri w_spi_master_sdio1;
-  tri w_spi_master_sdio2;
-  tri w_spi_master_sdio3;
-  tri w_spi_master_csn0;
-  tri w_spi_master_csn1;
-  tri w_spi_master_sck;
+  wire [IO_PAD_COUNT-1:0] w_pad_io;
+  wire w_spi_master_sdio0;
+  wire w_spi_master_sdio1;
+  wire w_spi_master_sdio2;
+  wire w_spi_master_sdio3;
+  wire w_spi_master_csn0;
+  wire w_spi_master_csn1;
+  wire w_spi_master_sck;
 
-  tri w_sdio_data0;
+  wire w_sdio_data0;
 
   wire w_i2c0_scl;
   wire w_i2c0_sda;
 
-  tri w_i2c1_scl;
-  tri w_i2c1_sda;
+  wire w_i2c1_scl;
+  wire w_i2c1_sda;
 
-  tri w_uart_rx;
-  tri w_uart_tx;
+  wire w_uart_rx;
+  wire w_uart_tx;
 
   wire w_cam_pclk;
   wire [7:0] w_cam_data;
@@ -130,6 +139,25 @@ module tb_pulp;
   wire w_i2s_sck;
   wire w_i2s_ws;
   wire [7:0] w_i2s_data;
+
+  // HyperBus/Flash
+  wire [1:0] w_pad_hyper_csn;
+  wire       w_pad_hyper_reset_n;
+  wire       w_pad_hyper_ck;
+  wire       w_pad_hyper_ckn;
+  wire [7:0] w_pad_hyper_dq;
+  wire       w_pad_hyper_rwds;
+
+  // HyperBus
+  logic      s_hyper_ck;
+  logic      s_hyper_ckn;
+  logic [1:0] s_hyper_csn;
+  logic       s_hyper_reset_n;
+  logic       s_hyper_rwds;
+  logic [7:0] s_hyper_dq_from_chip;
+  logic [7:0] s_hyper_dq_to_chip = '0;
+  logic [7:0] s_hyper_dq_tx_en = '0;
+
 
   wire w_trstn;
   wire w_tck;
@@ -299,6 +327,14 @@ module tb_pulp;
   assign w_bridge_tdo = tmp_bridge_tdo;
   assign sim_jtag_tdo = tmp_tdo;
 
+  // HyperBus (Not used at this point)
+  assign s_hyper_ck = w_pad_hyper_ck;
+  assign s_hyper_ckn = w_pad_hyper_ckn;
+  for (genvar i = 0; i < 8; i++) begin: gen_assign_hyper_dq_wires
+    assign s_hyper_dq_from_chip[i] = w_pad_hyper_dq[i];
+    assign w_pad_hyper_dq[i]       = s_hyper_dq_tx_en[i]? s_hyper_dq_to_chip: 1'bz;
+  end
+
 
   if (CONFIG_FILE == "NONE") begin
     assign w_uart_tx = w_uart_rx;
@@ -455,63 +491,72 @@ module tb_pulp;
 
   // PULPissimo chip (design under test)
   pulpissimo #(
-    .CORE_TYPE(CORE_TYPE),
-    .USE_FPU  (USE_FPU),
-    .USE_ZFINX (USE_ZFINX),
-    .USE_HWPE  (0),
-    .SIM_STDOUT  (SIM_STDOUT)
+    .CORE_TYPE ( CORE_TYPE ),
+    .USE_FPU   ( USE_FPU   ),
+    .USE_ZFINX ( USE_ZFINX ),
+    .USE_HWPE  ( 1'b0      ), //TODO Re-expose once debugged why it is not working
+    .SIM_STDOUT(SIM_STDOUT)
   ) i_dut (
-    .pad_spim_sdio0(w_spi_master_sdio0),
-    .pad_spim_sdio1(w_spi_master_sdio1),
-    .pad_spim_sdio2(w_spi_master_sdio2),
-    .pad_spim_sdio3(w_spi_master_sdio3),
-    .pad_spim_csn0 (w_spi_master_csn0),
-    .pad_spim_csn1 (w_spi_master_csn1),
-    .pad_spim_sck  (w_spi_master_sck),
-
-    .pad_uart_rx(w_uart_tx),
-    .pad_uart_tx(w_uart_rx),
-
-    .pad_cam_pclk (w_cam_pclk),
-    .pad_cam_hsync(w_cam_hsync),
-    .pad_cam_data0(w_cam_data[0]),
-    .pad_cam_data1(w_cam_data[1]),
-    .pad_cam_data2(w_cam_data[2]),
-    .pad_cam_data3(w_cam_data[3]),
-    .pad_cam_data4(w_cam_data[4]),
-    .pad_cam_data5(w_cam_data[5]),
-    .pad_cam_data6(w_cam_data[6]),
-    .pad_cam_data7(w_cam_data[7]),
-    .pad_cam_vsync(w_cam_vsync),
-
-    .pad_sdio_clk  (),
-    .pad_sdio_cmd  (),
-    .pad_sdio_data0(w_sdio_data0),
-    .pad_sdio_data1(),
-    .pad_sdio_data2(),
-    .pad_sdio_data3(),
-
-    .pad_i2c0_sda(w_i2c0_sda),
-    .pad_i2c0_scl(w_i2c0_scl),
-
-    .pad_i2s0_sck(w_i2s0_sck),
-    .pad_i2s0_ws (w_i2s0_ws),
-    .pad_i2s0_sdi(w_i2s0_sdi),
-    .pad_i2s1_sdi(w_i2s1_sdi),
-
-    .pad_reset_n (w_rst_n),
-    .pad_bootsel0(w_bootsel[0]),
-    .pad_bootsel1(w_bootsel[1]),
-
-    .pad_jtag_tck (w_tck),
-    .pad_jtag_tdi (w_tdi),
-    .pad_jtag_tdo (w_tdo),
-    .pad_jtag_tms (w_tms),
-    .pad_jtag_trst(w_trstn),
-
-    .pad_xtal_in(w_clk_ref)
+    .pad_ref_clk       ( w_clk_ref           ),
+    .pad_reset_n       ( w_rst_n             ),
+    .pad_clk_byp_en    ( w_clk_byp_en        ),
+    .pad_bootsel0      ( w_bootsel[0]        ),
+    .pad_bootsel1      ( w_bootsel[1]        ),
+    .pad_jtag_tck      ( w_tck               ),
+    .pad_jtag_tdi      ( w_tdi               ),
+    .pad_jtag_tdo      ( w_tdo               ),
+    .pad_jtag_tms      ( w_tms               ),
+    .pad_jtag_trstn    ( w_trstn             ),
+    .pad_hyper_csn     ( w_pad_hyper_csn     ),
+    .pad_hyper_reset_n ( w_pad_hyper_reset_n ),
+    .pad_hyper_ck      ( w_pad_hyper_ck      ),
+    .pad_hyper_ckn     ( w_pad_hyper_ckn     ),
+    .pad_hyper_dq      ( w_pad_hyper_dq      ),
+    .pad_hyper_rwds    ( w_pad_hyper_rwds    ),
+    .pad_io            ( w_pad_io            )
   );
 
+  // UART pads as assigned by default in bootrom's io mux config routine. User
+  // programs need to configure this themselves.
+  alias w_pad_io[0]  = w_uart_rx;
+  alias w_pad_io[1]  = w_uart_tx;
+
+  // SPI pads as assigned by default in bootrom's io mux config routine. User
+  // programs need to configure this themselves.
+  alias w_pad_io[2]  = w_spi_master_sck;
+  alias w_pad_io[3]  = w_spi_master_csn0;
+  alias w_pad_io[4]  = w_spi_master_sdio0;
+  alias w_pad_io[5]  = w_spi_master_sdio1;
+  alias w_pad_io[6]  = w_spi_master_sdio2;
+  alias w_pad_io[7]  = w_spi_master_sdio3;
+  alias w_pad_io[8]  = w_spi_master_csn1;
+
+  // CPI Pads
+  alias w_pad_io[9]  = w_cam_pclk;
+  alias w_pad_io[10] = w_cam_hsync;
+  alias w_pad_io[11] = w_cam_data[0];
+  alias w_pad_io[12] = w_cam_data[1];
+  alias w_pad_io[13] = w_cam_data[2];
+  alias w_pad_io[14] = w_cam_data[3];
+  alias w_pad_io[15] = w_cam_data[4];
+  alias w_pad_io[16] = w_cam_data[5];
+  alias w_pad_io[17] = w_cam_data[6];
+  alias w_pad_io[18] = w_cam_data[7];
+  alias w_pad_io[19] = w_cam_vsync;
+
+  // I2C
+  alias w_pad_io[20] = w_i2c0_sda;
+  alias w_pad_io[21] = w_i2c0_scl;
+
+  // GPIO 22
+  alias w_pad_io[22] = w_sdio_data0;
+
+  // I2S
+  alias w_pad_io[23] = w_i2s0_sck;
+  alias w_pad_io[24] = w_i2s0_ws;
+  alias w_pad_io[25] = w_i2s0_sdi;
+  alias w_pad_io[26] = w_i2s1_sdi;
+  
   tb_clk_gen #(
     .CLK_PERIOD(REF_CLK_PERIOD)
   ) i_ref_clk_gen (
@@ -607,7 +652,7 @@ module tb_pulp;
 
         // read in the stimuli vectors  == address_value
         // we support two formats:
-        //
+        // 
         // 1. stim.txt where each text line is 96 bits encoded in ascii. The
         // first 32 bits are the address the remaining 64 bits the data payload
         // 2. *.srec. Srecords is a standardized format to represent binary data
@@ -798,23 +843,23 @@ module tb_pulp;
     logic more_stim;
     static logic [95:0] stim_entry;
     more_stim = 1'b1;
-    $info("Preloading L2 with stimuli through direct access.");
+    $display("[TB] %t: Preloading L2 with stimuli through direct access.", $realtime);
     while (more_stim == 1'b1) begin
-      @(posedge i_dut.soc_domain_i.pulp_soc_i.i_soc_interconnect_wrap.clk_i);
+      @(posedge i_dut.i_soc_domain.i_pulp_soc.i_soc_interconnect_wrap.clk_i);
       stim_entry = stimuli[num_stim];
-      force i_dut.soc_domain_i.pulp_soc_i.i_soc_interconnect_wrap.tcdm_debug.req = 1'b1;
-      force i_dut.soc_domain_i.pulp_soc_i.i_soc_interconnect_wrap.tcdm_debug.add = stim_entry[95:64];
-      force i_dut.soc_domain_i.pulp_soc_i.i_soc_interconnect_wrap.tcdm_debug.wdata = stim_entry[31:0];
-      force i_dut.soc_domain_i.pulp_soc_i.i_soc_interconnect_wrap.tcdm_debug.wen = 1'b0;
-      force i_dut.soc_domain_i.pulp_soc_i.i_soc_interconnect_wrap.tcdm_debug.be = '1;
+      force i_dut.i_soc_domain.i_pulp_soc.i_soc_interconnect_wrap.tcdm_debug.req = 1'b1;
+      force i_dut.i_soc_domain.i_pulp_soc.i_soc_interconnect_wrap.tcdm_debug.add = stim_entry[95:64];
+      force i_dut.i_soc_domain.i_pulp_soc.i_soc_interconnect_wrap.tcdm_debug.wdata = stim_entry[31:0];
+      force i_dut.i_soc_domain.i_pulp_soc.i_soc_interconnect_wrap.tcdm_debug.wen = 1'b0;
+      force i_dut.i_soc_domain.i_pulp_soc.i_soc_interconnect_wrap.tcdm_debug.be = '1;
       do begin
-        @(posedge i_dut.soc_domain_i.pulp_soc_i.i_soc_interconnect_wrap.clk_i);
-      end while (~i_dut.soc_domain_i.pulp_soc_i.i_soc_interconnect_wrap.tcdm_debug.gnt);
-      force i_dut.soc_domain_i.pulp_soc_i.i_soc_interconnect_wrap.tcdm_debug.add   = stim_entry[95:64]+4;
-      force i_dut.soc_domain_i.pulp_soc_i.i_soc_interconnect_wrap.tcdm_debug.wdata = stim_entry[63:32];
+        @(posedge i_dut.i_soc_domain.i_pulp_soc.i_soc_interconnect_wrap.clk_i);
+      end while (~i_dut.i_soc_domain.i_pulp_soc.i_soc_interconnect_wrap.tcdm_debug.gnt);
+      force i_dut.i_soc_domain.i_pulp_soc.i_soc_interconnect_wrap.tcdm_debug.add   = stim_entry[95:64]+4;
+      force i_dut.i_soc_domain.i_pulp_soc.i_soc_interconnect_wrap.tcdm_debug.wdata = stim_entry[63:32];
       do begin
-        @(posedge i_dut.soc_domain_i.pulp_soc_i.i_soc_interconnect_wrap.clk_i);
-      end while (~i_dut.soc_domain_i.pulp_soc_i.i_soc_interconnect_wrap.tcdm_debug.gnt);
+        @(posedge i_dut.i_soc_domain.i_pulp_soc.i_soc_interconnect_wrap.clk_i);
+      end while (~i_dut.i_soc_domain.i_pulp_soc.i_soc_interconnect_wrap.tcdm_debug.gnt);
 
       num_stim = num_stim + 1;
       if (num_stim > $size(stimuli) || stimuli[num_stim] === 96'bx) begin  // make sure we have more stimuli
@@ -822,12 +867,12 @@ module tb_pulp;
         break;
       end
     end  // while (more_stim == 1'b1)
-    release i_dut.soc_domain_i.pulp_soc_i.i_soc_interconnect_wrap.tcdm_debug.req;
-    release i_dut.soc_domain_i.pulp_soc_i.i_soc_interconnect_wrap.tcdm_debug.add;
-    release i_dut.soc_domain_i.pulp_soc_i.i_soc_interconnect_wrap.tcdm_debug.wdata;
-    release i_dut.soc_domain_i.pulp_soc_i.i_soc_interconnect_wrap.tcdm_debug.wen;
-    release i_dut.soc_domain_i.pulp_soc_i.i_soc_interconnect_wrap.tcdm_debug.be;
-    @(posedge i_dut.soc_domain_i.pulp_soc_i.i_soc_interconnect_wrap.clk_i);
+    release i_dut.i_soc_domain.i_pulp_soc.i_soc_interconnect_wrap.tcdm_debug.req;
+    release i_dut.i_soc_domain.i_pulp_soc.i_soc_interconnect_wrap.tcdm_debug.add;
+    release i_dut.i_soc_domain.i_pulp_soc.i_soc_interconnect_wrap.tcdm_debug.wdata;
+    release i_dut.i_soc_domain.i_pulp_soc.i_soc_interconnect_wrap.tcdm_debug.wen;
+    release i_dut.i_soc_domain.i_pulp_soc.i_soc_interconnect_wrap.tcdm_debug.be;
+    @(posedge i_dut.i_soc_domain.i_pulp_soc.i_soc_interconnect_wrap.clk_i);
   endtask
 
 
