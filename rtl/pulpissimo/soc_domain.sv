@@ -126,7 +126,6 @@ module soc_domain #(
       .per_rstn_synced_i,
       .dft_test_mode_i,
       .dft_cg_enable_i,
-      .boot_l2_i(1'b0),
       .bootsel_i,
       // Start booting from bootrom immediately
       // after reset
