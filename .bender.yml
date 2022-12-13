@@ -2,3 +2,4 @@ overrides:
   gpio: { path: "vendored_ips/gpio" } # Override to use the vendored in copy of
                                       # the GPIO repo to allow reconfiguration
                                       # of the number of GPIO pads.
+  pulp_io:                { git: "https://github.com/pulp-platform/pulp-io.git", rev: "bee24f34798c8fd5c3c999726e90585bb0f4d65f" }

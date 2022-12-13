@@ -67,16 +67,14 @@ $(export_if_def QUESTA)
 all: build
 
 .PHONY: checkout
-## Checkout/update dependencies using IPApprox or Bender
-checkout: bender
+## Checkout/update dependencies using Bender
+checkout: | bender
 	./bender checkout
-	touch Bender.lock
 	$(MAKE) scripts
 
-Bender.lock: bender
-	./bender checkout
-	touch Bender.lock
-
+## Update all dependencies to the latest supported versions rather than using the pinned dependencies
+update_dependencies: 
+	./bender update --fetch
 # generic clean and build targets for the platform
 .PHONY: clean
 ## Remove the RTL model files
@@ -88,29 +86,24 @@ clean:
 ## Generate scripts for all tools
 scripts: scripts-bender-vsim scripts-bender-fpga
 
-scripts-bender-fpga: | Bender.lock
+scripts-bender-fpga: Bender.lock | bender
 	mkdir -p fpga/pulpissimo/tcl/generated
 	./bender script vivado -t fpga -t xilinx > $(BENDER_FPGA_SCRIPTS_DIR)/compile.tcl
 
-scripts-bender-vsim: | Bender.lock
+scripts-bender-vsim: $(BENDER_SIM_BUILD_DIR)/compile.tcl
+
+scripts-bender-vsim-vips: Bender.lock | bender
+	echo 'set ROOT [file normalize [file dirname [info script]]/..]' > $(BENDER_SIM_BUILD_DIR)/compile.tcl
+	./bender script vsim \
+		--vlog-arg="$(VLOG_ARGS)" --vcom-arg="" \
+		-t rtl -t test -t rtl_sim -t rt_dpi -t i2c_vip -t flash_vip -t i2s_vip -t use_vips \
+		| grep -v "set ROOT" >> $(BENDER_SIM_BUILD_DIR)/compile.tcl
+
+$(BENDER_SIM_BUILD_DIR)/compile.tcl: Bender.lock | bender
 	echo 'set ROOT [file normalize [file dirname [info script]]/..]' > $(BENDER_SIM_BUILD_DIR)/compile.tcl
 	./bender script vsim \
 		--vlog-arg="$(VLOG_ARGS)" --vcom-arg="" \
 		-t rtl -t test -t rtl_sim \
-		| grep -v "set ROOT" >> $(BENDER_SIM_BUILD_DIR)/compile.tcl
-
-scripts-bender-vsim-vips: | Bender.lock
-	echo 'set ROOT [file normalize [file dirname [info script]]/..]' > $(BENDER_SIM_BUILD_DIR)/compile.tcl
-	./bender script vsim \
-		--vlog-arg="$(VLOG_ARGS)" --vcom-arg="" \
-		-t rtl -t test -t rt_dpi -t i2c_vip -t flash_vip -t i2s_vip -t use_vips \
-		| grep -v "set ROOT" >> $(BENDER_SIM_BUILD_DIR)/compile.tcl
-
-$(BENDER_SIM_BUILD_DIR)/compile.tcl: Bender.lock
-	echo 'set ROOT [file normalize [file dirname [info script]]/..]' > $(BENDER_SIM_BUILD_DIR)/compile.tcl
-	./bender script vsim \
-		--vlog-arg="$(VLOG_ARGS)" --vcom-arg="" \
-		-t rtl -t test \
 		| grep -v "set ROOT" >> $(BENDER_SIM_BUILD_DIR)/compile.tcl
 
 
