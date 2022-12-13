@@ -29,6 +29,7 @@
 
 module soc_domain #(
     parameter CORE_TYPE            = 0,
+    parameter USE_XPULP            = 1,
     parameter USE_FPU              = 1,
     parameter USE_ZFINX            = 1,
     parameter USE_HWPE             = 1,
@@ -103,6 +104,7 @@ module soc_domain #(
 
     pulp_soc #(
       .CORE_TYPE           ( CORE_TYPE  ),
+      .USE_XPULP           ( USE_XPULP  ),
       .USE_FPU             ( USE_FPU    ),
       .USE_HWPE            ( USE_HWPE   ),
       .SIM_STDOUT          ( SIM_STDOUT ),
@@ -124,6 +126,11 @@ module soc_domain #(
       .soc_rstn_synced_i,
       .per_clk_i,
       .per_rstn_synced_i,
+      .soc_cluster_cdc_rst_ni(soc_rstn_synced_i), // There is no cluster in
+                                // PULPissimo, therefore we are allowed to use
+                                // the same reset for the CDCs and the
+                                // soc_domain itself. DON'T DO THIS IF YOU
+                                // ATTACH SOMETHING TO THE ASYNC CLUSTER PORT! 
       .dft_test_mode_i,
       .dft_cg_enable_i,
       .bootsel_i,

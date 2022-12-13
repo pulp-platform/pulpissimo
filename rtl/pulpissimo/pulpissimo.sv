@@ -28,12 +28,25 @@
 // -----------------------------------------------------------------------------
 
 module pulpissimo #(
-  parameter  CORE_TYPE    = 0, // 0 for CV32E40P with XPULP Extensions, 1 for IBEX RV32IMC (formerly ZERORISCY), 2 for IBEX RV32EC (formerly MICRORISCY)
-  parameter  USE_FPU      = 1,
-  parameter  USE_ZFINX    = 1,
-  parameter  USE_HWPE     = 0,
-  parameter  SIM_STDOUT   = 0,
-  localparam IO_PAD_COUNT = gpio_reg_pkg::GPIOCount // Check the README on how to modify the pad count
+  parameter  CORE_TYPE = 0, // 0 for CV32E40P with XPULP Extensions, 1 for IBEX RV32IMC (formerly ZERORISCY), 2 for IBEX RV32EC (formerly MICRORISCY)
+  parameter  USE_XPULP = 1, // Enable XPULP extensions on CV32E40P. Has no
+                            // effect if an IBEX core variant is use.
+  parameter  USE_FPU = 1, // Mutually exclusive with the use of IBEX. I.e.
+                               // if an IBEX core variant is used, this paraeter
+                               // is ignored.
+  parameter  USE_ZFINX = 1, // Standard RISC-V extension: Reuses the integer
+                               // regfile for FPU usage instead of requiring a
+                               // dedicated FPU regfile. Requires correct
+                               // compiler settings for software to work!
+  parameter  USE_HWPE = 0,
+  parameter  SIM_STDOUT = 0, // Enable the virtual stdout interface for
+                               // communication with simulated testbenches. This
+                               // parameter must be disabled during any form of
+                               // physical implementation.
+  localparam IO_PAD_COUNT = gpio_reg_pkg::GPIOCount // The number of GPIO pads
+                                                    // in the system. Check the
+                                                    // README on how to modify
+                                                    // the pad count
 )(
   // Some platforms (e.g. Verilator) require to feed the clock externally. With
   // the EXTERNAL_CLOCK define we remove all internall clock generation logic.
@@ -381,6 +394,7 @@ module pulpissimo #(
   /////////////////
   soc_domain #(
     .CORE_TYPE  ( CORE_TYPE  ),
+    .USE_XPULP  ( USE_XPULP  ),
     .USE_FPU    ( USE_FPU    ),
     .USE_ZFINX  ( USE_ZFINX  ),
     .USE_HWPE   ( USE_HWPE   ),
