@@ -84,13 +84,11 @@ sources:
       - rtl/vip/i2s/i2s_vip_channel.sv
       - rtl/vip/i2s/i2s_vip.sv
 
-external_import:
+vendor_package:
   # Import the GPIO repository directly. Since we have to regenerate the RTL
   # when we change the number GPIOs we cannot just depend on it as a regular
   # dependency but actually need a modifyable copy in the source tree.
   - name: gpio
     target_dir: vendored_ips/gpio
-    upstream: { git: "https://github.com/pulp-platform/gpio.git", rev: "f2aa015d3f0d6f14e2f7828e18b4343b18f8e9df"} #v0.1.3-draft with 32 gpios support in TB code
+    upstream: { git: "https://github.com/pulp-platform/gpio.git", rev: "3908df6e81d5a3f7be021e521f22d8d4a7fa6e34"}
     patch_dir: vendored_ips/patches/gpio
-    mapping:
-      - {from: '', to: ''}
