@@ -1,6 +1,3 @@
-[submodule "gpio"]
-	path = vendored_ips/gpio
-	url = https://github.com/pulp-platform/gpio.git
 [submodule "pulp-runtime"]
 	path = pulp-runtime
 	url = https://github.com/pulp-platform/pulp-runtime.git
