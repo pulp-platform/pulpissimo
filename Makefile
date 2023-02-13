@@ -223,7 +223,7 @@ test-rt:
 test-runtime-gitlab: pulp-runtime
 	cd tests && ../pulp-runtime/scripts/bwruntests.py --proc-verbose -v \
 		--report-junit -t 3600 --yaml \
-		-o simplified-runtime.xml runtime-tests.yaml
+		-o simplified-runtime.xml simple-regression-tests.yaml
 
 # test with built sdk
 .PHONY: test-gitlab2
