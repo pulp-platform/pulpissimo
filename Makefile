@@ -179,15 +179,8 @@ pulp-runtime:
 	git clone https://github.com/pulp-platform/pulp-runtime.git -b v0.0.3
 
 .PHONY: test-checkout
-## Download pulp test for local machine. You need ssh access to the gitlab server.
 test-checkout:
-	./update-tests
-
-# the gitlab runner needs a special configuration to be able to access the
-# dependent git repositories
-.PHONY: test-checkout-gitlab
-test-checkout-gitlab:
-	./update-tests-gitlab
+	git clone https://github.com/pulp-platform/regression_tests.git tests
 
 # test with sdk release
 .PHONY: test-gitlab
