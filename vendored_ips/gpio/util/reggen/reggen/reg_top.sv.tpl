@@ -20,6 +20,11 @@
   max_regs_char = len("{}".format(len(regs_flat) - 1))
   addr_width = rb.get_addr_width()
 
+  # Used for the dev_select_i signal on a tlul_socket_1n with N =
+  # num_wins + 1. This needs to be able to represent any value up to
+  # N-1.
+  steer_msb = ((num_wins).bit_length()) - 1
+
   lblock = block.name.lower()
   ublock = lblock.upper()
 
@@ -57,20 +62,20 @@
 module ${mod_name} \
 % if use_reg_iface:
 #(
-    parameter type reg_req_t = logic,
-    parameter type reg_rsp_t = logic,
-    parameter int AW = ${addr_width}
+  parameter type reg_req_t = logic,
+  parameter type reg_rsp_t = logic,
+  parameter int AW = ${addr_width}
 ) \
 % else:
     % if needs_aw:
 #(
-    parameter int AW = ${addr_width}
+  parameter int AW = ${addr_width}
 ) \
     % endif
 % endif
 (
-  input clk_i,
-  input rst_ni,
+  input logic clk_i,
+  input logic rst_ni,
 % if use_reg_iface:
   input  ${reg_intf_req} reg_req_i,
   output ${reg_intf_rsp} reg_rsp_o,
@@ -189,7 +194,7 @@ module ${mod_name} \
       % endif
   % endif
 % else:
-  logic [${num_wins_width-1}:0] reg_steer;
+  logic [${steer_msb}:0] reg_steer;
 
   % if use_reg_iface:
   ${reg_intf_req} [${num_dsp}-1:0] reg_intf_demux_req;
@@ -527,6 +532,84 @@ ${rdata_gen(f, r.name.lower() + "_" + f.name.lower())}\
 
 % endif
 endmodule
+
+% if use_reg_iface:
+module ${mod_name}_intf
+#(
+  parameter int AW = ${addr_width},
+  localparam int DW = ${block.regwidth}
+) (
+  input logic clk_i,
+  input logic rst_ni,
+  REG_BUS.in  regbus_slave,
+% if num_wins != 0:
+  REG_BUS.out  regbus_win_mst[${num_wins}-1:0],
+% endif
+  // To HW
+% if rb.get_n_bits(["q","qe","re"]):
+  output ${lblock}_reg_pkg::${reg2hw_t} reg2hw, // Write
+% endif
+% if rb.get_n_bits(["d","de"]):
+  input  ${lblock}_reg_pkg::${hw2reg_t} hw2reg, // Read
+% endif
+  // Config
+  input devmode_i // If 1, explicit error return for unmapped register access
+);
+ localparam int unsigned STRB_WIDTH = DW/8;
+
+`include "register_interface/typedef.svh"
+`include "register_interface/assign.svh"
+
+  // Define structs for reg_bus
+  typedef logic [AW-1:0] addr_t;
+  typedef logic [DW-1:0] data_t;
+  typedef logic [STRB_WIDTH-1:0] strb_t;
+  `REG_BUS_TYPEDEF_ALL(reg_bus, addr_t, data_t, strb_t)
+
+  reg_bus_req_t s_reg_req;
+  reg_bus_rsp_t s_reg_rsp;
+  
+  // Assign SV interface to structs
+  `REG_BUS_ASSIGN_TO_REQ(s_reg_req, regbus_slave)
+  `REG_BUS_ASSIGN_FROM_RSP(regbus_slave, s_reg_rsp)
+
+% if num_wins != 0:
+  reg_bus_req_t s_reg_win_req[${num_wins}-1:0];
+  reg_bus_rsp_t s_reg_win_rsp[${num_wins}-1:0];
+  for (genvar i = 0; i < ${num_wins}; i++) begin : gen_assign_window_structs
+    `REG_BUS_ASSIGN_TO_REQ(s_reg_win_req[i], regbus_win_mst[i])
+    `REG_BUS_ASSIGN_FROM_RSP(regbus_win_mst[i], s_reg_win_rsp[i])
+  end
+  
+% endif
+  
+
+  ${mod_name} #(
+    .reg_req_t(reg_bus_req_t),
+    .reg_rsp_t(reg_bus_rsp_t),
+    .AW(AW)
+  ) i_regs (
+    .clk_i,
+    .rst_ni,
+    .reg_req_i(s_reg_req),
+    .reg_rsp_o(s_reg_rsp),
+% if num_wins != 0:
+    .reg_req_win_o(s_reg_win_req),
+    .reg_rsp_win_i(s_reg_win_rsp),
+% endif
+% if rb.get_n_bits(["q","qe","re"]):
+    .reg2hw, // Write
+% endif
+% if rb.get_n_bits(["d","de"]):
+    .hw2reg, // Read
+% endif
+    .devmode_i
+  );
+  
+endmodule
+
+% endif
+
 <%def name="str_bits_sv(bits)">\
 % if bits.msb != bits.lsb:
 ${bits.msb}:${bits.lsb}\

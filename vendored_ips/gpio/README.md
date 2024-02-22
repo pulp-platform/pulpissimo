@@ -26,17 +26,18 @@ SystemVerilog interfaces over hierarchical structs.
   ```
 
 # Ports
-| **Signal Name**  | **Direction** | **Description**                                                                                                                                               |
-| ---------------  | ------------- | ---------------                                                                                                                                               |
-| `clk_i`          | *input*       | Primary input clock. The control interface is suposed to be synchronous to this clock.                                                                        |
-| `rst_ni`         | *input*       | Asynchronous active-low reset                                                                                                                                 |
-| `gpio_in`        | *input*       | GPIO input signals from IO Pads (Pad -> SoC) signal.                                                                                                          |
-| `gpio_out`       | *output*      | GPIO output signals to IO Pads (SoC -> Pad) signal.                                                                                                           |
-| `gpio_tx_en_o`   | *output*      | GPIO TX Buffer enable signal. This signal is supposed to control the output buffer enable of the IO Pad. 0 -> TX disabled (High-Z or Pull-low/high), 1 -> TX. |
-| `gpio_in_sync_o` | *input*       | Synchronized GPIO input signals. This port provides the `gpio_in` signal synchronized to `clk_i`.                                                             |
-| `interrupt_o`    | *output*      | Global interrupt line. The interrupt line is asserted for one `clk_i` whenever an unmasked interrupt on one of the GPIOs arrives.                             |
-| `reg_req_i`      | *input*       | Control interface request side using register interface protocol.                                                                                             |
-| `reg_rsp_o`      | *output*      | Control interface request side using register_interface protocol.                                                                                             |
+| **Signal Name**          | **Direction** | **Description**                                                                                                                                                                                                                                                                           |
+| ------------------------ | ------------- | ---------------                                                                                                                                                                                                                                                                           |
+| `clk_i`                  | *input*       | Primary input clock. The control interface is suposed to be synchronous to this clock.                                                                                                                                                                                                    |
+| `rst_ni`                 | *input*       | Asynchronous active-low reset                                                                                                                                                                                                                                                             |
+| `gpio_in`                | *input*       | GPIO input signals from IO Pads (Pad -> SoC) signal.                                                                                                                                                                                                                                      |
+| `gpio_out`               | *output*      | GPIO output signals to IO Pads (SoC -> Pad) signal.                                                                                                                                                                                                                                       |
+| `gpio_tx_en_o`           | *output*      | GPIO TX Buffer enable signal. This signal is supposed to control the output buffer enable of the IO Pad. 0 -> TX disabled (High-Z or Pull-low/high), 1 -> TX.                                                                                                                             |
+| `gpio_in_sync_o`         | *input*       | Synchronized GPIO input signals. This port provides the `gpio_in` signal synchronized to `clk_i`.                                                                                                                                                                                         |
+| `global_interrupt_o`     | *output*      | Global interrupt line. The interrupt line is asserted for one `clk_i` if one or more unmasked interrupts occur, or asserted on any unmaksed interrupt and held until all interrupts are cleared depending on the `glbl_intrpt_mode` setting in the `CFG` register.                        |
+| `pin_level_interrupts_o` | *output*      | Per-pin interrupt lines. Each interrupt line is asserted for one `clk_i` if an interrupt occurs on the respective pin or asserted and held on an unamsked interrupt until the respective interrupt has been cleared depending on the `pin_lvl_intrpt_mode` setting in the `CFG` register. |
+| `reg_req_i`              | *input*       | Control interface request side using register interface protocol.                                                                                                                                                                                                                         |
+| `reg_rsp_o`              | *output*      | Control interface request side using register_interface protocol.                                                                                                                                                                                                                         |
 
 # Clock Gates
 The GPIO IP manually instantiates a clock gate for each input to reduce power
@@ -62,13 +63,17 @@ Here is a summary of the registers:
 
 
 ## `CFG` Register (offset 0x04, rw)
-  Controls the interrupt mode of the gpios. If 1, keep the interrupt line
-  asserted until all interrupts for all GPIOs are cleared. If 0, generate one
-  cycle wide pulses for every new interrupt.
+  Controls the operation of the global and pin-level interrupt outputs respectively.
 
-  | 31 - 1     | 0                |
-  |------------|------------------|
-  | *reserved* | `interrupt_mode` |
+  If `glbl_intrpt_mode` is 1, the global interrupt output is asserted until all interrupts are cleared. If 0, 
+  a one-cycle pulse is generated every cycle were one or more interrupts occur.
+
+  If `pin_lvl_intrpt_mode` is 1, a pin level interrupt outputs will are asserted until the respective interrupt has been
+  cleared. If 0, a one-cycle pulse is generated for interrupt that occurs on the respective pin.
+
+  | 31 - 2     | 1                     | 0                  |
+  |------------|-----------------------|--------------------|
+  | *reserved* | `pin_lvl_intrpt_mode` | `glbl_intrpt_mode` |
 
 ## `GPIO_MODE<0-XX>`  Registers (offset 0x08+<reg_idx>*4, rw)
   The GPIO_MODE registers control the operating mode of the individual GPIOs.

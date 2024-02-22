@@ -77,5 +77,5 @@ vendor_package:
   # dependency but actually need a modifyable copy in the source tree.
   - name: gpio
     target_dir: vendored_ips/gpio
-    upstream: { git: "https://github.com/pulp-platform/gpio.git", rev: "3908df6e81d5a3f7be021e521f22d8d4a7fa6e34"}
+    upstream: { git: "https://github.com/pulp-platform/gpio.git", rev: "7f5e7b50a3d275fcbdae156ed14b7236ad5d7c0b"}
     patch_dir: vendored_ips/patches/gpio

@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## 0.2.2 - 2023-06-12
+### Added
+- Added simple CI
+### Changed
+- Bump bender dependencies
+### Fixed
+- Fix typos and errors in documentation
+
 ## 0.2.1 - 2022-12-15
 ### Changed
 - Simplified reconfiguration flow by using vendored-in regtool.py

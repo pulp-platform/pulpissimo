@@ -206,7 +206,7 @@ module gpio #(
 
     //Wire interrupt status registers
     always_comb begin
-      `assert_condition({s_reg2hw.intrpt_status[gpio_idx].qe, s_reg2hw.intrpt_status[gpio_idx].q}, rst_ni);
+      `assert_condition({s_reg2hw.intrpt_status[gpio_idx].qe && s_reg2hw.intrpt_status[gpio_idx].q}, rst_ni);
       //If we clear the aggregated, clear all individual interrupt status registers for the corresponding block of
       //GPIOs
       if (s_reg2hw.intrpt_status[gpio_idx].qe & (s_reg2hw.intrpt_status[gpio_idx].q == 1)) begin

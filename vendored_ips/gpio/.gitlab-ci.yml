@@ -1,0 +1,24 @@
+# Copyright 2023 ETH Zurich and University of Bologna.
+# Solderpad Hardware License, Version 0.51, see LICENSE for details.
+# SPDX-License-Identifier: SHL-0.51
+
+
+variables:
+  VSIM: questa-2022.3 vsim -64
+  VLIB: questa-2022.3 vlib
+  VMAP: questa-2022.3 vmap
+  VCOM: questa-2022.3 vcom -64
+  VLOG: questa-2022.3 vlog -64
+  VOPT: questa-2022.3 vopt -64
+
+stages:
+  - test
+
+sim:
+  stage: test
+  timeout: 5min
+  script:
+    - bender script vsim -t test > compile.tcl
+    - $VSIM -c -do 'exit -code [source compile.tcl]'
+    - $VSIM -c tb_gpio -do "run -all"
+    - (! grep -n "Error:" transcript)
