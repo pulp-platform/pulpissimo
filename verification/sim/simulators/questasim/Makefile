@@ -10,12 +10,13 @@ include $(PULPISSIMO_ROOT)/utils/utils.mk
 ## Configuration Variables for Bender, Questasim behavior
 BENDER_SCRIPTS_ARGS += -t rtl -t test -t rtl_sim
 VSIM_ARGS ?= -64
-VLOG_ARGS += -suppress 2583 -suppress 13314 \"+incdir+\$$ROOT/rtl/includes\"
+VLOG_ARGS += -suppress 2583 -suppress 13314 \"+incdir+\$$ROOT/hw/common/rtl/includes\"
 VCOM_ARGS += ""
 VOPT_ARGS ?= +acc
 VSIM_BIN ?= "vsim"
 VSIM_USER_PLUSARGS ?= ""
 RISCV_OBJCOPY_BIN ?= 'riscv32-unknown-elf-objcopy'
+SIM_TOP ?= 'tb_pulp'
 
 
 
@@ -52,8 +53,8 @@ endif
 .PHONY: build
 build: $(BUILD_DIR)/compile.tcl
 	cd $(BUILD_DIR) && $(VSIM_BIN) $(VSIM_ARGS) -c -do 'source compile.tcl; quit'
-	cd $(BUILD_DIR) && $(VSIM_BIN) $(VSIM_ARGS) -c -do 'vopt $(VOPT_ARGS) -o vopt_tb $(SIM_TOP) -work work'
-	@echo "Finished building design $SIM_TOP. The optimized design has been stored in a unit called 'vopt_tb'."
+	cd $(BUILD_DIR) && $(VSIM_BIN) $(VSIM_ARGS) -c -do 'vopt $(VOPT_ARGS) -o vopt_tb $(SIM_TOP) -work work; quit'
+	@echo "Finished building design $(SIM_TOP). The optimized design has been stored in a unit called 'vopt_tb'."
 
 ## Invoke bender to generate the TCL scripts for compilation with questasim
 ## @param BENDER_SCRIPTS_ARGS A list of additional arguments for source file filtering supplied to bender.
@@ -61,10 +62,14 @@ build: $(BUILD_DIR)/compile.tcl
 ## @param VCOM_ARGS="-suppress 2444" Additional flags to supply to vcom
 scripts: $(BUILD_DIR)/compile.tcl
 
+## Clean up files left to build and run simulation
+clean:
+	rm -rf $(BUILD_DIR)
+
 # Generate the compile scripts
 .PHONY: $(BUILD_DIR)/compile.tcl
 $(BUILD_DIR)/compile.tcl: $(PULPISSIMO_ROOT)/Bender.lock | $(PULPISSIMO_UTILS)/bender
-	echo 'set ROOT [file normalize [file dirname [info script]]/..]' > $(BUILD_DIR)/compile.tcl
+	echo 'set ROOT [file normalize [file dirname [info script]]/../..]' > $(BUILD_DIR)/compile.tcl
 	$(PULPISSIMO_UTILS)/bender script vsim $(BENDER_SCRIPTS_ARGS) --vlog-arg="$(VLOG_ARGS)" --vcom-arg="" | grep -v "set ROOT" >> $(BUILD_DIR)/compile.tcl
 
 # Convert the ELF binary to SREC format for simulation

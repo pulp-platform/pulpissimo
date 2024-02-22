@@ -31,6 +31,7 @@ include $(mkfile_dir)/venv.mk
 
 $(PULPISSIMO_UTILS)/padrick:
 ifeq (,$(widlcard bin/padrick))
+	mkdir -p $(PULPISSIMO_UTILS)
 	cd $(PULPISSIMO_UTILS) && curl https://api.github.com/repos/pulp-platform/padrick/releases/tags/v0.3.4 \
     | grep "browser_download_url.*Padrick-x86_64.AppImage" \
     | cut -d : -f 2,3 \
@@ -42,8 +43,9 @@ endif
 
 $(PULPISSIMO_UTILS)/bender:
 ifeq (,$(wildcard bin/bender))
+	mkdir -p $(PULPISSIMO_UTILS)
 	cd $(PULPISSIMO_UTILS) && curl --proto '=https' --tlsv1.2 -sSf https://pulp-platform.github.io/bender/init \
-		| bash -s -- 0.26.1
+		| bash -s -- 0.28.0
 	touch $(PULPISSIMO_UTILS)/bender
 endif
 

@@ -6,8 +6,8 @@ packages:
       Git: https://github.com/pulp-platform/adv_dbg_if.git
     dependencies: []
   apb:
-    revision: bb7b49a0a10c375ae3e05fa4756071eb964f0274
-    version: null
+    revision: 77ddf073f194d44b9119949d2421be59789e69ae
+    version: 0.2.4
     source:
       Git: https://github.com/pulp-platform/apb.git
     dependencies:
@@ -64,8 +64,8 @@ packages:
     dependencies:
     - common_cells
   common_cells:
-    revision: 9c1a1bdbd1a0928340863cad90c6fc0503da43a7
-    version: 1.27.1
+    revision: 2bd027cb87eaa9bf7d17196ec5f69864b35b630f
+    version: 1.32.0
     source:
       Git: https://github.com/pulp-platform/common_cells.git
     dependencies:
@@ -111,7 +111,7 @@ packages:
     revision: null
     version: null
     source:
-      Path: /home/meggiman/projects/pulp/pulpissimo/vendored_ips/gpio
+      Path: vendored_ips/gpio
     dependencies:
     - apb
     - axi
@@ -120,8 +120,8 @@ packages:
     - register_interface
     - tech_cells_generic
   hwpe-ctrl:
-    revision: 4bf1487a463c262bf7d8ffee79d1cf392937daa2
-    version: 1.7.1
+    revision: 1916c72f024175f1fe351acc3db3c6e9925a117d
+    version: 1.7.3
     source:
       Git: https://github.com/pulp-platform/hwpe-ctrl.git
     dependencies:
@@ -135,8 +135,8 @@ packages:
     - hwpe-ctrl
     - hwpe-stream
   hwpe-stream:
-    revision: ddc154424187dff42a8fcec946c768ceb13f13de
-    version: 1.6.4
+    revision: 4c2ef8c33a6e2a8c88127e2153013d4f2dc3f448
+    version: 1.7.0
     source:
       Git: https://github.com/pulp-platform/hwpe-stream.git
     dependencies:
@@ -206,17 +206,29 @@ packages:
     - scm
     - tech_cells_generic
     - timer_unit
+  pulpissimo-rtl_sim_tb:
+    revision: null
+    version: null
+    source:
+      Path: verification/sim/tb/generic
+    dependencies: []
+  pulpissimo_optional_vips:
+    revision: null
+    version: null
+    source:
+      Path: verification/sim/vip/generic
+    dependencies: []
   pulpissimo_padframe_rtl_sim:
     revision: null
     version: null
     source:
-      Path: /home/meggiman/projects/pulp/pulpissimo/rtl/pulpissimo/padframe/pulpissimo_padframe_rtl_sim_autogen
+      Path: hw/common/rtl/padframe/pulpissimo_padframe_rtl_sim_autogen
     dependencies:
     - common_cells
     - register_interface
   register_interface:
-    revision: e3a4955071fcf554febd4b29a7c7a52c7f1e7fc6
-    version: 0.3.8
+    revision: 146501d80052b61475cdc333d3aab4cd769fd5dc
+    version: 0.3.9
     source:
       Git: https://github.com/pulp-platform/register_interface.git
     dependencies:
@@ -232,8 +244,8 @@ packages:
     - common_cells
     - tech_cells_generic
   scm:
-    revision: e1ad7dffd9d8702430131ec8bc1a0d9ff686ece2
-    version: 1.1.0
+    revision: 998466d2a3c2d7d572e43d2666d93c4f767d8d60
+    version: 1.1.1
     source:
       Git: https://github.com/pulp-platform/scm.git
     dependencies: []
@@ -244,15 +256,15 @@ packages:
       Git: https://github.com/pulp-platform/tbtools.git
     dependencies: []
   tech_cells_generic:
-    revision: a9cae21902e75b1434328ecf36f85327ba5717de
-    version: 0.2.11
+    revision: 7968dd6e6180df2c644636bc6d2908a49f2190cf
+    version: 0.2.13
     source:
       Git: https://github.com/pulp-platform/tech_cells_generic.git
     dependencies:
     - common_verification
   timer_unit:
-    revision: 3f4ee3e5b3875a473242de5d0c3ebb5a0fe4b8db
-    version: 1.0.2
+    revision: 4c69615c89db9397a9747d6f6d6a36727854f0bc
+    version: 1.0.3
     source:
       Git: https://github.com/pulp-platform/timer_unit.git
     dependencies: []
