@@ -18,5 +18,6 @@
 # working at IIS
 
 ifneq (,$(wildcard /etc/iis.version))
-	VSIM_BIN ?= questa-2023.4-zr vsim
+$(info "Using IIS environment")
+VSIM_BIN ?= questa-2023.4-zr vsim
 endif
