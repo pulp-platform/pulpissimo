@@ -14,49 +14,39 @@
 
 PROJECT_NAME ?= pulpissimo
 PULP_PATH ?= $(shell git rev-parse --show-toplevel)
-SG_SHELL_CMD ?= spyglass-2019.06 sg_shell
-SG_GUI_CMD ?= spyglass-2019.06 spyglass
+SG_SHELL_CMD ?= spyglass-2022.06 sg_shell
+SG_GUI_CMD ?= spyglass-2022.06 spyglass
+SPYGLASS_DIR ?= $(PULP_PATH)/target/lint/spyglass
+SPYGLASS_WORKING_DIR = $(PULP_PATH)/build/spyglass
 
 .DEFAULT_GOAL := help
+include $(PULPISSIMO_ROOT)/utils/utils.mk
 
-.PHONY: $(PULP_PATH)/spyglass/working_dir/sources.f
-$(PULP_PATH)/spyglass/working_dir/sources.f: $(PULP_PATH)/bender
-	mkdir -p $(PULP_PATH)/spyglass/working_dir
-	$(PULP_PATH)/bender script -t synthesis verilator > $(PULP_PATH)/spyglass/working_dir/sources.f
+.PHONY: $(SPYGLASS_WORKING_DIR)/sources.f
+$(SPYGLASS_WORKING_DIR)/sources.f: $(PULPISSIMO_UTILS)/bender
+	mkdir -p $(SPYGLASS_WORKING_DIR)
+	$(PULPISSIMO_UTILS)/bender script -t synthesis verilator > $(SPYGLASS_WORKING_DIR)/sources.f
 
 .PHONY: lint_rtl
 ## Run spyglass lint with rtl_handoff methodology
-lint_rtl: $(PULP_PATH)/spyglass/working_dir/reports/lint_rtl.report.xml
+lint_rtl: $(SPYGLASS_WORKING_DIR)/reports/lint_rtl.report.xml
 
-$(PULP_PATH)/spyglass/working_dir/reports/moresimple.rpt: $(PULP_PATH)/spyglass/working_dir/sources.f
+$(SPYGLASS_WORKING_DIR)/reports/moresimple.rpt: $(SPYGLASS_WORKING_DIR)/sources.f
 	echo $(SG_SHELL_CMD)
-	cd $(PULP_PATH)/spyglass/working_dir && $(SG_SHELL_CMD) -tcl_file_continue_on_error -tcl $(PULP_PATH)/spyglass/run_lint_rtl_handoff.tcl
+	cd $(SPYGLASS_WORKING_DIR) && $(SG_SHELL_CMD) -tcl_file_continue_on_error -tcl $(SPYGLASS_DIR)/run_lint_rtl_handoff.tcl
 
 # generate generate junit report from spyglass report
-$(PULP_PATH)/spyglass/working_dir/reports/lint_rtl.report.xml: $(PULP_PATH)/spyglass/working_dir/reports/moresimple.rpt
-	./convert_report_to_junit.py --error-level error $(PULP_PATH)/spyglass/working_dir/reports/moresimple.rpt > $(PULP_PATH)/spyglass/working_dir/reports/lint_rtl.report.xml
+$(SPYGLASS_WORKING_DIR)/reports/lint_rtl.report.xml: $(SPYGLASS_WORKING_DIR)/reports/moresimple.rpt
+	./convert_report_to_junit.py --error-level error $(SPYGLASS_WORKING_DIR)/reports/moresimple.rpt > $(SPYGLASS_WORKING_DIR)/reports/lint_rtl.report.xml
 
 .PHONY: show_results
 ## Open the generated lint results in Spyglass GUI
 show_results:
-	cd $(PULP_PATH)/spyglass/working_dir && $(SG_GUI_CMD) -project $(PROJECT_NAME).prj
+	cd $(SPYGLASS_WORKING_DIR) && $(SG_GUI_CMD) -project $(PROJECT_NAME).prj
 
+.PHONY: clean_spyglass clean
+## Clean all
+clean: clean_spyglass
 ## Delete the spyglass working directory
-.PHONY: clean
-clean:
-	rm -rf $(PULP_PATH)/spyglass/working_dir
-
-.PHONY: help
-help: Makefile
-	@printf "PULP Platform\n"
-	@printf "Available targets\n\n"
-	@awk '/^[a-zA-Z\-\_0-9]+:/ { \
-		helpMessage = match(lastLine, /^## (.*)/); \
-		if (helpMessage) { \
-			helpCommand = substr($$1, 0, index($$1, ":")-1); \
-			helpMessage = substr(lastLine, RSTART + 3, RLENGTH); \
-			printf "%-15s %s\n", helpCommand, helpMessage; \
-		} \
-	} \
-	{ lastLine = $$0 }' $(MAKEFILE_LIST)
-
+clean_spyglass:
+	rm -rf $(SPYGLASS_WORKING_DIR)

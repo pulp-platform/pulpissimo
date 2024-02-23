@@ -1,6 +1,16 @@
-ifndef PULPISSIMO_ROOT
-$(error PULPISSIMO_ROOT is not defined. Please go to pulpissimos toplevel directory and run "source sourceme.sh" first.)
-endif
+# Copyright 2024 ETH Zurich and University of Bologna
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#     http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 BUILD_DIR = $(PULPISSIMO_ROOT)/build/questa
 $(shell mkdir -p $(BUILD_DIR))
@@ -62,8 +72,11 @@ build: $(BUILD_DIR)/compile.tcl
 ## @param VCOM_ARGS="-suppress 2444" Additional flags to supply to vcom
 scripts: $(BUILD_DIR)/compile.tcl
 
+.PHONY: clean_questasim clean
+## Clean all
+clean: clean_questasim
 ## Clean up files left to build and run simulation
-clean:
+clean_questasim:
 	rm -rf $(BUILD_DIR)
 
 # Generate the compile scripts

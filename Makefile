@@ -23,6 +23,7 @@ ifneq (,$(wildcard /etc/iis.version))
 endif
 
 include target/sim/questasim/Makefile
+include target/lint/spyglass/Makefile
 include $(PULPISSIMO_ROOT)/utils/utils.mk
 
 
