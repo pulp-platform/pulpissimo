@@ -29,8 +29,8 @@ dependencies:
   
 
   # Simulation Environment specific dependencies
-  pulpissimo_optional_vips:    { path: "target/sim/vip/generic"}
-  pulpissimo-rtl_sim_tb:       { path: "target/sim/tb/generic"}
+  pulpissimo_optional_vips:    { path: "target/sim/vip"}
+  pulpissimo-rtl_sim_tb:       { path: "target/sim/tb"}
 
 
 export_include_dirs:
