@@ -93,6 +93,17 @@ clean_zcu102: ## Removes all bitstreams, *.log files and vivado related files (r
 	rm -f pulpissimo_zcu102.bit
 	rm -f pulpissimo_zcu102.bin
 
+zyboz7: ## Generates the bistream for the ZedBoard
+	$(MAKE) -C pulpissimo-zyboz7 all
+	cp pulpissimo-zyboz7/pulpissimo-zyboz7.runs/impl_1/xilinx_pulpissimo.bit pulpissimo_zyboz7.bit
+	cp pulpissimo-zyboz7/pulpissimo-zyboz7.runs/impl_1/xilinx_pulpissimo.bin pulpissimo_zyboz7.bin
+	@echo "Bitstream generation for ZedBoard finished. The bitstream Configuration Memory File was copied to ./pulpissimo_zyboz7.bit and ./pulpissimo_zyboz7.bin"
+
+clean_zedboard: ## Removes all bitstreams, *.log files and vivado related files (rm -rf vivado*) for the ZedBoard.
+	$(MAKE) -C pulpissimo-zyboz7 clean
+	rm -f pulpissimo_zyboz7.bit
+	rm -f pulpissimo_zyboz7.bin
+
 
 help: ## Show this help message
 	@echo "PULPissimo on FPGA"
