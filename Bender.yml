@@ -16,10 +16,10 @@ dependencies:
   common_cells:                { git: "https://github.com/pulp-platform/common_cells.git",       version: 1.21.0 }
   apb:                         { git: "https://github.com/pulp-platform/apb.git",                version: 0.2.4 }
   jtag_pulp:                   { git: "https://github.com/pulp-platform/jtag_pulp.git",          version: 0.2.0 }
-  pulp_soc:                    { git: "https://github.com/pulp-platform/pulp_soc.git",           rev: v5.0.0-draft }
+  pulp_soc:                    { git: "https://github.com/pulp-platform/pulp_soc.git",           rev: dcc52471c12bb34f3d3182e6fb4ba4fee47e9b3b }
   tbtools:                     { git: "https://github.com/pulp-platform/tbtools.git",            version: 0.2.1 }
   tech_cells_generic:          { git: "https://github.com/pulp-platform/tech_cells_generic.git", version: 0.2.3 }
-  pulpissimo_padframe_rtl_sim: { path: "hw/common/rtl/padframe/pulpissimo_padframe_rtl_sim_autogen" }
+  pulpissimo_padframe_rtl_sim: { path: "hw/padframe/pulpissimo_padframe_rtl_sim_autogen" }
   register_interface:          { git: "https://github.com/pulp-platform/register_interface.git", version: 0.3.2 }
   generic_FLL:                 { git: "https://github.com/pulp-platform/generic_FLL.git",        version: 0.2.0 }
   apb_fll_if:                  { git: "https://github.com/pulp-platform/apb_fll_if.git",         version: 0.2.0 }
@@ -34,7 +34,7 @@ dependencies:
 
 
 export_include_dirs:
-  - hw/common/rtl/includes
+  - hw/includes
 
 # The default flavor of PULPIssimo is the generic version for RTL simulation.
 # For other target platforms, checkout the Bender.yml files in the various
@@ -46,15 +46,15 @@ sources:
   # Level 0
 
   # Common RTL files
-  - hw/common/rtl/soc_domain.sv
-  - hw/common/rtl/pulpissimo.sv
+  - hw/soc_domain.sv
+  - hw/pulpissimo.sv
 
 
   # rtl_sim - Generic version of pulpissimo used for non-verilator RTL simulation 
   - target: all(rtl_sim, not(verilator))
     files:
-      - hw/common/rtl/padframe/padframe_adapter.sv
-      - hw/common/rtl/clock_gen_generic.sv
+      - hw/padframe/padframe_adapter.sv
+      - hw/clock_gen_generic.sv
 
 
   # TB sources

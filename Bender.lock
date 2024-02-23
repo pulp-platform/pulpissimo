@@ -222,7 +222,7 @@ packages:
     revision: null
     version: null
     source:
-      Path: hw/common/rtl/padframe/pulpissimo_padframe_rtl_sim_autogen
+      Path: hw/padframe/pulpissimo_padframe_rtl_sim_autogen
     dependencies:
     - common_cells
     - register_interface

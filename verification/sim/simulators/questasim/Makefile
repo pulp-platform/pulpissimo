@@ -10,7 +10,7 @@ include $(PULPISSIMO_ROOT)/utils/utils.mk
 ## Configuration Variables for Bender, Questasim behavior
 BENDER_SCRIPTS_ARGS += -t rtl -t test -t rtl_sim
 VSIM_ARGS ?= -64
-VLOG_ARGS += -suppress 2583 -suppress 13314 \"+incdir+\$$ROOT/hw/common/rtl/includes\"
+VLOG_ARGS += -suppress 2583 -suppress 13314 \"+incdir+\$$ROOT/hw/includes\"
 VCOM_ARGS += ""
 VOPT_ARGS ?= +acc
 VSIM_BIN ?= "vsim"
