@@ -57,20 +57,6 @@ sources:
       - hw/clock_gen_generic.sv
 
 
-  # TB sources
-  - target: any(test,simulation)
-    files:
-      - target/sim/tb/generic/tb_lib/riscv_pkg.sv
-      - target/sim/tb/generic/tb_lib/jtag_pkg.sv
-      - target/sim/tb/generic/tb_lib/pulp_tap_pkg.sv
-      - target/sim/tb/generic/tb_lib/srec/srec_pkg.sv
-      - target/sim/tb/generic/tb_lib/tb_clk_gen.sv
-      - target/sim/tb/generic/tb_pulp_simple.sv
-      - target/sim/tb/generic/tb_pulp.sv
-      - target/sim/tb/generic/tb_lib/SimJTAG.sv
-      - target/sim/tb/generic/tb_lib/SimDTM.sv
-
-
 vendor_package:
   # Import the GPIO repository directly. Since we have to regenerate the RTL
   # when we change the number GPIOs we cannot just depend on it as a regular
