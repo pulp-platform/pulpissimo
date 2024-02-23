@@ -18,6 +18,10 @@ mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 current_dir := $(notdir $(patsubst %/,%,$(dir $(mkfile_path))))
 PULPISSIMO_ROOT=$(abspath $(current_dir)/..)
 
+ifneq (,$(wildcard /etc/iis.version))
+	include $(PULPISSIMO_ROOT)/utils/iis-env.mk
+endif
+
 include verification/sim/simulators/questasim/Makefile
 include $(PULPISSIMO_ROOT)/utils/utils.mk
 

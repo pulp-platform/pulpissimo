@@ -9,7 +9,7 @@ contained in this directory grouped in subdirectories by environment.
 The default generic SV testbench is a regular non-UVM SystemVerilog testbench to
 be simulated on conventional RTL simulators. There is a more complex testbench
 based on the legacy PULPissimo testebnch (`tb_pulp.sv`) and a simplified version
-to use as a template for your own TB (`tb_pulp_simple.sv**).
+to use as a template for your own TB (`tb_pulp_simple.sv`).
 
 ### `Verilator`
 TODO
