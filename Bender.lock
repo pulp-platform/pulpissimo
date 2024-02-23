@@ -111,7 +111,7 @@ packages:
     revision: null
     version: null
     source:
-      Path: vendored_ips/gpio
+      Path: hw/vendored_ips/gpio
     dependencies:
     - apb
     - axi

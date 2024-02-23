@@ -76,6 +76,6 @@ vendor_package:
   # when we change the number GPIOs we cannot just depend on it as a regular
   # dependency but actually need a modifyable copy in the source tree.
   - name: gpio
-    target_dir: vendored_ips/gpio
+    target_dir: hw/vendored_ips/gpio
     upstream: { git: "https://github.com/pulp-platform/gpio.git", rev: "7f5e7b50a3d275fcbdae156ed14b7236ad5d7c0b"}
-    patch_dir: vendored_ips/patches/gpio
+    patch_dir: hw/vendored_ips/patches/gpio
