@@ -12,8 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-BUILD_DIR = $(PULPISSIMO_ROOT)/build/questa
-$(shell mkdir -p $(BUILD_DIR))
+PULPISSIMO_ROOT ?= $(shell git rev-parse --show-toplevel)
+
+QUESTA_BUILD_DIR = $(PULPISSIMO_ROOT)/build/questasim
 
 include $(PULPISSIMO_ROOT)/utils/utils.mk
 
@@ -48,12 +49,12 @@ SIM_TOP ?= 'tb_pulp'
 ## @param VSIM_BIN=vsim The command to invoke the vsim binary.
 ## @param BOOTMODE=jtag The bootmode to use to start PULPissimo. Possible values: jtag_legacy, jtag_openocd or fastboot. 
 .PHONY: run_sim
-run_sim: $(BUILD_DIR)/app.s19
-	ln -sf waves $(BUILD_DIR)/waves
+run_sim: $(QUESTA_BUILD_DIR)/app.s19
+	ln -sf waves $(QUESTA_BUILD_DIR)/waves
 ifeq ($(GUI), '0')
-	cd $(BUILD_DIR) && $(VSIM_BIN) $(VSIM_ARGS) -c -do "vsim +BINARY_SREC_PATH='$< vopt_tb; run -all; exit"
+	cd $(QUESTA_BUILD_DIR) && $(VSIM_BIN) $(VSIM_ARGS) -c -do "vsim +BINARY_SREC_PATH='$< vopt_tb; run -all; exit"
 else
-	cd $(BUILD_DIR) && $(VSIM_BIN) $(VSIM_ARGS) -gui -do "vsim +BINARY_SREC_PATH='$< vopt_tb"
+	cd $(QUESTA_BUILD_DIR) && $(VSIM_BIN) $(VSIM_ARGS) -gui -do "vsim +BINARY_SREC_PATH='$< vopt_tb"
 endif
 
 ## (Re)Compile PULPissimo using Questasim.
@@ -61,36 +62,37 @@ endif
 ## @param VSIM_ARGS='-64' Additional args to supply to vsim during tool invocation
 ## @param SIM_TOP='tb_pulp' The toplevel module to optimize for simulation. Default: tb_pulp
 .PHONY: build
-build: $(BUILD_DIR)/compile.tcl
-	cd $(BUILD_DIR) && $(VSIM_BIN) $(VSIM_ARGS) -c -do 'source compile.tcl; quit'
-	cd $(BUILD_DIR) && $(VSIM_BIN) $(VSIM_ARGS) -c -do 'vopt $(VOPT_ARGS) -o vopt_tb $(SIM_TOP) -work work; quit'
+build: $(QUESTA_BUILD_DIR)/compile.tcl
+	cd $(QUESTA_BUILD_DIR) && $(VSIM_BIN) $(VSIM_ARGS) -c -do 'source compile.tcl; quit'
+	cd $(QUESTA_BUILD_DIR) && $(VSIM_BIN) $(VSIM_ARGS) -c -do 'vopt $(VOPT_ARGS) -o vopt_tb $(SIM_TOP) -work work; quit'
 	@echo "Finished building design $(SIM_TOP). The optimized design has been stored in a unit called 'vopt_tb'."
 
 ## Invoke bender to generate the TCL scripts for compilation with questasim
 ## @param BENDER_SCRIPTS_ARGS A list of additional arguments for source file filtering supplied to bender.
 ## @param VLOG_ARGS="-suppress 2583" Additional flags to supply to vlog
 ## @param VCOM_ARGS="-suppress 2444" Additional flags to supply to vcom
-scripts: $(BUILD_DIR)/compile.tcl
+scripts: $(QUESTA_BUILD_DIR)/compile.tcl
 
 .PHONY: clean_questasim clean
 ## Clean all
 clean: clean_questasim
 ## Clean up files left to build and run simulation
 clean_questasim:
-	rm -rf $(BUILD_DIR)
+	rm -rf $(QUESTA_BUILD_DIR)
 
 # Generate the compile scripts
-.PHONY: $(BUILD_DIR)/compile.tcl
-$(BUILD_DIR)/compile.tcl: $(PULPISSIMO_ROOT)/Bender.lock | $(PULPISSIMO_UTILS)/bender
-	echo 'set ROOT [file normalize [file dirname [info script]]/../..]' > $(BUILD_DIR)/compile.tcl
-	$(PULPISSIMO_UTILS)/bender script vsim $(BENDER_SCRIPTS_ARGS) --vlog-arg="$(VLOG_ARGS)" --vcom-arg="" | grep -v "set ROOT" >> $(BUILD_DIR)/compile.tcl
+.PHONY: $(QUESTA_BUILD_DIR)/compile.tcl
+$(QUESTA_BUILD_DIR)/compile.tcl: $(PULPISSIMO_ROOT)/Bender.lock | $(PULPISSIMO_UTILS)/bender
+	mkdir -p $(QUESTA_BUILD_DIR)
+	echo 'set ROOT [file normalize [file dirname [info script]]/../..]' > $(QUESTA_BUILD_DIR)/compile.tcl
+	$(PULPISSIMO_UTILS)/bender script vsim $(BENDER_SCRIPTS_ARGS) --vlog-arg="$(VLOG_ARGS)" --vcom-arg="" | grep -v "set ROOT" >> $(QUESTA_BUILD_DIR)/compile.tcl
 
 # Convert the ELF binary to SREC format for simulation
-$(BUILD_DIR)/app.s19: $(EXECUTABLE_PATH)
+$(QUESTA_BUILD_DIR)/app.s19: $(EXECUTABLE_PATH)
 ifndef EXECUTABLE_PATH
 	$(error EXECUTABLE_PATH not provided. Please specify which ELF binary to simulate.)
 endif
-	$(RISCV_OBJCOPY_BIN) -O srec $(EXECUTABLE_PATH) $(BUILD_DIR)/app.s19
+	$(RISCV_OBJCOPY_BIN) -O srec $(EXECUTABLE_PATH) $(QUESTA_BUILD_DIR)/app.s19
 
 HELP_TITLE=PULPissimo Questasim Simulation
 HELP_DESCRIPTION="Invocation targets for compilation and simulation of PULPissimo usin Questasim."

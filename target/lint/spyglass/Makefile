@@ -13,11 +13,11 @@
 # limitations under the License.
 
 PROJECT_NAME ?= pulpissimo
-PULP_PATH ?= $(shell git rev-parse --show-toplevel)
+PULPISSIMO_ROOT ?= $(shell git rev-parse --show-toplevel)
 SG_SHELL_CMD ?= spyglass-2022.06 sg_shell
 SG_GUI_CMD ?= spyglass-2022.06 spyglass
-SPYGLASS_DIR ?= $(PULP_PATH)/target/lint/spyglass
-SPYGLASS_WORKING_DIR = $(PULP_PATH)/build/spyglass
+SPYGLASS_DIR ?= $(PULPISSIMO_ROOT)/target/lint/spyglass
+SPYGLASS_WORKING_DIR = $(PULPISSIMO_ROOT)/build/spyglass
 
 .DEFAULT_GOAL := help
 include $(PULPISSIMO_ROOT)/utils/utils.mk
