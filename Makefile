@@ -22,7 +22,7 @@ ifneq (,$(wildcard /etc/iis.version))
 	include $(PULPISSIMO_ROOT)/utils/iis-env.mk
 endif
 
-include verification/sim/simulators/questasim/Makefile
+include target/sim/questasim/Makefile
 include $(PULPISSIMO_ROOT)/utils/utils.mk
 
 

@@ -29,8 +29,8 @@ dependencies:
   
 
   # Simulation Environment specific dependencies
-  pulpissimo_optional_vips:    { path: "verification/sim/vip/generic"}
-  pulpissimo-rtl_sim_tb:       { path: "verification/sim/tb/generic"}
+  pulpissimo_optional_vips:    { path: "target/sim/vip/generic"}
+  pulpissimo-rtl_sim_tb:       { path: "target/sim/tb/generic"}
 
 
 export_include_dirs:
@@ -60,15 +60,15 @@ sources:
   # TB sources
   - target: any(test,simulation)
     files:
-      - verification/sim/tb/generic/tb_lib/riscv_pkg.sv
-      - verification/sim/tb/generic/tb_lib/jtag_pkg.sv
-      - verification/sim/tb/generic/tb_lib/pulp_tap_pkg.sv
-      - verification/sim/tb/generic/tb_lib/srec/srec_pkg.sv
-      - verification/sim/tb/generic/tb_lib/tb_clk_gen.sv
-      - verification/sim/tb/generic/tb_pulp_simple.sv
-      - verification/sim/tb/generic/tb_pulp.sv
-      - verification/sim/tb/generic/tb_lib/SimJTAG.sv
-      - verification/sim/tb/generic/tb_lib/SimDTM.sv
+      - target/sim/tb/generic/tb_lib/riscv_pkg.sv
+      - target/sim/tb/generic/tb_lib/jtag_pkg.sv
+      - target/sim/tb/generic/tb_lib/pulp_tap_pkg.sv
+      - target/sim/tb/generic/tb_lib/srec/srec_pkg.sv
+      - target/sim/tb/generic/tb_lib/tb_clk_gen.sv
+      - target/sim/tb/generic/tb_pulp_simple.sv
+      - target/sim/tb/generic/tb_pulp.sv
+      - target/sim/tb/generic/tb_lib/SimJTAG.sv
+      - target/sim/tb/generic/tb_lib/SimDTM.sv
 
 
 vendor_package:

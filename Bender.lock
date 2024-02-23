@@ -210,13 +210,13 @@ packages:
     revision: null
     version: null
     source:
-      Path: verification/sim/tb/generic
+      Path: target/sim/tb/generic
     dependencies: []
   pulpissimo_optional_vips:
     revision: null
     version: null
     source:
-      Path: verification/sim/vip/generic
+      Path: target/sim/vip/generic
     dependencies: []
   pulpissimo_padframe_rtl_sim:
     revision: null
