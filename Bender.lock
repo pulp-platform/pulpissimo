@@ -171,7 +171,7 @@ packages:
     - udma_sdio
     - udma_uart
   pulp_soc:
-    revision: b72561de8fe8f1399d8231e5467275a70c618cc6
+    revision: 95efc08c176f2e38fa2137ad913ce31baabc2c95
     version: null
     source:
       Git: https://github.com/pulp-platform/pulp_soc.git
