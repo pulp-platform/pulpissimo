@@ -16,7 +16,7 @@ dependencies:
   common_cells:                { git: "https://github.com/pulp-platform/common_cells.git",       version: 1.21.0 }
   apb:                         { git: "https://github.com/pulp-platform/apb.git",                version: 0.2.4 }
   jtag_pulp:                   { git: "https://github.com/pulp-platform/jtag_pulp.git",          version: 0.2.0 }
-  pulp_soc:                    { git: "https://github.com/pulp-platform/pulp_soc.git",           rev: 5d5fe9d6c8612cf2c80e30c58c5acdf43b95940b }
+  pulp_soc:                    { git: "https://github.com/pulp-platform/pulp_soc.git",           rev: b72561de8fe8f1399d8231e5467275a70c618cc6 }
   tbtools:                     { git: "https://github.com/pulp-platform/tbtools.git",            version: 0.2.1 }
   tech_cells_generic:          { git: "https://github.com/pulp-platform/tech_cells_generic.git", version: 0.2.3 }
   pulpissimo_padframe_rtl_sim: { path: "hw/padframe/pulpissimo_padframe_rtl_sim_autogen" }
