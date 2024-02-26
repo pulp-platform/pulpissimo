@@ -79,7 +79,7 @@ test_sequential_bare:
     - make build
   script:
     - echo "Running sequential bare tests"
-    - source sw/pulp-runtime/comfigs/pulpissimo.sh
+    - source sw/pulp-runtime/configs/pulpissimo.sh
     - export PULP_RISCV_GCC_TOOLCHAIN=/usr/pack/riscv-1.0-kgf/pulp-gcc-2.5.0
     - export VSIM_PATH=$PWD/build/questasim
     - cd sw/regression_tests/sequential_bare_tests && plptest --threads 32 --stdout
@@ -100,7 +100,7 @@ test_ml:
     - make build
   script:
     - echo "Running ml tests"
-    - source sw/pulp-runtime/comfigs/pulpissimo.sh
+    - source sw/pulp-runtime/configs/pulpissimo.sh
     - export PULP_RISCV_GCC_TOOLCHAIN=/usr/pack/riscv-1.0-kgf/pulp-gcc-2.5.0
     - export VSIM_PATH=$PWD/build/questasim
     - cd sw/regression_tests/ml_tests && plptest --threads 32 --stdout
@@ -121,7 +121,7 @@ test_riscv:
     - make build
   script:
     - echo "Running ml tests"
-    - source sw/pulp-runtime/comfigs/pulpissimo.sh
+    - source sw/pulp-runtime/configs/pulpissimo.sh
     - export PULP_RISCV_GCC_TOOLCHAIN=/usr/pack/riscv-1.0-kgf/pulp-gcc-2.5.0
     - export VSIM_PATH=$PWD/build/questasim
     - cd sw/regression_tests/riscv_tests && plptest --threads 32 --stdout
@@ -163,7 +163,7 @@ test_dm:
     - export VSIM_PATH=$PWD/build/questasim
     - echo "Running debug module testbench"
     # Note that the program is irrelevant we just put something for it to not complain
-    - cd sim/ && make all simc VSIM_FLAGS="+jtag_dm_tests +srec=../rtl/tb/srec/min.srec"
+    - make build run_sim VSIM_FLAGS="+jtag_dm_tests +srec=../rtl/tb/srec/min.srec"
 
 fpga_synth_genesys2:
   stage: test
