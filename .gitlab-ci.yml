@@ -327,8 +327,8 @@ sim_questa_multivers:
   script:
     - make scripts
     - make clean build
-    - source setup/vsim.sh
-    - source pulp-runtime/configs/pulpissimo_cv32.sh
+    - export VSIM_PATH=$PWD/build/questasim
+    - source sw/pulp-runtime/configs/pulpissimo_cv32.sh
     - make -C hello clean all run
   dependencies:
     - fetch_ips_bender
