@@ -345,6 +345,6 @@ spi_boot:
     - printf "PULP_APP = hello\nPULP_APP_FC_SRCS = hello.c\nPULP_APP_HOST_SRCS = hello.c\nPULP_CFLAGS = -O3 -g\n\ninclude \$(PULP_SDK_HOME)/install/rules/pulp_rt.mk\n" > hello/Makefile
   script:
     - make scripts-bender-vsim-vips all
-    - source setup/vsim.sh
+    - export VSIM_PATH=$PWD/build/questasim
     - source pulp-runtime/configs/pulpissimo_cv32.sh
     - make -C hello clean all run bootmode=spi PULP_RUNTIME_GCC_TOOLCHAIN=/usr/pack/riscv-1.0-kgf/pulp-gcc-2.5.0
