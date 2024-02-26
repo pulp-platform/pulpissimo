@@ -39,7 +39,7 @@ $(SPYGLASS_WORKING_DIR)/reports/moresimple.rpt: $(SPYGLASS_WORKING_DIR)/sources.
 
 # generate generate junit report from spyglass report
 $(SPYGLASS_WORKING_DIR)/reports/lint_rtl.report.xml: $(SPYGLASS_WORKING_DIR)/reports/moresimple.rpt
-	./convert_report_to_junit.py --error-level error $(SPYGLASS_WORKING_DIR)/reports/moresimple.rpt > $(SPYGLASS_WORKING_DIR)/reports/lint_rtl.report.xml
+	$(SPYGLASS_DIR)/convert_report_to_junit.py --error-level error $(SPYGLASS_WORKING_DIR)/reports/moresimple.rpt > $(SPYGLASS_WORKING_DIR)/reports/lint_rtl.report.xml
 
 .PHONY: show_results
 ## Open the generated lint results in Spyglass GUI

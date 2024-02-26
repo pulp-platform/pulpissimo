@@ -28,6 +28,7 @@ VSIM_BIN ?= "vsim"
 VSIM_USER_PLUSARGS ?= ""
 RISCV_OBJCOPY_BIN ?= 'riscv32-unknown-elf-objcopy'
 SIM_TOP ?= 'tb_pulp'
+SIM_TOP_OPT ?= 'vopt_tb'
 
 
 
@@ -50,11 +51,11 @@ SIM_TOP ?= 'tb_pulp'
 ## @param BOOTMODE=jtag The bootmode to use to start PULPissimo. Possible values: jtag_legacy, jtag_openocd or fastboot. 
 .PHONY: run_sim
 run_sim: $(QUESTA_BUILD_DIR)/app.s19
-	ln -sf waves $(QUESTA_BUILD_DIR)/waves
+	ln -snf waves $(QUESTA_BUILD_DIR)/waves
 ifeq ($(GUI), '0')
-	cd $(QUESTA_BUILD_DIR) && $(VSIM_BIN) $(VSIM_ARGS) -c -do "vsim +BINARY_SREC_PATH='$< vopt_tb; run -all; exit"
+	cd $(QUESTA_BUILD_DIR) && $(VSIM_BIN) $(VSIM_ARGS) -c -do "vsim +BINARY_SREC_PATH='$< $(SIM_TOP_OPT); run -all; exit"
 else
-	cd $(QUESTA_BUILD_DIR) && $(VSIM_BIN) $(VSIM_ARGS) -gui -do "vsim +BINARY_SREC_PATH='$< vopt_tb"
+	cd $(QUESTA_BUILD_DIR) && $(VSIM_BIN) $(VSIM_ARGS) -gui -do "vsim +BINARY_SREC_PATH='$< $(SIM_TOP_OPT)"
 endif
 
 ## (Re)Compile PULPissimo using Questasim.
@@ -64,10 +65,10 @@ endif
 .PHONY: build
 build: $(QUESTA_BUILD_DIR)/compile.tcl
 	cd $(QUESTA_BUILD_DIR) && $(VSIM_BIN) $(VSIM_ARGS) -c -do 'source compile.tcl; quit'
-	cd $(QUESTA_BUILD_DIR) && $(VSIM_BIN) $(VSIM_ARGS) -c -do 'vopt $(VOPT_ARGS) -o vopt_tb $(SIM_TOP) -work work; quit'
-	@ln -sf $(PULPISSIMO_ROOT)/target/sim/questasim/waves $(QUESTA_BUILD_DIR)/waves
-	@ln -sf $(PULPISSIMO_ROOT)/target/sim/questasim/tcl_files $(QUESTA_BUILD_DIR)/tcl_files
-	@echo "Finished building design $(SIM_TOP). The optimized design has been stored in a unit called 'vopt_tb'."
+	cd $(QUESTA_BUILD_DIR) && $(VSIM_BIN) $(VSIM_ARGS) -c -do 'vopt $(VOPT_ARGS) -o $(SIM_TOP_OPT) $(SIM_TOP) -work work; quit'
+	@ln -snf $(PULPISSIMO_ROOT)/target/sim/questasim/waves $(QUESTA_BUILD_DIR)/waves
+	@ln -snf $(PULPISSIMO_ROOT)/target/sim/questasim/tcl_files $(QUESTA_BUILD_DIR)/tcl_files
+	@echo "Finished building design $(SIM_TOP). The optimized design has been stored in a unit called '$(SIM_TOP_OPT)'."
 ifneq ($(VSIM_PATH), $(PULPISSIMO_ROOT)/build/questasim)
 	@echo ""
 	@echo "To run a simulation directly with the PULP runtime or SDK \`make run\` commands execute the following:"
