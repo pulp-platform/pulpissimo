@@ -19,6 +19,8 @@ SG_GUI_CMD ?= spyglass-2022.06 spyglass
 SPYGLASS_DIR ?= $(PULPISSIMO_ROOT)/target/lint/spyglass
 SPYGLASS_WORKING_DIR = $(PULPISSIMO_ROOT)/build/spyglass
 
+## @section Spyglass Lint
+
 .DEFAULT_GOAL := help
 include $(PULPISSIMO_ROOT)/utils/utils.mk
 

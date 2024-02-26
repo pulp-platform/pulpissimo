@@ -49,13 +49,6 @@ packages:
     - common_cells
     - common_verification
     - tech_cells_generic
-  axi_slice:
-    revision: a4f72bc21ac4d7da631e8309d9f8d0c34b735c23
-    version: 1.1.4
-    source:
-      Git: https://github.com/pulp-platform/axi_slice.git
-    dependencies:
-    - common_cells
   cluster_interconnect:
     revision: 7d0a4f8acae71a583a6713cab5554e60b9bb8d27
     version: 1.2.1
@@ -178,7 +171,7 @@ packages:
     - udma_sdio
     - udma_uart
   pulp_soc:
-    revision: f2a510e7a6390543dde19f1fb415fb63f2f38534
+    revision: 5d5fe9d6c8612cf2c80e30c58c5acdf43b95940b
     version: null
     source:
       Git: https://github.com/pulp-platform/pulp_soc.git
@@ -190,7 +183,6 @@ packages:
     - apb_fll_if
     - apb_interrupt_cntrl
     - axi
-    - axi_slice
     - cluster_interconnect
     - common_cells
     - cv32e40p
@@ -227,14 +219,15 @@ packages:
     - common_cells
     - register_interface
   register_interface:
-    revision: 146501d80052b61475cdc333d3aab4cd769fd5dc
-    version: 0.3.9
+    revision: d7693be4aef1fc7e7eb2b00b41c42e87d959866c
+    version: 0.4.2
     source:
       Git: https://github.com/pulp-platform/register_interface.git
     dependencies:
     - apb
     - axi
     - common_cells
+    - common_verification
   riscv-dbg:
     revision: 69be5ddc03ea1688c0eab47d6ed9d0e8725beda1
     version: 0.5.1

@@ -23,14 +23,18 @@ TODO
   simulation environments.
 
 ## Simulation Environment Invocation
-In order to streamline switching between different simulation environments and to allow for easy simulation invocation during software development for Pulpissimo, we define a standard interface to invoke a simulation interface based on environment variables. 
+In order to streamline switching between different simulation environments and
+to allow for easy simulation invocation during software development for
+Pulpissimo, we define a standard interface to invoke a simulation interface
+based on environment variables. 
 
 Each simulation environment shall contain a Makefile with a target called
 `run_sim` to invoke the simulation. The `run_sim` target shall use the following
 **mandatory** environment variables (supplied by the user or the development
 SDK) to control simulation invocation:
 
-* `EXECUTABLE_PATH` The absolute path to the compiled ELF executable to be run on PULPissimo.
+* `EXECUTABLE_PATH` The absolute path to the compiled ELF executable to be run
+  on PULPissimo.
 
 Besides the mandatory environment variables, the following optional envionment
 variables shall be used for sim. environments supporting the relevant feature:
@@ -50,6 +54,12 @@ variables shall be used for sim. environments supporting the relevant feature:
 Each simulation environment may expose additional environment variables for
 environment-specific behavior that cannot be easily supported by all
 environments. 
+
+Further, the simulation can be launched with built-in launchers configured in
+the `pulp-runtime` and `pulp-sdk` by setting up the appropriate environment
+variables, indicated at the end of the build flow. `VSIM_PATH` needs to point to
+the questasim build directory for PULPissimo, and `VSIM` needs to containt the
+same value as `VSIM_BIN`.
 
 **The ``run_sim`` target in the sim. environemts Makefile must be documented
 using Makefile docs** (see ../../utils/utils.mk). All supported variables must

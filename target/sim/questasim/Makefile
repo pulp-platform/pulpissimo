@@ -65,15 +65,15 @@ endif
 build: $(QUESTA_BUILD_DIR)/compile.tcl
 	cd $(QUESTA_BUILD_DIR) && $(VSIM_BIN) $(VSIM_ARGS) -c -do 'source compile.tcl; quit'
 	cd $(QUESTA_BUILD_DIR) && $(VSIM_BIN) $(VSIM_ARGS) -c -do 'vopt $(VOPT_ARGS) -o vopt_tb $(SIM_TOP) -work work; quit'
-	@ln -s $(PULPISSIMO_ROOT)/target/sim/questasim/waves $(QUESTA_BUILD_DIR)/waves
-	@ln -s $(PULPISSIMO_ROOT)/target/sim/questasim/tcl_files $(QUESTA_BUILD_DIR)/tcl_files
+	@ln -sf $(PULPISSIMO_ROOT)/target/sim/questasim/waves $(QUESTA_BUILD_DIR)/waves
+	@ln -sf $(PULPISSIMO_ROOT)/target/sim/questasim/tcl_files $(QUESTA_BUILD_DIR)/tcl_files
 	@echo "Finished building design $(SIM_TOP). The optimized design has been stored in a unit called 'vopt_tb'."
 ifneq ($(VSIM_PATH), $(PULPISSIMO_ROOT)/build/questasim)
 	@echo ""
 	@echo "To run a simulation directly with the PULP runtime or SDK \`make run\` commands execute the following:"
 	@echo ""
 	@echo "	export VSIM_PATH=$(PULPISSIMO_ROOT)/build/questasim"
-ifneq (,$(wildcard /etc/iis.version))
+ifneq ($(VSIM),$(VSIM_BIN))
 	@echo "	export VSIM=\"$(VSIM_BIN)\""
 endif
 	@echo ""

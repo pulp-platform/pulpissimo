@@ -26,7 +26,19 @@ include target/sim/questasim/Makefile
 include target/lint/spyglass/Makefile
 include $(PULPISSIMO_ROOT)/utils/utils.mk
 
+.PHONY: hw
+## Re-generate generated hardware IPs
+hw: hw/asic_autogen_rom.sv hw/fpga_autogen_rom.sv
 
+## Generate the ASIC and simulation boot rom
+hw/asic_autogen_rom.sv:
+	$(MAKE) -C sw/bootcode asic_autogen_rom.sv
+	cp sw/bootcode/asic_autogen_rom.sv $@
+
+## Generate the FPGA boot rom
+hw/fpga_autogen_rom.sv:
+	$(MAKE) -C sw/bootcode fpga_autogen_rom.sv
+	cp sw/bootcode/fpga_autogen_rom.sv $@
 HELP_TITLE="PULPissimo Build & SIM Environment"
 HELP_DESCRIPTION="Toplevel targets for building and simulating PULPissimo. Please check the make files in the subdirectories for additional targets.."
 include $(PULPISSIMO_ROOT)/utils/help.mk

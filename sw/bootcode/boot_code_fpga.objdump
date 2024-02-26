@@ -1,5 +1,5 @@
 
-boot_code:     Dateiformat elf32-littleriscv
+boot_code:     file format elf32-littleriscv
 
 
 Disassembly of section .text:
@@ -1635,12 +1635,6 @@ default_handler:
 1a00104e:	8582                	jr	a1
 
 1a001050 <__clzsi2>:
-int
-__clzSI2 (UWtype x)
-{
-  Wtype ret;
-
-  count_leading_zeros (ret, x);
 1a001050:	000107b7          	lui	a5,0x10
 1a001054:	02f57a63          	bgeu	a0,a5,1a001088 <__clzsi2+0x38>
 1a001058:	0ff00793          	li	a5,255
@@ -1653,12 +1647,8 @@ __clzSI2 (UWtype x)
 1a001074:	57470793          	addi	a5,a4,1396 # 1a001574 <__clz_tab>
 1a001078:	00a78533          	add	a0,a5,a0
 1a00107c:	00054503          	lbu	a0,0(a0)
-
-  return ret;
-}
 1a001080:	40a68533          	sub	a0,a3,a0
 1a001084:	00008067          	ret
-  count_leading_zeros (ret, x);
 1a001088:	01000737          	lui	a4,0x1000
 1a00108c:	01000793          	li	a5,16
 1a001090:	fce56ae3          	bltu	a0,a4,1a001064 <__clzsi2+0x14>
