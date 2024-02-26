@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
 
 
 before_script:
@@ -26,40 +28,16 @@ stages:
   - test
   - sim_questa_multivers
 
-fetch_tests:
-  stage: fetch
-  script:
-    - echo "Fetching tests"
-    - make test-checkout-gitlab
-  artifacts:
-    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
-    paths:
-      - tests/*
-
 fetch_ips_bender:
   stage: fetch
   script:
     - echo "Fetching IPs using bender"
-    - ulimit -Sn 4096
-    - BENDER=1 make checkout
+    - make checkout
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
     paths:
-      # - .bender/*
-      #- Bender.lock
-      - bender
-
-
-# This jobs result is too large to produce an artifact
-# fetch_sdk:
-#   stage: fetch
-#   script:
-#     - echo "Fetching SDK from releases and setting up paths"
-#     - make sdk-gitlab
-#   artifacts:
-#     paths:
-#       - pkg/
-#       - env/
+      - .bender/*
+      - utils/bin/bender
 
 build_rtl:
   stage: build
@@ -68,30 +46,25 @@ build_rtl:
     - echo "Compiling RTL model and DPI libraries"
     - make build
     - echo "Fetching VIPs"
-    - ./rtl/vip/get-vips.sh --yes --gitlab
-    - echo "Installing scripts"
-    - make install
+    - ./target/sim/vip/get-vips.sh --yes --gitlab
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
     paths:
-      - tests/*
-#      - sim/*
-      - rtl/tb/remote_bitbang/* # we want to reuse bitbang lib
-      - rtl/vip/*
-#      - pkg/* # sdk is too large
+      - target/sim/tb/tb_lib/remote_bitbang/* # we want to reuse bitbang lib
+      - target/sim/vip/*
 
 
 lint:
   stage: test
   script:
     - echo "Running Spyglass Lint in rtl_handoff methodology with goal lint_rtl"
-    - make lint
+    - make lint_rtl
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
     paths:
-      - spyglass/working_dir/*
+      - build/spyglass/working_dir/*
     reports:
-      junit: spyglass/working_dir/reports/lint_rtl.report.xml
+      junit: build/spyglass/working_dir/reports/lint_rtl.report.xml
   dependencies:
     - fetch_ips_bender
   needs:
@@ -102,113 +75,65 @@ lint:
 test_sequential_bare:
   stage: test
   before_script:
-    - echo "Fetching SDK from releases and setting up paths"
-    - make sdk-gitlab
     - echo "Compiling RTL model and DPI libraries"
     - make build
-    - echo "Installing scripts"
-    - make install
   script:
     - echo "Running sequential bare tests"
-    - source env/ci-pulpissimo.sh && make test-sequential-bare
+    - source sw/pulp-runtime/comfigs/pulpissimo.sh
+    - export PULP_RISCV_GCC_TOOLCHAIN=/usr/pack/riscv-1.0-kgf/pulp-gcc-2.5.0
+    - export VSIM_PATH=$PWD/build/questasim
+    - cd sw/regression_tests/sequential_bare_tests && plptest --threads 32 --stdout
     - echo "Generating junit test results"
-    - /usr/sepp/bin/python3.4 -m junit2htmlreport tests/sequential_bare_tests/junit-reports/TEST-*.xml
+    - /usr/sepp/bin/python3.4 -m junit2htmlreport junit-reports/TEST-*.xml
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
     paths:
-      - tests/sequential_bare_tests/junit-reports/TEST-*.html
-      - tests/sequential_bare_tests/junit-reports/TEST-*.xml
+      - sw/regression_tests/sequential_bare_tests/junit-reports/TEST-*.html
+      - sw/regression_tests/sequential_bare_tests/junit-reports/TEST-*.xml
     reports:
-      junit: tests/sequential_bare_tests/junit-reports/TEST-*.xml
-
-# test_parallel_bare:
-#   stage: test
-#   before_script:
-#     - echo "Fetching SDK from releases and setting up paths"
-#     - make sdk-gitlab
-#     - echo "Compiling RTL model and DPI libraries"
-#     - make build
-#     - echo "Installing scripts"
-#     - make install
-#   script:
-#     - echo "Running parallel bare tests"
-#     - source env/ci-pulpissimo.sh && make test-parallel-bare
-#     - echo "Generating junit test results"
-#     - /usr/sepp/bin/python3.4 -m junit2htmlreport tests/parallel_bare_tests/junit-reports/TEST-*.xml
-#   artifacts:
-#     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
-#     paths:
-#       - tests/parallel_bare_tests/junit-reports/TEST-*.html
-#       - tests/parallel_bare_tests/junit-reports/TEST-*.xml
-#     reports:
-#       junit: tests/parallel_bare_tests/junit-reports/TEST-*.xml
-
-# test_pulp:
-#   stage: test
-#   before_script:
-#     - echo "Fetching SDK from releases and setting up paths"
-#     - make sdk-gitlab
-#     - echo "Compiling RTL model and DPI libraries"
-#     - make scripts-bender-vsim-vips
-#     - make build
-#     - echo "Installing scripts"
-#     - make install
-#   script:
-#     - echo "Running pulp tests"
-#     - source env/ci-pulpissimo.sh && make test-pulp
-#     - echo "Generating junit test results"
-#     - /usr/sepp/bin/python3.4 -m junit2htmlreport tests/pulp_tests/junit-reports/TEST-*.xml
-#   artifacts:
-#     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
-#     paths:
-#       - tests/pulp_tests/junit-reports/TEST-*.html
-#       - tests/pulp_tests/junit-reports/TEST-*.xml
-#     reports:
-#       junit: tests/pulp_tests/junit-reports/TEST-*.xml
+      junit: sw/regression_tests/sequential_bare_tests/junit-reports/TEST-*.xml
 
 test_ml:
   stage: test
   before_script:
-    - echo "Fetching SDK from releases and setting up paths"
-    - make sdk-gitlab
     - echo "Compiling RTL model and DPI libraries"
     - make build
-    - echo "Installing scripts"
-    - make install
   script:
     - echo "Running ml tests"
-    - source env/ci-pulpissimo.sh && make test-ml
+    - source sw/pulp-runtime/comfigs/pulpissimo.sh
+    - export PULP_RISCV_GCC_TOOLCHAIN=/usr/pack/riscv-1.0-kgf/pulp-gcc-2.5.0
+    - export VSIM_PATH=$PWD/build/questasim
+    - cd sw/regression_tests/ml_tests && plptest --threads 32 --stdout
     - echo "Generating junit test results"
-    - /usr/sepp/bin/python3.4 -m junit2htmlreport tests/ml_tests/junit-reports/TEST-*.xml
+    - /usr/sepp/bin/python3.4 -m junit2htmlreport junit-reports/TEST-*.xml
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
     paths:
-      - tests/ml_tests/junit-reports/TEST-*.html
-      - tests/ml_tests/junit-reports/TEST-*.xml
+      - sw/regression_tests/ml_tests/junit-reports/TEST-*.html
+      - sw/regression_tests/ml_tests/junit-reports/TEST-*.xml
     reports:
-      junit: tests/ml_tests/junit-reports/TEST-*.xml
+      junit: sw/regression_tests/ml_tests/junit-reports/TEST-*.xml
 
 test_riscv:
   stage: test
   before_script:
-    - echo "Fetching SDK from releases and setting up paths"
-    - make sdk-gitlab
     - echo "Compiling RTL model and DPI libraries"
     - make build
-    - echo "Installing scripts"
-    - make install
   script:
-    - echo "Running riscv tests"
-    - source env/ci-pulpissimo.sh && make test-riscv
+    - echo "Running ml tests"
+    - source sw/pulp-runtime/comfigs/pulpissimo.sh
+    - export PULP_RISCV_GCC_TOOLCHAIN=/usr/pack/riscv-1.0-kgf/pulp-gcc-2.5.0
+    - export VSIM_PATH=$PWD/build/questasim
+    - cd sw/regression_tests/riscv_tests && plptest --threads 32 --stdout
     - echo "Generating junit test results"
-    - /usr/sepp/bin/python3.4 -m junit2htmlreport tests/riscv_tests/junit-reports/TEST-*.xml
+    - /usr/sepp/bin/python3.4 -m junit2htmlreport junit-reports/TEST-*.xml
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
     paths:
-      - tests/riscv_tests/junit-reports/TEST-*.html
-      - tests/riscv_tests/junit-reports/TEST-*.xml
+      - sw/regression_tests/riscv_tests/junit-reports/TEST-*.html
+      - sw/regression_tests/riscv_tests/junit-reports/TEST-*.xml
     reports:
-      junit: tests/riscv_tests/junit-reports/TEST-*.xml
+      junit: sw/regression_tests/riscv_tests/junit-reports/TEST-*.xml
 
 freertos_helloworld:
   stage: test
@@ -222,81 +147,11 @@ freertos_helloworld:
   script:
     - make scripts
     - make clean build
-    - source setup/vsim.sh
+    - export VSIM_PATH=$PWD/build/questasim
     - cd pulp-freertos
     - source env/pulpissimo-cv32e40p.sh
     - cd tests/hello_world_pmsis
     - make all run
-
-# test_rt:
-#   stage: test
-#   before_script:
-#     - echo "Fetching SDK from releases and setting up paths"
-#     - make sdk-gitlab
-#     - echo "Compiling RTL model and DPI libraries"
-#     - make scripts-bender-vsim-vips
-#     - make build
-#     - echo "Installing scripts"
-#     - make install
-#   script:
-#     - echo "Running rt tests"
-#     - source env/ci-pulpissimo.sh && make test-rt
-#     - echo "Generating junit test results"
-#     - /usr/sepp/bin/python3.4 -m junit2htmlreport tests/rt-tests/junit-reports/TEST-*.xml
-#   artifacts:
-#     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
-#     paths:
-#       - tests/rt-tests/junit-reports/TEST-*.html
-#       - tests/rt-tests/junit-reports/TEST-*.xml
-#     reports:
-#       junit: tests/rt-tests/junit-reports/TEST-*.xml
-
-# Use simplified pulp-runtime to run a subset of tests
-# test_simplified_sw:
-#   stage: test
-#   before_script:
-#     - echo "Fetching Runtime"
-#     - make pulp-runtime
-#     - echo "Compiling RTL model and DPI libraries"
-#     - make build
-#     - echo "Installing scripts"
-#     - make install
-#   script:
-#     - echo "Running software test"
-#     - source pulp-runtime/configs/pulpissimo.sh && make test-runtime-gitlab
-#     - echo "Generating junit test results"
-#     - /usr/sepp/bin/python3.4 -m junit2htmlreport tests/rt-tests/junit-reports/TEST-*.xml
-#   artifacts:
-#     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
-#     paths:
-#       - tests/*.html
-#       - tests/*.xml
-#     reports:
-#       junit: tests/*.xml
-
-# Built SDK with the `make sdk` target and run all tests
-# test_sw_build_sdk:
-#   variables:
-#     PULP_RISCV_GCC_TOOLCHAIN: your-compiler-path
-#   stage: test
-#   before_script:
-#     - echo "Compiling RTL model and DPI libraries"
-#     - make build
-#     - echo "Installing scripts" # don't call this, breaks build
-#     - make install
-#     - echo "Building SDK"
-#     - make sdk
-#   script:
-#     - echo "Running software tests with built SDK"
-#     - make test-gitlab2
-#     - echo "Generating junit test results"
-#     - /usr/sepp/bin/python3.4 -m junit2htmlreport tests/junit-reports/TEST-*.xml
-#   artifacts:
-#     paths:
-#       - tests/junit-reports/TEST-*.html
-#       - tests/junit-reports/TEST-*.xml
-#     reports:
-#       junit: tests/junit-reports/TEST-*.xml
 
 test_dm:
   stage: test
@@ -305,7 +160,7 @@ test_dm:
     - echo "(Re)generating scripts with DPI disabled"
     - make scripts
     - echo "Setting up vsim path"
-    - source setup/vsim.sh
+    - export VSIM_PATH=$PWD/build/questasim
     - echo "Running debug module testbench"
     # Note that the program is irrelevant we just put something for it to not complain
     - cd sim/ && make all simc VSIM_FLAGS="+jtag_dm_tests +srec=../rtl/tb/srec/min.srec"
@@ -314,10 +169,8 @@ fpga_synth_genesys2:
   stage: test
   before_script:
   script:
-    - echo "(Re)generating scripts"
-    - make scripts
     - echo "Starting synthesis with vivado"
-    - cd fpga/ && make genesys2 VIVADO='vivado-2019.1.1 vivado'
+    - make genesys2 VIVADO='vivado-2019.1.1 vivado'
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
     paths:
@@ -341,10 +194,8 @@ fpga_synth_nexys_video:
   stage: test
   before_script:
   script:
-    - echo "(Re)generating scripts"
-    - make scripts
     - echo "Starting synthesis with vivado"
-    - cd fpga/ && make nexys_video VIVADO='vivado-2019.1.1 vivado'
+    - make nexys_video VIVADO='vivado-2019.1.1 vivado'
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
     paths:
@@ -368,10 +219,8 @@ fpga_synth_nexys:
   stage: test
   before_script:
   script:
-    - echo "(Re)generating scripts"
-    - make scripts
     - echo "Starting synthesis with vivado"
-    - cd fpga/ && make nexys rev=nexys4 VIVADO='vivado-2019.1.1 vivado'
+    - make nexys rev=nexys4 VIVADO='vivado-2019.1.1 vivado'
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
     paths:
@@ -395,10 +244,8 @@ fpga_synth_nexys_zcu104:
   stage: test
   before_script:
   script:
-    - echo "(Re)generating scripts"
-    - make scripts
     - echo "Starting synthesis with vivado"
-    - cd fpga/ && make zcu104 VIVADO='vivado-2019.1.1 vivado'
+    - make zcu104 VIVADO='vivado-2019.1.1 vivado'
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
     paths:
@@ -418,41 +265,12 @@ fpga_synth_nexys_zcu104:
       - fpga/pulpissimo-zcu104/*.jou
       - fpga/pulpissimo-zcu104/*.log
 
-# fpga_synth_zedboard:
-#   stage: test
-#   before_script:
-#   script:
-#     - echo "(Re)generating scripts"
-#     - make scripts
-#     - echo "Starting synthesis with vivado"
-#     - cd fpga/ && make zedboard VIVADO='vivado-2019.1.1 vivado'
-#   artifacts:
-#     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
-#     paths:
-#       - fpga/pulpissimo_zedboard.bit
-#       - fpga/pulpissimo_zedboard.bin
-#       - fpga/*.jou
-#       - fpga/*.log
-#       - fpga/*.str
-#       - fpga/pulpissimo-zedboard/reports
-#       - fpga/pulpissimo-zedboard/rtl
-#       - fpga/pulpissimo-zedboard/tcl
-#       - fpga/pulpissimo-zedboard/pulpissimo_zedboard.xpr
-#       - fpga/pulpissimo-zedboard/fpga-settings.mk
-#       - fpga/pulpissimo-zedboard/*.log
-#       - fpga/pulpissimo-zedboard/*.cfg
-#       - fpga/pulpissimo-zedboard/*.gdb
-#       - fpga/pulpissimo-zedboard/*.jou
-#       - fpga/pulpissimo-zedboard/*.log
-
 fpga_synth_zcu102:
   stage: test
   before_script:
   script:
-    - echo "(Re)generating scripts"
-    - make scripts
     - echo "Starting synthesis with vivado"
-    - cd fpga/ && make zcu102 VIVADO='vivado-2019.1.1 vivado'
+    - make zcu102 VIVADO='vivado-2019.1.1 vivado'
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
     paths:
@@ -481,27 +299,26 @@ sim_questa_multivers:
       - QUESTA_PREFIX:
         - 'vsim'                   # Default
         - 'questa-2019.3-kgf vsim'
-        - 'questa-2020.1-kgf vsim'
-        - 'questa-2021.1-bt vsim'  # Has errors
-        - 'questa-2021.2-bt vsim'  # Has errors
-        - 'vsim-10.0d-kgf'         # Incompatible
-        - 'vsim-10.1c-kgf'         # Incompatible
-        - 'vsim-10.2c-kgf'         # Incompatible
-        - 'vsim-10.3a-kgf'         # Incompatible
-        - 'vsim-10.3e-kgf'         # Incompatible
-        - 'vsim-10.4c-kgf'         # Incompatible
-        - 'vsim-10.5a-kgf'         # Incompatible
-        - 'vsim-10.5c-kgf'
-        - 'vsim-10.6b-kgf'
+        # - 'questa-2020.1-kgf vsim'
+        # - 'questa-2021.1-bt vsim'  # Has errors
+        # - 'questa-2021.2-bt vsim'  # Has errors
+        - 'questa-2021.3-kgf vsim'
+        - 'questa-2022.3-bt vsim'
+        - 'questa-2023.4-zr vsim'
+        # - 'vsim-10.0d-kgf'         # Incompatible
+        # - 'vsim-10.1c-kgf'         # Incompatible
+        # - 'vsim-10.2c-kgf'         # Incompatible
+        # - 'vsim-10.3a-kgf'         # Incompatible
+        # - 'vsim-10.3e-kgf'         # Incompatible
+        # - 'vsim-10.4c-kgf'         # Incompatible
+        # - 'vsim-10.5a-kgf'         # Incompatible
+        # - 'vsim-10.5c-kgf'
+        # - 'vsim-10.6b-kgf'
         - 'vsim-10.7b-kgf'
         - 'vsim-10.7e-kgf'
   before_script:
     - export VSIM="$QUESTA_PREFIX"
-    - export VLOG="${QUESTA_PREFIX/vsim/vlog}"
-    - export VOPT="${QUESTA_PREFIX/vsim/vopt}"
-    - export VLIB="${QUESTA_PREFIX/vsim/vlib}"
-    - export VMAP="${QUESTA_PREFIX/vsim/vmap}"
-    - export VCOM="${QUESTA_PREFIX/vsim/vcom}"
+    - export VSIM_BIN="$QUESTA_PREFIX"
     - export PULP_RISCV_GCC_TOOLCHAIN=/usr/pack/riscv-1.0-kgf/pulp-gcc-1.0.16
     - git clone https://github.com/pulp-platform/pulp-runtime.git -b v0.0.15
     - mkdir hello

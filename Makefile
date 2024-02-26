@@ -26,6 +26,11 @@ include target/sim/questasim/Makefile
 include target/lint/spyglass/Makefile
 include $(PULPISSIMO_ROOT)/utils/utils.mk
 
+.PHONY: checkout
+## Checkout all Bender IPs
+checkout: $(PULPISSIMO_UTILS)/bender
+	$(PULPISSIMO_UTILS)/bender checkout
+
 .PHONY: hw
 ## Re-generate generated hardware IPs
 hw: hw/asic_autogen_rom.sv hw/fpga_autogen_rom.sv
