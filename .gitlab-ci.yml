@@ -46,7 +46,7 @@ build_rtl:
     - echo "Compiling RTL model and DPI libraries"
     - make build
     - echo "Fetching VIPs"
-    - ./target/sim/vip/get-vips.sh --yes --gitlab
+    - ./target/sim/vip/get-vips.sh --yes # --gitlab
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
     paths:
