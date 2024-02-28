@@ -1,0 +1,51 @@
+# IO pad templates for the Xilinx pads. These are used in FPGA synthesis.
+
+- name: pull_down_pad # user defined name of the pad. Used to reference
+                              # it in the pad_list
+  description: |
+    Generic behavioral model of an IO Pad with pull down resistors. The pad is
+    defined in the tech_cells_generic repository and only used in simulation.
+    Define your own pad types for a custom tapeout.
+  template: |
+    (* PULLDOWN = "YES" *)
+    IOBUF ${instance_name} (
+      .T ( ~${conn["tx_en"]}   ),
+      .I ( ${conn["chip2pad"]} ),
+      .O ( ${conn["pad2chip"]} ),
+      .IO( ${conn["pad"]}      )
+    );
+
+  pad_signals: !include fpga_config/fpga_pad_signals.yml
+
+- name: pull_up_pad # user defined name of the pad. Used to reference
+                              # it in the pad_list
+  description: |
+    Generic behavioral model of an IO Pad with pull down resistors. The pad is
+    defined in the tech_cells_generic repository and only used in simulation.
+    Define your own pad types for a custom tapeout.
+  template: |
+    (* PULLUP = "YES" *)
+    IOBUF ${instance_name} (
+      .T ( ~${conn["tx_en"]}   ),
+      .I ( ${conn["chip2pad"]} ),
+      .O ( ${conn["pad2chip"]} ),
+      .IO( ${conn["pad"]}      )
+    );
+
+  pad_signals: !include fpga_config/fpga_pad_signals.yml
+
+- name: direct_input
+  description: |
+    Direct connection - no IO pad, requires user to define the IO pad
+  template: |
+    assign ${conn["pad2chip"]} = ${conn["pad"]};
+  pad_signals:
+    - name: pad2chip
+      description: "input signal (output from pad)"
+      size: 1
+      kind: output
+      conn_type: dynamic
+    - name: pad
+      description: "pad signal"
+      size: 1
+      kind: pad

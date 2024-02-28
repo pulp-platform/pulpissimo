@@ -20,6 +20,7 @@ dependencies:
   tbtools:                     { git: "https://github.com/pulp-platform/tbtools.git",            version: 0.2.1 }
   tech_cells_generic:          { git: "https://github.com/pulp-platform/tech_cells_generic.git", version: 0.2.3 }
   pulpissimo_padframe_rtl_sim: { path: "hw/padframe/pulpissimo_padframe_rtl_sim_autogen" }
+  pulpissimo_padframe_fpga:    { path: "hw/padframe/pulpissimo_padframe_fpga_autogen" }
   register_interface:          { git: "https://github.com/pulp-platform/register_interface.git", version: 0.3.2 }
   generic_FLL:                 { git: "https://github.com/pulp-platform/generic_FLL.git",        version: 0.2.0 }
   apb_fll_if:                  { git: "https://github.com/pulp-platform/apb_fll_if.git",         version: 0.2.0 }
@@ -46,7 +47,9 @@ sources:
   # Level 0
 
   # Common RTL files
-  - hw/asic_autogen_rom.sv
+  - target: not(any(fpga, xilinx))
+    files:
+      - hw/asic_autogen_rom.sv
   - hw/soc_domain.sv
   - hw/pulpissimo.sv
 
@@ -56,6 +59,13 @@ sources:
     files:
       - hw/padframe/padframe_adapter.sv
       - hw/clock_gen_generic.sv
+
+  # rtl_sim - Generic version of pulpissimo used for non-verilator RTL simulation 
+  - target: all(fpga, xilinx)
+    files:
+      - hw/fpga_autogen_rom.sv
+      - hw/padframe/padframe_adapter.sv
+      - hw/clock_gen_fpga.sv
 
 
 vendor_package:

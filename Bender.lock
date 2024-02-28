@@ -210,6 +210,14 @@ packages:
     source:
       Path: target/sim/vip
     dependencies: []
+  pulpissimo_padframe_fpga:
+    revision: null
+    version: null
+    source:
+      Path: hw/padframe/pulpissimo_padframe_fpga_autogen
+    dependencies:
+    - common_cells
+    - register_interface
   pulpissimo_padframe_rtl_sim:
     revision: null
     version: null
