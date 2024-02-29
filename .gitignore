@@ -3,9 +3,10 @@ xcelium.d/
 xrun.history
 xrun.log
 .bender
-bender
+/utils/bin/bender
 work/
 compile.tcl
 working_dir/
-/padrick
+/utils/bin/padrick
 /Bender.local
+/build

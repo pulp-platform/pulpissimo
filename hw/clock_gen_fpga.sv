@@ -42,7 +42,7 @@ module clock_gen #(
 
   // Configuration interface for clock generation
   input logic  cfg_clk_i,
-               APB.Slave cfg_bus_slave,
+  APB.Slave    cfg_bus_slave,
 
 
   // Output clocks
@@ -73,9 +73,9 @@ module clock_gen #(
   logic        s_slow_clk_ungated;
 
   // Tie-off APB port with error response
-  cfg_bus_slave.pready  = 1'b1;
-  cfg_bus_slave.prdata  = 32'deadda7a;
-  cfg_bus_slave.pslverr = 1'b1;
+  assign cfg_bus_slave.pready  = 1'b1;
+  assign cfg_bus_slave.prdata  = 32'hdeadda7a;
+  assign cfg_bus_slave.pslverr = 1'b1;
 
   // Instantiate LogiCore clocking mngr IP
   xilinx_clk_mngr i_clk_manager (
@@ -127,7 +127,7 @@ module clock_gen #(
 
   // Instantiate clock divider to divide 8.3886 MHz PLL clock down to 32 kHz
   clk_int_div #(
-    .DIV_VALUE_WIDTH       ( 9    )
+    .DIV_VALUE_WIDTH       ( 9    ),
     .DEFAULT_DIV_VALUE     ( 256  ),
     .ENABLE_CLOCK_IN_RESET ( 1'b1 )
   ) i_slow_clk_div (

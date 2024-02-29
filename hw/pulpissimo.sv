@@ -28,25 +28,23 @@
 // -----------------------------------------------------------------------------
 
 module pulpissimo #(
-  parameter  CORE_TYPE = 0, // 0 for CV32E40P with XPULP Extensions, 1 for IBEX RV32IMC (formerly ZERORISCY), 2 for IBEX RV32EC (formerly MICRORISCY)
-  parameter  USE_XPULP = 1, // Enable XPULP extensions on CV32E40P. Has no
-                            // effect if an IBEX core variant is use.
-  parameter  USE_FPU = 1, // Mutually exclusive with the use of IBEX. I.e.
-                               // if an IBEX core variant is used, this paraeter
-                               // is ignored.
-  parameter  USE_ZFINX = 1, // Standard RISC-V extension: Reuses the integer
-                               // regfile for FPU usage instead of requiring a
-                               // dedicated FPU regfile. Requires correct
-                               // compiler settings for software to work!
-  parameter  USE_HWPE = 0,
-  parameter  SIM_STDOUT = 0, // Enable the virtual stdout interface for
-                               // communication with simulated testbenches. This
-                               // parameter must be disabled during any form of
-                               // physical implementation.
-  localparam IO_PAD_COUNT = gpio_reg_pkg::GPIOCount // The number of GPIO pads
-                                                    // in the system. Check the
-                                                    // README on how to modify
-                                                    // the pad count
+  /// 0 for CV32E40P with XPULP Extensions, 1 for IBEX RV32IMC (formerly ZERORISCY),
+  /// 2 for IBEX RV32EC (formerly MICRORISCY)
+  parameter  int unsigned CORE_TYPE = 0,
+  /// Enable XPULP extensions on CV32E40P. Has no effect if an IBEX core variant is use.
+  parameter  bit          USE_XPULP = 1,
+  /// Mutually exclusive with the use of IBEX. I.e. if an IBEX core variant is used, this parameter
+  /// is ignored.
+  parameter  bit          USE_FPU = 1,
+  /// Standard RISC-V extension: Reuses the integer regfile for FPU usage instead of requiring a
+  /// dedicated FPU regfile. Requires correct compiler settings for software to work!
+  parameter  bit          USE_ZFINX = 1,
+  parameter  bit          USE_HWPE = 0,
+  /// Enable the virtual stdout interface for communication with simulated testbenches. This
+  /// parameter must be disabled during any form of physical implementation.
+  parameter  bit          SIM_STDOUT = 0,
+  /// The number of GPIO pads in the system. Check the README on how to modify the pad count
+  localparam int unsigned IO_PAD_COUNT = gpio_reg_pkg::GPIOCount
 )(
   // Some platforms (e.g. Verilator) require to feed the clock externally. With
   // the EXTERNAL_CLOCK define we remove all internall clock generation logic.

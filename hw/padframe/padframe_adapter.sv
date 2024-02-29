@@ -21,9 +21,8 @@
 //-----------------------------------------------------------------------------
 
 module padframe_adapter #(
-  localparam NGPIO = gpio_reg_pkg::GPIOCount  // Have a look at the README in
-                                              // the GPIO repo in order to
-                                              // change the number of GPIOs.
+  /// Have a look at the README in the GPIO repo in order to change the number of GPIOs.
+  localparam int unsigned NGPIO = gpio_reg_pkg::GPIOCount
 )(
   input logic              soc_clk_i,
   input logic              soc_rstn_synced_i,

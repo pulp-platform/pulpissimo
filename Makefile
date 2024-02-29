@@ -31,9 +31,12 @@ include $(PULPISSIMO_ROOT)/utils/utils.mk
 checkout: $(PULPISSIMO_UTILS)/bender
 	$(PULPISSIMO_UTILS)/bender checkout
 
-.PHONY: hw
+.PHONY: hw bootrom padframe
 ## Re-generate generated hardware IPs
-hw: hw/asic_autogen_rom.sv hw/fpga_autogen_rom.sv
+hw: bootrom padframe
+
+## Generate the boot rom
+bootrom: hw/asic_autogen_rom.sv hw/fpga_autogen_rom.sv
 
 ## Generate the ASIC and simulation boot rom
 hw/asic_autogen_rom.sv:
@@ -44,6 +47,21 @@ hw/asic_autogen_rom.sv:
 hw/fpga_autogen_rom.sv:
 	$(MAKE) -C sw/bootcode fpga_autogen_rom.sv
 	cp sw/bootcode/fpga_autogen_rom.sv $@
+
+padframe: hw/padframe/pulpissimo_padframe_rtl_sim_autogen hw/padframe/pulpissimo_padframe_fpga_autogen
+
+hw/padframe/pulpissimo_padframe_rtl_sim_autogen: $(PULPISSIMO_UTILS)/padrick
+	cd hw/padframe && $(PULPISSIMO_UTILS)/padrick generate -s padrick_generator_settings.yml rtl rtl_sim_padframe_config_top.yml -o pulpissimo_padframe_rtl_sim_autogen
+
+hw/padframe/pulpissimo_padframe_fpga_autogen: $(PULPISSIMO_UTILS)/padrick
+	cd hw/padframe && $(PULPISSIMO_UTILS)/padrick generate -s padrick_generator_settings.yml rtl fpga_padframe_config_top.yml -o pulpissimo_padframe_fpga_autogen
+
+.PHONY: gpio-reconfigure
+## Reconfigure number of GPIOs
+## @param GPIO=32 Number of GPIOs to reconfigure
+gpio-reconfigure:
+	$(MAKE) -C hw/vendored_ips/gpio reconfigure
+
 HELP_TITLE="PULPissimo Build & SIM Environment"
 HELP_DESCRIPTION="Toplevel targets for building and simulating PULPissimo. Please check the make files in the subdirectories for additional targets.."
 include $(PULPISSIMO_ROOT)/utils/help.mk

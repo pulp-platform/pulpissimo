@@ -32,13 +32,13 @@ include $(mkfile_dir)/venv.mk
 $(PULPISSIMO_UTILS)/padrick:
 ifeq (,$(widlcard bin/padrick))
 	mkdir -p $(PULPISSIMO_UTILS)
-	cd $(PULPISSIMO_UTILS) && curl https://api.github.com/repos/pulp-platform/padrick/releases/tags/v0.3.4 \
+	cd $(PULPISSIMO_UTILS) && curl https://api.github.com/repos/pulp-platform/padrick/releases/tags/v0.3.6 \
     | grep "browser_download_url.*Padrick-x86_64.AppImage" \
     | cut -d : -f 2,3 \
     | tr -d \" \
     | wget -qi -
 	mv $(PULPISSIMO_UTILS)/Padrick-x86_64.AppImage $(PULPISSIMO_UTILS)/padrick
-	chmod a+x bin/padrick
+	chmod a+x $(PULPISSIMO_UTILS)/padrick
 endif
 
 $(PULPISSIMO_UTILS)/bender:
