@@ -14,7 +14,10 @@
 
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
-
+  VSIM: "questa-2023.4-zr vsim"
+  VSIM_BIN: "questa-2023.4-zr vsim"
+  RISCV: "/usr/pack/riscv-1.0-kgf/pulp-gcc-2.5.0"
+  PULP_RISCV_GCC_TOOLCHAIN: "/usr/pack/riscv-1.0-kgf/pulp-gcc-2.5.0"
 
 before_script:
   - pwd
@@ -80,7 +83,6 @@ test_sequential_bare:
   script:
     - echo "Running sequential bare tests"
     - source sw/pulp-runtime/configs/pulpissimo.sh
-    - export PULP_RISCV_GCC_TOOLCHAIN=/usr/pack/riscv-1.0-kgf/pulp-gcc-2.5.0
     - export VSIM_PATH=$PWD/build/questasim
     - cd sw/regression_tests/sequential_bare_tests && plptest --threads 32 --stdout
     - echo "Generating junit test results"
@@ -101,7 +103,6 @@ test_ml:
   script:
     - echo "Running ml tests"
     - source sw/pulp-runtime/configs/pulpissimo.sh
-    - export PULP_RISCV_GCC_TOOLCHAIN=/usr/pack/riscv-1.0-kgf/pulp-gcc-2.5.0
     - export VSIM_PATH=$PWD/build/questasim
     - cd sw/regression_tests/ml_tests && plptest --threads 32 --stdout
     - echo "Generating junit test results"
@@ -122,7 +123,6 @@ test_riscv:
   script:
     - echo "Running ml tests"
     - source sw/pulp-runtime/configs/pulpissimo.sh
-    - export PULP_RISCV_GCC_TOOLCHAIN=/usr/pack/riscv-1.0-kgf/pulp-gcc-2.5.0
     - export VSIM_PATH=$PWD/build/questasim
     - cd sw/regression_tests/riscv_tests && plptest --threads 32 --stdout
     - echo "Generating junit test results"
@@ -138,17 +138,16 @@ test_riscv:
 freertos_helloworld:
   stage: test
   before_script:
-    - export RISCV=/usr/pack/riscv-1.0-kgf/pulp-gcc-2.5.0
-    - git clone https://github.com/pulp-platform/pulp-freertos.git
-    - cd pulp-freertos
+    - git clone https://github.com/pulp-platform/pulp-freertos.git sw/pulp-freertos
+    - cd sw/pulp-freertos
     - git checkout d6966cae9471b7a592bd09b7acfd5b832666e3b5
     - git submodule update --init --recursive
-    - cd ..
+    - cd ../..
   script:
     - make scripts
     - make clean build
     - export VSIM_PATH=$PWD/build/questasim
-    - cd pulp-freertos
+    - cd sw/pulp-freertos
     - source env/pulpissimo-cv32e40p.sh
     - cd tests/hello_world_pmsis
     - make all run
@@ -319,7 +318,6 @@ sim_questa_multivers:
   before_script:
     - export VSIM="$QUESTA_PREFIX"
     - export VSIM_BIN="$QUESTA_PREFIX"
-    - export PULP_RISCV_GCC_TOOLCHAIN=/usr/pack/riscv-1.0-kgf/pulp-gcc-2.5.0
     - mkdir hello
     - printf "#include <stdio.h>\nint main(){\n  printf(\"Hello World\\\n\");\n  return 0;\n}\n" > hello/hello.c
     - printf "PULP_APP = hello\nPULP_APP_FC_SRCS = hello.c\nPULP_APP_HOST_SRCS = hello.c\nPULP_CFLAGS = -O3 -g\n\ninclude \$(PULP_SDK_HOME)/install/rules/pulp_rt.mk\n" > hello/Makefile
@@ -338,7 +336,6 @@ spi_boot:
   stage: test
   before_script:
     - git clone https://github.com/pulp-platform/pulp-runtime.git -b v0.0.15
-    - export PULP_RISCV_GCC_TOOLCHAIN=/usr/pack/riscv-1.0-kgf/pulp-gcc-2.5.0
     - mkdir hello
     - printf "#include <stdio.h>\nint main(){\n  printf(\"Hello World\\\n\");\n  return 0;\n}\n" > hello/hello.c
     - printf "PULP_APP = hello\nPULP_APP_FC_SRCS = hello.c\nPULP_APP_HOST_SRCS = hello.c\nPULP_CFLAGS = -O3 -g\n\ninclude \$(PULP_SDK_HOME)/install/rules/pulp_rt.mk\n" > hello/Makefile
