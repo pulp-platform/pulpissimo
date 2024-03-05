@@ -62,10 +62,10 @@ module xilinx_pulpissimo (
 
    input  wire pad_reset,
 
-   input  wire pad_jtag_tck,
-   input  wire pad_jtag_tdi,
-   output wire pad_jtag_tdo,
-   input  wire pad_jtag_tms
+   inout  wire pad_jtag_tck,
+   inout  wire pad_jtag_tdi,
+   inout  wire pad_jtag_tdo,
+   inout  wire pad_jtag_tms
  );
 
   localparam CORE_TYPE = 0; // 0 for RISCY, 1 for IBEX RV32IMC (formerly ZERORISCY), 2 for IBEX RV32EC (formerly MICRORISCY)
@@ -73,21 +73,15 @@ module xilinx_pulpissimo (
   localparam USE_HWPE  = 0;
 
   wire ref_clk_int;
-  wire tck_int;
   wire rst_n;
   assign rst_n = ~pad_reset;
 
   // Input clock buffer
   BUFG i_sysclk_bufg (
-     .I(ref_clk_i),
-     .O(ref_clk_int)
+    .I(ref_clk_i),
+    .O(ref_clk_int)
   );
 
-  // TCK clock buffer (dedicated route is false in constraints)
-  IBUF i_tck_iobuf (
-    .I(pad_jtag_tck),
-    .O(tck_int)
-  );
 
   // PULPissimo instance
   pulpissimo #(
@@ -95,47 +89,60 @@ module xilinx_pulpissimo (
     .USE_FPU(USE_FPU),
     .USE_HWPE(USE_HWPE)
   ) i_pulpissimo (
-    .pad_spim_sdio0(led4_o),
-    .pad_spim_sdio1(led5_o),
-    .pad_spim_sdio2(led6_o),
-    .pad_spim_sdio3(led7_o),
-    .pad_spim_csn0(pad_uart_rts),
-    .pad_spim_csn1(led0_o),
-    .pad_spim_sck(pad_uart_cts),
-    .pad_uart_rx(pad_uart_rx),
-    .pad_uart_tx(pad_uart_tx),
-    .pad_cam_pclk(led1_o),
-    .pad_cam_hsync(led2_o),
-    .pad_cam_data0(led3_o),
-    .pad_cam_data1(switch0_i),
-    .pad_cam_data2(switch1_i),
-    .pad_cam_data3(btnu_i),
-    .pad_cam_data4(btnr_i),
-    .pad_cam_data5(btnd_i),
-    .pad_cam_data6(btnl_i),
-    .pad_cam_data7(switch2_i),
-    .pad_cam_vsync(switch3_i),
-    .pad_sdio_clk(pad_i2c1_scl),
-    .pad_sdio_cmd(pad_i2c1_sda),
-    .pad_sdio_data0(switch4_i),
-    .pad_sdio_data1(switch5_i),
-    .pad_sdio_data2(switch6_i),
-    .pad_sdio_data3(switch7_i),
-    .pad_i2c0_sda(pad_i2c0_sda),
-    .pad_i2c0_scl(pad_i2c0_scl),
-    .pad_i2s0_sck(pad_pmod1_4),
-    .pad_i2s0_ws(pad_pmod1_5),
-    .pad_i2s0_sdi(pad_pmod1_6),
-    .pad_i2s1_sdi(pad_pmod1_7),
-    .pad_reset_n(rst_n),
-    .pad_jtag_tck(tck_int),
-    .pad_jtag_tdi(pad_jtag_tdi),
-    .pad_jtag_tdo(pad_jtag_tdo),
-    .pad_jtag_tms(pad_jtag_tms),
-    .pad_jtag_trst(1'b1),
-    .pad_xtal_in(ref_clk_int),
-    .pad_bootsel0(),
-    .pad_bootsel1()
+    .pad_ref_clk    ( ref_clk_int  ),
+    .pad_reset_n    ( rst_n        ),
+    .pad_clk_byp_en ( 1'b0 ),
+
+    .pad_bootsel0   ( ),
+    .pad_bootsel1   ( ),
+
+    .pad_jtag_tck   ( pad_jtag_tck ),
+    .pad_jtag_tdi   ( pad_jtag_tdi ),
+    .pad_jtag_tdo   ( pad_jtag_tdo ),
+    .pad_jtag_tms   ( pad_jtag_tms ),
+    .pad_jtag_trstn (  ), // Tied to 1 in run.tcl
+
+    .pad_hyper_csn     (  ),
+    .pad_hyper_reset_n (  ),
+    .pad_hyper_ck      (  ),
+    .pad_hyper_ckn     (  ),
+    .pad_hyper_dq      (  ),
+    .pad_hyper_rwds    (  ),
+
+    .pad_io            ( {
+      pad_i2c0_scl,   // io_31
+      pad_i2c0_sda,   // io_30
+      switch7_i,      // io_29
+      switch6_i,      // io_28
+      switch5_i,      // io_27
+      switch4_i,      // io_26
+      pad_i2c1_sda,   // io_25
+      pad_i2c1_scl,   // io_24
+      switch3_i,      // io_23
+      pad_pmod1_7,    // io_22
+      pad_pmod1_6,    // io_21
+      pad_pmod1_5,    // io_20
+      pad_pmod1_4,    // io_19
+      switch2_i,      // io_18
+      btnu_i,         // io_17
+      btnr_i,         // io_16
+      btnl_i,         // io_15
+      btnd_i,         // io_14
+      switch1_i,      // io_13
+      switch0_i,      // io_12
+      led3_o,         // io_11
+      led2_o,         // io_10
+      led1_o,         // io_09
+      led0_o,         // io_08
+      led7_o,         // io_07
+      led6_o,         // io_06
+      led5_o,         // io_05
+      led4_o,         // io_04
+      pad_uart_rts,   // io_03
+      pad_uart_cts,   // io_02
+      pad_uart_rx,    // io_01
+      pad_uart_tx     // io_00
+    } )
   );
 
 endmodule

@@ -19,61 +19,60 @@
 // specific language governing permissions and limitations under the License.
 //-----------------------------------------------------------------------------
 
-module xilinx_pulpissimo
-  (
-   input wire  sys_clk,
+module xilinx_pulpissimo (
+  input wire  sys_clk,
 
-   inout wire  pad_spim_sdio0,
-   inout wire  pad_spim_sdio1,
-   inout wire  pad_spim_sdio2,
-   inout wire  pad_spim_sdio3,
-   inout wire  pad_spim_csn0,
-   inout wire  pad_spim_sck,
-   
-   inout  wire pad_uart_rx,  //Mapped to uart_rx
-   inout  wire pad_uart_tx,  //Mapped to uart_tx
-   //inout  wire pad_uart_cts,  //Not mapped, optional
-   //inout  wire pad_uart_rts,  //Not mapped, optional
+  inout wire  pad_spim_sdio0,
+  inout wire  pad_spim_sdio1,
+  inout wire  pad_spim_sdio2,
+  inout wire  pad_spim_sdio3,
+  inout wire  pad_spim_csn0,
+  inout wire  pad_spim_sck,
 
-   inout wire  led0_o, //Mapped to spim_csn1
-   inout wire  led1_o, //Mapped to cam_pclk
-   inout wire  led2_o, //Mapped to cam_hsync
-   inout wire  led3_o, //Mapped to cam_data0
+  inout  wire pad_uart_rx,  //Mapped to uart_rx
+  inout  wire pad_uart_tx,  //Mapped to uart_tx
+  //inout  wire pad_uart_cts,  //Not mapped, optional
+  //inout  wire pad_uart_rts,  //Not mapped, optional
 
-   inout wire  switch0_i, //Mapped to cam_data1
-   inout wire  switch1_i, //Mapped to cam_data2
+  inout wire  led0_o, //Mapped to spim_csn1
+  inout wire  led1_o, //Mapped to cam_pclk
+  inout wire  led2_o, //Mapped to cam_hsync
+  inout wire  led3_o, //Mapped to cam_data0
 
-   inout wire  btnc_i, //Mapped to cam_data3
-   inout wire  btnd_i, //Mapped to cam_data4
-   inout wire  btnl_i, //Mapped to cam_data5
-   inout wire  btnr_i, //Mapped to cam_data6
-   inout wire  btnu_i, //Mapped to cam_data7
+  inout wire  switch0_i, //Mapped to cam_data1
+  inout wire  switch1_i, //Mapped to cam_data2
+
+  inout wire  btnc_i, //Mapped to cam_data3
+  inout wire  btnd_i, //Mapped to cam_data4
+  inout wire  btnl_i, //Mapped to cam_data5
+  inout wire  btnr_i, //Mapped to cam_data6
+  inout wire  btnu_i, //Mapped to cam_data7
 
 
-   inout wire  sdio_reset_o, //Reset signal for SD card need to be driven low to
-                             //power the onboard sd-card. Mapped to cam_vsync.
-   inout wire  pad_sdio_clk,
-   inout wire  pad_sdio_cmd,
-   inout wire  pad_sdio_data0,
-   inout wire  pad_sdio_data1,
-   inout wire  pad_sdio_data2,
-   inout wire  pad_sdio_data3,
+  inout wire  sdio_reset_o, //Reset signal for SD card need to be driven low to
+                            //power the onboard sd-card. Mapped to cam_vsync.
+  inout wire  pad_sdio_clk,
+  inout wire  pad_sdio_cmd,
+  inout wire  pad_sdio_data0,
+  inout wire  pad_sdio_data1,
+  inout wire  pad_sdio_data2,
+  inout wire  pad_sdio_data3,
 
-	 inout wire	 pad_i2c0_sda, 
-   inout wire  pad_i2c0_scl, 
+	inout wire	 pad_i2c0_sda, 
+  inout wire  pad_i2c0_scl, 
 
-   inout wire  pad_i2s0_sck,
-   inout wire  pad_i2s0_ws,
-   inout wire  pad_i2s0_sdi,
-   inout wire  pad_i2s1_sdi,
+  inout wire  pad_i2s0_sck,
+  inout wire  pad_i2s0_ws,
+  inout wire  pad_i2s0_sdi,
+  inout wire  pad_i2s1_sdi,
 
-   input wire  pad_reset_n,
+  input wire  pad_reset_n,
 
-   input wire  pad_jtag_tck,
-   input wire  pad_jtag_tdi,
-   output wire pad_jtag_tdo,
-   input wire  pad_jtag_tms
-   //input wire  pad_jtag_trst
+  inout wire  pad_jtag_tck,
+  inout wire  pad_jtag_tdi,
+  input wire  pad_jtag_tdo,
+  inout wire  pad_jtag_tms
+  //input wire  pad_jtag_trst
  );
 
   localparam CORE_TYPE = 0; // 0 for RISCY, 1 for IBEX RV32IMC (formerly ZERORISCY), 2 for IBEX RV32EC (formerly MICRORISCY)
@@ -81,25 +80,23 @@ module xilinx_pulpissimo
   localparam USE_HWPE  = 0;
 
   wire        ref_clk;
-  wire        tck_int;
+  // wire        tck_int;
   //wire        pad_spim_sck;
 
   // Input clock buffer
-  IBUFG
-    #(
-      .IOSTANDARD("LVCMOS33"),
-      .IBUF_LOW_PWR("FALSE"))
-  i_sysclk_iobuf
-    (
-     .I(sys_clk),
-     .O(ref_clk)
-     );
+  IBUFG #(
+    .IOSTANDARD("LVCMOS33"),
+    .IBUF_LOW_PWR("FALSE")
+  ) i_sysclk_iobuf (
+    .I(sys_clk),
+    .O(ref_clk)
+  );
 
 	//JTAG TCK clock buffer (dedicated route is false in constraints)
-	IBUF i_tck_iobuf (
-		  .I(pad_jtag_tck),
-		  .O(tck_int)
-		);
+	// IBUF i_tck_iobuf (
+	// 	.I(pad_jtag_tck),
+	// 	.O(tck_int)
+	// );
 
   // The SPI-Flash SCK Pin P8 is a configuration pin
   // Therefore we must use a primitive to access it
@@ -128,54 +125,65 @@ module xilinx_pulpissimo
 
   //  );
 
-  pulpissimo
-    #(.CORE_TYPE(CORE_TYPE),
-      .USE_FPU(USE_FPU),
-      .USE_HWPE(USE_HWPE)
-      ) i_pulpissimo
-      (
-       .pad_spim_sdio0(pad_spim_sdio0),
-       .pad_spim_sdio1(pad_spim_sdio1),
-       .pad_spim_sdio2(pad_spim_sdio2),
-       .pad_spim_sdio3(pad_spim_sdio3),
-       .pad_spim_csn0(pad_spim_csn0),
-       .pad_spim_csn1(led0_o),
-       .pad_spim_sck(pad_spim_sck),
-       .pad_uart_rx(pad_uart_rx),
-       .pad_uart_tx(pad_uart_tx),
-       .pad_cam_pclk(led1_o),
-       .pad_cam_hsync(led2_o),
-       .pad_cam_data0(led3_o),
-       .pad_cam_data1(switch0_i),
-       .pad_cam_data2(switch1_i),
-       .pad_cam_data3(btnc_i),
-       .pad_cam_data4(btnd_i),
-       .pad_cam_data5(btnl_i),
-       .pad_cam_data6(btnr_i),
-       .pad_cam_data7(btnu_i),
-       .pad_cam_vsync(sdio_reset_o),
-       .pad_sdio_clk(pad_sdio_clk),
-       .pad_sdio_cmd(pad_sdio_cmd),
-       .pad_sdio_data0(pad_sdio_data0),
-       .pad_sdio_data1(pad_sdio_data1),
-       .pad_sdio_data2(pad_sdio_data2),
-       .pad_sdio_data3(pad_sdio_data3),
-			 .pad_i2c0_sda(pad_i2c0_sda),
-			 .pad_i2c0_scl(pad_i2c0_scl),
-			 .pad_i2s0_sck(pad_i2s0_sck),
-			 .pad_i2s0_ws(pad_i2s0_ws),
-			 .pad_i2s0_sdi(pad_i2s0_sdi),
-			 .pad_i2s1_sdi(pad_i2s1_sdi),
-       .pad_reset_n(pad_reset_n),
-       .pad_jtag_tck(tck_int),
-       .pad_jtag_tdi(pad_jtag_tdi),
-       .pad_jtag_tdo(pad_jtag_tdo),
-       .pad_jtag_tms(pad_jtag_tms),
-       //.pad_jtag_trst(pad_jtag_trst),
-			 .pad_jtag_trst(1'b1),
-       .pad_xtal_in(ref_clk),
-       .pad_bootsel0(),
-       .pad_bootsel1()
-       );
+  pulpissimo #(
+    .CORE_TYPE(CORE_TYPE),
+    .USE_FPU(USE_FPU),
+    .USE_HWPE(USE_HWPE)
+  ) i_pulpissimo (
+    .pad_ref_clk    ( ref_clk ),
+    .pad_reset_n    ( pad_reset_n ),
+    .pad_clk_byp_en ( 1'b0 ),
+
+    .pad_bootsel0   (), // Tied to 0 in run.tcl
+    .pad_bootsel1   (), // Tied to 0 in run.tcl
+
+    .pad_jtag_tck   (pad_jtag_tck),
+    .pad_jtag_tdi   (pad_jtag_tdi),
+    .pad_jtag_tdo   (pad_jtag_tdo),
+    .pad_jtag_tms   (pad_jtag_tms),
+    .pad_jtag_trstn (), // tied to 1 in run.tcl
+
+    .pad_hyper_csn     (  ), // Tied to 0 in run.tcl
+    .pad_hyper_reset_n (  ), // Tied to 0 in run.tcl
+    .pad_hyper_ck      (  ), // Tied to 0 in run.tcl
+    .pad_hyper_ckn     (  ), // Tied to 0 in run.tcl
+    .pad_hyper_dq      (  ), // Tied to 0 in run.tcl
+    .pad_hyper_rwds    (  ), // Tied to 0 in run.tcl
+
+    .pad_io            ( {
+      pad_i2c0_scl,   // io_31
+      pad_i2c0_sda,   // io_30
+      pad_sdio_data3, // io_29
+      pad_sdio_data2, // io_28
+      pad_sdio_data1, // io_27
+      pad_sdio_data0, // io_26
+      pad_sdio_cmd,   // io_25
+      pad_sdio_clk,   // io_24
+      sdio_reset_o,   // io_23
+      pad_i2s1_sdi,   // io_22
+      pad_i2s0_sdi,   // io_21
+      pad_i2s0_ws,    // io_20
+      pad_i2s0_sck,   // io_19
+      btnu_i,         // io_18
+      btnr_i,         // io_17
+      btnl_i,         // io_16
+      btnd_i,         // io_15
+      btnc_i,         // io_14
+      switch1_i,      // io_13
+      switch0_i,      // io_12
+      led3_o,         // io_11
+      led2_o,         // io_10
+      led1_o,         // io_09
+      led0_o,         // io_08
+      pad_spim_sdio3, // io_07
+      pad_spim_sdio2, // io_06
+      pad_spim_sdio1, // io_05
+      pad_spim_sdio0, // io_04
+      pad_spim_csn0,  // io_03
+      pad_spim_sck,   // io_02
+      pad_uart_rx,    // io_01
+      pad_uart_tx     // io_00
+    } )
+  );
 
 endmodule

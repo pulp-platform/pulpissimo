@@ -13,12 +13,6 @@
 #Create constraint for the clock input of the genesys2 board
 create_clock -period 5.000 -name ref_clk [get_ports ref_clk_p]
 
-#I2S and CAM interface are not used in this FPGA port. Set constraints to
-#disable the clock
-set_case_analysis 0 i_pulpissimo/safe_domain_i/cam_pclk_o
-set_case_analysis 0 i_pulpissimo/safe_domain_i/i2s_slave_sck_o
-#set_input_jitter tck 1.000
-
 ## JTAG
 create_clock -period 100.000 -name tck -waveform {0.000 50.000} [get_ports pad_jtag_tck]
 set_input_jitter tck 1.000
@@ -35,34 +29,41 @@ set_max_delay -from [get_ports pad_jtag_tms] 20.000
 set_max_delay -from [get_ports pad_jtag_tdi] 20.000
 set_max_delay -from [get_ports pad_jtag_trst] 20.000
 
-set_max_delay -datapath_only -from [get_pins i_pulpissimo/soc_domain_i/pulp_soc_i/i_dmi_jtag/i_dmi_cdc/i_cdc_resp/i_src/data_src_q_reg*/C] -to [get_pins i_pulpissimo/soc_domain_i/pulp_soc_i/i_dmi_jtag/i_dmi_cdc/i_cdc_resp/i_dst/data_dst_q_reg*/D] 20.000
-set_max_delay -datapath_only -from [get_pins i_pulpissimo/soc_domain_i/pulp_soc_i/i_dmi_jtag/i_dmi_cdc/i_cdc_resp/i_src/req_src_q_reg/C] -to [get_pins i_pulpissimo/soc_domain_i/pulp_soc_i/i_dmi_jtag/i_dmi_cdc/i_cdc_resp/i_dst/req_dst_q_reg/D] 20.000
-set_max_delay -datapath_only -from [get_pins i_pulpissimo/soc_domain_i/pulp_soc_i/i_dmi_jtag/i_dmi_cdc/i_cdc_req/i_dst/ack_dst_q_reg/C] -to [get_pins i_pulpissimo/soc_domain_i/pulp_soc_i/i_dmi_jtag/i_dmi_cdc/i_cdc_req/i_src/ack_src_q_reg/D] 20.000
+set_max_delay -datapath_only -from [get_pins i_pulpissimo/i_soc_domain/i_pulp_soc/i_dmi_jtag/i_dmi_cdc/i_cdc_resp/i_src/data_src_q_reg*/C] -to [get_pins i_pulpissimo/i_soc_domain/i_pulp_soc/i_dmi_jtag/i_dmi_cdc/i_cdc_resp/i_dst/data_dst_q_reg*/D] 20.000
+set_max_delay -datapath_only -from [get_pins i_pulpissimo/i_soc_domain/i_pulp_soc/i_dmi_jtag/i_dmi_cdc/i_cdc_resp/i_src/req_src_q_reg/C] -to [get_pins i_pulpissimo/i_soc_domain/i_pulp_soc/i_dmi_jtag/i_dmi_cdc/i_cdc_resp/i_dst/req_dst_q_reg/D] 20.000
+set_max_delay -datapath_only -from [get_pins i_pulpissimo/i_soc_domain/i_pulp_soc/i_dmi_jtag/i_dmi_cdc/i_cdc_req/i_dst/ack_dst_q_reg/C] -to [get_pins i_pulpissimo/i_soc_domain/i_pulp_soc/i_dmi_jtag/i_dmi_cdc/i_cdc_req/i_src/ack_src_q_reg/D] 20.000
 
 
 # reset signal
 set_false_path -from [get_ports pad_reset_n]
+set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets pad_reset_n_IBUF]
+
+set_property CLOCK_DEDICATED_ROUTE ANY_CMT_COLUMN [get_nets i_pulpissimo/i_clock_gen/i_slow_clk_div/i_clk_mux/clk_o]
+set_property CLOCK_DEDICATED_ROUTE ANY_CMT_COLUMN [get_nets i_pulpissimo/i_clock_gen/i_slow_clk_mngr/inst/clk_out1]
 
 # Set ASYNC_REG attribute for ff synchronizers to place them closer together and
 # increase MTBF
-set_property ASYNC_REG true [get_cells i_pulpissimo/soc_domain_i/pulp_soc_i/soc_peripherals_i/i_apb_adv_timer/u_tim0/u_in_stage/r_ls_clk_sync_reg*]
-set_property ASYNC_REG true [get_cells i_pulpissimo/soc_domain_i/pulp_soc_i/soc_peripherals_i/i_apb_adv_timer/u_tim1/u_in_stage/r_ls_clk_sync_reg*]
-set_property ASYNC_REG true [get_cells i_pulpissimo/soc_domain_i/pulp_soc_i/soc_peripherals_i/i_apb_adv_timer/u_tim2/u_in_stage/r_ls_clk_sync_reg*]
-set_property ASYNC_REG true [get_cells i_pulpissimo/soc_domain_i/pulp_soc_i/soc_peripherals_i/i_apb_adv_timer/u_tim3/u_in_stage/r_ls_clk_sync_reg*]
-set_property ASYNC_REG true [get_cells i_pulpissimo/soc_domain_i/pulp_soc_i/soc_peripherals_i/i_apb_timer_unit/s_ref_clk*]
-set_property ASYNC_REG true [get_cells i_pulpissimo/soc_domain_i/pulp_soc_i/soc_peripherals_i/i_ref_clk_sync/i_pulp_sync/r_reg_reg*]
-set_property ASYNC_REG true [get_cells i_pulpissimo/soc_domain_i/pulp_soc_i/soc_peripherals_i/u_evnt_gen/r_ls_sync_reg*]
+set_property ASYNC_REG true [get_cells i_pulpissimo/i_soc_domain/i_pulp_soc/soc_peripherals_i/i_apb_adv_timer/u_tim0/u_in_stage/r_ls_clk_sync_reg*]
+set_property ASYNC_REG true [get_cells i_pulpissimo/i_soc_domain/i_pulp_soc/soc_peripherals_i/i_apb_adv_timer/u_tim1/u_in_stage/r_ls_clk_sync_reg*]
+set_property ASYNC_REG true [get_cells i_pulpissimo/i_soc_domain/i_pulp_soc/soc_peripherals_i/i_apb_adv_timer/u_tim2/u_in_stage/r_ls_clk_sync_reg*]
+set_property ASYNC_REG true [get_cells i_pulpissimo/i_soc_domain/i_pulp_soc/soc_peripherals_i/i_apb_adv_timer/u_tim3/u_in_stage/r_ls_clk_sync_reg*]
+set_property ASYNC_REG true [get_cells i_pulpissimo/i_soc_domain/i_pulp_soc/soc_peripherals_i/i_apb_timer_unit/s_ref_clk*]
+set_property ASYNC_REG true [get_cells i_pulpissimo/i_soc_domain/i_pulp_soc/soc_peripherals_i/i_ref_clk_sync/i_pulp_sync/r_reg_reg*]
+set_property ASYNC_REG true [get_cells i_pulpissimo/i_soc_domain/i_pulp_soc/soc_peripherals_i/u_evnt_gen/r_ls_sync_reg*]
 
 # Create asynchronous clock group between slow-clk and SoC clock. Those clocks
 # are considered asynchronously and proper synchronization regs are in place
-set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins i_pulpissimo/safe_domain_i/i_slow_clk_gen/i_slow_clk_mngr/inst/mmcm_adv_inst/CLKOUT0]] -group [get_clocks -of_objects [get_pins i_pulpissimo/soc_domain_i/pulp_soc_i/i_clk_rst_gen/i_fpga_clk_gen/i_clk_manager/inst/mmcm_adv_inst/CLKOUT0]]
+set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins i_pulpissimo/i_clock_gen/slow_clk_o]] \
+                               -group [get_clocks -of_objects [get_pins i_pulpissimo/i_clock_gen/i_clk_manager/clk_out1]]
 
 # Create asynchronous clock group between Per Clock  and SoC clock. Those clocks
 # are considered asynchronously and proper synchronization regs are in place
-set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins i_pulpissimo/soc_domain_i/pulp_soc_i/i_clk_rst_gen/clk_per_o]] -group [get_clocks -of_objects [get_pins i_pulpissimo/soc_domain_i/pulp_soc_i/i_clk_rst_gen/clk_soc_o]]
+set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins i_pulpissimo/i_clock_gen/i_clk_manager/clk_out1]] \
+                               -group [get_clocks -of_objects [get_pins i_pulpissimo/i_clock_gen/i_clk_manager/clk_out2]]
 
 # Create asynchronous clock group between JTAG TCK and SoC clock.
-set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins i_pulpissimo/pad_jtag_tck]] -group [get_clocks -of_objects [get_pins i_pulpissimo/soc_domain_i/pulp_soc_i/i_clk_rst_gen/clk_soc_o]]
+set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins i_pulpissimo/pad_jtag_tck]] \
+                               -group [get_clocks -of_objects [get_pins i_pulpissimo/i_clock_gen/i_clk_manager/clk_out1]]
 
 #############################################################
 #  _____ ____         _____      _   _   _                  #
@@ -124,6 +125,8 @@ set_property -dict {PACKAGE_PIN AE30 IOSTANDARD LVCMOS33} [get_ports pad_i2c0_sc
 set_property -dict {PACKAGE_PIN AF30 IOSTANDARD LVCMOS33} [get_ports pad_i2c0_sda]
 
 ## QSPI Flash
+# This is unlikely to be correct, setting the pin just to have a connection
+set_property -dict {PACKAGE_PIN P24 IOSTANDARD LVCMOS33} [get_ports pad_spim_sck]
 set_property -dict {PACKAGE_PIN U19 IOSTANDARD LVCMOS33} [get_ports pad_spim_csn0]
 #set_property -dict { PACKAGE_PIN P24   IOSTANDARD LVCMOS33 } [get_ports { pad_spim_sdio0 }]; #IO_L1P_T0_D00_MOSI_14 Sch=qspi_d[0]
 set_property -dict {PACKAGE_PIN R25 IOSTANDARD LVCMOS33} [get_ports pad_spim_sdio1]

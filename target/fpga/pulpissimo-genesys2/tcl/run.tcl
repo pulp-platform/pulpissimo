@@ -73,10 +73,15 @@ open_run synth_1 -name netlist_1
 set_property needs_refresh false [get_runs synth_1]
 
 # Remove unused IOBUF cells in padframe (they are not optimized away since the
-# pad driver also drives the input creating a datapath from pad_xy_o to pad_xy_i
-# )
-remove_cell i_pulpissimo/pad_frame_i/padinst_bootsel0
-remove_cell i_pulpissimo/pad_frame_i/padinst_bootsel1
+# pad driver also drives the input creating a datapath from pad_xy_o to pad_xy_i)
+# Disconnect the nets and connect them to ground to avoid issues in optimization
+remove_cell i_pulpissimo/i_padframe/i_pulpissimo_pads/i_all_pads/i_all_pads_pads/i_pad_bootsel*
+disconnect_net -objects [get_nets i_pulpissimo/i_soc_domain/bootsel_i*]
+connect_net -objects [get_nets i_pulpissimo/i_soc_domain/bootsel_i*] -net i_pulpissimo/<const0>
+
+remove_cell i_pulpissimo/i_padframe/i_pulpissimo_pads/i_all_pads/i_all_pads_pads/i_pad_hyper*
+disconnect_net -objects [get_nets i_pulpissimo/i_soc_domain/pad_to_hyper_i*]
+connect_net -objects [get_nets i_pulpissimo/i_soc_domain/pad_to_hyper_i*] -net i_pulpissimo/<const0>
 
 
 # Launch Implementation

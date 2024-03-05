@@ -71,13 +71,7 @@ module pulpissimo_padframe_all_pads_pads
    // Pad instantiations
    assign static_connection_signals_pad2soc.ref_clk = pad_pad_ref_clk_pad;
    assign static_connection_signals_pad2soc.clk_byp_en = pad_pad_clk_byp_en_pad;
-   (* PULLUP = "YES" *)
-  IOBUF i_pad_reset_n (
-    .T ( ~1'b0   ),
-    .I ( 1'b0 ),
-    .O ( static_connection_signals_pad2soc.rst_n ),
-    .IO( pad_pad_reset_n_pad      )
-  );
+   assign static_connection_signals_pad2soc.rst_n = pad_pad_reset_n_pad;
    (* PULLUP = "YES" *)
   IOBUF i_pad_bootsel0 (
     .T ( ~1'b0   ),

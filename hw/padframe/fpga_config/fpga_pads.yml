@@ -15,12 +15,10 @@
 
 - name: pad_reset_n
   description: "Active-low asynchronous reset. Internally synchronized to rising edge."
-  pad_type: pull_up_pad
+  pad_type: direct_input
   is_static: true
   connections:
     pad2chip: rst_n
-    rx_en: 1'b1
-    tx_en: 1'b0
 
 - name: pad_bootsel0
   description: "Selects boot behavior of the chip. (0b00 -> boot from SPI flash, 0b01 -> JTAG boot, 0b10 -> Hyperflash boot)"

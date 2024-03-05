@@ -1,116 +1,121 @@
 .DEFAULT_GOAL:=help
-export BENDER
+
+PULPISSIMO_ROOT ?= $(shell git rev-parse --show-toplevel)
+.DEFAULT_GOAL := help
+PULPISSIMO_FPGA_ROOT = $(PULPISSIMO_ROOT)/target/fpga
+include $(PULPISSIMO_ROOT)/utils/utils.mk
+
+## @section FPGA Bitstream Generation
 
 all: genesys2 zcu104 nexys_video nexys zedboard zcu102 zcu106 ## Generates the bitstream for all supported boards board.
 
 clean_all: clean_genesys2 clean_zcu104 clean_nexys_video clean_nexys clean_zedboard clean_zcu102 ## Removes synthesis output and bitstreams for all boards.
 
-genesys2: ## Generates the bistream for the genesys2 board
-	$(MAKE) -C pulpissimo-genesys2 all
-	cp pulpissimo-genesys2/pulpissimo-genesys2.runs/impl_1/xilinx_pulpissimo.bit pulpissimo_genesys2.bit
-	cp pulpissimo-genesys2/pulpissimo-genesys2.runs/impl_1/xilinx_pulpissimo.bin pulpissimo_genesys2.bin
+.PHONY: $(PULPISSIMO_FPGA_ROOT)/pulpissimo/tcl/generated/compile.tcl
+$(PULPISSIMO_FPGA_ROOT)/pulpissimo/tcl/generated/compile.tcl:
+	mkdir -p $(PULPISSIMO_FPGA_ROOT)/pulpissimo/tcl/generated
+	$(PULPISSIMO_UTILS)/bender script vivado -t fpga -t xilinx > $@
+
+## Generates the bistream for the genesys2 board
+genesys2: $(PULPISSIMO_FPGA_ROOT)/pulpissimo/tcl/generated/compile.tcl
+	$(MAKE) -C $(PULPISSIMO_FPGA_ROOT)/pulpissimo-genesys2 all
+	cp $(PULPISSIMO_FPGA_ROOT)/pulpissimo-genesys2/pulpissimo-genesys2.runs/impl_1/xilinx_pulpissimo.bit $(PULPISSIMO_FPGA_ROOT)/pulpissimo_genesys2.bit
+	cp $(PULPISSIMO_FPGA_ROOT)/pulpissimo-genesys2/pulpissimo-genesys2.runs/impl_1/xilinx_pulpissimo.bin $(PULPISSIMO_FPGA_ROOT)/pulpissimo_genesys2.bin
 	@echo "Bitstream generation for genesys2 board finished. The bitstream Configuration Memory File was copied to ./pulpissimo_genesys2.bit and ./pulpissimo_genesys2.bin"
 
-clean_genesys2: ## Removes all bitstreams, *.log files and vivado related files (rm -rf vivado*) for the genesys2 board.
-	$(MAKE) -C pulpissimo-genesys2 clean
-	rm -f pulpissimo_genesys2.bit
-	rm -f pulpissimo_genesys2.bin
+## Removes all bitstreams, *.log files and vivado related files (rm -rf vivado*) for the genesys2 board.
+clean_genesys2:
+	$(MAKE) -C $(PULPISSIMO_FPGA_ROOT)/pulpissimo-genesys2 clean
+	rm -f $(PULPISSIMO_FPGA_ROOT)/pulpissimo_genesys2.bit
+	rm -f $(PULPISSIMO_FPGA_ROOT)/pulpissimo_genesys2.bin
 
-zcu104: ## Generates the bistream for the zcu104 board
-	$(MAKE) -C pulpissimo-zcu104 all
-	cp pulpissimo-zcu104/pulpissimo-zcu104.runs/impl_1/xilinx_pulpissimo.bit pulpissimo_zcu104.bit
-	cp pulpissimo-zcu104/pulpissimo-zcu104.runs/impl_1/xilinx_pulpissimo.bin pulpissimo_zcu104.bin
+## Generates the bistream for the zcu104 board
+zcu104: $(PULPISSIMO_FPGA_ROOT)/pulpissimo/tcl/generated/compile.tcl
+	$(MAKE) -C $(PULPISSIMO_FPGA_ROOT)/pulpissimo-zcu104 all
+	cp $(PULPISSIMO_FPGA_ROOT)/pulpissimo-zcu104/pulpissimo-zcu104.runs/impl_1/xilinx_pulpissimo.bit $(PULPISSIMO_FPGA_ROOT)/pulpissimo_zcu104.bit
+	cp $(PULPISSIMO_FPGA_ROOT)/pulpissimo-zcu104/pulpissimo-zcu104.runs/impl_1/xilinx_pulpissimo.bin $(PULPISSIMO_FPGA_ROOT)/pulpissimo_zcu104.bin
 	@echo "Bitstream generation for zcu104 board finished. The bitstream Configuration Memory File was copied to ./pulpissimo_zcu104.bit and ./pulpissimo_zcu104.bin"
 
-clean_zcu104: ## Removes all bitstreams, *.log files and vivado related files (rm -rf vivado*) for the zcu104 board.
-	$(MAKE) -C pulpissimo-zcu104 clean
-	rm -f pulpissimo_zcu104.bit
-	rm -f pulpissimo_zcu104.bin
+## Removes all bitstreams, *.log files and vivado related files (rm -rf vivado*) for the zcu104 board.
+clean_zcu104:
+	$(MAKE) -C $(PULPISSIMO_FPGA_ROOT)/pulpissimo-zcu104 clean
+	rm -f $(PULPISSIMO_FPGA_ROOT)/pulpissimo_zcu104.bit
+	rm -f $(PULPISSIMO_FPGA_ROOT)/pulpissimo_zcu104.bin
 
-zcu106: ## Generates the bistream for the zcu104 board
-	$(MAKE) -C pulpissimo-zcu106 all
-	cp pulpissimo-zcu106/pulpissimo-zcu106.runs/impl_1/xilinx_pulpissimo.bit pulpissimo_zcu106.bit
-	cp pulpissimo-zcu106/pulpissimo-zcu106.runs/impl_1/xilinx_pulpissimo.bin pulpissimo_zcu106.bin
+## Generates the bistream for the zcu104 board
+zcu106: $(PULPISSIMO_FPGA_ROOT)/pulpissimo/tcl/generated/compile.tcl
+	$(MAKE) -C $(PULPISSIMO_FPGA_ROOT)/pulpissimo-zcu106 all
+	cp $(PULPISSIMO_FPGA_ROOT)/pulpissimo-zcu106/pulpissimo-zcu106.runs/impl_1/xilinx_pulpissimo.bit $(PULPISSIMO_FPGA_ROOT)/pulpissimo_zcu106.bit
+	cp $(PULPISSIMO_FPGA_ROOT)/pulpissimo-zcu106/pulpissimo-zcu106.runs/impl_1/xilinx_pulpissimo.bin $(PULPISSIMO_FPGA_ROOT)/pulpissimo_zcu106.bin
 	@echo "Bitstream generation for zcu106 board finished. The bitstream Configuration Memory File was copied to ./pulpissimo_zcu106.bit and ./pulpissimo_zcu106.bin"
 
-clean_zcu106: ## Removes all bitstreams, *.log files and vivado related files (rm -rf vivado*) for the zcu104 board.
-	$(MAKE) -C pulpissimo-zcu106 clean
-	rm -f pulpissimo_zcu106.bit
-	rm -f pulpissimo_zcu106.bin
+## Removes all bitstreams, *.log files and vivado related files (rm -rf vivado*) for the zcu104 board.
+clean_zcu106:
+	$(MAKE) -C $(PULPISSIMO_FPGA_ROOT)/pulpissimo-zcu106 clean
+	rm -f $(PULPISSIMO_FPGA_ROOT)/pulpissimo_zcu106.bit
+	rm -f $(PULPISSIMO_FPGA_ROOT)/pulpissimo_zcu106.bin
 
-nexys_video: ## Generates the bistream for the nexys_video board
-	$(MAKE) -C pulpissimo-nexys_video all
-	cp pulpissimo-nexys_video/pulpissimo-nexys_video.runs/impl_1/xilinx_pulpissimo.bit pulpissimo_nexys_video.bit
-	cp pulpissimo-nexys_video/pulpissimo-nexys_video.runs/impl_1/xilinx_pulpissimo.bin pulpissimo_nexys_video.bin
+## Generates the bistream for the nexys_video board
+nexys_video: $(PULPISSIMO_FPGA_ROOT)/pulpissimo/tcl/generated/compile.tcl
+	$(MAKE) -C $(PULPISSIMO_FPGA_ROOT)/pulpissimo-nexys_video all
+	cp $(PULPISSIMO_FPGA_ROOT)/pulpissimo-nexys_video/pulpissimo-nexys_video.runs/impl_1/xilinx_pulpissimo.bit $(PULPISSIMO_FPGA_ROOT)/pulpissimo_nexys_video.bit
+	cp $(PULPISSIMO_FPGA_ROOT)/pulpissimo-nexys_video/pulpissimo-nexys_video.runs/impl_1/xilinx_pulpissimo.bin $(PULPISSIMO_FPGA_ROOT)/pulpissimo_nexys_video.bin
 	@echo "Bitstream generation for nexys_video board finished. The bitstream Configuration Memory File was copied to ./pulpissimo_nexys_video.bit and ./pulpissimo_nexys_video.bin"
 
-clean_nexys_video: ## Removes all bitstreams, *.log files and vivado related files (rm -rf vivado*) for the nexys_video board.
-	$(MAKE) -C pulpissimo-nexys_video clean
-	rm -f pulpissimo_nexys_video.bit
-	rm -f pulpissimo_nexys_video.bin
+## Removes all bitstreams, *.log files and vivado related files (rm -rf vivado*) for the nexys_video board.
+clean_nexys_video:
+	$(MAKE) -C $(PULPISSIMO_FPGA_ROOT)/pulpissimo-nexys_video clean
+	rm -f $(PULPISSIMO_FPGA_ROOT)/pulpissimo_nexys_video.bit
+	rm -f $(PULPISSIMO_FPGA_ROOT)/pulpissimo_nexys_video.bin
 
-nexys: ## Generates the bistream for the nexys board. Use make nexys rev=[nexys4|nexys4DDR|nexysA7-50T|nexysA7-100T]
-	$(MAKE) -C pulpissimo-nexys all
-	cp pulpissimo-nexys/pulpissimo-nexys.runs/impl_1/xilinx_pulpissimo.bit pulpissimo_nexys.bit
-	cp pulpissimo-nexys/pulpissimo-nexys.runs/impl_1/xilinx_pulpissimo.bin pulpissimo_nexys.bin
+## Generates the bistream for the nexys board. Use make nexys rev=[nexys4|nexys4DDR|nexysA7-50T|nexysA7-100T]
+nexys: $(PULPISSIMO_FPGA_ROOT)/pulpissimo/tcl/generated/compile.tcl
+	$(MAKE) -C $(PULPISSIMO_FPGA_ROOT)/pulpissimo-nexys all
+	cp $(PULPISSIMO_FPGA_ROOT)/pulpissimo-nexys/pulpissimo-nexys.runs/impl_1/xilinx_pulpissimo.bit $(PULPISSIMO_FPGA_ROOT)/pulpissimo_nexys.bit
+	cp $(PULPISSIMO_FPGA_ROOT)/pulpissimo-nexys/pulpissimo-nexys.runs/impl_1/xilinx_pulpissimo.bin $(PULPISSIMO_FPGA_ROOT)/pulpissimo_nexys.bin
 	@echo "Bitstream generation for nexys board finished. The bitstream Configuration Memory File was copied to ./pulpissimo_nexys.bit and ./pulpissimo_nexys.bin"
 
-clean_nexys: ## Removes all bitstreams, *.log files and vivado related files (rm -rf vivado*) for the nexys board.
-	$(MAKE) -C pulpissimo-nexys clean
-	rm -f pulpissimo_nexys.bit
-	rm -f pulpissimo_nexys.bin
+## Removes all bitstreams, *.log files and vivado related files (rm -rf vivado*) for the nexys board.
+clean_nexys:
+	$(MAKE) -C $(PULPISSIMO_FPGA_ROOT)/pulpissimo-nexys clean
+	rm -f $(PULPISSIMO_FPGA_ROOT)/pulpissimo_nexys.bit
+	rm -f $(PULPISSIMO_FPGA_ROOT)/pulpissimo_nexys.bin
 
-vcu108: ## Generates the bistream for the vcu108 board
-	$(MAKE) -C pulpissimo-vcu108 all
-	cp pulpissimo-vcu108/pulpissimo-vcu108.runs/impl_1/xilinx_pulpissimo.bit pulpissimo_vcu108.bit
-	cp pulpissimo-vcu108/pulpissimo-vcu108.runs/impl_1/xilinx_pulpissimo.bin pulpissimo_vcu108.bin
+## Generates the bistream for the vcu108 board
+vcu108: $(PULPISSIMO_FPGA_ROOT)/pulpissimo/tcl/generated/compile.tcl
+	$(MAKE) -C $(PULPISSIMO_FPGA_ROOT)/pulpissimo-vcu108 all
+	cp $(PULPISSIMO_FPGA_ROOT)/pulpissimo-vcu108/pulpissimo-vcu108.runs/impl_1/xilinx_pulpissimo.bit $(PULPISSIMO_FPGA_ROOT)/pulpissimo_vcu108.bit
+	cp $(PULPISSIMO_FPGA_ROOT)/pulpissimo-vcu108/pulpissimo-vcu108.runs/impl_1/xilinx_pulpissimo.bin $(PULPISSIMO_FPGA_ROOT)/pulpissimo_vcu108.bin
 	@echo "Bitstream generation for vcu108 board finished. The bitstream Configuration Memory File was copied to ./pulpissimo_vcu108.bit and ./pulpissimo_vcu108.bin"
 
-clean_vcu108: ## Removes all bitstreams, *.log files and vivado related files (rm -rf vivado*) for the vcu108 board.
-	$(MAKE) -C pulpissimo-vcu108 clean
-	rm -f pulpissimo_vcu108.bit
-	rm -f pulpissimo_vcu108.bin
+## Removes all bitstreams, *.log files and vivado related files (rm -rf vivado*) for the vcu108 board.
+clean_vcu108:
+	$(MAKE) -C $(PULPISSIMO_FPGA_ROOT)/pulpissimo-vcu108 clean
+	rm -f $(PULPISSIMO_FPGA_ROOT)/pulpissimo_vcu108.bit
+	rm -f $(PULPISSIMO_FPGA_ROOT)/pulpissimo_vcu108.bin
 
-zedboard: ## Generates the bistream for the ZedBoard
-	$(MAKE) -C pulpissimo-zedboard all
-	cp pulpissimo-zedboard/pulpissimo-zedboard.runs/impl_1/xilinx_pulpissimo.bit pulpissimo_zedboard.bit
-	cp pulpissimo-zedboard/pulpissimo-zedboard.runs/impl_1/xilinx_pulpissimo.bin pulpissimo_zedboard.bin
+## Generates the bistream for the ZedBoard
+zedboard: $(PULPISSIMO_FPGA_ROOT)/pulpissimo/tcl/generated/compile.tcl
+	$(MAKE) -C $(PULPISSIMO_FPGA_ROOT)/pulpissimo-zedboard all
+	cp $(PULPISSIMO_FPGA_ROOT)/pulpissimo-zedboard/pulpissimo-zedboard.runs/impl_1/xilinx_pulpissimo.bit $(PULPISSIMO_FPGA_ROOT)/pulpissimo_zedboard.bit
+	cp $(PULPISSIMO_FPGA_ROOT)/pulpissimo-zedboard/pulpissimo-zedboard.runs/impl_1/xilinx_pulpissimo.bin $(PULPISSIMO_FPGA_ROOT)/pulpissimo_zedboard.bin
 	@echo "Bitstream generation for ZedBoard finished. The bitstream Configuration Memory File was copied to ./pulpissimo_zedboard.bit and ./pulpissimo_zedboard.bin"
 
-clean_zedboard: ## Removes all bitstreams, *.log files and vivado related files (rm -rf vivado*) for the ZedBoard.
-	$(MAKE) -C pulpissimo-zedboard clean
-	rm -f pulpissimo_zedboard.bit
-	rm -f pulpissimo_zedboard.bin
+## Removes all bitstreams, *.log files and vivado related files (rm -rf vivado*) for the ZedBoard.
+clean_zedboard:
+	$(MAKE) -C $(PULPISSIMO_FPGA_ROOT)/pulpissimo-zedboard clean
+	rm -f $(PULPISSIMO_FPGA_ROOT)/pulpissimo_zedboard.bit
+	rm -f $(PULPISSIMO_FPGA_ROOT)/pulpissimo_zedboard.bin
 
-zcu102: ## Generates the bistream for the zcu102 board
-	$(MAKE) -C pulpissimo-zcu102 all
-	cp pulpissimo-zcu102/pulpissimo-zcu102.runs/impl_1/xilinx_pulpissimo.bit pulpissimo_zcu102.bit
-	cp pulpissimo-zcu102/pulpissimo-zcu102.runs/impl_1/xilinx_pulpissimo.bin pulpissimo_zcu102.bin
+## Generates the bistream for the zcu102 board
+zcu102: $(PULPISSIMO_FPGA_ROOT)/pulpissimo/tcl/generated/compile.tcl
+	$(MAKE) -C $(PULPISSIMO_FPGA_ROOT)/pulpissimo-zcu102 all
+	cp $(PULPISSIMO_FPGA_ROOT)/pulpissimo-zcu102/pulpissimo-zcu102.runs/impl_1/xilinx_pulpissimo.bit $(PULPISSIMO_FPGA_ROOT)/pulpissimo_zcu102.bit
+	cp $(PULPISSIMO_FPGA_ROOT)/pulpissimo-zcu102/pulpissimo-zcu102.runs/impl_1/xilinx_pulpissimo.bin $(PULPISSIMO_FPGA_ROOT)/pulpissimo_zcu102.bin
 	@echo "Bitstream generation for zcu102 board finished. The bitstream Configuration Memory File was copied to ./pulpissimo_zcu102.bit and ./pulpissimo_zcu102.bin"
 
-clean_zcu102: ## Removes all bitstreams, *.log files and vivado related files (rm -rf vivado*) for the zcu102 board.
-	$(MAKE) -C pulpissimo-zcu102 clean
-	rm -f pulpissimo_zcu102.bit
-	rm -f pulpissimo_zcu102.bin
-
-zyboz7: ## Generates the bistream for the ZedBoard
-	$(MAKE) -C pulpissimo-zyboz7 all
-	cp pulpissimo-zyboz7/pulpissimo-zyboz7.runs/impl_1/xilinx_pulpissimo.bit pulpissimo_zyboz7.bit
-	cp pulpissimo-zyboz7/pulpissimo-zyboz7.runs/impl_1/xilinx_pulpissimo.bin pulpissimo_zyboz7.bin
-	@echo "Bitstream generation for ZedBoard finished. The bitstream Configuration Memory File was copied to ./pulpissimo_zyboz7.bit and ./pulpissimo_zyboz7.bin"
-
-clean_zedboard: ## Removes all bitstreams, *.log files and vivado related files (rm -rf vivado*) for the ZedBoard.
-	$(MAKE) -C pulpissimo-zyboz7 clean
-	rm -f pulpissimo_zyboz7.bit
-	rm -f pulpissimo_zyboz7.bin
-
-
-help: ## Show this help message
-	@echo "PULPissimo on FPGA"
-	@echo ""
-	@echo "Call make with one of the supported FPGA boards as arguments to generate the bitstream in the corresponding folder. "
-	@echo "E.g. 'make genesys2' to generate the bitstream for the genesys2 board in pulpissimo-genesy2 subdirectory."
-	@echo "By default make invokes 'vivado'  to start Xilinx Vivado. This behaviour can be overriden by setting the make variable 'VIVADO'"
-	@echo "e.g. make genesys2 VIVADO='vivado-2018.3 vivado' for ETH centos machines."
-	@echo ""
-	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+## Removes all bitstreams, *.log files and vivado related files (rm -rf vivado*) for the zcu102 board.
+clean_zcu102:
+	$(MAKE) -C $(PULPISSIMO_FPGA_ROOT)/pulpissimo-zcu102 clean
+	rm -f $(PULPISSIMO_FPGA_ROOT)/pulpissimo_zcu102.bit
+	rm -f $(PULPISSIMO_FPGA_ROOT)/pulpissimo_zcu102.bin
