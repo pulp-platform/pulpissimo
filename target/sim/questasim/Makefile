@@ -58,16 +58,20 @@ else
 	cd $(QUESTA_BUILD_DIR) && $(VSIM_BIN) $(VSIM_ARGS) -gui -do "vsim +BINARY_SREC_PATH='$< $(SIM_TOP_OPT)"
 endif
 
+.PHONY: relink
+relink:
+	@mkdir -p $(QUESTA_BUILD_DIR)
+	@ln -snf $(PULPISSIMO_ROOT)/target/sim/questasim/waves $(QUESTA_BUILD_DIR)/waves
+	@ln -snf $(PULPISSIMO_ROOT)/target/sim/questasim/tcl_files $(QUESTA_BUILD_DIR)/tcl_files
+
 ## (Re)Compile PULPissimo using Questasim.
 ## @param VSIM_BIN=vsim The command to invoke vsim. Default: 'vsim'
 ## @param VSIM_ARGS='-64' Additional args to supply to vsim during tool invocation
 ## @param SIM_TOP='tb_pulp' The toplevel module to optimize for simulation. Default: tb_pulp
 .PHONY: build
-build: $(QUESTA_BUILD_DIR)/compile.tcl
+build: $(QUESTA_BUILD_DIR)/compile.tcl relink
 	cd $(QUESTA_BUILD_DIR) && $(VSIM_BIN) $(VSIM_ARGS) -c -do 'source compile.tcl; quit'
 	cd $(QUESTA_BUILD_DIR) && $(VSIM_BIN) $(VSIM_ARGS) -c -do 'vopt $(VOPT_ARGS) -o $(SIM_TOP_OPT) $(SIM_TOP) -work work; quit'
-	@ln -snf $(PULPISSIMO_ROOT)/target/sim/questasim/waves $(QUESTA_BUILD_DIR)/waves
-	@ln -snf $(PULPISSIMO_ROOT)/target/sim/questasim/tcl_files $(QUESTA_BUILD_DIR)/tcl_files
 	@echo "Finished building design $(SIM_TOP). The optimized design has been stored in a unit called '$(SIM_TOP_OPT)'."
 ifneq ($(VSIM_PATH), $(PULPISSIMO_ROOT)/build/questasim)
 	@echo ""
