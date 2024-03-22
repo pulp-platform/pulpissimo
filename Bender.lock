@@ -41,8 +41,8 @@ packages:
     - apb
     - common_cells
   axi:
-    revision: 2f395b176bee1c769c80f060a4345fda965bb04b
-    version: 0.38.0
+    revision: ac5deb3ff086aa34b168f392c051e92603d6c0e2
+    version: 0.39.2
     source:
       Git: https://github.com/pulp-platform/axi.git
     dependencies:
@@ -57,8 +57,8 @@ packages:
     dependencies:
     - common_cells
   common_cells:
-    revision: 2bd027cb87eaa9bf7d17196ec5f69864b35b630f
-    version: 1.32.0
+    revision: ad22699793d98ef714f120c6268fe92d096a61e1
+    version: 1.33.1
     source:
       Git: https://github.com/pulp-platform/common_cells.git
     dependencies:
@@ -71,7 +71,7 @@ packages:
       Git: https://github.com/pulp-platform/common_verification.git
     dependencies: []
   cv32e40p:
-    revision: 800a09d97a1e9418e127e8bbf1763c1d1097c92f
+    revision: 7a49867b2232d97344cde1b8a1e05bcb38634894
     version: null
     source:
       Git: https://github.com/pulp-platform/cv32e40p.git
@@ -80,10 +80,10 @@ packages:
     - fpnew
     - tech_cells_generic
   fpnew:
-    revision: 8dc44406b1ccbc4487121710c1883e805f893965
-    version: 0.6.6
+    revision: a8e0cba6dd50f357ece73c2c955d96efc3c6c315
+    version: null
     source:
-      Git: https://github.com/pulp-platform/fpnew.git
+      Git: https://github.com/pulp-platform/cvfpu.git
     dependencies:
     - common_cells
     - fpu_div_sqrt_mvp
@@ -128,8 +128,8 @@ packages:
     - hwpe-ctrl
     - hwpe-stream
   hwpe-stream:
-    revision: 4c2ef8c33a6e2a8c88127e2153013d4f2dc3f448
-    version: 1.7.0
+    revision: bcb4435f802add732f557dc7fa1c6b5dd8854458
+    version: 1.7.1
     source:
       Git: https://github.com/pulp-platform/hwpe-stream.git
     dependencies:
@@ -146,12 +146,6 @@ packages:
     version: 0.2.0
     source:
       Git: https://github.com/pulp-platform/jtag_pulp.git
-    dependencies: []
-  l2_tcdm_hybrid_interco:
-    revision: fa55e72859dcfb117a2788a77352193bef94ff2b
-    version: 1.0.0
-    source:
-      Git: https://github.com/pulp-platform/L2_tcdm_hybrid_interco.git
     dependencies: []
   pulp_io:
     revision: bee24f34798c8fd5c3c999726e90585bb0f4d65f
@@ -171,7 +165,7 @@ packages:
     - udma_sdio
     - udma_uart
   pulp_soc:
-    revision: 95efc08c176f2e38fa2137ad913ce31baabc2c95
+    revision: 26e4681834f716cf97c7b128df52b1ddd33a4780
     version: null
     source:
       Git: https://github.com/pulp-platform/pulp_soc.git
@@ -191,7 +185,6 @@ packages:
     - hwpe-mac-engine
     - ibex
     - jtag_pulp
-    - l2_tcdm_hybrid_interco
     - pulp_io
     - register_interface
     - riscv-dbg
@@ -227,8 +220,8 @@ packages:
     - common_cells
     - register_interface
   register_interface:
-    revision: d7693be4aef1fc7e7eb2b00b41c42e87d959866c
-    version: 0.4.2
+    revision: ae616e5a1ec2b41e72d200e5ab09c65e94aebd3d
+    version: 0.4.4
     source:
       Git: https://github.com/pulp-platform/register_interface.git
     dependencies:
