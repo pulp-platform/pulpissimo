@@ -67,8 +67,13 @@ set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins i_pulpis
 set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins i_pulpissimo/pad_jtag_tck]] \
                                -group [get_clocks -of_objects [get_pins i_pulpissimo/i_clock_gen/i_clk_manager/clk_out1]]
 
-# waive DRCs related to emulated clock gating cells
-create_waiver -of_objects [get_methodology_violations -name xilinx_pulpissimo_methodology_drc_routed.rpx {TIMING-14#1}] -user fconti -description {emulated clock gating cells}
+# Create asynchronous clock group between JTAG TCK and per clock.
+set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins i_pulpissimo/pad_jtag_tck]] \
+                               -group [get_clocks -of_objects [get_pins i_pulpissimo/i_clock_gen/i_clk_manager/clk_out2]]
+
+# Create asynchronous clock group between slow clock and JTAG TCK.
+set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins i_pulpissimo/i_clock_gen/slow_clk_o]] \
+                               -group [get_clocks -of_objects [get_pins i_pulpissimo/pad_jtag_tck]]
 
 #############################################################
 #  _____ ____         _____      _   _   _                  #

@@ -10,8 +10,6 @@ if [info exists ::env(XILINX_BOARD)] {
 }
 set partNumber $::env(XILINX_PART)
 
-set_param board.repoPaths /home/michaero/.Xilinx/Vivado/2023.2/xhub/board_store/xilinx_board_store
-
 # sets up Vivado messages in a more sensible way
 set_msg_config -id {[Synth 8-3352]}         -new_severity "critical warning"
 set_msg_config -id {[Synth 8-350]}          -new_severity "critical warning"
