@@ -57,8 +57,8 @@ packages:
     dependencies:
     - common_cells
   common_cells:
-    revision: ad22699793d98ef714f120c6268fe92d096a61e1
-    version: 1.33.1
+    revision: 7773d971b9d7bef7f5f6a2ef36ee1e4d02cefcd3
+    version: 1.34.0
     source:
       Git: https://github.com/pulp-platform/common_cells.git
     dependencies:
@@ -165,7 +165,7 @@ packages:
     - udma_sdio
     - udma_uart
   pulp_soc:
-    revision: 26e4681834f716cf97c7b128df52b1ddd33a4780
+    revision: 645988c8533b5ff843699068d7c369e41ccec1d3
     version: null
     source:
       Git: https://github.com/pulp-platform/pulp_soc.git
