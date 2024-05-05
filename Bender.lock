@@ -70,15 +70,16 @@ packages:
     source:
       Git: https://github.com/pulp-platform/common_verification.git
     dependencies: []
-  cv32e40p:
-    revision: 7a49867b2232d97344cde1b8a1e05bcb38634894
-    version: null
+  cv32e40x:
+    revision: 636785cd4aef6e857b320834b3ec158b2be7d2c8
     source:
-      Git: https://github.com/pulp-platform/cv32e40p.git
+      Git: https://github.com/pulp-platform/cv32e40x.git
+  fir-xifu:
+    revision: 0fbc043db0798adbb3bec8ee37b7b08f010cce23
+    source:
+      Git: https://iis-git.ee.ethz.ch/ades-labs/fir-xifu.git
     dependencies:
-    - common_cells
-    - fpnew
-    - tech_cells_generic
+    - cv32e40x
   fpnew:
     revision: a8e0cba6dd50f357ece73c2c955d96efc3c6c315
     version: null
@@ -169,7 +170,7 @@ packages:
     revision: bf65372aab4edd404160170e2a4d2c63b27ab5f2
     version: 5.0.1
     source:
-      Git: https://github.com/pulp-platform/pulp_soc.git
+      Git: https://github.com/pulp-platform/pulpissimo.git
     dependencies:
     - adv_dbg_if
     - apb
@@ -179,7 +180,8 @@ packages:
     - axi
     - cluster_interconnect
     - common_cells
-    - cv32e40p
+    - cv32e40x
+    - fir-xifu
     - fpnew
     - hwpe-mac-engine
     - ibex
@@ -264,8 +266,8 @@ packages:
     - tech_cells_generic
     - udma_core
   udma_core:
-    revision: 32bcc4f7472c3eeb8ef04612deb9088ffce7eb59
-    version: 2.0.0
+    revision: d032d4914e63924c9a6e51b11ab36efe36999e30
+    version: null
     source:
       Git: https://github.com/pulp-platform/udma_core.git
     dependencies:
