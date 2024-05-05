@@ -57,8 +57,8 @@ packages:
     dependencies:
     - common_cells
   common_cells:
-    revision: 7773d971b9d7bef7f5f6a2ef36ee1e4d02cefcd3
-    version: 1.34.0
+    revision: 0d67563b6b592549542544f1abc0f43e5d4ee8b4
+    version: 1.35.0
     source:
       Git: https://github.com/pulp-platform/common_cells.git
     dependencies:
@@ -70,15 +70,16 @@ packages:
     source:
       Git: https://github.com/pulp-platform/common_verification.git
     dependencies: []
-  cv32e40p:
-    revision: 7a49867b2232d97344cde1b8a1e05bcb38634894
-    version: null
+  cv32e40x:
+    revision: 636785cd4aef6e857b320834b3ec158b2be7d2c8
     source:
-      Git: https://github.com/pulp-platform/cv32e40p.git
+      Git: https://github.com/pulp-platform/cv32e40x.git
+  fir-xifu:
+    revision: 0fbc043db0798adbb3bec8ee37b7b08f010cce23
+    source:
+      Git: https://iis-git.ee.ethz.ch/ades-labs/fir-xifu.git
     dependencies:
-    - common_cells
-    - fpnew
-    - tech_cells_generic
+    - cv32e40x
   fpnew:
     revision: a8e0cba6dd50f357ece73c2c955d96efc3c6c315
     version: null
@@ -128,8 +129,8 @@ packages:
     - hwpe-ctrl
     - hwpe-stream
   hwpe-stream:
-    revision: bcb4435f802add732f557dc7fa1c6b5dd8854458
-    version: 1.7.1
+    revision: 65c99a4a2f37a79acee800ab0151f67dfb1edef1
+    version: 1.8.0
     source:
       Git: https://github.com/pulp-platform/hwpe-stream.git
     dependencies:
@@ -165,10 +166,9 @@ packages:
     - udma_sdio
     - udma_uart
   pulp_soc:
-    revision: 645988c8533b5ff843699068d7c369e41ccec1d3
-    version: null
+    revision: cc4d812dd2211e9f1602080c3ee788e4cd517ca5
     source:
-      Git: https://github.com/pulp-platform/pulp_soc.git
+      Git: https://github.com/pulp-platform/pulpissimo.git
     dependencies:
     - adv_dbg_if
     - apb
@@ -179,7 +179,8 @@ packages:
     - axi
     - cluster_interconnect
     - common_cells
-    - cv32e40p
+    - cv32e40x
+    - fir-xifu
     - fpnew
     - generic_fll
     - hwpe-mac-engine
@@ -271,8 +272,8 @@ packages:
     - tech_cells_generic
     - udma_core
   udma_core:
-    revision: 32bcc4f7472c3eeb8ef04612deb9088ffce7eb59
-    version: 2.0.0
+    revision: d032d4914e63924c9a6e51b11ab36efe36999e30
+    version: null
     source:
       Git: https://github.com/pulp-platform/udma_core.git
     dependencies:
