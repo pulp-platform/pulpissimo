@@ -70,7 +70,7 @@ relink:
 ## @param SIM_TOP='tb_pulp' The toplevel module to optimize for simulation. Default: tb_pulp
 .PHONY: build
 build: $(QUESTA_BUILD_DIR)/compile.tcl relink
-	cd $(QUESTA_BUILD_DIR) && $(VSIM_BIN) $(VSIM_ARGS) -c -do 'source compile.tcl; quit'
+	cd $(QUESTA_BUILD_DIR) && $(VSIM_BIN) $(VSIM_ARGS) -c -do 'quit -code [source compile.tcl]'
 	cd $(QUESTA_BUILD_DIR) && $(VSIM_BIN) $(VSIM_ARGS) -c -do 'vopt $(VOPT_ARGS) -o $(SIM_TOP_OPT) $(SIM_TOP) -work work; quit'
 	@echo "Finished building design $(SIM_TOP). The optimized design has been stored in a unit called '$(SIM_TOP_OPT)'."
 ifneq ($(VSIM_PATH), $(PULPISSIMO_ROOT)/build/questasim)
