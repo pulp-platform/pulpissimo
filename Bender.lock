@@ -80,7 +80,7 @@ packages:
     revision: 1b7c0c43c1e32be61e54f6eee95ccd94cb2541c6
     version: null
     source:
-      Git: git@iis-git.ee.ethz.ch:ades-labs/fir-hwpe.git
+      Git: https://github.com/pulp-platform/fir-hwpe.git
     dependencies:
     - hci
     - hwpe-ctrl
@@ -90,7 +90,7 @@ packages:
     revision: 2491bd2ac4ec1c45fc08dcb1f964ae6f520e29da
     version: null
     source:
-      Git: git@iis-git.ee.ethz.ch:ades-labs/fir-xifu.git
+      Git: https://github.com/pulp-platform/fir-xifu.git
     dependencies:
     - cv32e40x
   fpnew:
