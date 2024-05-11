@@ -71,26 +71,26 @@ packages:
       Git: https://github.com/pulp-platform/common_verification.git
     dependencies: []
   cv32e40x:
-    revision: null
+    revision: 636785cd4aef6e857b320834b3ec158b2be7d2c8
     version: null
     source:
-      Path: working_dir/cv32e40x
+      Git: https://github.com/pulp-platform/cv32e40x.git
     dependencies: []
   fir-hwpe:
-    revision: null
+    revision: 1b7c0c43c1e32be61e54f6eee95ccd94cb2541c6
     version: null
     source:
-      Path: working_dir/fir-hwpe
+      Git: git@iis-git.ee.ethz.ch:ades-labs/fir-hwpe.git
     dependencies:
     - hci
     - hwpe-ctrl
     - hwpe-stream
     - zeroriscy
   fir-xifu:
-    revision: null
+    revision: 2491bd2ac4ec1c45fc08dcb1f964ae6f520e29da
     version: null
     source:
-      Path: working_dir/fir-xifu
+      Git: git@iis-git.ee.ethz.ch:ades-labs/fir-xifu.git
     dependencies:
     - cv32e40x
   fpnew:
@@ -127,10 +127,10 @@ packages:
     - register_interface
     - tech_cells_generic
   hci:
-    revision: null
+    revision: d31af36ebcaf2196fb51676b40782aa8cbd9cc69
     version: null
     source:
-      Path: working_dir/hci
+      Git: git@github.com:pulp-platform/hci.git
     dependencies:
     - cluster_interconnect
     - hwpe-stream
@@ -186,10 +186,10 @@ packages:
     - udma_sdio
     - udma_uart
   pulp_soc:
-    revision: null
+    revision: e507a97ab1e6e6c55d9c381418b2975cc0c62138
     version: null
     source:
-      Path: working_dir/pulp_soc
+      Git: https://github.com/pulp-platform/pulp_soc.git
     dependencies:
     - adv_dbg_if
     - apb
@@ -308,7 +308,7 @@ packages:
     dependencies:
     - udma_core
   udma_hyper:
-    revision: a1d548e75248646785803b7f4df5584f056b6289
+    revision: 20444561921a9a5ef40efdbf40855de32a2bdccf
     version: null
     source:
       Git: https://github.com/pulp-platform/udma_hyper.git
