@@ -39,7 +39,7 @@ module pulpissimo #(
   /// Standard RISC-V extension: Reuses the integer regfile for FPU usage instead of requiring a
   /// dedicated FPU regfile. Requires correct compiler settings for software to work!
   parameter  bit          USE_ZFINX = 1,
-  parameter  bit          USE_HWPE = 0,
+  parameter  bit          USE_HWPE = 1,
   /// Enable the virtual stdout interface for communication with simulated testbenches. This
   /// parameter must be disabled during any form of physical implementation.
   parameter  bit          SIM_STDOUT = 0,

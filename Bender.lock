@@ -71,14 +71,26 @@ packages:
       Git: https://github.com/pulp-platform/common_verification.git
     dependencies: []
   cv32e40x:
-    revision: 636785cd4aef6e857b320834b3ec158b2be7d2c8
+    revision: null
+    version: null
     source:
-      Git: https://github.com/pulp-platform/cv32e40x.git
+      Path: working_dir/cv32e40x
     dependencies: []
-  fir-xifu:
-    revision: 0fbc043db0798adbb3bec8ee37b7b08f010cce23
+  fir-hwpe:
+    revision: null
+    version: null
     source:
-      Git: https://iis-git.ee.ethz.ch/ades-labs/fir-xifu.git
+      Path: working_dir/fir-hwpe
+    dependencies:
+    - hci
+    - hwpe-ctrl
+    - hwpe-stream
+    - zeroriscy
+  fir-xifu:
+    revision: null
+    version: null
+    source:
+      Path: working_dir/fir-xifu
     dependencies:
     - cv32e40x
   fpnew:
@@ -114,26 +126,27 @@ packages:
     - common_verification
     - register_interface
     - tech_cells_generic
-  hwpe-ctrl:
-    revision: 1916c72f024175f1fe351acc3db3c6e9925a117d
-    version: 1.7.3
+  hci:
+    revision: null
+    version: null
     source:
-      Git: https://github.com/pulp-platform/hwpe-ctrl.git
+      Path: working_dir/hci
+    dependencies:
+    - cluster_interconnect
+    - hwpe-stream
+    - l2_tcdm_hybrid_interco
+  hwpe-ctrl:
+    revision: 877d676329785f7bba042402e0a6f329a387573d
+    version: null
+    source:
+      Git: git@github.com:pulp-platform/hwpe-ctrl.git
     dependencies:
     - tech_cells_generic
-  hwpe-mac-engine:
-    revision: cd48c574f1972ecbe02d3f463a0e12a92acde484
-    version: 1.3.3
-    source:
-      Git: https://github.com/pulp-platform/hwpe-mac-engine.git
-    dependencies:
-    - hwpe-ctrl
-    - hwpe-stream
   hwpe-stream:
     revision: 65c99a4a2f37a79acee800ab0151f67dfb1edef1
     version: 1.8.0
     source:
-      Git: https://github.com/pulp-platform/hwpe-stream.git
+      Git: git@github.com:pulp-platform/hwpe-stream.git
     dependencies:
     - tech_cells_generic
   ibex:
@@ -148,6 +161,12 @@ packages:
     version: 0.2.0
     source:
       Git: https://github.com/pulp-platform/jtag_pulp.git
+    dependencies: []
+  l2_tcdm_hybrid_interco:
+    revision: fa55e72859dcfb117a2788a77352193bef94ff2b
+    version: 1.0.0
+    source:
+      Git: https://github.com/pulp-platform/L2_tcdm_hybrid_interco.git
     dependencies: []
   pulp_io:
     revision: da6f8817b667f17973ecb19cb1e7aa4347108716
@@ -171,7 +190,7 @@ packages:
     revision: bf65372aab4edd404160170e2a4d2c63b27ab5f2
     version: 5.0.1
     source:
-      Git: https://github.com/pulp-platform/pulpissimo.git
+      Path: working_dir/pulp_soc
     dependencies:
     - adv_dbg_if
     - apb
@@ -182,6 +201,7 @@ packages:
     - cluster_interconnect
     - common_cells
     - cv32e40x
+    - fir-hwpe
     - fir-xifu
     - fpnew
     - hwpe-mac-engine
@@ -331,3 +351,9 @@ packages:
     dependencies:
     - common_cells
     - udma_core
+  zeroriscy:
+    revision: cc4068a0ccb7691cd062b809c34b2304e7fbfa36
+    version: null
+    source:
+      Git: git@github.com:yvantor/ibex.git
+    dependencies: []
