@@ -41,8 +41,8 @@ packages:
     - apb
     - common_cells
   axi:
-    revision: ac5deb3ff086aa34b168f392c051e92603d6c0e2
-    version: 0.39.2
+    revision: 9402c8a9ce0a7b5253c3c29e788612d771e8b5d6
+    version: 0.39.3
     source:
       Git: https://github.com/pulp-platform/axi.git
     dependencies:
@@ -57,8 +57,8 @@ packages:
     dependencies:
     - common_cells
   common_cells:
-    revision: 7773d971b9d7bef7f5f6a2ef36ee1e4d02cefcd3
-    version: 1.34.0
+    revision: 0d67563b6b592549542544f1abc0f43e5d4ee8b4
+    version: 1.35.0
     source:
       Git: https://github.com/pulp-platform/common_cells.git
     dependencies:
@@ -128,8 +128,8 @@ packages:
     - hwpe-ctrl
     - hwpe-stream
   hwpe-stream:
-    revision: bcb4435f802add732f557dc7fa1c6b5dd8854458
-    version: 1.7.1
+    revision: 65c99a4a2f37a79acee800ab0151f67dfb1edef1
+    version: 1.8.0
     source:
       Git: https://github.com/pulp-platform/hwpe-stream.git
     dependencies:
@@ -148,11 +148,12 @@ packages:
       Git: https://github.com/pulp-platform/jtag_pulp.git
     dependencies: []
   pulp_io:
-    revision: bee24f34798c8fd5c3c999726e90585bb0f4d65f
-    version: null
+    revision: da6f8817b667f17973ecb19cb1e7aa4347108716
+    version: 0.1.0
     source:
       Git: https://github.com/pulp-platform/pulp-io.git
     dependencies:
+    - apb
     - common_cells
     - gpio
     - udma_camera
@@ -165,7 +166,7 @@ packages:
     - udma_sdio
     - udma_uart
   pulp_soc:
-    revision: 645988c8533b5ff843699068d7c369e41ccec1d3
+    revision: f6081c6da0c1455e44b0be630fbb23b4b7e97bd2
     version: null
     source:
       Git: https://github.com/pulp-platform/pulp_soc.git
@@ -263,8 +264,8 @@ packages:
       Git: https://github.com/pulp-platform/timer_unit.git
     dependencies: []
   udma_camera:
-    revision: 9de94cbb46bf53bf1df05cd291f33e9d525eb892
-    version: null
+    revision: cb4dc897125c823e646f65a9d155e832c763b29d
+    version: 2.0.0
     source:
       Git: https://github.com/pulp-platform/udma_camera.git
     dependencies:
@@ -279,30 +280,30 @@ packages:
     - common_cells
     - tech_cells_generic
   udma_filter:
-    revision: 8b4817f1ef2162f01d83c2607b4e6ac2b37ee01f
-    version: null
+    revision: b346c42543fbff5f4146eb8d56c7cb3dd55b19f4
+    version: 2.0.0
     source:
       Git: https://github.com/pulp-platform/udma_filter.git
     dependencies:
     - udma_core
   udma_hyper:
-    revision: a1d548e75248646785803b7f4df5584f056b6289
-    version: null
+    revision: bd41ed10f94621a13ff02bdd631bf64c838a10d4
+    version: 0.1.0
     source:
       Git: https://github.com/pulp-platform/udma_hyper.git
     dependencies:
     - tech_cells_generic
     - udma_core
   udma_i2c:
-    revision: 662f8717edfbf58a115e86f7074122f3ae653009
-    version: null
+    revision: d0852881b90b9bf10d51409def6d9abf58d46b6a
+    version: 3.0.0
     source:
       Git: https://github.com/pulp-platform/udma_i2c.git
     dependencies:
     - udma_core
   udma_i2s:
-    revision: 2abe6e405e0f1231e14d567f73fc88986c18a0b2
-    version: null
+    revision: aa3e698a56824493da3b9334f7236cc7f85699de
+    version: 2.0.0
     source:
       Git: https://github.com/pulp-platform/udma_i2s.git
     dependencies:
@@ -310,8 +311,8 @@ packages:
     - tech_cells_generic
     - udma_core
   udma_qspi:
-    revision: 04874baa0c9a83cb15f1dca67f1e8a4de65af660
-    version: null
+    revision: 505b9d37ba7666962450ea8a45d6abb7b1c4fc03
+    version: 2.0.0
     source:
       Git: https://github.com/pulp-platform/udma_qspi.git
     dependencies:
@@ -319,8 +320,8 @@ packages:
     - tech_cells_generic
     - udma_core
   udma_sdio:
-    revision: a2a9238a2fed228d3a53ad8a4ab774f100ad462d
-    version: null
+    revision: 892ac6f17bb9ad6ad223e27b75809c8163a71900
+    version: 2.0.0
     source:
       Git: https://github.com/pulp-platform/udma_sdio.git
     dependencies:
@@ -328,8 +329,8 @@ packages:
     - tech_cells_generic
     - udma_core
   udma_uart:
-    revision: e25b51d03a964793081b2fb491afa939efc5c852
-    version: null
+    revision: 15d36f5f1d4459da3fa458a1af3334f1a8447058
+    version: 2.0.0
     source:
       Git: https://github.com/pulp-platform/udma_uart.git
     dependencies:
