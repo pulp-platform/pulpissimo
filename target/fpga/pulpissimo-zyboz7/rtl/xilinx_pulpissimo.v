@@ -78,7 +78,7 @@ module xilinx_pulpissimo (
   inout  wire pad_pmodb_10 
 );
 
-  localparam CORE_TYPE = 0; // 0 for RISCY, 1 for IBEX RV32IMC (formerly ZERORISCY), 2 for IBEX RV32EC (formerly MICRORISCY)
+  localparam CORE_TYPE = 3; // 0 for RISCY, 1 for IBEX RV32IMC (formerly ZERORISCY), 2 for IBEX RV32EC (formerly MICRORISCY), 3 for CV32E40X
   localparam USE_FPU   = 0;
   localparam USE_HWPE  = 1;
 
