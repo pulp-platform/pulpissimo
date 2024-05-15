@@ -87,7 +87,7 @@ packages:
     - hwpe-stream
     - zeroriscy
   fir-xifu:
-    revision: 2491bd2ac4ec1c45fc08dcb1f964ae6f520e29da
+    revision: 36abd2f98a809dc6cc70ffe008bd59555a8ef51b
     version: null
     source:
       Git: https://github.com/pulp-platform/fir-xifu.git
@@ -186,7 +186,7 @@ packages:
     - udma_sdio
     - udma_uart
   pulp_soc:
-    revision: e507a97ab1e6e6c55d9c381418b2975cc0c62138
+    revision: 8a821b6cbf45cda5f1b2ce67cf6c04ffa8e1fa27
     version: null
     source:
       Git: https://github.com/pulp-platform/pulp_soc.git
