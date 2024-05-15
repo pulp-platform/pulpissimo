@@ -65,6 +65,10 @@ set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins i_pulpis
 set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins i_pulpissimo/pad_jtag_tck]] \
                                -group [get_clocks -of_objects [get_pins i_pulpissimo/i_clock_gen/i_clk_manager/clk_out1]]
 
+# Create asynchronous clock group between JTAG TCK and per clock.
+set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins i_pulpissimo/pad_jtag_tck]] \
+                               -group [get_clocks -of_objects [get_pins i_pulpissimo/i_clock_gen/i_clk_manager/clk_out2]]
+
 # Create asynchronous clock group between slow clock and JTAG TCK.
 set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins i_pulpissimo/i_clock_gen/slow_clk_o]] \
                                -group [get_clocks -of_objects [get_pins i_pulpissimo/pad_jtag_tck]]

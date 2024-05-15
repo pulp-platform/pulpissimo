@@ -222,7 +222,7 @@ fpga_synth_genesys2:
       - target/fpga/pulpissimo-genesys2/reports
       - target/fpga/pulpissimo-genesys2/rtl
       - target/fpga/pulpissimo-genesys2/tcl
-      - target/fpga/pulpissimo-genesys2/pulpissimo_genesys2.xpr
+      - target/fpga/pulpissimo-genesys2/pulpissimo-genesys2.xpr
       - target/fpga/pulpissimo-genesys2/fpga-settings.mk
       - target/fpga/pulpissimo-genesys2/*.log
       - target/fpga/pulpissimo-genesys2/*.cfg
@@ -247,7 +247,7 @@ fpga_synth_nexys_video:
       - target/fpga/pulpissimo-nexys_video/reports
       - target/fpga/pulpissimo-nexys_video/rtl
       - target/fpga/pulpissimo-nexys_video/tcl
-      - target/fpga/pulpissimo-nexys_video/pulpissimo_nexys_video.xpr
+      - target/fpga/pulpissimo-nexys_video/pulpissimo-nexys_video.xpr
       - target/fpga/pulpissimo-nexys_video/fpga-settings.mk
       - target/fpga/pulpissimo-nexys_video/*.log
       - target/fpga/pulpissimo-nexys_video/*.cfg
@@ -272,7 +272,7 @@ fpga_synth_nexys:
       - target/fpga/pulpissimo-nexys/reports
       - target/fpga/pulpissimo-nexys/rtl
       - target/fpga/pulpissimo-nexys/tcl
-      - target/fpga/pulpissimo-nexys/pulpissimo_nexys.xpr
+      - target/fpga/pulpissimo-nexys/pulpissimo-nexys.xpr
       - target/fpga/pulpissimo-nexys/fpga-settings.mk
       - target/fpga/pulpissimo-nexys/*.log
       - target/fpga/pulpissimo-nexys/*.cfg
@@ -297,7 +297,7 @@ fpga_synth_zcu104:
       - target/fpga/pulpissimo-zcu104/reports
       - target/fpga/pulpissimo-zcu104/rtl
       - target/fpga/pulpissimo-zcu104/tcl
-      - target/fpga/pulpissimo-zcu104/pulpissimo_zcu104.xpr
+      - target/fpga/pulpissimo-zcu104/pulpissimo-zcu104.xpr
       - target/fpga/pulpissimo-zcu104/fpga-settings.mk
       - target/fpga/pulpissimo-zcu104/*.log
       - target/fpga/pulpissimo-zcu104/*.cfg
@@ -322,7 +322,7 @@ fpga_synth_zcu102:
       - target/fpga/pulpissimo-zcu102/reports
       - target/fpga/pulpissimo-zcu102/rtl
       - target/fpga/pulpissimo-zcu102/tcl
-      - target/fpga/pulpissimo-zcu102/pulpissimo_zcu102.xpr
+      - target/fpga/pulpissimo-zcu102/pulpissimo-zcu102.xpr
       - target/fpga/pulpissimo-zcu102/fpga-settings.mk
       - target/fpga/pulpissimo-zcu102/*.log
       - target/fpga/pulpissimo-zcu102/*.cfg
