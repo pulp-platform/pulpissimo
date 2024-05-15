@@ -29,8 +29,8 @@
 
 module pulpissimo #(
   /// 0 for CV32E40P with XPULP Extensions, 1 for IBEX RV32IMC (formerly ZERORISCY),
-  /// 2 for IBEX RV32EC (formerly MICRORISCY)
-  parameter  int unsigned CORE_TYPE = 0,
+  /// 2 for IBEX RV32EC (formerly MICRORISCY), 3 for CV32E40X
+  parameter  int unsigned CORE_TYPE = 3,
   /// Enable XPULP extensions on CV32E40P. Has no effect if an IBEX core variant is use.
   parameter  bit          USE_XPULP = 1,
   /// Mutually exclusive with the use of IBEX. I.e. if an IBEX core variant is used, this parameter
