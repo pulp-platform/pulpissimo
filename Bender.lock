@@ -192,12 +192,6 @@ packages:
     - scm
     - tech_cells_generic
     - timer_unit
-  pulpissimo-rtl_sim_tb:
-    revision: null
-    version: null
-    source:
-      Path: target/sim/tb
-    dependencies: []
   pulpissimo_optional_vips:
     revision: null
     version: null

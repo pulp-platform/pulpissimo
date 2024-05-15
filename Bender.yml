@@ -31,7 +31,6 @@ dependencies:
 
   # Simulation Environment specific dependencies
   pulpissimo_optional_vips:    { path: "target/sim/vip"}
-  pulpissimo-rtl_sim_tb:       { path: "target/sim/tb"}
 
 
 export_include_dirs:
@@ -66,6 +65,18 @@ sources:
       - hw/fpga_autogen_rom.sv
       - hw/padframe/padframe_adapter.sv
       - hw/clock_gen_fpga.sv
+
+  - target: simulation
+    files:
+      - target/sim/tb/tb_lib/riscv_pkg.sv
+      - target/sim/tb/tb_lib/jtag_pkg.sv
+      - target/sim/tb/tb_lib/pulp_tap_pkg.sv
+      - target/sim/tb/tb_lib/srec/srec_pkg.sv
+      - target/sim/tb/tb_lib/tb_clk_gen.sv
+      - target/sim/tb/tb_lib/SimDTM.sv
+      - target/sim/tb/tb_lib/SimJTAG.sv
+      - target/sim/tb/tb_pulp.sv
+      - target/sim/tb/tb_pulp_simple.sv
 
 
 vendor_package:

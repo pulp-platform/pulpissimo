@@ -20,15 +20,18 @@ include $(PULPISSIMO_ROOT)/utils/utils.mk
 
 ## Configuration Variables for Bender, Questasim behavior
 BENDER_SCRIPTS_ARGS += -t rtl -t test -t rtl_sim
+BENDER_VIP_SCRIPT_ARGS ?= -t rt_dpi -t i2c_vip -t flash_vip -t i2s_vip -t use_vips
 VSIM_ARGS ?= -64
 VLOG_ARGS += -suppress 2583 -suppress 13314 \"+incdir+\$$ROOT/hw/includes\"
 VCOM_ARGS += ""
 VOPT_ARGS ?= +acc
 VSIM_BIN ?= "vsim"
 VSIM_USER_PLUSARGS ?= ""
+VSIM_DEFAULT_PLUSARGS ?= +nowarnTRAN +nowarnTSCALE +nowarnTFMPC -suppress 8386
 RISCV_OBJCOPY_BIN ?= 'riscv32-unknown-elf-objcopy'
 SIM_TOP ?= 'tb_pulp'
-SIM_TOP_OPT ?= 'vopt_tb'
+SIM_TOP_OPT ?= vopt_tb
+USE_VIPS ?= 0
 
 
 
@@ -52,10 +55,10 @@ SIM_TOP_OPT ?= 'vopt_tb'
 .PHONY: run_sim
 run_sim: $(QUESTA_BUILD_DIR)/app.s19
 	ln -snf waves $(QUESTA_BUILD_DIR)/waves
-ifeq ($(GUI), '0')
-	cd $(QUESTA_BUILD_DIR) && $(VSIM_BIN) $(VSIM_ARGS) -c -do "vsim +BINARY_SREC_PATH='$< $(SIM_TOP_OPT); run -all; exit"
+ifeq ($(gui), 1)
+	cd $(QUESTA_BUILD_DIR) && $(VSIM_BIN) $(VSIM_ARGS) -gui -do "vsim -t ps $(SIM_TOP_OPT) $(VSIM_DEFAULT_PLUSARGS) $(VSIM_USER_PLUSARGS) +srec=$<"
 else
-	cd $(QUESTA_BUILD_DIR) && $(VSIM_BIN) $(VSIM_ARGS) -gui -do "vsim +BINARY_SREC_PATH='$< $(SIM_TOP_OPT)"
+	cd $(QUESTA_BUILD_DIR) && $(VSIM_BIN) $(VSIM_ARGS) -c -do "vsim -t ps $(SIM_TOP_OPT) $(VSIM_DEFAULT_PLUSARGS) $(VSIM_USER_PLUSARGS) +srec=$<; run -all; exit"
 endif
 
 .PHONY: relink
@@ -68,9 +71,15 @@ relink:
 ## @param VSIM_BIN=vsim The command to invoke vsim. Default: 'vsim'
 ## @param VSIM_ARGS='-64' Additional args to supply to vsim during tool invocation
 ## @param SIM_TOP='tb_pulp' The toplevel module to optimize for simulation. Default: tb_pulp
+## @param USE_VIPS=0 Use the VIPs in the simulation. Default: 0
 .PHONY: build
-build: $(QUESTA_BUILD_DIR)/compile.tcl relink
-	cd $(QUESTA_BUILD_DIR) && $(VSIM_BIN) $(VSIM_ARGS) -c -do 'source compile.tcl; quit'
+build: $(QUESTA_BUILD_DIR)/compile.tcl $(QUESTA_BUILD_DIR)/compile_vip.tcl relink
+ifeq ($(USE_VIPS), 0)
+	cd $(QUESTA_BUILD_DIR) && $(VSIM_BIN) $(VSIM_ARGS) -c -do 'quit -code [source compile.tcl]'
+else
+	cd $(QUESTA_BUILD_DIR) && $(VSIM_BIN) $(VSIM_ARGS) -c -do 'quit -code [source compile_vip.tcl]'
+	echo "Building with VIPS"
+endif
 	cd $(QUESTA_BUILD_DIR) && $(VSIM_BIN) $(VSIM_ARGS) -c -do 'vopt $(VOPT_ARGS) -o $(SIM_TOP_OPT) $(SIM_TOP) -work work; quit'
 	@echo "Finished building design $(SIM_TOP). The optimized design has been stored in a unit called '$(SIM_TOP_OPT)'."
 ifneq ($(VSIM_PATH), $(PULPISSIMO_ROOT)/build/questasim)
@@ -101,8 +110,14 @@ clean_questasim:
 .PHONY: $(QUESTA_BUILD_DIR)/compile.tcl
 $(QUESTA_BUILD_DIR)/compile.tcl: $(PULPISSIMO_ROOT)/Bender.lock | $(PULPISSIMO_UTILS)/bender
 	mkdir -p $(QUESTA_BUILD_DIR)
-	echo 'set ROOT [file normalize [file dirname [info script]]/../..]' > $(QUESTA_BUILD_DIR)/compile.tcl
-	$(PULPISSIMO_UTILS)/bender script vsim $(BENDER_SCRIPTS_ARGS) --vlog-arg="$(VLOG_ARGS)" --vcom-arg="" | grep -v "set ROOT" >> $(QUESTA_BUILD_DIR)/compile.tcl
+	echo 'set ROOT [file normalize [file dirname [info script]]/../..]' > $@
+	$(PULPISSIMO_UTILS)/bender script vsim $(BENDER_SCRIPTS_ARGS) --vlog-arg="$(VLOG_ARGS)" --vcom-arg="" | grep -v "set ROOT" >> $@
+
+.PHONY: $(QUESTA_BUILD_DIR)/compile_vip.tcl
+$(QUESTA_BUILD_DIR)/compile_vip.tcl: $(PULPISSIMO_ROOT)/Bender.lock | $(PULPISSIMO_UTILS)/bender
+	mkdir -p $(QUESTA_BUILD_DIR)
+	echo 'set ROOT [file normalize [file dirname [info script]]/../..]' > $@
+	$(PULPISSIMO_UTILS)/bender script vsim $(BENDER_SCRIPTS_ARGS) $(BENDER_VIP_SCRIPT_ARGS) --vlog-arg="$(VLOG_ARGS)" --vcom-arg="" | grep -v "set ROOT" >> $@
 
 # Convert the ELF binary to SREC format for simulation
 $(QUESTA_BUILD_DIR)/app.s19: $(EXECUTABLE_PATH)
