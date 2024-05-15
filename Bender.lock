@@ -70,6 +70,15 @@ packages:
     source:
       Git: https://github.com/pulp-platform/common_verification.git
     dependencies: []
+  cv32e40p:
+    revision: 7a49867b2232d97344cde1b8a1e05bcb38634894
+    version: null
+    source:
+      Git: https://github.com/pulp-platform/cv32e40p.git
+    dependencies:
+    - common_cells
+    - fpnew
+    - tech_cells_generic
   cv32e40x:
     revision: 636785cd4aef6e857b320834b3ec158b2be7d2c8
     version: null
@@ -187,7 +196,7 @@ packages:
     - udma_sdio
     - udma_uart
   pulp_soc:
-    revision: e3fa9100629b87834f7da8d494e8d58f3cb24080
+    revision: 5ae7869970165483db776c0dec97103a07d00f6d
     version: null
     source:
       Git: https://github.com/pulp-platform/pulp_soc.git
@@ -200,6 +209,7 @@ packages:
     - axi
     - cluster_interconnect
     - common_cells
+    - cv32e40p
     - cv32e40x
     - fir-hwpe
     - fir-xifu
