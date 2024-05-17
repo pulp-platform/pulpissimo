@@ -181,7 +181,7 @@ fpga_synth_genesys2:
   before_script:
   script:
     - echo "Starting synthesis with vivado"
-    - make genesys2 VIVADO='vitis-2020.2 vivado'
+    - make genesys2 VIVADO='vitis-2022.1 vivado'
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
     paths:
@@ -206,7 +206,7 @@ fpga_synth_nexys_video:
   before_script:
   script:
     - echo "Starting synthesis with vivado"
-    - make nexys_video VIVADO='vitis-2020.2 vivado'
+    - make nexys_video VIVADO='vitis-2022.1 vivado'
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
     paths:
@@ -231,7 +231,7 @@ fpga_synth_nexys:
   before_script:
   script:
     - echo "Starting synthesis with vivado"
-    - make nexys rev=nexys4 VIVADO='vitis-2020.2 vivado'
+    - make nexys rev=nexys4 VIVADO='vitis-2022.1 vivado'
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
     paths:
@@ -256,7 +256,7 @@ fpga_synth_zcu104:
   before_script:
   script:
     - echo "Starting synthesis with vivado"
-    - make zcu104 VIVADO='vitis-2020.2 vivado'
+    - make zcu104 VIVADO='vitis-2023.2 vivado'
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
     paths:
@@ -279,6 +279,7 @@ fpga_synth_zcu104:
 fpga_synth_zcu102:
   stage: test
   before_script:
+  timeout: 5 hours
   script:
     - echo "Starting synthesis with vivado"
     - make zcu102 VIVADO='vitis-2020.2 vivado'
