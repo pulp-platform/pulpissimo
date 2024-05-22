@@ -26,8 +26,8 @@ packages:
     dependencies:
     - tech_cells_generic
   apb_fll_if:
-    revision: 1acbb0f9485f903a60417ab4c455067fc9ebe766
-    version: 0.2.0
+    revision: ce34d65007e05da1f788fcdf7cc1849b5aedaf67
+    version: 0.2.1
     source:
       Git: https://github.com/pulp-platform/apb_fll_if.git
     dependencies:
@@ -96,8 +96,8 @@ packages:
     - hwpe-stream
     - zeroriscy
   fir-xifu:
-    revision: b31bc66683704646727140b57a91c5ca2de396d5
-    version: 0.1.0
+    revision: 031d31f52f6c3151c5ff683e3e268277f2ddc30b
+    version: 0.1.1
     source:
       Git: https://github.com/pulp-platform/fir-xifu.git
     dependencies:
@@ -195,7 +195,7 @@ packages:
     - udma_sdio
     - udma_uart
   pulp_soc:
-    revision: 7c377ca63b5d792a99605a26cafd487863c85df0
+    revision: a9c360697d8f4cbf7859f2b52c9372d2a1945683
     version: null
     source:
       Git: https://github.com/pulp-platform/pulp_soc.git
