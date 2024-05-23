@@ -80,7 +80,10 @@ module clock_gen #(
   // Convert APB interface to FLL native interface
   FLL_BUS fll_bus[2](.clk_i(cfg_clk_i));
 
-  apb_to_fll #(.APB_ADDR_WIDTH(APB_ADDR_WIDTH), .NR_FLLS(2)) apb2fll_if_i (
+  apb_to_fll #(
+    .APB_ADDR_WIDTH(APB_ADDR_WIDTH),
+    .NR_FLLS(2)
+  ) apb2fll_if_i (
     .clk_i    ( cfg_clk_i     ),
     .rst_ni,
     .apb      ( cfg_bus_slave ),

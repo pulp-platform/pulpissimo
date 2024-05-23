@@ -174,7 +174,7 @@ module pulpissimo #(
 
   // Config. Interfaces
   APB #(.ADDR_WIDTH(32), .DATA_WIDTH(32)) s_apb_chip_ctrl_bus();
-  APB #(.ADDR_WIDTH(10), .DATA_WIDTH(32)) s_apb_fll_ctrl_bus();
+  APB #(.ADDR_WIDTH(6), .DATA_WIDTH(32)) s_apb_fll_ctrl_bus();
   APB #(.ADDR_WIDTH(32), .DATA_WIDTH(32)) s_apb_pads_ctrl_bus();
 
   ////////////////////////////
@@ -194,7 +194,7 @@ module pulpissimo #(
   //////////////////////////////
 `ifndef EXTERNAL_CLOCK
   clock_gen #(
-    .APB_ADDR_WIDTH(8)
+    .APB_ADDR_WIDTH(6)
   ) i_clock_gen(
     .ref_clk_i         ( s_ref_clk                                                              ),
     .rst_ni            ( s_global_rst_n                                                         ),

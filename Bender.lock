@@ -26,8 +26,8 @@ packages:
     dependencies:
     - tech_cells_generic
   apb_fll_if:
-    revision: 1acbb0f9485f903a60417ab4c455067fc9ebe766
-    version: 0.2.0
+    revision: ce34d65007e05da1f788fcdf7cc1849b5aedaf67
+    version: 0.2.1
     source:
       Git: https://github.com/pulp-platform/apb_fll_if.git
     dependencies:
@@ -166,7 +166,7 @@ packages:
     - udma_sdio
     - udma_uart
   pulp_soc:
-    revision: f6081c6da0c1455e44b0be630fbb23b4b7e97bd2
+    revision: 470e10f9b917efc79beee20af53a77adbf8f3954
     version: null
     source:
       Git: https://github.com/pulp-platform/pulp_soc.git
@@ -175,14 +175,12 @@ packages:
     - apb
     - apb2per
     - apb_adv_timer
-    - apb_fll_if
     - apb_interrupt_cntrl
     - axi
     - cluster_interconnect
     - common_cells
     - cv32e40p
     - fpnew
-    - generic_fll
     - hwpe-mac-engine
     - ibex
     - jtag_pulp
