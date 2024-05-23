@@ -86,8 +86,8 @@ packages:
       Git: https://github.com/pulp-platform/cv32e40x.git
     dependencies: []
   fir-hwpe:
-    revision: 1b7c0c43c1e32be61e54f6eee95ccd94cb2541c6
-    version: null
+    revision: b59edc4daf6fc44b4c0b3bb8a494351299c0423a
+    version: 2.0.0
     source:
       Git: https://github.com/pulp-platform/fir-hwpe.git
     dependencies:
@@ -96,8 +96,8 @@ packages:
     - hwpe-stream
     - zeroriscy
   fir-xifu:
-    revision: 031d31f52f6c3151c5ff683e3e268277f2ddc30b
-    version: 0.1.1
+    revision: 6ad47bd94458e2ace0d2976d92da4ba5d06268fb
+    version: 0.1.2
     source:
       Git: https://github.com/pulp-platform/fir-xifu.git
     dependencies:
@@ -139,7 +139,7 @@ packages:
     revision: d31af36ebcaf2196fb51676b40782aa8cbd9cc69
     version: null
     source:
-      Git: git@github.com:pulp-platform/hci.git
+      Git: https://github.com/pulp-platform/hci.git
     dependencies:
     - cluster_interconnect
     - hwpe-stream
@@ -148,14 +148,14 @@ packages:
     revision: 877d676329785f7bba042402e0a6f329a387573d
     version: null
     source:
-      Git: git@github.com:pulp-platform/hwpe-ctrl.git
+      Git: https://github.com/pulp-platform/hwpe-ctrl.git
     dependencies:
     - tech_cells_generic
   hwpe-stream:
     revision: 65c99a4a2f37a79acee800ab0151f67dfb1edef1
     version: 1.8.0
     source:
-      Git: git@github.com:pulp-platform/hwpe-stream.git
+      Git: https://github.com/pulp-platform/hwpe-stream.git
     dependencies:
     - tech_cells_generic
   ibex:
@@ -196,7 +196,7 @@ packages:
     - udma_sdio
     - udma_uart
   pulp_soc:
-    revision: a9c360697d8f4cbf7859f2b52c9372d2a1945683
+    revision: 40be30a32f1561958d873d9d82a9bb8ad14145aa
     version: null
     source:
       Git: https://github.com/pulp-platform/pulp_soc.git
@@ -365,5 +365,5 @@ packages:
     revision: cc4068a0ccb7691cd062b809c34b2304e7fbfa36
     version: null
     source:
-      Git: git@github.com:yvantor/ibex.git
+      Git: https://github.com/yvantor/ibex.git
     dependencies: []
