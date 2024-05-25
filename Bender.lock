@@ -196,7 +196,7 @@ packages:
     - udma_sdio
     - udma_uart
   pulp_soc:
-    revision: 40be30a32f1561958d873d9d82a9bb8ad14145aa
+    revision: d4b558f00a0ce6fa87bbf38190178e6003e9c81f
     version: null
     source:
       Git: https://github.com/pulp-platform/pulp_soc.git
@@ -214,7 +214,6 @@ packages:
     - fir-hwpe
     - fir-xifu
     - fpnew
-    - hwpe-mac-engine
     - ibex
     - jtag_pulp
     - pulp_io
@@ -297,8 +296,8 @@ packages:
     - tech_cells_generic
     - udma_core
   udma_core:
-    revision: d032d4914e63924c9a6e51b11ab36efe36999e30
-    version: null
+    revision: 32bcc4f7472c3eeb8ef04612deb9088ffce7eb59
+    version: 2.0.0
     source:
       Git: https://github.com/pulp-platform/udma_core.git
     dependencies:
