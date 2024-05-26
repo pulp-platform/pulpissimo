@@ -19,6 +19,9 @@ create_clock -period 100.000 -name tck -waveform {0.000 50.000} [get_ports pad_j
 set_input_jitter tck 1.000
 set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets i_pulpissimo/i_padframe/i_pulpissimo_pads/i_all_pads/i_all_pads_pads/i_pad_jtag_tck/O]
 
+# generated clocks
+create_generated_clock -source [get_ports ref_clk_i] [get_nets i_pulpissimo/i_clock_gen/i_clk_manager/inst/clk_in1]
+create_generated_clock -source [get_ports ref_clk_i] [get_nets i_pulpissimo/i_clock_gen/i_slow_clk_mngr/inst/clk_in1]
 
 # minimize routing delay
 set_input_delay -clock tck -clock_fall 5.000 [get_ports pad_jtag_tdi]
@@ -30,9 +33,9 @@ set_max_delay -from [get_ports pad_jtag_tms] 20.000
 set_max_delay -from [get_ports pad_jtag_tdi] 20.000
 
 set_max_delay -datapath_only -from [get_pins i_pulpissimo/i_soc_domain/i_pulp_soc/i_dmi_jtag/i_dmi_cdc/i_cdc_resp/i_src/data_src_q_reg*/C] -to [get_pins i_pulpissimo/i_soc_domain/i_pulp_soc/i_dmi_jtag/i_dmi_cdc/i_cdc_resp/i_dst/data_dst_q_reg*/D] 20.000
-set_max_delay -datapath_only -from [get_pins i_pulpissimo/i_soc_domain/i_pulp_soc/i_dmi_jtag/i_dmi_cdc/i_cdc_resp/i_src/req_src_q_reg/C] -to [get_pins i_pulpissimo/i_soc_domain/i_pulp_soc/i_dmi_jtag/i_dmi_cdc/i_cdc_resp/i_dst/req_dst_q_reg/D] 20.000
-set_max_delay -datapath_only -from [get_pins i_pulpissimo/i_soc_domain/i_pulp_soc/i_dmi_jtag/i_dmi_cdc/i_cdc_req/i_dst/ack_dst_q_reg/C] -to [get_pins i_pulpissimo/i_soc_domain/i_pulp_soc/i_dmi_jtag/i_dmi_cdc/i_cdc_req/i_src/ack_src_q_reg/D] 20.000
-
+set_max_delay -datapath_only -from [get_pins i_pulpissimo/i_soc_domain/i_pulp_soc/i_dmi_jtag/i_dmi_cdc/i_cdc_resp/i_src/req_src_q_reg/C]   -to [get_pins i_pulpissimo/i_soc_domain/i_pulp_soc/i_dmi_jtag/i_dmi_cdc/i_cdc_resp/i_dst/req_dst_q_reg/D]   20.000
+set_max_delay -datapath_only -from [get_pins i_pulpissimo/i_soc_domain/i_pulp_soc/i_dmi_jtag/i_dmi_cdc/i_cdc_req/i_dst/ack_dst_q_reg/C]    -to [get_pins i_pulpissimo/i_soc_domain/i_pulp_soc/i_dmi_jtag/i_dmi_cdc/i_cdc_req/i_src/ack_src_q_reg/D]    20.000
+set_max_delay -datapath_only -from [get_pins i_pulpissimo/i_soc_domain/i_pulp_soc/jtag_tap_top_i/confreg/reg_bit_last/r_dataout_reg/C]     -to [get_pins i_pulpissimo/i_clock_gen/i_slow_clk_bypass_mux/i_BUFGMUX/I1]                                  20.000
 
 # reset signal
 set_false_path -from [get_ports pad_reset]
@@ -63,6 +66,9 @@ set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins i_pulpis
 # Create asynchronous clock group between JTAG TCK and SoC clock.
 set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins i_pulpissimo/pad_jtag_tck]] \
                                -group [get_clocks -of_objects [get_pins i_pulpissimo/i_clock_gen/i_clk_manager/clk_out1]]
+
+# waive DRCs related to emulated clock gating cells
+create_waiver -of_objects [get_methodology_violations -name xilinx_pulpissimo_methodology_drc_routed.rpx {TIMING-14#1}] -user fconti -description {emulated clock gating cells}
 
 #############################################################
 #  _____ ____         _____      _   _   _                  #
