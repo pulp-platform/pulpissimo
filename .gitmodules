@@ -4,3 +4,6 @@
 [submodule "regression_tests"]
 	path = sw/regression_tests
 	url = https://github.com/pulp-platform/regression_tests.git
+[submodule "efcl_ss"]
+	path = sw/efcl_ss
+	url = https://github.com/pulp-platform/efcl_ss_exercises
