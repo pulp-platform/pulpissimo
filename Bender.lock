@@ -80,7 +80,7 @@ packages:
     - fpnew
     - tech_cells_generic
   cv32e40x:
-    revision: fe5e7f41ad284b5aee583a727503bb6f1097daab
+    revision: 9e64e75cd2859aea3a772556fae00e6f89c9d43b
     version: null
     source:
       Git: https://github.com/pulp-platform/cv32e40x.git
@@ -150,7 +150,7 @@ packages:
     - udma_sdio
     - udma_uart
   pulp_soc:
-    revision: 4763edad187e34f0d6b130f46d247d434d9cf8c3
+    revision: 54f208f2aed3b729b94a5b3c1ef35c22832fd05a
     version: null
     source:
       Git: https://github.com/pulp-platform/pulp_soc.git
