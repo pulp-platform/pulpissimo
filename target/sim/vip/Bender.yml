@@ -1,0 +1,35 @@
+package:
+  name: pulpissimo_optional_vips
+  authors:
+    - "Manuel Eggimann <meggiman@iis.ee.ethz.ch>"
+
+sources:
+    # Open models
+  - target: any(test,simulation)
+    files:
+      - spi_master_padframe.sv
+      - uart_sim.sv
+      - camera/cam_vip.sv
+
+  # S25FS256_model (SPI Flash)
+  - target: all(any(test,simulation), flash_vip)
+    defines:
+      SPEEDSIM: ~
+    files:
+      - spi_flash/S25fs256s/model/s25fs256s.v
+
+  # 24FC1025 model (I2C flash)
+  - target: all(any(test,simulation), i2c_vip)
+    defines:
+      SPEEDSIM: ~
+    files:
+      - i2c_eeprom/24FC1025.v
+
+  # i2s model
+  - target: all(any(test,simulation), i2s_vip)
+    defines:
+      SPEEDSIM: ~
+    files:
+      - i2s/i2c_if.v
+      - i2s/i2s_vip_channel.sv
+      - i2s/i2s_vip.sv

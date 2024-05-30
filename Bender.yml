@@ -1,7 +1,8 @@
 package:
-  name: Pulpissimo
+  name: pulpissimo
   authors:
     - "Robert Balas <balasr@iis.ee.ethz.ch>"
+    - "Manuel Eggimann <meggiman@iis.ee.ethz.ch>"
     - "Pasquale Davide Schiavone <pschiavo@iis.ee.ethz.ch>"
     - "Germain Haugou <haugoug@iis.ee.ethz.ch>"
     - "Francesco Conti <f.conti@unibo.it>"
@@ -9,78 +10,80 @@ package:
     - "Stefan Mach <smach@iis.ee.ethz.ch>"
     - "Antonio Pullini <pullinia@iis.ee.ethz.ch>"
     - "Gianmarco Ottavi <gianmarco.ottavi@studio.unibo.it>"
-    - "Manuel Eggimann <meggiman@iis.ee.ethz.ch>"
     - "Luca Valente <luca.valente2@unibo.it>"
 
 dependencies:
-  common_cells: { git: "https://github.com/pulp-platform/common_cells.git", version: 1.21.0 }
-  jtag_pulp: { git: "https://github.com/pulp-platform/jtag_pulp.git", version: 0.2.0 }
-  pulp_soc: { git: "https://github.com/pulp-platform/pulp_soc.git", version: 4.4.0 }
-  tbtools: { git: "https://github.com/pulp-platform/tbtools.git", version: 0.2.1 }
-  tech_cells_generic: { git: "https://github.com/pulp-platform/tech_cells_generic.git", version: 0.2.3 }
+  common_cells:                { git: "https://github.com/pulp-platform/common_cells.git",       version: 1.21.0 }
+  apb:                         { git: "https://github.com/pulp-platform/apb.git",                version: 0.2.4 }
+  jtag_pulp:                   { git: "https://github.com/pulp-platform/jtag_pulp.git",          version: 0.2.0 }
+  pulp_soc:                    { git: "https://github.com/pulp-platform/pulp_soc.git",           version: 5.0.1 }
+  tbtools:                     { git: "https://github.com/pulp-platform/tbtools.git",            version: 0.2.1 }
+  tech_cells_generic:          { git: "https://github.com/pulp-platform/tech_cells_generic.git", version: 0.2.3 }
+  pulpissimo_padframe_rtl_sim: { path: "hw/padframe/pulpissimo_padframe_rtl_sim_autogen" }
+  pulpissimo_padframe_fpga:    { path: "hw/padframe/pulpissimo_padframe_fpga_autogen" }
+  register_interface:          { git: "https://github.com/pulp-platform/register_interface.git", version: 0.4.1 }
+  generic_FLL:                 { git: "https://github.com/pulp-platform/generic_FLL.git",        version: 0.2.0 }
+  apb_fll_if:                  { git: "https://github.com/pulp-platform/apb_fll_if.git",         version: 0.2.1 }
 
-workspace:
-  # package_links:
-  #   ips/tbtools: tbtools # symlinks for backwards compatibility with IPApprox
-#   checkout_dir: deps
+
+  # Target Specific Dependencies
+  
+
+  # Simulation Environment specific dependencies
+  pulpissimo_optional_vips:    { path: "target/sim/vip"}
+
 
 export_include_dirs:
-  - rtl/includes
+  - hw/includes
 
+# The default flavor of PULPIssimo is the generic version for RTL simulation.
+# For other target platforms, checkout the Bender.yml files in the various
+# subdirectories bellow 'hw'.
 sources:
   # Source files grouped in levels. Files in level 0 have no dependencies on files in this
   # package. Files in level 1 only depend on files in level 0, files in level 2 on files in
   # levels 1 and 0, etc. Files within a level are ordered alphabetically.
   # Level 0
-  - rtl/pulpissimo/jtag_tap_top.sv
-  - rtl/pulpissimo/pad_frame.sv
-  - rtl/pulpissimo/pad_control.sv
-  - rtl/pulpissimo/soc_domain.sv
-  - rtl/pulpissimo/rtc_date.sv
-  - rtl/pulpissimo/rtc_clock.sv
-  - rtl/pulpissimo/safe_domain_reg_if.sv
-  # Level 1
-  - rtl/pulpissimo/safe_domain.sv
-  - rtl/pulpissimo/pulpissimo.sv
 
-  # TB sources
-  - target: any(test,simulation)
+  # Common RTL files
+  - target: not(any(fpga, xilinx))
     files:
-      - rtl/tb/riscv_pkg.sv
-      - rtl/tb/jtag_pkg.sv
-      - rtl/tb/pulp_tap_pkg.sv
-      - rtl/tb/srec/srec_pkg.sv
-      - rtl/tb/tb_clk_gen.sv
-      - rtl/tb/tb_pulp.sv
-      - rtl/tb/SimJTAG.sv
-      - rtl/tb/SimDTM.sv
+      - hw/asic_autogen_rom.sv
+  - hw/soc_domain.sv
+  - hw/pulpissimo.sv
 
-  # Open models
-  - target: any(test,simulation)
-    files:
-      - rtl/vip/spi_master_padframe.sv
-      - rtl/vip/uart_sim.sv
-      - rtl/vip/camera/cam_vip.sv
 
-  # S25FS256_model (SPI Flash)
-  - target: all(any(test,simulation), flash_vip)
-    defines:
-      SPEEDSIM: ~
+  # rtl_sim - Generic version of pulpissimo used for non-verilator RTL simulation 
+  - target: all(rtl_sim, not(verilator))
     files:
-      - rtl/vip/spi_flash/S25fs256s/model/s25fs256s.v
+      - hw/padframe/padframe_adapter.sv
+      - hw/clock_gen_generic.sv
 
-  # 24FC1025 model (I2C flash)
-  - target: all(any(test,simulation), i2c_vip)
-    defines:
-      SPEEDSIM: ~
+  # rtl_sim - Generic version of pulpissimo used for non-verilator RTL simulation 
+  - target: all(fpga, xilinx)
     files:
-      - rtl/vip/i2c_eeprom/24FC1025.v
+      - hw/fpga_autogen_rom.sv
+      - hw/padframe/padframe_adapter.sv
+      - hw/clock_gen_fpga.sv
 
-  # i2s model
-  - target: all(any(test,simulation), i2s_vip)
-    defines:
-      SPEEDSIM: ~
+  - target: simulation
     files:
-      - rtl/vip/i2s/i2c_if.v
-      - rtl/vip/i2s/i2s_vip_channel.sv
-      - rtl/vip/i2s/i2s_vip.sv
+      - target/sim/tb/tb_lib/riscv_pkg.sv
+      - target/sim/tb/tb_lib/jtag_pkg.sv
+      - target/sim/tb/tb_lib/pulp_tap_pkg.sv
+      - target/sim/tb/tb_lib/srec/srec_pkg.sv
+      - target/sim/tb/tb_lib/tb_clk_gen.sv
+      - target/sim/tb/tb_lib/SimDTM.sv
+      - target/sim/tb/tb_lib/SimJTAG.sv
+      - target/sim/tb/tb_pulp.sv
+      - target/sim/tb/tb_pulp_simple.sv
+
+
+vendor_package:
+  # Import the GPIO repository directly. Since we have to regenerate the RTL
+  # when we change the number GPIOs we cannot just depend on it as a regular
+  # dependency but actually need a modifyable copy in the source tree.
+  - name: gpio
+    target_dir: hw/vendored_ips/gpio
+    upstream: { git: "https://github.com/pulp-platform/gpio.git", rev: "7f5e7b50a3d275fcbdae156ed14b7236ad5d7c0b"}
+    patch_dir: hw/vendored_ips/patches/gpio

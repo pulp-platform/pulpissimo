@@ -1,0 +1,44 @@
+manifest_version: 3
+rtl_templates:
+  bender_project_file:
+    name: Bender.yml Project file
+    target_file_name: Bender.yml
+    template: custom_templates/rtl_templates/Bender.yml.mako
+    skip_generation: false
+  ipapprox_src_files_yml:
+    name: IPApprox src_files.yml
+    template: ""
+    target_file_name: ""
+    skip_generation: True
+  ipapprox_ips_list_yml:
+    name: IPApprox ips_list.yml
+    template: ""
+    target_file_name: ""
+    skip_generation: True
+  assign_header_file:
+    name: Padframe assignment header file
+    target_file_name: assign.svh
+    template: custom_templates/rtl_templates/assign.svh.mako
+    skip_generation: false
+  toplevel_module:
+    name: Padframe Top Module
+    target_file_name: '{padframe.name}.sv'
+    template: custom_templates/rtl_templates/padframe.sv.mako
+    skip_generation: false
+driver_templates:
+  regfile_hjson:
+    name: Register File Specification for {pad_domain.name}
+    target_file_name: '{padframe.name}_{pad_domain.name}_regs.hjson'
+    template: custom_templates/driver_templates/regfile.hjson.mako
+    skip_generation: false
+  driver_header:
+    name: Driver header file
+    target_file_name: '{padframe.name}.h'
+    template: ""
+    skip_generation: true
+  driver_source:
+    name: Driver implementation file
+    target_file_name: '{padframe.name}.c'
+    template: ""
+    skip_generation: true
+

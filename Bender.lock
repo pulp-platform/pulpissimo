@@ -1,320 +1,330 @@
----
 packages:
   adv_dbg_if:
     revision: 19eeef8cae1cbec7413877b3f29fe0bd078748d7
     version: 0.0.2
     source:
-      Git: "https://github.com/pulp-platform/adv_dbg_if.git"
+      Git: https://github.com/pulp-platform/adv_dbg_if.git
     dependencies: []
   apb:
-    revision: d077333a7e5cc80008935dc2761440532dfdce81
-    version: 0.1.0
+    revision: 77ddf073f194d44b9119949d2421be59789e69ae
+    version: 0.2.4
     source:
-      Git: "https://github.com/pulp-platform/apb.git"
-    dependencies: []
+      Git: https://github.com/pulp-platform/apb.git
+    dependencies:
+    - common_cells
   apb2per:
     revision: 6fc13fc0bfa71772d91391893e57306d0d95befa
     version: 0.1.0
     source:
-      Git: "https://github.com/pulp-platform/apb2per.git"
+      Git: https://github.com/pulp-platform/apb2per.git
     dependencies: []
   apb_adv_timer:
     revision: c8faec1e1755386d0e0f31a55ebd80612a3dcea9
     version: 1.0.4
     source:
-      Git: "https://github.com/pulp-platform/apb_adv_timer.git"
+      Git: https://github.com/pulp-platform/apb_adv_timer.git
     dependencies:
-      - tech_cells_generic
+    - tech_cells_generic
   apb_fll_if:
-    revision: a1f67b624fe379d4d319c809656b672f0267cfc8
-    version: 0.1.3
+    revision: ce34d65007e05da1f788fcdf7cc1849b5aedaf67
+    version: 0.2.1
     source:
-      Git: "https://github.com/pulp-platform/apb_fll_if.git"
+      Git: https://github.com/pulp-platform/apb_fll_if.git
     dependencies:
-      - apb
-  apb_gpio:
-    revision: 0e9f142f2f11278445c953ad011fce1c7ed85b66
-    version: ~
-    source:
-      Git: "https://github.com/pulp-platform/apb_gpio.git"
-    dependencies: []
+    - apb
   apb_interrupt_cntrl:
-    revision: 86d650f590a385cc0d5148125528527377f0527c
-    version: 0.1.2
+    revision: 8faeac71f89bca19e5daa14ebac99a81ceb85593
+    version: 0.2.0
     source:
-      Git: "https://github.com/pulp-platform/apb_interrupt_cntrl.git"
+      Git: https://github.com/pulp-platform/apb_interrupt_cntrl.git
     dependencies:
-      - common_cells
-  apb_node:
-    revision: 4e350ef4980141397e3e17ced00e310e30f8dc95
-    version: 0.1.1
-    source:
-      Git: "https://github.com/pulp-platform/apb_node.git"
-    dependencies:
-      - apb
+    - apb
+    - common_cells
   axi:
-    revision: 527cf64a95f7aea36836b2db76dc4d767e150358
-    version: 0.29.2
+    revision: 9402c8a9ce0a7b5253c3c29e788612d771e8b5d6
+    version: 0.39.3
     source:
-      Git: "https://github.com/pulp-platform/axi.git"
+      Git: https://github.com/pulp-platform/axi.git
     dependencies:
-      - common_cells
-      - common_verification
-  axi_slice:
-    revision: a4f72bc21ac4d7da631e8309d9f8d0c34b735c23
-    version: 1.1.4
-    source:
-      Git: "https://github.com/pulp-platform/axi_slice.git"
-    dependencies:
-      - common_cells
+    - common_cells
+    - common_verification
+    - tech_cells_generic
   cluster_interconnect:
     revision: 7d0a4f8acae71a583a6713cab5554e60b9bb8d27
     version: 1.2.1
     source:
-      Git: "https://github.com/pulp-platform/cluster_interconnect.git"
+      Git: https://github.com/pulp-platform/cluster_interconnect.git
     dependencies:
-      - common_cells
+    - common_cells
   common_cells:
-    revision: 88a08fd4e365ec258375a326c30c20726eaa4fa2
-    version: 1.24.1
+    revision: 0d67563b6b592549542544f1abc0f43e5d4ee8b4
+    version: 1.35.0
     source:
-      Git: "https://github.com/pulp-platform/common_cells.git"
+      Git: https://github.com/pulp-platform/common_cells.git
     dependencies:
-      - common_verification
-      - tech_cells_generic
+    - common_verification
+    - tech_cells_generic
   common_verification:
-    revision: b616c1a25aea3b76e32dcbed2ec87d057efdcffd
-    version: 0.2.1
+    revision: 9c07fa860593b2caabd9b5681740c25fac04b878
+    version: 0.2.3
     source:
-      Git: "https://github.com/pulp-platform/common_verification.git"
+      Git: https://github.com/pulp-platform/common_verification.git
     dependencies: []
   cv32e40p:
-    revision: 800a09d97a1e9418e127e8bbf1763c1d1097c92f
-    version: ~
+    revision: 7a49867b2232d97344cde1b8a1e05bcb38634894
+    version: null
     source:
-      Git: "https://github.com/pulp-platform/cv32e40p.git"
+      Git: https://github.com/pulp-platform/cv32e40p.git
     dependencies:
-      - common_cells
-      - fpnew
-      - tech_cells_generic
+    - common_cells
+    - fpnew
+    - tech_cells_generic
   fpnew:
-    revision: 8dc44406b1ccbc4487121710c1883e805f893965
-    version: 0.6.6
+    revision: a8e0cba6dd50f357ece73c2c955d96efc3c6c315
+    version: null
     source:
-      Git: "https://github.com/pulp-platform/fpnew.git"
+      Git: https://github.com/pulp-platform/cvfpu.git
     dependencies:
-      - common_cells
-      - fpu_div_sqrt_mvp
+    - common_cells
+    - fpu_div_sqrt_mvp
   fpu_div_sqrt_mvp:
     revision: 86e1f558b3c95e91577c41b2fc452c86b04e85ac
     version: 1.0.4
     source:
-      Git: "https://github.com/pulp-platform/fpu_div_sqrt_mvp.git"
+      Git: https://github.com/pulp-platform/fpu_div_sqrt_mvp.git
     dependencies:
-      - common_cells
+    - common_cells
   generic_fll:
     revision: 1c92dc73a940392182fd4cb7b86f35649b349595
-    version: ~
+    version: 0.2.0
     source:
-      Git: "https://github.com/pulp-platform/generic_FLL.git"
+      Git: https://github.com/pulp-platform/generic_FLL.git
     dependencies: []
-  hwpe-ctrl:
-    revision: 4bf1487a463c262bf7d8ffee79d1cf392937daa2
-    version: 1.7.1
+  gpio:
+    revision: null
+    version: null
     source:
-      Git: "https://github.com/pulp-platform/hwpe-ctrl.git"
+      Path: hw/vendored_ips/gpio
     dependencies:
-      - tech_cells_generic
+    - apb
+    - axi
+    - common_cells
+    - common_verification
+    - register_interface
+    - tech_cells_generic
+  hwpe-ctrl:
+    revision: 1916c72f024175f1fe351acc3db3c6e9925a117d
+    version: 1.7.3
+    source:
+      Git: https://github.com/pulp-platform/hwpe-ctrl.git
+    dependencies:
+    - tech_cells_generic
   hwpe-mac-engine:
     revision: cd48c574f1972ecbe02d3f463a0e12a92acde484
     version: 1.3.3
     source:
-      Git: "https://github.com/pulp-platform/hwpe-mac-engine.git"
+      Git: https://github.com/pulp-platform/hwpe-mac-engine.git
     dependencies:
-      - hwpe-ctrl
-      - hwpe-stream
+    - hwpe-ctrl
+    - hwpe-stream
   hwpe-stream:
-    revision: ddc154424187dff42a8fcec946c768ceb13f13de
-    version: 1.6.4
+    revision: 65c99a4a2f37a79acee800ab0151f67dfb1edef1
+    version: 1.8.0
     source:
-      Git: "https://github.com/pulp-platform/hwpe-stream.git"
+      Git: https://github.com/pulp-platform/hwpe-stream.git
     dependencies:
-      - tech_cells_generic
+    - tech_cells_generic
   ibex:
     revision: b18f7ef178ed07f5085051f96042c670a919fd5c
-    version: ~
+    version: null
     source:
-      Git: "https://github.com/pulp-platform/ibex.git"
+      Git: https://github.com/pulp-platform/ibex.git
     dependencies:
-      - tech_cells_generic
+    - tech_cells_generic
   jtag_pulp:
     revision: d22e828aef0484c79355d97d12de044c97e1f20f
     version: 0.2.0
     source:
-      Git: "https://github.com/pulp-platform/jtag_pulp.git"
+      Git: https://github.com/pulp-platform/jtag_pulp.git
     dependencies: []
-  l2_tcdm_hybrid_interco:
-    revision: fa55e72859dcfb117a2788a77352193bef94ff2b
-    version: 1.0.0
+  pulp_io:
+    revision: da6f8817b667f17973ecb19cb1e7aa4347108716
+    version: 0.1.0
     source:
-      Git: "https://github.com/pulp-platform/L2_tcdm_hybrid_interco.git"
-    dependencies: []
+      Git: https://github.com/pulp-platform/pulp-io.git
+    dependencies:
+    - apb
+    - common_cells
+    - gpio
+    - udma_camera
+    - udma_core
+    - udma_filter
+    - udma_hyper
+    - udma_i2c
+    - udma_i2s
+    - udma_qspi
+    - udma_sdio
+    - udma_uart
   pulp_soc:
-    revision: 0573a85c8ec502ff5e3ef06946a75eaf567ce16a
-    version: 4.4.0
+    revision: bf65372aab4edd404160170e2a4d2c63b27ab5f2
+    version: 5.0.1
     source:
-      Git: "https://github.com/pulp-platform/pulp_soc.git"
+      Git: https://github.com/pulp-platform/pulp_soc.git
     dependencies:
-      - adv_dbg_if
-      - apb
-      - apb2per
-      - apb_adv_timer
-      - apb_fll_if
-      - apb_gpio
-      - apb_interrupt_cntrl
-      - apb_node
-      - axi
-      - axi_slice
-      - cluster_interconnect
-      - common_cells
-      - cv32e40p
-      - fpnew
-      - generic_fll
-      - hwpe-mac-engine
-      - ibex
-      - jtag_pulp
-      - l2_tcdm_hybrid_interco
-      - register_interface
-      - riscv-dbg
-      - scm
-      - tech_cells_generic
-      - timer_unit
-      - udma_camera
-      - udma_core
-      - udma_external_per
-      - udma_filter
-      - udma_hyper
-      - udma_i2c
-      - udma_i2s
-      - udma_qspi
-      - udma_sdio
-      - udma_uart
+    - adv_dbg_if
+    - apb
+    - apb2per
+    - apb_adv_timer
+    - apb_interrupt_cntrl
+    - axi
+    - cluster_interconnect
+    - common_cells
+    - cv32e40p
+    - fpnew
+    - hwpe-mac-engine
+    - ibex
+    - jtag_pulp
+    - pulp_io
+    - register_interface
+    - riscv-dbg
+    - scm
+    - tech_cells_generic
+    - timer_unit
+  pulpissimo_optional_vips:
+    revision: null
+    version: null
+    source:
+      Path: target/sim/vip
+    dependencies: []
+  pulpissimo_padframe_fpga:
+    revision: null
+    version: null
+    source:
+      Path: hw/padframe/pulpissimo_padframe_fpga_autogen
+    dependencies:
+    - common_cells
+    - register_interface
+  pulpissimo_padframe_rtl_sim:
+    revision: null
+    version: null
+    source:
+      Path: hw/padframe/pulpissimo_padframe_rtl_sim_autogen
+    dependencies:
+    - common_cells
+    - register_interface
   register_interface:
-    revision: e32e6fde632f3cd21861b2ce47045a8bacb5216f
-    version: 0.3.2
+    revision: ae616e5a1ec2b41e72d200e5ab09c65e94aebd3d
+    version: 0.4.4
     source:
-      Git: "https://github.com/pulp-platform/register_interface.git"
+      Git: https://github.com/pulp-platform/register_interface.git
     dependencies:
-      - axi
-      - common_cells
+    - apb
+    - axi
+    - common_cells
+    - common_verification
   riscv-dbg:
     revision: 69be5ddc03ea1688c0eab47d6ed9d0e8725beda1
     version: 0.5.1
     source:
-      Git: "https://github.com/pulp-platform/riscv-dbg.git"
+      Git: https://github.com/pulp-platform/riscv-dbg.git
     dependencies:
-      - common_cells
-      - tech_cells_generic
+    - common_cells
+    - tech_cells_generic
   scm:
-    revision: e1ad7dffd9d8702430131ec8bc1a0d9ff686ece2
-    version: 1.1.0
+    revision: 998466d2a3c2d7d572e43d2666d93c4f767d8d60
+    version: 1.1.1
     source:
-      Git: "https://github.com/pulp-platform/scm.git"
+      Git: https://github.com/pulp-platform/scm.git
     dependencies: []
   tbtools:
     revision: 4bc2c825df8540a0c0210ab7f484533809801fa2
     version: 0.2.1
     source:
-      Git: "https://github.com/pulp-platform/tbtools.git"
+      Git: https://github.com/pulp-platform/tbtools.git
     dependencies: []
   tech_cells_generic:
-    revision: e6226a6f374eb88fed84d4989bb3f066cb470f33
-    version: 0.2.9
+    revision: 7968dd6e6180df2c644636bc6d2908a49f2190cf
+    version: 0.2.13
     source:
-      Git: "https://github.com/pulp-platform/tech_cells_generic.git"
+      Git: https://github.com/pulp-platform/tech_cells_generic.git
     dependencies:
-      - common_verification
+    - common_verification
   timer_unit:
-    revision: 3f4ee3e5b3875a473242de5d0c3ebb5a0fe4b8db
-    version: 1.0.2
-    source:
-      Git: "https://github.com/pulp-platform/timer_unit.git"
-    dependencies: []
-  udma_camera:
-    revision: cfcd80416ef18f8e8139188b8dfa52a8a7f6f7c8
-    version: 1.1.2
-    source:
-      Git: "https://github.com/pulp-platform/udma_camera.git"
-    dependencies:
-      - tech_cells_generic
-      - udma_core
-  udma_core:
-    revision: 7af2db5ea8cee3ecfe8e0e647bbdbc7f58ecb73b
-    version: 1.1.2
-    source:
-      Git: "https://github.com/pulp-platform/udma_core.git"
-    dependencies:
-      - common_cells
-      - tech_cells_generic
-  udma_external_per:
-    revision: 8674ecd131a173915a69ee9e4a04edf8745cbcf4
-    version: 1.0.4
-    source:
-      Git: "https://github.com/pulp-platform/udma_external_per.git"
-    dependencies:
-      - udma_core
-  udma_filter:
-    revision: a11e2057e7b21852e978b744714c384de49228cf
+    revision: 4c69615c89db9397a9747d6f6d6a36727854f0bc
     version: 1.0.3
     source:
-      Git: "https://github.com/pulp-platform/udma_filter.git"
-    dependencies:
-      - udma_core
-  udma_hyper:
-    revision: 83ab704f9d1c5f9e5353268c901fe95c36bcea36
-    version: ~
-    source:
-      Git: "https://github.com/pulp-platform/udma_hyper.git"
+      Git: https://github.com/pulp-platform/timer_unit.git
     dependencies: []
-  udma_i2c:
-    revision: 47d6892e38eb0e45692c81a5f47d71945098ffa0
+  udma_camera:
+    revision: cb4dc897125c823e646f65a9d155e832c763b29d
     version: 2.0.0
     source:
-      Git: "https://github.com/pulp-platform/udma_i2c.git"
+      Git: https://github.com/pulp-platform/udma_camera.git
     dependencies:
-      - udma_core
+    - tech_cells_generic
+    - udma_core
+  udma_core:
+    revision: 32bcc4f7472c3eeb8ef04612deb9088ffce7eb59
+    version: 2.0.0
+    source:
+      Git: https://github.com/pulp-platform/udma_core.git
+    dependencies:
+    - common_cells
+    - tech_cells_generic
+  udma_filter:
+    revision: b346c42543fbff5f4146eb8d56c7cb3dd55b19f4
+    version: 2.0.0
+    source:
+      Git: https://github.com/pulp-platform/udma_filter.git
+    dependencies:
+    - udma_core
+  udma_hyper:
+    revision: bd41ed10f94621a13ff02bdd631bf64c838a10d4
+    version: 0.1.0
+    source:
+      Git: https://github.com/pulp-platform/udma_hyper.git
+    dependencies:
+    - tech_cells_generic
+    - udma_core
+  udma_i2c:
+    revision: d0852881b90b9bf10d51409def6d9abf58d46b6a
+    version: 3.0.0
+    source:
+      Git: https://github.com/pulp-platform/udma_i2c.git
+    dependencies:
+    - udma_core
   udma_i2s:
-    revision: f63cb528dbff7d580c87fd4de90dbdf0ab69048e
-    version: 1.1.2
+    revision: aa3e698a56824493da3b9334f7236cc7f85699de
+    version: 2.0.0
     source:
-      Git: "https://github.com/pulp-platform/udma_i2s.git"
+      Git: https://github.com/pulp-platform/udma_i2s.git
     dependencies:
-      - common_cells
-      - tech_cells_generic
-      - udma_core
+    - common_cells
+    - tech_cells_generic
+    - udma_core
   udma_qspi:
-    revision: ddbe8a2e530a5edafc93fe1a25f47fb4b8716bd8
-    version: 1.0.4
+    revision: 505b9d37ba7666962450ea8a45d6abb7b1c4fc03
+    version: 2.0.0
     source:
-      Git: "https://github.com/pulp-platform/udma_qspi.git"
+      Git: https://github.com/pulp-platform/udma_qspi.git
     dependencies:
-      - common_cells
-      - tech_cells_generic
-      - udma_core
+    - common_cells
+    - tech_cells_generic
+    - udma_core
   udma_sdio:
-    revision: e768162ef48ad8fd873daa995ac51269fc82ec4f
-    version: 1.1.2
+    revision: 892ac6f17bb9ad6ad223e27b75809c8163a71900
+    version: 2.0.0
     source:
-      Git: "https://github.com/pulp-platform/udma_sdio.git"
+      Git: https://github.com/pulp-platform/udma_sdio.git
     dependencies:
-      - common_cells
-      - tech_cells_generic
-      - udma_core
+    - common_cells
+    - tech_cells_generic
+    - udma_core
   udma_uart:
-    revision: 18ed1986fd62920b1065005c370fd740995cfd4a
-    version: 1.0.2
+    revision: 15d36f5f1d4459da3fa458a1af3334f1a8447058
+    version: 2.0.0
     source:
-      Git: "https://github.com/pulp-platform/udma_uart.git"
+      Git: https://github.com/pulp-platform/udma_uart.git
     dependencies:
-      - common_cells
-      - udma_core
+    - common_cells
+    - udma_core

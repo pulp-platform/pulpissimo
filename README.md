@@ -80,6 +80,7 @@ PULPissimo supports I/O on interfaces such as:
 - Camera Interface (CPI)
 - I2C
 - UART
+- Hyperbus
 - JTAG
 
 PULPissimo also supports integration of hardware accelerators (Hardware
@@ -95,7 +96,7 @@ see `ips/hwpe-stream/doc` and https://arxiv.org/abs/1612.05974.
 
 ## Documentation
 
-- The [datasheet](doc/datasheet/datasheet.pdf) contains details about Memory Map, Peripherals, Registers etc.
+- The [datasheet](doc/datasheet/datasheet.pdf) contains details about Memory Map, Peripherals, Registers etc. This may not be fully up-to-date.
 - PULPissimo was presented at the Week of Open Source Hardware (WOSH) 2019 at ETH Zurich.
   - [Slides](https://pulp-platform.org/docs/riscv_workshop_zurich/schiavone_wosh2019_tutorial.pdf)
   - [Video](https://www.youtube.com/watch?v=27tndT6cBH0)
@@ -144,14 +145,14 @@ export PATH=$PULP_RISCV_GCC_TOOLCHAIN/bin:$PATH
 ```
 
 
-Get the repository for the simple runtime:
+The repository for the simple runtime is included as a submodule:
 ```
-git clone https://github.com/pulp-platform/pulp-runtime/
+git submodule update --init --recursive
 ```
 The simple runtime supports many different hardware configurations. We want PULPissimo.
 
 ```
-cd pulp-runtime
+cd sw/pulp-runtime
 ```
 Then, to use the CV32E40P (formely RI5CY) core, type:
 
@@ -188,7 +189,7 @@ simulate the hardware design running your program, so go
 
 Then get the repository for the pulp-freertos:
 ```
-git clone https://github.com/pulp-platform/pulp-freertos/
+git clone https://github.com/pulp-platform/pulp-freertos/ sw/pulp-freertos
 ```
 
 There are multiple hardware configuration supported. Select PULPissimo using the
@@ -196,7 +197,7 @@ CV32E40P core.
 So enter the directory of pulp-freertos:
 
 ```
-cd pulp-freertos
+cd sw/pulp-freertos
 ```
 
 and select the correct configuration:
@@ -263,14 +264,13 @@ scripts. The dependency management tool is
 After having access to the SDK, you can build the simulation platform by doing
 the following:
 ```bash
-source setup/vsim.sh
 make build
 ```
 This command builds a version of the simulation platform with no dependencies on
 external models for peripherals. See below (Proprietary verification IPs) for
 details on how to plug in some models of real SPI, I2C, I2S peripherals.
 
-For more advanced usage have a look at `./bender --help` for bender.
+For more advanced usage have a look at `./utils/bin/bender --help` for bender.
 
 
 Also check out the output of `make help` for more useful Makefile targets.
@@ -388,10 +388,10 @@ make conf
 More information is available in the documentation here: pulp-builder/install/doc/vp/index.html
 
 ### Updating the bootrom
-You can customize the bootrom, have a look at the `boot_code/` directory. To
+You can customize the bootrom, have a look at the `sw/bootcode/` directory. To
 import your changed version of the boot code into PULPissimo, just call
 ```
-make import-bootcode
+make bootrom
 ```
 
 ## FPGA
@@ -413,22 +413,18 @@ follow the section below to generate the bitstreams yourself.
 
 ### Bitstream Generation
 In order to generate the PULPissimo bitstream for a supported target FPGA board
-first generate the necessary synthesis include scripts by running the
+you can directly generate the bitstream for the desired board by running the
 corresponding make target.
-
-```Shell
-make scripts
-```
 
 This will parse the `Bender.yml` using the PULP bender dependency management tool to
 generate tcl scripts for all the IPs used in the PULPissimo project. These files
 are later on sourced by Vivado to generate the bitstream for PULPissimo.
 
-Now switch to the fpga subdirectory and start the apropriate make target to
+You can also switch to the fpga subdirectory and start the apropriate make target to
 generate the bitstream:
 
 ```Shell
-cd fpga
+cd target/fpga
 make <board_target>
 ```
 In order to show a list of all available board targets call:
@@ -448,7 +444,7 @@ should now contain two files:
 
 If your invocation command to start Vivado isn't `vivado` you can use the Make
 variable `VIVADO` to specify the right command (e.g. `make genesys2
-VIVADO='vivado-2018.3 vivado'` for ETH CentOS machines.) Boot from ROM is not
+VIVADO='vitis vivado'` for ETH Almalinux machines.) Boot from ROM is not
 available yet. The ROM will always return the `jal x0,0` to trap the core until
 the debug module takes over control and loads the programm into L2 memory. Once
 the bitstream `pulpissimo_genesys2.bit` is generated in the fpga folder, you can
@@ -469,7 +465,7 @@ Now your FPGA is ready to emulate PULPissimo!
 
 ### Board Specific Information
 Have a look at the board specific README.md files in
-`fpga/pulpissimo-<board_target>/README.md` for a description of peripheral
+`target/fpga/pulpissimo-<board_target>/README.md` for a description of peripheral
 mappings and default clock frequencies.
 
 ### Compiling Applications for the FPGA Target
@@ -675,8 +671,8 @@ instead which has the same effect.
 ## Proprietary verification IPs
 The full simulation platform can take advantage of a few models of commercial
 SPI, I2C, I2S peripherals to attach to the open-source PULP simulation platform.
-In `rtl/vip/spi_flash`, `rtl/vip/i2c_eeprom`, `rtl/vip/i2s` you find the
-instructions to install SPI, I2C and I2S models.
+In `target/sim/vip/spi_flash`, `target/sim/vip/i2c_eeprom`, `target/sim/vip/i2s`
+you find the instructions to install SPI, I2C and I2S models.
 
 When the SPI flash model is installed, it will be possible to switch to a more
 realistic boot simulation, where the internal ROM of PULP is used to perform an
@@ -687,27 +683,28 @@ To do this, the `LOAD_L2` parameter of the testbench has to be switched from
 ## PULP platform structure
 After being fully setup as explained in the Getting Started section, this root
 repository is structured as follows:
-- `rtl/tb` contains the main platform testbench and the related files.
-- `rtl/vip` contains the verification IPs used to emulate external peripherals,
+- `target/sim/tb` contains the main platform testbench and the related files.
+- `target/sim/vip` contains the verification IPs used to emulate external peripherals,
   e.g. SPI flash and camera.
-- `rtl` could also contain other material (e.g. global includes, top-level
+- `hw` could also contain other material (e.g. global includes, top-level
   files)
-- `sim` contains the ModelSim/QuestaSim simulation platform.
-- `pulp-sdk` contains the PULP software development kit; `pulp-sdk/tests`
-  contains all tests released with the SDK.
+- `target/sim/questasim` contains the ModelSim/QuestaSim simulation platform.
+- `sw/pulp-runtime` contains the PULP runtime; `sw/regression_tests`
+  contains some tests released with the SDK or runtime. Some tests, especially
+  parallel tests, are not compatible with PULPissimo.
 - `Bender.yml` contains the package information used with bender. This includes
   a list of IPs required and source files contained within this repository.
 - When using bender, other files may be relevant: `Bender.local` contains
   configs for bender, including overrides for dependencies, `Bender.lock` is a
-  generated file used by bender, `bender` is the bender executable fetched by
-  the makefile, `.bender` directory contains the database and checkouts used by
-  bender.
+  generated file used by bender, `utils/bin/bender` is the bender executable
+  fetched by the makefile, `.bender` directory contains the database and
+  checkouts used by bender.
 
 ## Requirements
 The RTL platform has the following requirements:
-- Relatively recent Linux-based operating system; we tested *Ubuntu 16.04* and
-  *CentOS 7*.
-- Mentor ModelSim in reasonably recent version (we tested it with version *10.6b*
+- Relatively recent Linux-based operating system; we tested *Ubuntu 16.04*,
+  *CentOS 7*, and *Almalinux 8*.
+- QuestaSim in reasonably recent version (we tested it with version *2023.4*
 -- the free version provided by Altera is only partially working, see issue #12).
 - Python 3.4, with the `pyyaml` module installed (you can get that with
   `pip3 install pyyaml`).
@@ -724,7 +721,7 @@ describe your changes in detail, along with motivations.
 The pull request will be evaluated and checked with our regression test suite
 for possible integration.
 If you want to replace our version of an IP with your GitHub fork, just 
-update the Bender.yml file and run `./bender update`.
+update the Bender.yml file and run `./utils/bin/bender update`.
 While we are quite relaxed in terms of coding style, please try to follow these
 recommendations:
 https://github.com/pulp-platform/ariane/blob/master/CONTRIBUTING.md

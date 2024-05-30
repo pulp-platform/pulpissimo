@@ -1,0 +1,6 @@
+[submodule "pulp-runtime"]
+	path = sw/pulp-runtime
+	url = https://github.com/pulp-platform/pulp-runtime.git
+[submodule "regression_tests"]
+	path = sw/regression_tests
+	url = https://github.com/pulp-platform/regression_tests.git

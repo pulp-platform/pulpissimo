@@ -1,0 +1,208 @@
+# This file declares the interface signals of every peripheral in pulpissimo.
+- name: gpio
+  output_defaults: 1'b0
+  ports:
+    - name: gpio{i:2d}
+      # We use some custom attributes to simplify conversion between individual
+      # signal names and signal arrays. Padrick does not natively support arrays
+      # so we use custom attributes to tell our custom_template
+      # ('assign.svh.mako') how to translate it correctly.
+      user_attr:
+        port_signal_aliases:
+          gpio{i:2d}_out: gpio_out[{i:1d}]
+          gpio{i:2d}_in: gpio_in[{i:1d}]
+          gpio{i:2d}_tx_en: gpio_tx_en[{i:1d}]
+      multiple: !include gpio_count.txt
+      mux_groups: ["pad_io{i:2d}"]
+      description: "Bidirectional GPIO{i} signal"
+      connections:
+        chip2pad: gpio{i:2d}_out
+        gpio{i:2d}_in: pad2chip
+        tx_en: gpio{i:2d}_tx_en
+        rx_en: ~gpio{i:2d}_tx_en
+
+- name: i2c{i:1d}
+  multiple: 1
+  mux_groups: [all_muxed_ios]
+  output_defaults:
+    sda_i: 1'b1
+    scl_i: 1'b1
+  ports:
+    - name: sda
+      description: "Bidirectional I2C SDA signal"
+      connections:
+        chip2pad: sda_o
+        sda_i: pad2chip
+        tx_en: sda_oe
+        rx_en: ~sda_oe
+
+    - name: scl
+      description: "I2C clock signal"
+      connections:
+        chip2pad: scl_o
+        scl_i: pad2chip
+        rx_en: scl_oe
+        tx_en: ~scl_oe
+
+- name: uart{i:1d}
+  multiple: 1
+  mux_groups: [all_muxed_ios]
+  output_defaults:
+    rx_i: 1'b1
+  ports:
+    - name: rx
+      description: "UART RX signal"
+      connections:
+        chip2pad: 1'b1
+        rx_i: pad2chip
+        tx_en: 1'b0
+        rx_en: 1'b1
+    - name: tx
+      description: "UART TX signal"
+      connections:
+        chip2pad: tx_o
+        tx_en: 1'b1
+        rx_en: 1'b0
+
+- name: qspim{i:1d}
+  multiple: 1
+  mux_groups: [all_muxed_ios]
+  output_defaults: 1'b0
+  ports:
+    - name: sdio{i:1d}
+      description: "IO data port of the SPI master peripheral"
+      multiple: 4
+      connections:
+        chip2pad: sd{i:1d}_o
+        sd{i:1d}_i: pad2chip
+        tx_en: sd{i:1d}_oe
+        rx_en: ~sd{i:1d}_oe
+    - name: sck
+      connections:
+        chip2pad: sck_o
+        tx_en: 1'b1
+        rx_en: 1'b0
+    - name: csn{i:1d}
+      description: "IO data port of the SPI master peripheral"
+      multiple: 4
+      connections:
+        chip2pad: csn{i:1d}_o
+        tx_en: 1'b1
+        rx_en: 1'b0
+
+- name: cpi{i:1d}
+  multiple: 1
+  mux_groups: [all_muxed_ios]
+  output_defaults: 1'b0
+  ports:
+    - name: pclk
+      description: "input clock of the CPI slave peripheral" # An optional description of the signal
+      connections:
+        chip2pad: 1'b0
+        pclk_i: pad2chip
+    - name: hsync
+      description: "horizontal synchronization input signal" # An optional description of the signal
+      connections:
+        chip2pad: 1'b0
+        hsync_i: pad2chip
+    - name: vsync
+      description: "vertical synchronization input signal" # An optional description of the signal
+      connections:
+        chip2pad: 1'b0
+        vsync_i: pad2chip
+    - name: data{i:1d}
+      description: "Input data line of the CPI slave peripheral" # An optional description of the signal
+      multiple: 10
+      connections:
+        chip2pad: 1'b0
+        data{i:1d}_i: pad2chip
+
+
+- name: sdio{i:1d}
+  description: "SDIO interface peripheral to communicate with external SD-Cards"
+  multiple: 1
+  mux_groups: [all_muxed_ios]
+  output_defaults: 1'b0
+  ports:
+    - name: sdclk
+      description: "Clock signal of the SDIO interface"
+      connections:
+        chip2pad: sdclk_out
+        tx_en: 1'b1
+        rx_en: 1'b0
+    - name: sdcmd
+      description: "Bidirection command response siganl"
+      connections:
+        chip2pad: sdcmd_out
+        sdcmd_in: pad2chip
+        rx_en: sdcmd_oen
+        tx_en: ~sdcmd_oen
+    - name: sddata{i:1d}
+      description: "Bidirectional data bus"
+      multiple: 4
+      user_attr:
+        port_signal_aliases:
+          sddata{i:1d}_out: sddata_out[{i}]
+          sddata{i:1d}_in: sddata_in[{i}]
+          sddata{i:1d}_oen: sddata_oen[{i}]
+      connections:
+        chip2pad: sddata{i:1d}_out
+        sddata{i:1d}_in: pad2chip
+        rx_en: sddata{i:1d}_oen
+        tx_en: ~sddata{i:1d}_oen
+
+- name: i2s{i:1d}
+  description:  "I2S peripheral to communicate with external audio devices. Supports master and slave mode"
+  multiple: 1
+  mux_groups: [all_muxed_ios]
+  output_defaults: 1'b0
+  ports:
+    - name: master_sck
+      connections:
+        chip2pad: master_sck_out
+        master_sck_in: pad2chip
+        rx_en: ~master_sck_oe
+        tx_en: master_sck_oe
+    - name: master_ws
+      connections:
+        chip2pad: master_ws_out
+        master_ws_in: pad2chip
+        rx_en: ~master_ws_oe
+        tx_en: master_ws_oe
+    - name: master_sd{i:1d}
+      multiple: 2
+      connections:
+        chip2pad: master_sd{i:1d}_out
+        rx_en: 1'b0
+        tx_en: 1'b1
+    - name: slave_sck
+      connections:
+        chip2pad: slave_sck_out
+        slave_sck_in: pad2chip
+        rx_en: ~slave_sck_oe
+        tx_en: slave_sck_oe
+    - name: slave_ws
+      connections:
+        chip2pad: slave_ws_out
+        slave_ws_in: pad2chip
+        rx_en: ~slave_ws_oe
+        tx_en: slave_ws_oe
+    - name: slave_sd{i:1d}
+      multiple: 2
+      connections:
+        slave_sd{i:1d}_in: pad2chip
+        rx_en: 1'b1
+        tx_en: 1'b0
+
+- name: timer{i}
+  multiple: 4
+  mux_groups: ["all_muxed_ios"]
+  ports:
+    - name: out{i}
+      user_attr:
+        port_signal_aliases:
+          timer_out{i}: out[{i}]
+      multiple: 4
+      description: "TIMER 0 out {i}"
+      connections:
+        chip2pad: timer_out{i}

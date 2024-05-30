@@ -7,7 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
-- Default dependency management is now bender, no longer IPApproX.
+- Default dependency management is now bender, IPApproX no longer supported.
+- Reorganize folder structure
+- Reorganize code structure for simpler design
+- Integrate padrick generated padframe
+- Update `pulp_soc` to v5.0.0, update various dependencies
+- Clock generation now in top level, no longer in `pulp_soc`
 
 ### Fixed
 - fixed support for ibex core from top level

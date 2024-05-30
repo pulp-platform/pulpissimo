@@ -1,0 +1,12 @@
+boot_code
+boot_code_fpga
+boot_code.sv
+fpga_autogen_rom.sv
+asic_autogen_rom.sv
+rom.bin
+*.cde
+*.o
+*.o.2
+*.s19
+*.map
+.venv

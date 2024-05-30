@@ -1,0 +1,160 @@
+# Specification of how many and what kind of IO pads to instantiate in the padframe
+- name: pad_ref_clk
+  description: "32kHz reference clock for on-chip PLLs"
+  pad_type: pull_up_pad
+  is_static: true
+  connections:
+    pad2chip: ref_clk
+    rx_en: 1'b1
+    tx_en: 1'b0
+
+- name: pad_clk_byp_en
+  description: "PLL clock bypass enable, active-high. If asserted the PLLs VCO is bypassed and the system uses the ref_clk directly"
+  pad_type: pull_up_pad
+  is_static: true
+  connections:
+    pad2chip: clk_byp_en
+    rx_en: 1'b1
+    tx_en: 1'b0
+
+- name: pad_reset_n
+  description: "Active-low asynchronous reset. Internally synchronized to rising edge."
+  pad_type: pull_up_pad
+  is_static: true
+  connections:
+    pad2chip: rst_n
+    rx_en: 1'b1
+    tx_en: 1'b0
+
+- name: pad_bootsel0
+  description: "Selects boot behavior of the chip. (0b00 -> boot from SPI flash, 0b01 -> JTAG boot, 0b10 -> Hyperflash boot)"
+  pad_type: pull_up_pad
+  is_static: true
+  connections:
+    pad2chip: bootsel0
+    rx_en: 1'b1
+    tx_en: 1'b0
+
+- name: pad_bootsel1
+  description: "Selects boot behavior of the chip. (0b00 -> boot from SPI flash, 0b01 -> JTAG boot, 0b10 -> Hyperflash boot)"
+  pad_type: pull_up_pad
+  is_static: true
+  connections:
+    pad2chip: bootsel1
+    rx_en: 1'b1
+    tx_en: 1'b0
+
+- name: pad_jtag_tck
+  description: "JTAG clock input"
+  pad_type: pull_up_pad
+  is_static: true
+  connections:
+    pad2chip: jtag_tck
+    rx_en: 1'b1
+    tx_en: 1'b0
+
+- name: pad_jtag_trstn
+  description: "JTAG interface reset (active-low)"
+  pad_type: pull_up_pad
+  is_static: true
+  connections:
+    pad2chip: jtag_trstn
+    rx_en: 1'b1
+    tx_en: 1'b0
+
+- name: pad_jtag_tms
+  description: "JTAG test mode select"
+  pad_type: pull_up_pad
+  is_static: true
+  connections:
+    pad2chip: jtag_tms
+    rx_en: 1'b1
+    tx_en: 1'b0
+
+- name: pad_jtag_tdi
+  description: "JTAG interface data input"
+  pad_type: pull_up_pad
+  is_static: true
+  connections:
+    pad2chip: jtag_tdi
+    rx_en: 1'b1
+    tx_en: 1'b0
+
+- name: pad_jtag_tdo
+  description: "JTAG interface data output"
+  pad_type: pull_up_pad
+  is_static: true
+  connections:
+    chip2pad: jtag_tdo
+    rx_en: 1'b0
+    tx_en: 1'b1
+
+- name: pad_hyper_csn{i:1d}
+  description: "Hyperbus chip select (active-low)"
+  pad_type: pull_up_pad
+  multiple: 2
+  is_static: true
+  connections:
+    chip2pad: hyper_cs{i:1d}_no
+    rx_en: 1'b0
+    tx_en: 1'b1
+
+- name: pad_hyper_reset_n
+  description: "Hyperbus reset (active-low)"
+  pad_type: pull_up_pad
+  is_static: true
+  connections:
+    chip2pad: hyper_reset_no
+    rx_en: 1'b0
+    tx_en: 1'b1
+
+- name: pad_hyper_ck
+  description: "Hyperbus differential clock"
+  pad_type: pull_up_pad
+  is_static: true
+  connections:
+    chip2pad: hyper_ck
+    rx_en: 1'b0
+    tx_en: 1'b1
+
+- name: pad_hyper_ckn
+  description: "Hyperbus differential clock"
+  pad_type: pull_up_pad
+  is_static: true
+  connections:
+    chip2pad: hyper_ckn
+    rx_en: 1'b0
+    tx_en: 1'b1
+
+- name: pad_hyper_dq{i}
+  description: "Hyperbus data line"
+  multiple: 8
+  pad_type: pull_up_pad
+  is_static: true
+  connections:
+    pad2chip: hyper_dq{i}_i
+    chip2pad: hyper_dq{i}_o
+    tx_en: hyper_dq_oe
+    rx_en: ~hyper_dq_oe
+
+- name: pad_hyper_rwds
+  description: "Hyperbus read/write data strobe"
+  pad_type: pull_up_pad
+  is_static: true
+  connections:
+    chip2pad: hyper_rwds_o
+    pad2chip: hyper_rwds_i
+    rx_en: ~hyper_rwds_oe
+    tx_en: hyper_rwds_oe
+
+- name: pad_io{i:2d}
+  mux_groups: [all_muxed_ios, self]
+  description: "General purpose pad that can expose various internal peripherals"
+  multiple: !include gpio_count.txt
+  pad_type: pull_up_pad
+  is_static: false
+  default_port: gpio.gpio{i:2d}
+  user_attr:
+    custom_toplevel_connection: True
+
+

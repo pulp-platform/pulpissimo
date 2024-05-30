@@ -1,0 +1,36 @@
+# IO pad templates for the generic padmodels from the tech_cells_generic
+# library. These are used in RTL simulation.
+
+- name: pull_down_pad # user defined name of the pad. Used to reference
+                              # it in the pad_list
+  description: |
+    Generic behavioral model of an IO Pad with pull down resistors. The pad is
+    defined in the tech_cells_generic repository and only used in simulation.
+    Define your own pad types for a custom tapeout.
+  template: |
+    pad_functional_pd ${instance_name} (
+      .PAD(${conn["pad"]}),
+      .OEN(~${conn["tx_en"]}),
+      .PEN(~${conn["pull_en"]}),
+      .I(${conn["chip2pad"]}),
+      .O(${conn["pad2chip"]})
+    );
+
+  pad_signals: !include rtl_sim_config/rtl_sim_pad_signals.yml
+
+- name: pull_up_pad # user defined name of the pad. Used to reference
+                              # it in the pad_list
+  description: |
+    Generic behavioral model of an IO Pad with pull down resistors. The pad is
+    defined in the tech_cells_generic repository and only used in simulation.
+    Define your own pad types for a custom tapeout.
+  template: |
+    pad_functional_pu ${instance_name} (
+      .PAD(${conn["pad"]}),
+      .OEN(~${conn["tx_en"]}),
+      .PEN(~${conn["pull_en"]}),
+      .I(${conn["chip2pad"]}),
+      .O(${conn["pad2chip"]})
+    );
+
+  pad_signals: !include rtl_sim_config/rtl_sim_pad_signals.yml

@@ -1,0 +1,4 @@
+overrides:
+  gpio: { path: "hw/vendored_ips/gpio" } # Override to use the vendored in copy of
+                                      # the GPIO repo to allow reconfiguration
+                                      # of the number of GPIO pads.

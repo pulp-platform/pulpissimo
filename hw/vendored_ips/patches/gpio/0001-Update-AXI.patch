@@ -1,0 +1,25 @@
+From 7499f1bfc986840811802e9662faf3f4ad106a46 Mon Sep 17 00:00:00 2001
+From: Michael Rogenmoser <michael@rogenmoser.us>
+Date: Tue, 7 May 2024 14:24:48 +0200
+Subject: [PATCH] Update AXI
+
+---
+ Bender.yml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Bender.yml b/Bender.yml
+index 96ef8ce..843bd42 100644
+--- a/Bender.yml
++++ b/Bender.yml
+@@ -9,7 +9,7 @@ dependencies:
+   common_verification: { git: "https://github.com/pulp-platform/common_verification.git", version: 0.2.0}
+   register_interface: { git: "https://github.com/pulp-platform/register_interface.git", version: 0.4.1}
+   apb: { git: "https://github.com/pulp-platform/apb.git", version: 0.2.4 } # To be udpated once PR #6 got merged.
+-  axi: { git: "https://github.com/pulp-platform/axi.git", version: 0.38.0 }
++  axi: { git: "https://github.com/pulp-platform/axi.git", version: 0.39.2 }
+ 
+ sources:
+   - src/gpio_reg_pkg.sv
+-- 
+2.39.3
+
