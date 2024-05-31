@@ -25,7 +25,11 @@ VSIM_ARGS ?= -64
 VLOG_ARGS += -suppress 2583 -suppress 13314 \"+incdir+\$$ROOT/hw/includes\"
 VCOM_ARGS += ""
 VOPT_ARGS ?= +acc
+ifdef VSIM
+VSIM_BIN ?= "$(VSIM) vsim"
+else
 VSIM_BIN ?= "vsim"
+endif
 VSIM_USER_PLUSARGS ?= ""
 VSIM_DEFAULT_PLUSARGS ?= +nowarnTRAN +nowarnTSCALE +nowarnTFMPC -suppress 8386
 RISCV_OBJCOPY_BIN ?= 'riscv32-unknown-elf-objcopy'
