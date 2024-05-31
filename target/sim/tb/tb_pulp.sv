@@ -16,9 +16,9 @@
 
 
 module tb_pulp;
-  import srec_pkg::*;
   timeunit 1ns;
   timeprecision 100ps;
+  import srec_pkg::*;
 
   parameter CONFIG_FILE = "NONE";
 
