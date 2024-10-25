@@ -119,3 +119,16 @@ clean_zcu102:
 	$(MAKE) -C $(PULPISSIMO_FPGA_ROOT)/pulpissimo-zcu102 clean
 	rm -f $(PULPISSIMO_FPGA_ROOT)/pulpissimo_zcu102.bit
 	rm -f $(PULPISSIMO_FPGA_ROOT)/pulpissimo_zcu102.bin
+
+## Generates the bistream for the zyboz7 board
+zyboz7: $(PULPISSIMO_FPGA_ROOT)/pulpissimo/tcl/generated/compile.tcl
+	$(MAKE) -C $(PULPISSIMO_FPGA_ROOT)/pulpissimo-zyboz7 all
+	cp $(PULPISSIMO_FPGA_ROOT)/pulpissimo-zyboz7/pulpissimo-zyboz7.runs/impl_1/xilinx_pulpissimo.bit $(PULPISSIMO_FPGA_ROOT)/pulpissimo_zyboz7.bit
+	cp $(PULPISSIMO_FPGA_ROOT)/pulpissimo-zyboz7/pulpissimo-zyboz7.runs/impl_1/xilinx_pulpissimo.bin $(PULPISSIMO_FPGA_ROOT)/pulpissimo_zyboz7.bin
+	@echo "Bitstream generation for zyboz7 board finished. The bitstream Configuration Memory File was copied to ./pulpissimo_zyboz7.bit and ./pulpissimo_zyboz7.bin"
+
+## Removes all bitstreams, *.log files and vivado related files (rm -rf vivado*) for the zyboz7 board.
+clean_zyboz7:
+	$(MAKE) -C $(PULPISSIMO_FPGA_ROOT)/pulpissimo-zyboz7 clean
+	rm -f $(PULPISSIMO_FPGA_ROOT)/pulpissimo_zyboz7.bit
+	rm -f $(PULPISSIMO_FPGA_ROOT)/pulpissimo_zyboz7.bin

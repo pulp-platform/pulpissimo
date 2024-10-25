@@ -17,8 +17,8 @@ variables:
   QUESTA: "questa-2023.4-zr"
   VSIM: "$QUESTA vsim"
   VSIM_BIN: "$QUESTA vsim"
-  RISCV: "/usr/pack/riscv-1.0-kgf/pulp-gcc-2.5.0"
-  PULP_RISCV_GCC_TOOLCHAIN: "/usr/pack/riscv-1.0-kgf/pulp-gcc-2.5.0"
+  RISCV: "/usr/pack/riscv-1.0-kgf/efclschool-llvm-18.1.6"
+  PULP_RISCV_GCC_TOOLCHAIN: "/usr/pack/riscv-1.0-kgf/efclschool-llvm-18.1.6"
 
 before_script:
   - pwd

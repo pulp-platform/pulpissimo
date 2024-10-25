@@ -16,16 +16,16 @@
 
 
 module tb_pulp;
-  import srec_pkg::*;
   timeunit 1ns;
   timeprecision 100ps;
+  import srec_pkg::*;
 
   parameter CONFIG_FILE = "NONE";
 
   // simulation platform parameters
 
-  // Choose your core: 0 for RISCY, 1 for IBEX RV32IMC (formerly ZERORISCY), 2 for IBEX RV32EC (formerly MICRORISCY)
-  parameter CORE_TYPE = 0;
+  // Choose your core: 0 for RISCY, 1 for IBEX RV32IMC (formerly ZERORISCY), 2 for IBEX RV32EC (formerly MICRORISCY), 3 for CV32E40X
+  parameter CORE_TYPE = 3;
 
   // if RI5CY is instantiated (CORE_TYPE == 0), USE_FPU enables the FPU
   parameter USE_FPU = 1;

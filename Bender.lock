@@ -41,8 +41,8 @@ packages:
     - apb
     - common_cells
   axi:
-    revision: 9402c8a9ce0a7b5253c3c29e788612d771e8b5d6
-    version: 0.39.3
+    revision: 587355b77b8ce94dcd600efbd5d5bd118ff913a7
+    version: 0.39.4
     source:
       Git: https://github.com/pulp-platform/axi.git
     dependencies:
@@ -57,8 +57,8 @@ packages:
     dependencies:
     - common_cells
   common_cells:
-    revision: 0d67563b6b592549542544f1abc0f43e5d4ee8b4
-    version: 1.35.0
+    revision: c27bce39ebb2e6bae52f60960814a2afca7bd4cb
+    version: 1.37.0
     source:
       Git: https://github.com/pulp-platform/common_cells.git
     dependencies:
@@ -79,6 +79,29 @@ packages:
     - common_cells
     - fpnew
     - tech_cells_generic
+  cv32e40x:
+    revision: fe5e7f41ad284b5aee583a727503bb6f1097daab
+    version: null
+    source:
+      Git: https://github.com/pulp-platform/cv32e40x.git
+    dependencies: []
+  fir-hwpe:
+    revision: 0397301c727e2f232e0f508fbdc13401c023fa26
+    version: 2.0.2
+    source:
+      Git: https://github.com/pulp-platform/fir-hwpe.git
+    dependencies:
+    - hci
+    - hwpe-ctrl
+    - hwpe-stream
+    - zeroriscy
+  fir-xifu:
+    revision: 2b1a71fa7310c20ae0824b93669766713ebcec88
+    version: 0.1.3
+    source:
+      Git: https://github.com/pulp-platform/fir-xifu.git
+    dependencies:
+    - cv32e40x
   fpnew:
     revision: a8e0cba6dd50f357ece73c2c955d96efc3c6c315
     version: null
@@ -112,21 +135,22 @@ packages:
     - common_verification
     - register_interface
     - tech_cells_generic
+  hci:
+    revision: d31af36ebcaf2196fb51676b40782aa8cbd9cc69
+    version: null
+    source:
+      Git: https://github.com/pulp-platform/hci.git
+    dependencies:
+    - cluster_interconnect
+    - hwpe-stream
+    - l2_tcdm_hybrid_interco
   hwpe-ctrl:
-    revision: 1916c72f024175f1fe351acc3db3c6e9925a117d
-    version: 1.7.3
+    revision: 877d676329785f7bba042402e0a6f329a387573d
+    version: null
     source:
       Git: https://github.com/pulp-platform/hwpe-ctrl.git
     dependencies:
     - tech_cells_generic
-  hwpe-mac-engine:
-    revision: cd48c574f1972ecbe02d3f463a0e12a92acde484
-    version: 1.3.3
-    source:
-      Git: https://github.com/pulp-platform/hwpe-mac-engine.git
-    dependencies:
-    - hwpe-ctrl
-    - hwpe-stream
   hwpe-stream:
     revision: 65c99a4a2f37a79acee800ab0151f67dfb1edef1
     version: 1.8.0
@@ -147,6 +171,12 @@ packages:
     source:
       Git: https://github.com/pulp-platform/jtag_pulp.git
     dependencies: []
+  l2_tcdm_hybrid_interco:
+    revision: fa55e72859dcfb117a2788a77352193bef94ff2b
+    version: 1.0.0
+    source:
+      Git: https://github.com/pulp-platform/L2_tcdm_hybrid_interco.git
+    dependencies: []
   pulp_io:
     revision: da6f8817b667f17973ecb19cb1e7aa4347108716
     version: 0.1.0
@@ -166,8 +196,8 @@ packages:
     - udma_sdio
     - udma_uart
   pulp_soc:
-    revision: bf65372aab4edd404160170e2a4d2c63b27ab5f2
-    version: 5.0.1
+    revision: 8c6b9dea6ba8dbdbc995efb6e0e24194d470f373
+    version: null
     source:
       Git: https://github.com/pulp-platform/pulp_soc.git
     dependencies:
@@ -180,8 +210,10 @@ packages:
     - cluster_interconnect
     - common_cells
     - cv32e40p
+    - cv32e40x
+    - fir-hwpe
+    - fir-xifu
     - fpnew
-    - hwpe-mac-engine
     - ibex
     - jtag_pulp
     - pulp_io
@@ -190,6 +222,12 @@ packages:
     - scm
     - tech_cells_generic
     - timer_unit
+  pulpissimo_essentials:
+    revision: null
+    version: null
+    source:
+      Path: target/synthesis/bender/pulpissimo_essentials
+    dependencies: []
   pulpissimo_optional_vips:
     revision: null
     version: null
@@ -249,6 +287,12 @@ packages:
       Git: https://github.com/pulp-platform/tech_cells_generic.git
     dependencies:
     - common_verification
+  tech_cells_gf22fdx:
+    revision: null
+    version: null
+    source:
+      Path: target/synthesis/bender/tech_cells
+    dependencies: []
   timer_unit:
     revision: 4c69615c89db9397a9747d6f6d6a36727854f0bc
     version: 1.0.3
@@ -328,3 +372,9 @@ packages:
     dependencies:
     - common_cells
     - udma_core
+  zeroriscy:
+    revision: cc4068a0ccb7691cd062b809c34b2304e7fbfa36
+    version: null
+    source:
+      Git: https://github.com/yvantor/ibex.git
+    dependencies: []
