@@ -51,6 +51,7 @@ build_rtl:
     - make build
     - echo "Fetching VIPs"
     - ./target/sim/vip/get-vips.sh --yes # --gitlab
+    - rm -rf build/questasim/tcl_files; cp -R target/sim/questasim/tcl_files build/questasim/tcl_files # workaround: tcl_files symlink seems not to work in CI, replacing it with copy
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
     paths:

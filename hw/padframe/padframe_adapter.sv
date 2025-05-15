@@ -137,7 +137,7 @@ module padframe_adapter #(
   localparam N_CONNECTED_I2S = 0;
 
   if (udma_cfg_pkg::N_QSPIM != N_CONNECTED_QSPIM)
-    $error("The number of QSPIM peripherals is %0d but we are only connecting %0d. Please change the padframe wrapper file.", udma_cfg_pkg::N_QSPIM);
+    $error("The number of QSPIM peripherals is %0d but we are only connecting %0d. Please change the padframe wrapper file.", udma_cfg_pkg::N_QSPIM, N_CONNECTED_QSPIM);
   if (udma_cfg_pkg::N_UART != N_CONNECTED_UART)
     $error("The number of UART is %0d but we are only connecting %0d. Please change the padframe wrapper file.", udma_cfg_pkg::N_UART, N_CONNECTED_UART);
   if (udma_cfg_pkg::N_I2C != N_CONNECTED_I2C)

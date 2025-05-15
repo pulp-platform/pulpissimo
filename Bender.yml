@@ -16,14 +16,17 @@ dependencies:
   common_cells:                { git: "https://github.com/pulp-platform/common_cells.git",       version: 1.21.0 }
   apb:                         { git: "https://github.com/pulp-platform/apb.git",                version: 0.2.4 }
   jtag_pulp:                   { git: "https://github.com/pulp-platform/jtag_pulp.git",          version: 0.2.0 }
-  pulp_soc:                    { git: "https://github.com/pulp-platform/pulp_soc.git",           version: 5.0.1 }
+  pulp_soc:                    { git: "https://github.com/pulp-platform/pulp_soc.git",           rev: c783d47 } # branch fc/verilator
   tbtools:                     { git: "https://github.com/pulp-platform/tbtools.git",            version: 0.2.1 }
-  tech_cells_generic:          { git: "https://github.com/pulp-platform/tech_cells_generic.git", version: 0.2.3 }
+  tech_cells_generic:          { git: "https://github.com/pulp-platform/tech_cells_generic.git", rev: 8149cde } # branch fc/verilator
   pulpissimo_padframe_rtl_sim: { path: "hw/padframe/pulpissimo_padframe_rtl_sim_autogen" }
   pulpissimo_padframe_fpga:    { path: "hw/padframe/pulpissimo_padframe_fpga_autogen" }
   register_interface:          { git: "https://github.com/pulp-platform/register_interface.git", version: 0.4.1 }
   generic_FLL:                 { git: "https://github.com/pulp-platform/generic_FLL.git",        version: 0.2.0 }
   apb_fll_if:                  { git: "https://github.com/pulp-platform/apb_fll_if.git",         version: 0.2.1 }
+  # the following dependencies are non-free, and will be ignored in a free setup
+  tech_cells_gf22fdx:          { path: "target/synthesis/bender/tech_cells" }
+  pulpissimo_essentials:       { path: "target/synthesis/bender/pulpissimo_essentials" }
 
 
   # Target Specific Dependencies
@@ -66,7 +69,25 @@ sources:
       - hw/padframe/padframe_adapter.sv
       - hw/clock_gen_fpga.sv
 
-  - target: simulation
+  # For Verilator RTL simulation 
+  - target: verilator
+    files:
+      - hw/padframe/padframe_adapter.sv
+      - hw/clock_gen_verilator.sv
+      - target/sim/tb/tb_lib/riscv_pkg.sv
+      - target/sim/tb/tb_lib/jtag_pkg.sv
+      - target/sim/tb/tb_lib/pulp_tap_pkg.sv
+      - target/sim/tb/tb_lib/tb_clk_gen.sv
+      - target/sim/tb/tb_lib/SimJTAG.sv
+      - target/sim/tb/tb_pulp.sv
+
+  # For Verilator RTL simulation 
+  - target: verilator_dpi
+    files:
+      - target/sim/tb/tb_lib/remote_bitbang/sim_jtag.c
+      - target/sim/tb/tb_lib/remote_bitbang/remote_bitbang.c
+
+  - target: all(simulation, not(verilator))
     files:
       - target/sim/tb/tb_lib/riscv_pkg.sv
       - target/sim/tb/tb_lib/jtag_pkg.sv
@@ -77,7 +98,6 @@ sources:
       - target/sim/tb/tb_lib/SimJTAG.sv
       - target/sim/tb/tb_pulp.sv
       - target/sim/tb/tb_pulp_simple.sv
-
 
 vendor_package:
   # Import the GPIO repository directly. Since we have to regenerate the RTL

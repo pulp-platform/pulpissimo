@@ -19,7 +19,7 @@ QUESTA_BUILD_DIR = $(PULPISSIMO_ROOT)/build/questasim
 include $(PULPISSIMO_ROOT)/utils/utils.mk
 
 ## Configuration Variables for Bender, Questasim behavior
-BENDER_SCRIPTS_ARGS += -t rtl -t test -t rtl_sim
+BENDER_SCRIPTS_ARGS += -t rtl -t test -t rtl_sim -t cv32e40x_bhv
 BENDER_VIP_SCRIPT_ARGS ?= -t rt_dpi -t i2c_vip -t flash_vip -t i2s_vip -t use_vips
 VSIM_ARGS ?= -64
 VLOG_ARGS += -suppress 2583 -suppress 13314 \"+incdir+\$$ROOT/hw/includes\"

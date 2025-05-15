@@ -20,7 +20,7 @@ sources:
   - target: all(any(test, gpio_include_tb_files), not(gpio_exclude_tb_files))
     files:
       - test/tb_gpio.sv
-  - target: all(any(simulation, asic, gpio_with_clk_gates), not(gpio_no_clk_gates))
+  - target: all(any(simulation, asic, gpio_with_clk_gates, verilator), not(gpio_no_clk_gates))
     files:
       - src/gpio_input_stage.sv
   - target: all(any(fpga, gpio_no_clk_gates), not(gpio_with_clk_gates))

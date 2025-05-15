@@ -29,7 +29,7 @@
 
 module pulpissimo #(
   /// 0 for CV32E40P with XPULP Extensions, 1 for IBEX RV32IMC (formerly ZERORISCY),
-  /// 2 for IBEX RV32EC (formerly MICRORISCY)
+  /// 2 for IBEX RV32EC (formerly MICRORISCY), 3 for CV32E40X
   parameter  int unsigned CORE_TYPE = 0,
   /// Enable XPULP extensions on CV32E40P. Has no effect if an IBEX core variant is use.
   parameter  bit          USE_XPULP = 1,
@@ -39,7 +39,7 @@ module pulpissimo #(
   /// Standard RISC-V extension: Reuses the integer regfile for FPU usage instead of requiring a
   /// dedicated FPU regfile. Requires correct compiler settings for software to work!
   parameter  bit          USE_ZFINX = 1,
-  parameter  bit          USE_HWPE = 0,
+  parameter  bit          USE_HWPE = 1,
   /// Enable the virtual stdout interface for communication with simulated testbenches. This
   /// parameter must be disabled during any form of physical implementation.
   parameter  bit          SIM_STDOUT = 0,

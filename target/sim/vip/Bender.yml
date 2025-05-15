@@ -5,7 +5,7 @@ package:
 
 sources:
     # Open models
-  - target: any(test,simulation)
+  - target: any(test,simulation,verilator)
     files:
       - spi_master_padframe.sv
       - uart_sim.sv

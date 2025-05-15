@@ -30,7 +30,6 @@ module uart_sim #(
   timeprecision 1ns;
 
 /* pragma translate_off */
-`ifndef VERILATOR
   localparam realtime BIT_PERIOD = 1s / BAUD_RATE;
 
   bit               newline;
@@ -112,7 +111,6 @@ module uart_sim #(
     tx = 1'b1;
     #(BIT_PERIOD);
   endtask
-`endif
 
   task wait_symbol();
     #(BIT_PERIOD * 10);

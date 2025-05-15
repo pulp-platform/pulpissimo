@@ -1,0 +1,92 @@
+# Copyright 2024 ETH Zurich and University of Bologna.
+# Solderpad Hardware License, Version 0.51, see LICENSE for details.
+# SPDX-License-Identifier: SHL-0.51
+
+# Some CI tests run on our GitLab servers due to licenses and tools
+name: verilator-ci
+on: [push, pull_request, workflow_dispatch]
+jobs:
+  verilator-ci:
+    name: Public Verilator CI
+    runs-on: ubuntu-22.04
+    container:
+      image: fconti/pulp-verilator:latest
+      volumes: 
+        - ${{ github.workspace }}:/workspaces
+    strategy:
+      matrix:
+        test: [
+          sequential_bare_tests/dct,
+          sequential_bare_tests/fft2,
+          sequential_bare_tests/rijndael,
+          sequential_bare_tests/jacobi-2d-imper,
+          sequential_bare_tests/bitDescriptor,
+          sequential_bare_tests/stencil_vect,
+          sequential_bare_tests/keccak,
+          sequential_bare_tests/fir,
+          sequential_bare_tests/stencil,
+          sequential_bare_tests/ipm,
+          sequential_bare_tests/towerofhanoi,
+          sequential_bare_tests/crc32,
+          sequential_bare_tests/conv2d,
+          sequential_bare_tests/seidel,
+          sequential_bare_tests/fibonacci,
+          sequential_bare_tests/gauss-2d,
+          sequential_bare_tests/aes_cbc,
+          sequential_bare_tests/bubblesort,
+          sequential_bare_tests/fdtd-1d,
+          sequential_bare_tests/jacobi-1d-imper,
+          sequential_bare_tests/fft,
+          riscv_tests/testBitManipulation,
+          riscv_tests/testVecCmp,
+          riscv_tests/testAddSubNorm,
+          riscv_tests/testMisaligned,
+          riscv_tests/testALU,
+          riscv_tests/testMAC3,
+          riscv_tests/testVecArith,
+          riscv_tests/testDotMul,
+          riscv_tests/testVecLogic,
+          riscv_tests/testCnt,
+          riscv_tests/testVecRelat,
+          riscv_tests/testShufflePack,
+          riscv_tests/testMUL,
+          # riscv_tests/testHWLP,
+          riscv_tests/testMacNorm,
+          riscv_tests/testVariadic,
+          riscv_tests/testMAC,
+          riscv_tests/testLoadStore,
+          riscv_tests/testALUExt,
+          riscv_tests/testBuiltins
+        ]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Check container environment
+        run: |
+          echo "Running on:"
+          cat /etc/os-release
+      - name: Check Verilator version
+        shell: bash
+        run: |
+          cd /workspaces
+          verilator --version
+      - name: Verilate
+        shell: bash
+        run: |
+          cd /workspaces
+          mkdir -p utils/bin && touch utils/bin/bender
+          make checkout
+          make verilate
+      - name: Checkout software
+        shell: bash
+        run: |
+          git submodule update --init --recursive
+      - name: SW tests
+        shell: bash
+        env:
+          VERILATOR_PATH: /workspaces/build/verilator
+        run: |
+          cd /workspaces
+          source sw/pulp-runtime/configs/pulpissimo_cv32.sh
+          cd sw/regression_tests/${{ matrix.test }}
+          make clean all run platform=verilator bootmode=fast_debug

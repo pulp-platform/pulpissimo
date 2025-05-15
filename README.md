@@ -246,6 +246,13 @@ If you encounter this bug use the following temporary workaround instead to buil
 VP_WORKAROUND_NONNULL_BUG=yes make build-pulp-sdk
 ```
 
+### Non-free synthesis setup
+If you have access to the non-free synthesis setup, you can download requirements
+with the command
+```bash
+make checkout-synthesis
+```
+
 ### Building the RTL simulation platform
 Note you need Questasim or Xcelium to do an RTL simulation of PULPissimo
 (verilator support planned, but not finished). Intel Modelsim for Intel FPGAs

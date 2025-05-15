@@ -13,7 +13,12 @@
 # limitations under the License.
 #
 # Author: Manuel Eggimann
-
+# Check if bender is in PATH; if yes, use it; if not, use $(PULPISSIMO_UTILS)/bender
+ifeq (, $(shell which bender 2>/dev/null))
+	BENDER ?= $(PULPISSIMO_UTILS)/bender
+else
+	BENDER ?= bender
+endif
 mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 current_dir := $(notdir $(patsubst %/,%,$(dir $(mkfile_path))))
 PULPISSIMO_ROOT=$(abspath $(current_dir)/..)
@@ -23,14 +28,23 @@ ifneq (,$(wildcard /etc/iis.version))
 endif
 
 include target/sim/questasim/Makefile
+include target/sim/verilator/Makefile
 include target/lint/spyglass/Makefile
 include target/fpga/Makefile
 include $(PULPISSIMO_ROOT)/utils/utils.mk
 
+# ignore synthesis targets if only free setup available
+-include target/synthesis/Makefile
+
 .PHONY: checkout
 ## Checkout all Bender IPs
 checkout: $(PULPISSIMO_UTILS)/bender
-	$(PULPISSIMO_UTILS)/bender checkout
+	$(BENDER) checkout
+
+.PHONY: checkout-synthesis
+checkout-synthesis: $(PULPISSIMO_UTILS)/bender
+	git clone --recursive git@iis-git.ee.ethz.ch:pulp-restricted/pulpissimo-synthesis target/synthesis
+	$(BENDER) update
 
 .PHONY: hw bootrom padframe
 ## Re-generate generated hardware IPs
