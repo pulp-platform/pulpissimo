@@ -53,5 +53,5 @@ An OpenOCD configuration file for the Digilent JTAG-HS1 adapter is included.
 To use it, run
 
 ```Shell
-$OPENOCD/bin/openocd -f pulpissimo/home/meggiman/projects/pulp/pulpissimo/fpga/pulpissimo-zcu104/openocd-zcu104-digilent-jtag-hs1.cfg
+$OPENOCD/bin/openocd -f openocd-zcu104-digilent-jtag-hs1.cfg
 ```
