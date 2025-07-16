@@ -49,9 +49,6 @@ Instead, you need to connect a separate JTAG adapter to the GPIO port (PMOD0 hea
 | gnd         | GND       | Pin 9    |
 | vdd         | 3V3       | Pin 11   |
 
-An OpenOCD configuration file for the Digilent JTAG-HS1 adapter is included.
-To use it, run
-
-```Shell
-$OPENOCD/bin/openocd -f openocd-zcu104-digilent-jtag-hs1.cfg
+OpenOCD configuration files for the Digilent JTAG-HS1 and JTAG-HS2 adapter are included.
+To use it, run: `openocd -f openocd-zcu104-digilent-jtag-hs1.cfg` or `openocd -f openocd-zcu104-digilent-jtag-hs2.cfg`.
 ```
