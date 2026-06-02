@@ -2005,5 +2005,392 @@ Debug / JTAG Subsystem — ASIC Tapeout Sign-off
 
 ---
 
-*Document version 0.3 — Last updated: 2026-06-02*
+---
+
+## L3 #3 — L2 Memory Subsystem {#l2}
+
+### 3.1 Role and Purpose
+
+L2 is PULPissimo's main on-chip memory (512 KB default). CV32E40P has no L1 D-cache — every load/store hits L2. It is also the target of every uDMA transfer and every JTAG SBA access. **This is the most ASIC-effort-intensive block** because every byte must be replaced from behavioral SCM to foundry SRAM macros.
+
+### 3.2 Sub-Hierarchy
+
+```
+pulp_soc
+└── l2_subsystem
+    ├── l2_tcdm_hybrid_interco      ← TCDM crossbar (multi-master arbiter)
+    │   ├── XBAR_TCDM               ← parallel paths NB_MASTERS × NB_BANKS
+    │   └── arb_FF (round-robin)    ← per-bank arbitration
+    ├── bank_sram_wrap[0..3]        ← 4 interleaved banks (112 KB each)
+    │   └── scm_wrap ★ REPLACE ★   ← behavioral SCM → foundry SRAM macro
+    ├── bank_sram_wrap_priv         ← 1 private bank (64 KB, FC-only)
+    │   └── scm_wrap ★ REPLACE ★
+    └── l2_boot_rom                 ← hw/asic_autogen_rom.sv (8 KB at 0x1A000000)
+
+Masters on TCDM crossbar:
+  M0: CV32E40P data port (OBI→TCDM)
+  M1: CV32E40P I-cache miss refill (OBI→TCDM)
+  M2: uDMA AXI master (AXI→TCDM bridge)
+  M3: Debug Module SBA (AXI→TCDM bridge)
+  M4: HWPE hardware accelerator (optional)
+```
+
+### 3.3 Address Map
+
+```
+0x1A00_0000 – 0x1A00_1FFF   Boot ROM (8 KB, read-only)
+0x1C00_0000 – 0x1C0F_FFFF   L2 interleaved banks (448 KB, 4×112 KB)
+0x1C10_0000 – 0x1C10_FFFF   L2 private bank (64 KB, FC-only)
+```
+
+**Interleaving**: `addr[3:2]` selects bank 0–3. A 16-byte burst hits all 4 banks in parallel → ~4× peak sequential bandwidth.
+
+### 3.4 Clock & Reset
+
+All L2 on `soc_clk` (~200 MHz), reset `soc_rstn`. No internal CDC — the bridges entering L2 are external. TCDM is single-cycle latency (req→gnt→rdata in 2 cycles).
+
+### 3.5 SCM → SRAM Replacement Procedure
+
+**Step 1 — Identify instances:**
+```bash
+grep -rn "scm_1x1\|scm_wrap" .bender/scm/
+```
+
+**Step 2 — Calculate macro sizes** (4 interleaved banks, each 112 KB = 28K×32b):
+```
+Depth: 28,672 words  Width: 32b  Ports: 1RW
+If foundry max is 8K×32: 4 macros per bank = 16 macros + 4 macros for private = 20 total
+```
+
+**Step 3 — Generate macros from foundry compiler:**
+```bash
+sram_compiler -words 8192 -bits 32 -mux 4 -ports 1RW \
+    -corner TT -voltage 0.9 -temperature 25 \
+    -output_dir macros/sram_8kx32/
+# Produces: .v, _TT.lib, _FF.lib, _SS.lib, .lef, (eventually .gds)
+```
+
+**Step 4 — Write scm_wrap_asic wrapper:**
+```systemverilog
+module scm_wrap_asic #(
+    parameter int unsigned ADDR_WIDTH = 15,
+    parameter int unsigned DATA_WIDTH = 32,
+    parameter int unsigned BE_WIDTH   = 4
+)(
+    input  logic                    clk, rst_n, req_i, we_i,
+    input  logic [ADDR_WIDTH-1:0]   addr_i,
+    input  logic [DATA_WIDTH-1:0]   wdata_i,
+    input  logic [BE_WIDTH-1:0]     be_i,
+    output logic [DATA_WIDTH-1:0]   rdata_o
+);
+    sram_8kx32 u_sram (
+        .CLK  (clk),    .CEB  (~req_i),
+        .WEB  (~we_i),  .A    (addr_i[12:0]),
+        .D    (wdata_i),.BWEB (~be_i),
+        .Q    (rdata_o)
+    );
+endmodule
+```
+
+**Step 5 — Map in Genus:**
+```tcl
+read_lib  macros/sram_8kx32/sram_8kx32_TT_0p9_25.lib
+read_lib  macros/sram_8kx32/sram_8kx32_FF_0p99_m40.lib
+read_lib  macros/sram_8kx32/sram_8kx32_SS_0p81_125.lib
+read_hdl  macros/sram_8kx32/sram_8kx32.v
+read_hdl  rtl/scm_wrap_asic.sv
+set_db root: .map_to_module {scm_wrap=scm_wrap_asic}
+```
+
+**Boot ROM**: generate foundry ROM macro from `sw/bootcode/build/boot_code.hex`, or keep `asic_autogen_rom.sv` as synthesized case-statement (~60–100K gates — large but flexible).
+
+### 3.6 Key ASIC Hazards
+
+| Hazard | Impact | Fix |
+|--------|--------|-----|
+| SCM not replaced | 5–10× area, 20× leakage, no ECC | Replace all instances before synthesis |
+| SRAM W→R same address | X in GLS (SRAM needs write-recovery time) | Add 1-cycle bubble in TCDM arbiter for same-word back-to-back |
+| SRAM .lib not loaded | Genus treats SRAM as black box | Load all 3 corners before elaborate |
+| Boot ROM at wrong address | CPU hangs at `0x1A000080` | Verify ROM macro maps to `0x1A000000` in address decode |
+
+### 3.7 Synthesis SDC (L2-specific)
+
+```sdc
+# TCDM is single-cycle — no multicycle paths
+# SRAM read data path is often the critical path:
+report_timing -through [get_pins -hier -filter "name=~*sram_8kx32*Q*"] -max_paths 30
+# If WNS < 0: pipeline the TCDM read return (add register after rdata)
+```
+
+### 3.8 Sign-off Table
+
+```
+L2 Memory Subsystem — ASIC Tapeout Sign-off
+══════════════════════════════════════════════════════════════════════════
+ #   Check                                Status   Pass criteria
+──────────────────────────────────────────────────────────────────────────
+ 1   RTL Lint — SCM waivers applied        ☐       0 unwaived violations
+ 2   Functional sim — all 5 tests          ☐
+     - CPU memtest all 512K                ☐
+     - uDMA write/read                     ☐
+     - JTAG SBA write/read                 ☐
+     - Interleaving: 4 banks parallel      ☐
+     - Private bank FC-only isolation      ☐
+ 3   RISC-V compliance — uses L2 storage   ☐       PASSED
+ 4   FPU IEEE-754                         N/A
+ 5   JTAG SBA L2 range                    ☐       restore/dump match
+ 6   CDC (at bridges only)                ☐       0 unwaived
+ 7   GLS with SRAM behavioral model        ☐
+     - Same memtest passes                 ☐
+     - No setup/hold on SRAM pins          ☐
+     - No X on rdata                       ☐
+ 8   Power                                 ☐
+     - Active < 5 mW uDMA bulk @ 200 MHz  ☐
+     - Idle leakage < 100 µW              ☐
+ 9   Synthesis                             ☐
+     - All SCM replaced (0 latches)        ☐
+     - 20 SRAM macros mapped               ☐
+     - Boot ROM resolved                   ☐
+     - WNS ≥ 0 all corners                 ☐
+ 10  Formal equiv                          ☐
+     - TCDM crossbar equivalent            ☐
+     - Boot ROM contents bit-exact         ☐
+     - SRAM storage cut-points waived      ☐
+──────────────────────────────────────────────────────────────────────────
+ SRAM macros at all PVT corners (TT/FF/SS)       ☐
+ SRAM .lib + .lef + .gds in build flow           ☐
+ SRAM power pins wired (VDD, VSS, VDDM)          ☐
+ BIST controller wired to all SRAM macros        ☐
+ Boot ROM macro generated from boot_code.hex     ☐
+ Boot ROM bit-exact match with objdump           ☐
+ SRAM write-recovery 1-cycle bubble honored      ☐
+ USE_L2_MULTIBANK + NB_L2_CHANNELS=4 defined     ☐
+══════════════════════════════════════════════════════════════════════════
+```
+
+---
+
+## L0 — ASIC Top / L1 — SoC Domain {#top}
+
+### Overview
+
+```
+L0: pulpissimo.sv    ← chip boundary: pads, clock gen, reset gen, DFT ports
+└── L1: soc_domain.sv ← thin structural wire-through; ties off cluster ports
+    └── L2: pulp_soc  ← all logic (covered in L3 blocks above)
+```
+
+### A. Padframe
+
+#### A.1 Sub-Hierarchy
+
+```
+padframe_adapter.sv  (RTL sim — uses tech_cells_generic)
+└── pulpissimo_padframe_rtl_sim_autogen  ← GENERATED by Padrick tool
+    ├── static_pads  (fixed-function, not muxable)
+    │   ├── pad_ref_clk        pull_up_pad   (32kHz XO input)
+    │   ├── pad_reset_n        pull_up_pad   (async reset)
+    │   ├── pad_clk_byp_en     pull_up_pad   (PLL bypass)
+    │   ├── pad_bootsel0/1     pull_up_pad   (boot mode)
+    │   ├── pad_jtag_tck/tms/tdi/tdo/trstn  (ASIC: Schmitt-trigger input)
+    │   ├── pad_hyper_csn[1:0] / reset_n     (HyperBus CS)
+    │   ├── pad_hyper_ck/ckn               (DDR clock pair — DDR IO cell)
+    │   ├── pad_hyper_dq[7:0]              (DDR data — DDR IO cell)
+    │   └── pad_hyper_rwds                 (async return clock)
+    └── muxed_pads  (any-to-any mux, APB-configured)
+        └── pad_io[GPIOCount-1:0]  (default 64 pads)
+            ├── mux_sel register (written via 0x1A107000+)
+            └── io_cell (drive strength + pull configurable)
+```
+
+#### A.2 Padrick Regeneration Flow
+
+The padframe is **auto-generated** — never hand-edit the `*_autogen` directories.
+
+Source config files:
+```
+hw/padframe/rtl_sim_padframe_config_top.yml  ← root
+hw/padframe/common_peripherals.yml           ← peripheral signal defs
+hw/padframe/rtl_sim_config/rtl_sim_pads.yml  ← pad list (type, pull, mux)
+hw/padframe/rtl_sim_config/rtl_sim_pad_types.yml ← pad cell types (generic)
+```
+
+**Regenerate after any pad count or signal change:**
+```bash
+pip install padrick
+cd hw/padframe
+padrick generate rtl_sim_padframe_config_top.yml \
+    -o pulpissimo_padframe_rtl_sim_autogen/ \
+    --settings padrick_generator_settings.yml
+```
+
+**For ASIC tapeout — create a new ASIC config:**
+1. Copy `rtl_sim_padframe_config_top.yml` → `asic_padframe_config_top.yml`
+2. Create `asic_config/asic_pad_types.yml` mapping abstract types to foundry cells:
+```yaml
+- name: schmitt_input_pad       # JTAG pads
+  user_attr: {foundry_cell: IO_STD_H}
+- name: ddr_output_pad          # HyperBus CK/DQ
+  user_attr: {foundry_cell: IO_DDR_O_H}
+- name: bidirectional_pad       # GP pads
+  user_attr: {foundry_cell: IO_PDDW_12_H}
+```
+3. Edit `custom_templates/rtl_templates/padframe.sv.mako` to emit foundry cell instantiation
+4. Regenerate: `padrick generate asic_padframe_config_top.yml -o pulpissimo_padframe_asic_autogen/`
+
+**IO pad ring placement rules:**
+- JTAG pads grouped (TCK, TMS, TDI, TDO, TRSTN adjacent)
+- HyperBus CK/CKn adjacent — matched length routing in PnR
+- Analog pads (ref_clk, PLL input) separated from digital GPIO by ≥2 filler cells
+- Power pads (VDD/VSS) every 8–10 IO pads around ring
+- Scan_in/Scan_out pads allocated in DFT planning stage
+
+### B. Clock Generation
+
+#### B.1 Behavioral vs ASIC
+
+`clock_gen_generic.sv` uses `gf22_FLL` behavioral model. **Replace entirely for ASIC** with `clock_gen_asic.sv` wrapping your foundry PLL.
+
+```
+pad_ref_clk (32.768 kHz)
+    │
+    ├── slow_clk = ref_clk gated by ICG           (32.768 kHz)
+    ├── PLL_soc → bypass_mux → ICG → soc_clk_o   (~200 MHz)
+    └── PLL_per → bypass_mux → ICG → per_clk_o   (~100 MHz)
+
+Bypass logic: auto-bypass until PLL LOCK asserted
+  → chip runs at ref_clk until both PLLs lock
+  → Boot ROM waits for LOCK then switches to full speed
+```
+
+The module interface is **fixed** — do not change port names. Boot ROM's `fll-v1.c` directly programs these APB registers. If your foundry PLL has a different register map, update `fll-v1.c`.
+
+#### B.2 Power-On Sequence
+
+```
+1. POR → rst_ni asserts → soc_clk = ref_clk (bypass active)
+2. Boot ROM runs at 32kHz, programs PLL dividers via APB
+3. PLLs acquire lock (~10–100 µs typical)
+4. LOCK → bypass_mux switches to PLL output
+5. soc_clk = 200 MHz, per_clk = 100 MHz
+6. Boot ROM reads LOCK status register, confirms lock
+7. Application boots at full frequency
+```
+
+#### B.3 MMMC Corner Setup (Cadence Genus)
+
+```tcl
+# constraints/pulpissimo_mmmc.tcl
+create_library_set -name libs_tt \
+  -timing [list $PDK/stdcells_TT_0p9_25.lib $PDK/sram_TT.lib $PDK/io_TT.lib $PDK/pll_TT.lib]
+create_library_set -name libs_ss \
+  -timing [list $PDK/stdcells_SS_0p81_125.lib $PDK/sram_SS.lib $PDK/io_SS.lib $PDK/pll_SS.lib]
+create_library_set -name libs_ff \
+  -timing [list $PDK/stdcells_FF_0p99_m40.lib $PDK/sram_FF.lib $PDK/io_FF.lib $PDK/pll_FF.lib]
+
+create_rc_corner -name rc_worst  -temperature 125 -qrc_tech $PDK/qrc_worst.tech
+create_rc_corner -name rc_best   -temperature -40 -qrc_tech $PDK/qrc_best.tech
+
+create_timing_condition -name tc_setup -library_sets {libs_ss}
+create_timing_condition -name tc_hold  -library_sets {libs_ff}
+
+create_delay_corner -name dc_setup -timing_condition tc_setup -rc_corner rc_worst
+create_delay_corner -name dc_hold  -timing_condition tc_hold  -rc_corner rc_best
+
+create_constraint_mode -name cm_func -sdc_files {constraints/pulpissimo_asic.sdc}
+
+create_analysis_view -name av_setup -constraint_mode cm_func -delay_corner dc_setup
+create_analysis_view -name av_hold  -constraint_mode cm_func -delay_corner dc_hold
+
+set_analysis_view -setup {av_setup} -hold {av_hold}
+```
+
+### C. Reset Generation
+
+Three `rstgen` instances (one per clock domain) implement the standard safe-reset pattern:
+- **Async assert**: reset propagates immediately on `pad_reset_n` low
+- **Sync deassert**: reset releases synchronously (2-flop synchronizer per domain)
+
+```
+pad_reset_n → padframe → s_global_rst_n ──┬── i_rstgen_soc_clk  → soc_rstn_synced
+                                           ├── i_rstgen_per_clk  → per_rstn_synced
+                                           └── i_rstgen_slow_clk → slow_rstn_synced
+```
+
+ASIC requirement: `rstgen` sync flops → metastability-hardened cells (same as GPIO sync flops).
+
+### D. DFT Connections
+
+```systemverilog
+// pulpissimo.sv lines 121–133
+assign s_dft_test_en = 1'b0;  // → all test_en/test_mode_i pins in SoC
+assign s_dft_cg_en   = 1'b0;  // → all dft_cg_en (forces ICGs transparent for scan)
+```
+
+Before DFT insertion:
+- Leave tied to `'0`; Genus will propagate constant and optimize unused test logic
+
+After DFT tool runs (Tessent/EDT):
+- `s_dft_test_en` → dedicated `pad_scan_enable` IO pad
+- `s_dft_cg_en`   → scan test controller output
+
+### E. Top-Level ASIC Sign-off
+
+```
+L0/L1 Top Level — ASIC Tapeout Sign-off
+══════════════════════════════════════════════════════════════════════════
+PADFRAME
+ Foundry IO cells (not generic)                          ☐
+ Schmitt-trigger on JTAG pads                            ☐
+ DDR IO cells on HyperBus CK/CKn/DQ                     ☐
+ ESD verified with foundry                               ☐
+ VDDIO / VDD isolation + level shifters                  ☐
+ Pad ring placement fixed in PnR                         ☐
+
+CLOCK GENERATION
+ clock_gen_asic.sv replacing behavioral model            ☐
+ Foundry PLL macros instantiated (×2)                   ☐
+ Boot ROM fll-v1.c compatible with PLL register map      ☐
+ Bypass until LOCK (glitch-free mux)                     ☐
+ 3 ICGs → foundry ICG cells                              ☐
+ MMMC corners (SS/FF/TT) defined                         ☐
+
+RESET
+ 3 × rstgen (soc/per/slow)                               ☐
+ rstgen sync flops → MT-hardened cells                   ☐
+ pad_reset_n has pull-up                                 ☐
+
+DFT
+ s_dft_test_en wired (tied '0 for pre-DFT synthesis)     ☐
+ All ICGs expose dft_cg_en                               ☐
+ Scan chain insertion planned                            ☐
+
+TOP SYNTHESIS
+ MMMC read before elaborate                              ☐
+ SIM_STDOUT=0 elaboration parameter                      ☐
+ WNS ≥ 0, TNS = 0 at setup and hold views               ☐
+ Cluster ports optimized away                            ☐
+══════════════════════════════════════════════════════════════════════════
+```
+
+---
+
+## Full SoC Area Budget (28nm reference estimates)
+
+| Block | Logic gates (NAND2-eq) | Notes |
+|-------|------------------------|-------|
+| CV32E40P + fpnew FPU | ~100K | Largest logic block |
+| SoC Interconnect | ~30K | AXI crossbar dominates |
+| uDMA subsystem | ~45K | HyperBus largest channel |
+| L2 Memory | ~20K + 20 SRAM macros | SRAMs are ~80% of chip die area |
+| Peripheral subsystem | ~30K | GPIO 12K |
+| Debug/JTAG | ~12K | |
+| Clock gen (excl. PLL macro) | ~5K | |
+| Padframe | ~64 IO cells | Quoted as cell count |
+| rstgen ×3 + glue | ~2K | |
+| **Total logic** | **~244K** | Excl. SRAMs, PLL, IO cells |
+
+---
+
+*Document version 0.4 — Last updated: 2026-06-02*
 *To update: edit `doc/pulpissimo_asic_flow.md` and commit to the branch.*
