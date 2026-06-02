@@ -1201,5 +1201,326 @@ pulpissimo/
 
 ---
 
-*Document version 0.1 — Last updated: 2026-06-01*
+## L3 #4 — uDMA Subsystem {#udma}
+
+### 4.1 Role and Purpose
+
+The uDMA (micro-DMA) is PULPissimo's autonomous peripheral DMA engine. Once the CPU programs a descriptor, the uDMA moves data between L2 memory and any peripheral **without CPU involvement**. This enables ultra-low-power operation: the CV32E40P can enter WFI sleep while audio, sensor, or communication data flows unattended.
+
+### 4.2 Sub-Hierarchy
+
+```
+pulp_soc (Bender: pulp_soc v5.0.1)
+└── udma_subsystem
+    ├── udma_core              ← central scheduler + L2 AXI master + APB slave
+    │   ├── udma_ctrl          ← clock-gate register (UDMA_CONF_CG), event mux
+    │   ├── udma_rx_ch[N]      ← per-channel RX FIFO (32-entry, 32-bit wide)
+    │   └── udma_tx_ch[N]      ← per-channel TX FIFO + descriptor buffer
+    │
+    ├── udma_uart   [N_UART=1] ← 8N1/8E1, baud generator, RX oversampling
+    ├── udma_i2c    [N_I2C=2]  ← master-only I2C, micro-code command sequencer
+    ├── udma_qspi   [N_QSPIM=1]← QSPI master, XIP-style burst, DDR mode
+    ├── udma_i2s    [N_I2S=1]  ← I2S/PDM audio, 2-ch TDM, master/slave
+    ├── udma_camera [N_CPI=1]  ← Camera Parallel Interface, line/frame sync
+    ├── udma_sdio   [N_SDIO=1] ← SDIO/SD-card host, 4-bit data, CRC7/16
+    ├── udma_hyper  [N_HYPER=1]← HyperBus / HyperRAM / HyperFlash, DDR 200 Mbps
+    └── udma_filter [optional] ← in-line CIC+HBF decimator (PDM→PCM)
+```
+
+Channel counts come from `udma_cfg_pkg` (inside `pulp_soc`). Default: 1 UART, 2 I2C, 1 QSPI, 1 I2S, 1 CPI, 1 SDIO, 1 HyperBus → ~16 logical DMA channels (each with RX + TX half).
+
+### 4.3 Bus Interfaces
+
+| Interface | Protocol | Width | Direction | Connected to |
+|-----------|----------|-------|-----------|--------------|
+| L2 data bus | AXI4-Lite | 32b addr/data | Master | L2 memory crossbar |
+| Config bus | APB | 32b | Slave | APB bridge from SoC interconnect |
+| Pad interfaces | Per-IP struct | varies | Bidirectional | `hw/padframe/padframe_adapter.sv` |
+| Events | Pulse (event bus) | 4b/channel | Output | FC event unit |
+
+**APB address map** (base `0x1A10_2000`):
+
+```
+0x000  UDMA_CONF_CG    — per-channel clock gate (1 bit per channel)
+0x004  UDMA_CONF_EVTIN — event trigger source mux
+0x080+ Peripheral 0 (UART0): RX_SADDR, RX_SIZE, RX_CFG; TX_SADDR, TX_SIZE, TX_CFG; CUSTOM[6]
+0x100+ Peripheral 1 (I2C0)
+0x180+ Peripheral 2 (I2C1)
+...   (0x80 per peripheral; 0x10 per half-channel)
+```
+
+**Per-channel descriptor registers** (`udma_v3.h`):
+
+```c
+SADDR  [31:0]  // L2 start address for transfer
+SIZE   [15:0]  // bytes to transfer
+CFG    [5:0]   // EN[4], CONT[0] (ping-pong), SIZE_8/16/32[2:1], CLEAR[5]
+```
+
+### 4.4 Clock Domain
+
+```
+soc_clk (~200 MHz) ── udma_core AXI master (L2 write path)
+per_clk (~100 MHz) ── APB config registers, FIFO read side
+ext I/O clocks     ── channel PHY (I2S BCLK, QSPI SCK, HyperBus CLK)
+```
+
+**CDC crossings** (all must be verified in Check 6):
+
+| Crossing | From → To | Mechanism |
+|----------|-----------|-----------|
+| RX FIFO write pointer | ext_clk → per_clk | gray-code + 2FF (`fifo_v3`) |
+| RX FIFO read pointer | per_clk → ext_clk | gray-code + 2FF |
+| RX FIFO read pointer | per_clk → soc_clk | gray-code + 2FF |
+| TX FIFO write pointer | soc_clk → per_clk | gray-code + 2FF |
+| Channel enable | per_clk → soc_clk | pulse synchronizer |
+| HyperBus RWDS | external pad → per_clk | fully async (waive in CDC) |
+
+### 4.5 ASIC-Specific Strategy
+
+#### SCM FIFOs → SRAM or FF-array
+Channel FIFOs are 32×32 bits (128 bytes). Options:
+- **Flip-flop array**: synthesizes clean, ~3× area vs SRAM, acceptable for small FIFOs
+- **Foundry 1-port SRAM**: memory compiler macro, replace `fifo_v3` storage array
+
+#### HyperBus DDR IO Cells — Critical
+`udma_hyper` drives DDR data at 200 Mbps. The behavioral RTL model uses a `negedge` flip-flop:
+
+```systemverilog
+// Behavioral — does NOT synthesize correctly through standard cells
+always_ff @(posedge clk) dq_out_rise <= data[7:0];
+always_ff @(negedge clk) dq_out_fall <= data[15:8];
+```
+
+**For ASIC**: replace with foundry DDR output IO cell (e.g., `DDRIOBUF`). This must happen **before synthesis** or Genus will generate incorrect negedge logic using standard cells.
+
+#### Clock Gating for Power
+`UDMA_CONF_CG` gates `per_clk` to each inactive channel. Verify ICG coverage:
+
+```tcl
+# In Genus after syn_map:
+report_clock_gating -hier -module udma_subsystem > udma_cg_report.rpt
+# Expect: 1 ICG cell per channel at its clock root
+```
+
+Target: **≥80% switching activity reduction** when a channel is idle.
+
+#### udma_filter Multicycle Path
+CIC+HBF decimation logic runs at I2S BCLK (2–4 MHz) — fast relative to its computation window:
+
+```sdc
+set_multicycle_path 2 -setup -through [get_pins -hier -filter "name=~*udma_filter*hbf*"]
+set_multicycle_path 1 -hold  -through [get_pins -hier -filter "name=~*udma_filter*hbf*"]
+```
+
+### 4.6 Verification Checklist (uDMA)
+
+#### Check 1 — RTL Lint
+
+```bash
+cd target/lint/spyglass
+make lint_rtl BENDER_TARGETS="-t rtl_sim -t asic"
+make show_results
+```
+
+uDMA-specific rules to watch:
+- `W528` — undriven output: HyperBus DDR outputs if DDR IO model absent
+- `W013` — multiple drivers: I2S BCLK if master/slave mode simultaneously active
+- `STARC05-2.1.3.1` — latches: channel enable not fully synchronous
+
+**Pass**: 0 errors, 0 policy-violating warnings.
+
+#### Check 2 — RTL Functional Simulation (per channel)
+
+```bash
+cd target/sim/questasim
+make build
+
+# UART loopback (TX pad → RX pad connected externally)
+make run_sim EXECUTABLE_PATH=<uart_test.hex> BOOTMODE=fastboot VSIM_FLAGS="+UART_LOOPBACK=1"
+
+# HyperBus (uses HyperRAM behavioral model in target/sim/vip/)
+make run_sim EXECUTABLE_PATH=<hyper_test.hex> BOOTMODE=fastboot
+
+# Load uDMA wave group
+do waves/udma_ss.tcl
+```
+
+Pass criteria per channel: received data == transmitted data; no FIFO overflow events; interrupt fires on transfer complete.
+
+#### Check 3 — RISC-V Compliance (uDMA-adjacent)
+
+uDMA register access tested indirectly: FC must program `SADDR/SIZE/CFG` registers without bus faults. Run compliance bootcode and verify no data-access exceptions occur in log:
+
+```bash
+make run_sim EXECUTABLE_PATH=<compliance.hex> BOOTMODE=jtag_openocd
+openocd -f target/sim/tb/openocd_configs/pulpissimo_compliance_test.cfg
+# Expect: OpenOCD log shows "riscv test_compliance passed"
+```
+
+#### Check 4 — FPU IEEE-754
+
+Not applicable to uDMA. Mark **N/A**.
+
+#### Check 5 — JTAG Debug While DMA In-Flight
+
+Verify CPU can be halted while uDMA transfer is active (autonomy property):
+
+```bash
+# Terminal 1: sim with long DMA transfer
+make run_sim EXECUTABLE_PATH=<long_dma.hex> BOOTMODE=jtag_openocd gui=1
+
+# Terminal 2: OpenOCD + GDB
+openocd -f target/sim/tb/openocd_configs/pulpissimo_debug.cfg
+riscv32-unknown-elf-gdb <long_dma.elf>
+(gdb) target remote :3333
+(gdb) monitor halt
+(gdb) x/4w 0x1A102084    # UART0 TX_CFG — must show EN=1 while halted
+(gdb) monitor resume
+```
+
+Pass: L2 memory contents advance during CPU halt; CPU resumes cleanly.
+
+#### Check 6 — CDC Analysis (uDMA is High Priority)
+
+```bash
+cd target/lint/spyglass
+make lint_rtl LINT_MODE=cdc
+```
+
+All 6 crossing types (see table in Section 4.4) must be covered by gray-code synchronizers. Waive only the HyperBus async RWDS input:
+
+```tcl
+# cdc_waiver.do
+waive -rule {CDC_COHERENCY} -module {udma_hyper} \
+  -comment "HyperBus RWDS is async by architecture"
+```
+
+Pass: 0 unwaived violations.
+
+#### Check 7 — Gate-Level Simulation
+
+```bash
+# Generate SDF from Genus
+genus_tcl> write_sdf $netlist_dir/pulpissimo.sdf
+
+# GLS with SDF back-annotation
+vsim -sdfmax /tb_pulp/i_dut/i_soc_domain/i_pulp_soc/i_udma_subsystem=\
+  build/synth/outputs/pulpissimo.sdf \
+  -L <foundry_stdcell_lib> work.tb_pulp
+```
+
+Pass: UART loopback and HyperBus read-back correct; no `X` on FIFO outputs (X = setup/hold violation on async FIFO gray-code path).
+
+#### Check 8 — Power Analysis
+
+```bash
+# Dump VCD for uDMA only
+vsim work.tb_pulp -do "
+  vcd file udma_activity.vcd;
+  vcd add -r /tb_pulp/i_dut/.../i_udma_subsystem/*;
+  run 10ms; vcd flush; quit -f"
+
+# Analyze in PrimePower/Voltus
+primepow -read_vcd udma_activity.vcd \
+         -read_netlist build/synth/outputs/pulpissimo.v \
+         -read_sdc constraints/pulpissimo_asic.sdc \
+         -output_dir reports/power/udma
+```
+
+Pass: Clock gating efficiency ≥80% when only 1 channel active. HyperBus DDR power within budget (~10–15 mW at 200 MHz/0.9V is expected).
+
+#### Check 9 — Synthesis (Cadence Genus)
+
+Append to main SDC before running Genus:
+
+```sdc
+# uDMA async pad clocks
+create_clock -name i2s_bclk -period 250.0 [get_ports pad_i2s_sck_i]
+create_clock -name qspi_sck -period  20.0 [get_ports {pad_spim_sck*}]
+
+set_clock_groups -asynchronous \
+  -group {soc_clk} -group {per_clk} -group {slow_clk} \
+  -group {jtag_tck} -group {i2s_bclk} -group {qspi_sck}
+
+# HBF filter multicycle
+set_multicycle_path 2 -setup -through [get_pins -hier -filter "name=~*udma_filter*hbf*"]
+set_multicycle_path 1 -hold  -through [get_pins -hier -filter "name=~*udma_filter*hbf*"]
+
+# I2C SCL stretch logic
+set_multicycle_path 4 -setup -through [get_pins -hier -filter "name=~*udma_i2c*scl_stretch*"]
+set_multicycle_path 3 -hold  -through [get_pins -hier -filter "name=~*udma_i2c*scl_stretch*"]
+
+# HyperBus DDR output timing
+set_output_delay -max  1.0 -clock qspi_sck [get_ports {pad_hyper_dq*}]
+set_output_delay -min -0.5 -clock qspi_sck [get_ports {pad_hyper_dq*}]
+set_output_delay -max  1.0 -clock qspi_sck -clock_fall \
+  [get_ports {pad_hyper_dq*}] -add_delay
+
+# HyperBus RWDS — async input, no timing check
+set_false_path -from [get_ports pad_hyper_rwds_i]
+```
+
+Expected area (28nm rough estimate):
+
+| Sub-block | NAND2-equivalent gates |
+|-----------|------------------------|
+| udma_core (scheduler + FIFOs) | ~8K |
+| udma_uart | ~2K |
+| udma_i2c ×2 | ~5K |
+| udma_qspi | ~6K |
+| udma_i2s | ~4K |
+| udma_camera | ~3K |
+| udma_sdio | ~7K |
+| udma_hyper | ~10K |
+| **Total** | **~45K** |
+
+Pass: WNS ≥ 0 at all MMMC corners; `report_clock_gating` shows 1 ICG per channel.
+
+#### Check 10 — Formal Equivalence
+
+```bash
+lec -work reports/lec/udma/ <<'EOF'
+read_library -both $PDK_LEC_LIB
+read_design -golden -sdc constraints/pulpissimo_asic.sdc -verilog rtl_list_udma.f
+read_design -revised -verilog build/synth/outputs/pulpissimo.v
+set_root_module udma_subsystem -both
+set_flatten_model -seq_constant
+map_points -auto
+verify
+report_verify
+EOF
+```
+
+Waive HyperBus DDR cell and any SCM→SRAM replacements as structural differences; verify data path equivalence manually for those instances.
+
+### 4.7 Sign-off Table
+
+```
+uDMA Subsystem — ASIC Tapeout Sign-off
+──────────────────────────────────────────────────────────────────────────
+ #    Check                                Status   Notes
+──────────────────────────────────────────────────────────────────────────
+ 1    RTL Lint — 0 errors                   ☐
+ 2    Functional sim — all 7 channels        ☐       UART/I2C/QSPI/I2S/CPI/SDIO/HyperBus
+ 3    RISC-V compliance — no bus faults      ☐       uDMA register access
+ 4    FPU IEEE-754                          N/A
+ 5    JTAG halt while DMA in-flight          ☐       CPU halts, uDMA continues autonomously
+ 6    CDC — 0 unwaived violations            ☐       6 crossing types; RWDS waived
+ 7    Gate-level sim — all channels pass     ☐       SDF back-annotated; no X on FIFOs
+ 8    Power — ICG efficiency ≥80%            ☐       Per-channel clock gating verified
+ 9    Synthesis — WNS ≥ 0 all corners        ☐       HyperBus DDR cell replaced pre-synth
+ 10   Formal equiv — RTL vs netlist          ☐       DDR/SCM replacements waived
+──────────────────────────────────────────────────────────────────────────
+ HyperBus DDR IO cell replaced (not behavioral)  ☐
+ FIFO SCM → FF-array or SRAM macro               ☐
+ UDMA_CONF_CG gates → foundry ICG cells          ☐
+ udma_filter HBF multicycle path in SDC          ☐
+ Pad interfaces count matches udma_cfg_pkg        ☐
+──────────────────────────────────────────────────────────────────────────
+```
+
+---
+
+*Document version 0.2 — Last updated: 2026-06-02*
 *To update: edit `doc/pulpissimo_asic_flow.md` and commit to the branch.*
