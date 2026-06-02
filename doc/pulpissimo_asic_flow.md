@@ -1522,5 +1522,488 @@ uDMA Subsystem — ASIC Tapeout Sign-off
 
 ---
 
-*Document version 0.2 — Last updated: 2026-06-02*
+## L3 #5 — Peripheral Subsystem {#periph}
+
+### 5.1 Role and Purpose
+
+The Peripheral Subsystem is the APB-attached register bank for everything that isn't speed-critical: GPIO, timers, event/interrupt control, SoC control registers, FLL/PLL configuration, and pad multiplexing. Slowest clock domain (`per_clk` ≈100 MHz), highest register count, and most software-visible state.
+
+### 5.2 Sub-Hierarchy
+
+```
+pulp_soc (Bender: pulp_soc v5.0.1)
+└── soc_peripherals
+    ├── apb_bus              ← APB interconnect (1 master from AXI bridge, N slaves)
+    ├── apb_gpio             ← GPIO controller (hw/vendored_ips/gpio — local, regen-able)
+    │   └── gpio_reg_top     ← Auto-generated register file (regtool from gpio_regs.hjson)
+    ├── apb_soc_ctrl         ← Boot addr, JTAG IDs, chip info registers
+    ├── apb_advanced_timer   ← 4× 32-bit advanced timer (PWM-capable)
+    ├── apb_timer            ← 2× 32-bit RISC-V mtime/mtimecmp timers
+    ├── apb_event_unit       ← Event/interrupt controller (CLINT-style)
+    │   ├── core_event_unit  ← Per-core event mask, WFI wakeup
+    │   ├── interrupt_mask   ← 32-bit IRQ enable + status
+    │   └── event_fifo       ← SW event queue
+    ├── apb_fll_if           ← FLL/PLL config shim
+    ├── apb_pad_ctrl         ← Pad mux, drive strength, pull-up/down registers
+    ├── apb_stdout           ← Sim-only UART (SIM_STDOUT=1 only — REMOVE for ASIC)
+    └── apb_i2cs             ← Optional I2C slave for external host control
+```
+
+### 5.3 Bus Interfaces
+
+| Interface | Protocol | Width | Direction | Connected to |
+|-----------|----------|-------|-----------|--------------|
+| Config | APB3 | 32b addr/data | Slave | AXI→APB bridge |
+| GPIO pins | logic | GPIOCount (default 64) | Bidirectional + TX-en | Padframe |
+| Pad ctrl | logic | per-pad | Output | Padframe pad cells |
+| Timer IRQ | logic | 32-line | Output | CV32E40P `irq_i[31:0]` |
+| Event lines | pulse | varies | Input | From uDMA, GPIO, timer |
+| FLL config | dedicated | varies | Output | clock_gen_generic / foundry PLL |
+
+**APB Address Map** (base `0x1A10_0000`):
+
+```
+0x0000  FLL config         apb_fll_if
+0x1000  GPIO               apb_gpio         (64 pins default)
+0x2000  uDMA               udma_subsystem   (L3 #4)
+0x4000  SoC Control        apb_soc_ctrl
+0x5000  Advanced Timer     apb_advanced_timer (4-ch PWM)
+0x6000  Event Unit         apb_event_unit
+0x7000  Pad Mux/Ctrl       apb_pad_ctrl
+0xB000  Basic Timer        apb_timer (mtime/mtimecmp)
+0xF000  sim-stdout         (REMOVE for ASIC: SIM_STDOUT=0)
+```
+
+### 5.4 Clock & Reset Domain
+
+- `per_clk` (~100 MHz) — all APB registers, GPIO sync flops, event unit
+- `slow_clk` (32.768 kHz) — optional always-on RTC domain
+- `per_rstn` — synchronous deassert, async assert (from `rstgen`)
+
+**CDC**: GPIO inputs (`gpio_i`) arrive from pads asynchronously → **2-flop synchronizer** built into `apb_gpio`. These sync flops must map to foundry **metastability-hardened** cells on ASIC.
+
+### 5.5 GPIO — Vendored IP Detail
+
+GPIO lives at `hw/vendored_ips/gpio/` (not a Bender dep — vendored because regen requires a local makefile step). Default: 64 pins. To change for your ASIC:
+
+```bash
+cd hw/vendored_ips/gpio
+make reconfigure GPIOS=48    # regenerates gpio_reg_pkg.sv + gpio_regs.sv
+# GPIOCount propagates everywhere via gpio_reg_pkg::GPIOCount
+```
+
+Per-pin features: push-pull or open-drain output; 2-stage input synchronization; rising/falling edge + high/low level interrupts; per-pin IRQ enable + status; global + per-pin interrupt lines.
+
+### 5.6 Event Unit — IRQ Mapping
+
+`apb_event_unit` maps ~32 event sources to CV32E40P's `irq_i[31:0]`:
+
+```
+MSI  (sw interrupt)         → irq_i[3]
+MTI  (machine timer)        → irq_i[7]   (from apb_timer mtime)
+MEI  (machine external)     → irq_i[11]
+uDMA channel events         → irq_i[16..23]
+GPIO global interrupt       → irq_i[24]
+Advanced timer ch0..3 IRQs  → irq_i[25..28]
+SW event queue              → irq_i[29..31]
+```
+
+WFI sleep: event unit holds CPU in sleep, wakes on any unmasked event.
+
+### 5.7 ASIC-Specific Strategy
+
+**SIM_STDOUT removal** — mandatory:
+```tcl
+# In Genus elaboration:
+elaborate pulpissimo -parameters {SIM_STDOUT=0}
+# Verify: apb_stdout NOT in get_cells -hier output
+```
+
+**Metastability-hardened GPIO sync flops**:
+```sdc
+set_attribute -name dont_touch -value true \
+  [get_cells -hier -filter "name=~*gpio*sync_d*"]
+```
+Check foundry PDK for `SYNC2_X*` or `METASTABLE_FF` cells — replace inferred flops.
+
+**Pad ctrl safe reset defaults** — wrong direction on bidirectional pad at reset can short outputs. Verify all `apb_pad_ctrl` registers reset to input mode + weak pull.
+
+### 5.8 Synthesis SDC Additions
+
+```sdc
+# GPIO inputs are async from outside world
+set_false_path -from [get_ports gpio_i*]
+
+# Pad ctrl registers — written rarely, no fast path needed
+set_multicycle_path 2 -setup \
+  -through [get_pins -hier -filter "name=~*apb_pad_ctrl*reg*"]
+
+# AON timer on slow_clk — separate async group (if used)
+set_clock_groups -asynchronous -group {per_clk} -group {slow_clk}
+```
+
+### 5.9 Sign-off Table
+
+```
+Peripheral Subsystem — ASIC Tapeout Sign-off
+──────────────────────────────────────────────────────────────────────────
+ #    Check                                Status   Notes
+──────────────────────────────────────────────────────────────────────────
+ 1    RTL Lint — 0 errors                   ☐
+ 2    Functional sim (GPIO/Timer/Event)      ☐
+ 3    RISC-V compliance — mtime/CSRs         ☐
+ 4    FPU IEEE-754                          N/A
+ 5    JTAG SBA — read/write all APB regs    ☐
+ 6    CDC — GPIO 2-flop sync verified        ☐
+ 7    GLS — sync cells mapped MT-hardened    ☐
+ 8    Power — ICG per peripheral, <5% idle  ☐
+ 9    Synthesis — WNS ≥ 0, SIM_STDOUT=0     ☐
+ 10   Formal equiv — gpio_reg regen matches  ☐
+──────────────────────────────────────────────────────────────────────────
+ SIM_STDOUT absent from netlist                  ☐
+ GPIO pin count regenerated (gpio_reg_pkg)       ☐
+ Pad ctrl reset defaults safe (input + weak-pu)  ☐
+ GPIO sync flops → MT-hardened cells             ☐
+ apb_stdout pad NOT in padframe                  ☐
+──────────────────────────────────────────────────────────────────────────
+```
+
+---
+
+## L3 #6 — Debug / JTAG Subsystem {#debug}
+
+### 6.1 Role and Purpose
+
+PULPissimo has **two independent JTAG TAPs** sharing a single 5-pin JTAG port (TCK, TMS, TDI, TDO, TRST_N) in a daisy-chain. Understanding both is essential: wrong IDCODEs or wrong OpenOCD scan-chain declaration are the #1 bring-up failure.
+
+TAP0 (position 0 in chain): **PULP legacy adv_dbg_if** — used for fast binary preloading in simulation via `jtag_legacy` boot mode. Not a standard debug protocol.
+
+TAP1 (position 1 in chain): **RISC-V DMI (Debug Module Interface)** — standard RISC-V external debug spec 0.13. Used by OpenOCD + GDB for software debug, compliance testing, and all production debug.
+
+### 6.2 Sub-Hierarchy
+
+```
+pulpissimo.sv (ASIC top)
+├── i_padframe
+│   ├── pad_jtag_tck     ← Schmitt-trigger IO cell (ASIC: use ST input buffer)
+│   ├── pad_jtag_tms     ← Schmitt-trigger IO cell
+│   ├── pad_jtag_tdi     ← Schmitt-trigger IO cell
+│   ├── pad_jtag_tdo     ← Standard output cell
+│   └── pad_jtag_trstn   ← Schmitt-trigger IO cell with pull-up
+│
+└── i_soc_domain
+    └── i_pulp_soc
+        ├── i_jtag_tap_top (jtag_pulp v0.2.0 — Bender dep)
+        │   ├── TAP0: adv_dbg_if    ← PULP legacy TAP, IDCODE 0x5fffedb3
+        │   │   └── adbg_top        ← AXI4 master to L2, direct memory access
+        │   └── TAP1: dmi_jtag      ← RISC-V DMI TAP, IDCODE 0x50001db3
+        │       └── dm_top          ← Debug Module (register file + SBA)
+        │           ├── dm_csrs     ← dmcontrol, dmstatus, abstractcs, data*
+        │           ├── dm_sba      ← System Bus Access (AXI4 to L2/periph)
+        │           └── dm_mem      ← Abstract command scratch area
+        │
+        └── i_fc_subsystem
+            └── cv32e40p_core
+                └── cs_registers    ← dcsr, dpc, tdata* (trigger unit)
+```
+
+### 6.3 TAP Daisy-Chain
+
+The two TAPs share a single TDI/TDO path. JTAG protocol connects them:
+```
+Host TDI → TAP0 (adv_dbg_if) TDO → TAP1 (dmi_jtag) TDI → TDO → Host
+                ↑                          ↑
+        IDCODE 0x5fffedb3           IDCODE 0x50001db3
+```
+
+OpenOCD declares this in `pulpissimo_debug.cfg`:
+```tcl
+jtag newtap riscv unknown0 -irlen 5 -expected-id 0x5fffedb3  # TAP0
+jtag newtap riscv cpu      -irlen 5 -expected-id 0x50001db3  # TAP1
+```
+
+Both TAPs have IR length = 5 bits. IDCODE register = IR=0x01 (standard JTAG).
+
+### 6.4 Boot Modes
+
+PULPissimo supports 3 boot modes, selectable at simulation time:
+
+| Mode | How it works | Use case |
+|------|-------------|----------|
+| `fastboot` | Testbench writes ELF directly to L2 via hierarchy path | Fastest — functional sim only. **Not physically realizable!** |
+| `jtag_legacy` | adv_dbg_if TAP0 preloads binary over JTAG into L2, then releases reset | Legacy PULP sim; fast preload in FPGA bring-up |
+| `jtag_openocd` | OpenOCD uses DMI TAP1 + GDB load to write ELF sections to L2, then `resume` | Real hardware bring-up, production debug, compliance testing |
+
+Boot vector is **`0x1A00_0080`** — this is the Boot ROM entry point inside `pulp_soc`. The Boot ROM (`hw/asic_autogen_rom.sv`) is a hardcoded instruction sequence generated from `sw/bootcode/`.
+
+### 6.5 Boot ROM (Critical ASIC Step)
+
+The Boot ROM is a compiled binary embedded as a SystemVerilog `case` statement in `hw/asic_autogen_rom.sv`. It:
+1. Configures FLL/PLL to target frequency
+2. Sets up pad mux for UART or QSPI boot
+3. Loads application binary from QSPI flash (production) or waits for JTAG download
+4. Jumps to application entry point
+
+**For ASIC tapeout — Boot ROM must be frozen last:**
+```bash
+cd sw/bootcode
+make clean
+make CORE=riscv                     # generates boot_code.c → .elf → .srec
+python3 gen_rom.py boot_code.srec   # generates asic_autogen_rom.sv
+cp asic_autogen_rom.sv ../../hw/asic_autogen_rom.sv
+# Then commit — this is the ROM that goes to tape
+```
+
+Any FLL/PLL frequency plan change, pad mux change, or boot protocol change requires regenerating the Boot ROM.
+
+### 6.6 JTAG Pad Cells — ASIC Requirement
+
+JTAG signals must use **Schmitt-trigger input IO cells** to handle slow/noisy TCK edges on PCBs:
+
+```
+pad_jtag_tck   → Schmitt-trigger input  + pull-down  (no clock when idle)
+pad_jtag_tms   → Schmitt-trigger input  + pull-up    (TMS high = Run-Test-Idle)
+pad_jtag_tdi   → Schmitt-trigger input  + pull-up    (idle high per JTAG spec)
+pad_jtag_trstn → Schmitt-trigger input  + pull-up    (active-low, must default deasserted)
+pad_jtag_tdo   → Standard output cell, 2–4 mA drive
+```
+
+In `hw/padframe/*.yml`, set the `type: schmitt_input` attribute for these pads and regenerate the padframe with Padrick.
+
+### 6.7 Clock Domain (TCK is Fully Async)
+
+```
+TCK (async, 1–10 MHz typical)
+   │
+   ├── TAP0 adv_dbg_if FSM    (TCK domain)
+   │       │
+   │       └── CDC → soc_clk  (gray-code FIFO in adbg_axi_if)
+   │
+   └── TAP1 dmi_jtag TAP+DTM  (TCK domain)
+           │
+           └── CDC → soc_clk  (req/ack handshake in dm_top)
+```
+
+TCK must be declared as an independent async clock group in SDC:
+```sdc
+create_clock -name jtag_tck -period 100.0 [get_ports pad_jtag_tck]
+set_clock_groups -asynchronous -group {jtag_tck} -group {soc_clk} -group {per_clk}
+```
+
+### 6.8 Debug Module (dm_top) — RISC-V Debug Spec 0.13
+
+The Debug Module provides:
+
+| Feature | Mechanism |
+|---------|-----------|
+| Halt/resume | `dmcontrol.haltreq` → CV32E40P enters debug mode at `0x1A11_0800` (dm_mem) |
+| Single-step | `dcsr.step` in CV32E40P → halts after each instruction |
+| Register read/write | Abstract command `ACCESS_REGISTER` via `abstractcs`/`command`/`data` regs |
+| Memory access | System Bus Access (`sbcs`, `sbaddr`, `sbdata`) — AXI4 master to any L2/periph address |
+| Breakpoints | CV32E40P trigger unit: `tdata1`/`tdata2` (2 hardware breakpoints) |
+| Program buffer | 2-word buffer for arbitrary instruction injection |
+
+IDCODE decode of `0x50001db3`:
+```
+Version  [31:28] = 0x5     (ETH Zurich)
+PartNum  [27:12] = 0x0001  (cv32e40p debug module)
+Manuf    [11:1]  = 0x6D9   (JEDEC: University of Bologna)
+Always1  [0]     = 1
+```
+
+### 6.9 Verification Checklist (Debug / JTAG)
+
+#### Check 1 — RTL Lint
+```bash
+make lint_rtl
+```
+Watch for: `W214` — synchronizer not recognized (TCK domain flops); `W528` — undriven TDO if scan chain is misconfigured.
+
+#### Check 2 — Functional Sim: JTAG Scan Chain
+
+First test before any register access — verify the ID chain is correct:
+```bash
+cd target/sim/questasim
+make build
+make run_sim EXECUTABLE_PATH=/dev/null BOOTMODE=jtag_openocd gui=1
+
+# In a second terminal:
+openocd -f target/sim/tb/openocd_configs/pulpissimo_debug.cfg
+```
+
+OpenOCD log must show:
+```
+TAP: riscv.unknown0    IDCODE 0x5fffedb3   adv_dbg_if
+TAP: riscv.cpu         IDCODE 0x50001db3   dmi_jtag
+```
+
+Any mismatch means the IDCODE parameter in `pulp_soc_defines.sv` doesn't match the RTL — fix before proceeding.
+
+#### Check 3 — RISC-V Compliance via OpenOCD
+
+```bash
+make run_sim EXECUTABLE_PATH=/dev/null BOOTMODE=jtag_openocd
+
+openocd -f target/sim/tb/openocd_configs/pulpissimo_compliance_test.cfg
+# Config runs: riscv test_compliance; shutdown
+```
+
+Pass: OpenOCD log ends with `riscv test_compliance: passed`. This exercises all mandatory debug registers (dmcontrol, dmstatus, abstractcs, hartinfo, sbcs, etc.).
+
+#### Check 4 — FPU IEEE-754
+
+**N/A** — Debug subsystem has no FPU.
+
+#### Check 5 — Full Debug Session
+
+The most important functional debug check — exercise the complete debug flow:
+
+```bash
+# Terminal 1: start sim
+make run_sim EXECUTABLE_PATH=<app.hex> BOOTMODE=jtag_openocd gui=1
+
+# Terminal 2: OpenOCD
+openocd -f target/sim/tb/openocd_configs/pulpissimo_debug.cfg
+
+# Terminal 3: GDB
+riscv32-unknown-elf-gdb <app.elf>
+(gdb) target remote :3333
+(gdb) load                           # program via SBA
+(gdb) break main                     # hardware breakpoint
+(gdb) continue                       # run to breakpoint
+(gdb) info registers                 # read all GPRs via abstract command
+(gdb) x/16w 0x1C000000               # memory read via SBA
+(gdb) set *0x1C000000 = 0xDEADBEEF   # memory write via SBA
+(gdb) stepi                          # single step (dcsr.step)
+(gdb) detach                         # release target
+```
+
+Pass: all operations complete without timeout; CPU resumes after detach.
+
+#### Check 6 — CDC Analysis (JTAG paths)
+
+```bash
+make lint_rtl LINT_MODE=cdc
+```
+
+Critical JTAG CDC paths:
+- TCK → soc_clk in `adbg_axi_if` (TAP0 → L2 AXI): req/ack + data capture
+- TCK → soc_clk in `dmi_jtag` (TAP1 → dm_top): req/ack handshake
+- TRSTn (async reset) → soc_clk domain resets: must be synchronous deassert
+
+Waive only the external TCK pad input itself (it IS the clock):
+```tcl
+waive -rule {CDC_INPUTPORT} -port {pad_jtag_tck} \
+  -comment "TCK is an external async clock, declared via create_clock"
+```
+
+Pass: 0 unwaived violations. Both TAP→SoC handshakes must show synchronizer coverage.
+
+#### Check 7 — Gate-Level Simulation
+
+After synthesis, re-run the full GDB debug session on the gate-level netlist with SDF:
+```bash
+vsim -sdfmax /tb_pulp/i_dut=build/synth/outputs/pulpissimo.sdf \
+  -L <foundry_lib> work.tb_pulp
+# Then run: openocd + gdb halt/resume/breakpoint sequence
+```
+
+Pass: scan chain IDCODEs still correct; halt/resume/single-step functional.
+
+#### Check 8 — Power Analysis (JTAG idle)
+
+JTAG should draw near-zero power when idle (no active debug session):
+```bash
+# Measure with TCK tied low (no toggling)
+# Expected: only leakage from TAP FSM flops (<0.1 mW)
+report_power -hier -module i_jtag_tap_top
+```
+
+#### Check 9 — Synthesis Constraints (JTAG)
+
+```sdc
+# ── JTAG Clock ────────────────────────────────────────────────────────────
+create_clock -name jtag_tck -period 100.0 [get_ports pad_jtag_tck]
+
+set_clock_groups -asynchronous \
+  -group {soc_clk} -group {per_clk} -group {slow_clk} \
+  -group {jtag_tck} -group {i2s_bclk} -group {qspi_sck}
+
+# TCK input uncertainty (PCB jitter)
+set_clock_uncertainty 2.0 [get_clocks jtag_tck]
+
+# JTAG IO timing constraints
+set_input_delay  -max 5.0 -clock jtag_tck [get_ports {pad_jtag_tdi pad_jtag_tms}]
+set_output_delay -max 5.0 -clock jtag_tck [get_ports pad_jtag_tdo]
+
+# TRSTn is async — no timing check
+set_false_path -from [get_ports pad_jtag_trstn]
+
+# Scan chain verification: do NOT optimize away IDCODE register
+set_dont_touch [get_cells -hier -filter "name=~*idcode_reg*"]
+```
+
+Expected area: `jtag_tap_top` (both TAPs + Debug Module) ≈ 8–12K NAND2-equivalent gates.
+
+#### Check 10 — Formal Equivalence
+
+```bash
+lec -work reports/lec/jtag/ <<'EOF'
+read_library -both $PDK_LEC_LIB
+read_design -golden  -verilog rtl_list_jtag.f
+read_design -revised -verilog build/synth/outputs/pulpissimo.v
+set_root_module i_jtag_tap_top -both
+set_flatten_model -seq_constant
+map_points -auto
+verify
+report_verify
+EOF
+```
+
+Watch for: IDCODE register must be functionally equivalent — if Genus optimized it away (because nothing reads it during synthesis), use `set_dont_touch` on the IDCODE capture register.
+
+### 6.10 Boot ROM Freeze Checklist (Pre-Tapeout)
+
+```
+□ FLL/PLL target frequency finalized
+□ Pad mux configuration for boot mode finalized
+□ Boot ROM regenerated: make + gen_rom.py
+□ hw/asic_autogen_rom.sv committed (final version)
+□ Boot ROM read-back verified in simulation:
+    → CPU fetches from 0x1A00_0080, rom returns correct instructions
+□ Boot ROM area in memory map protected (no writes possible)
+□ ROM contents match objdump of boot_code_asic.objdump
+```
+
+### 6.11 Sign-off Table (Debug/JTAG)
+
+```
+Debug / JTAG Subsystem — ASIC Tapeout Sign-off
+──────────────────────────────────────────────────────────────────────────
+ #    Check                                Status   Notes
+──────────────────────────────────────────────────────────────────────────
+ 1    RTL Lint — 0 errors                   ☐
+ 2    Scan chain IDCODEs correct             ☐       0x5fffedb3 + 0x50001db3
+ 3    RISC-V compliance — all DMI regs      ☐       riscv test_compliance passed
+ 4    FPU IEEE-754                          N/A
+ 5    Full GDB session — halt/step/bp/mem   ☐       load, break, stepi, memory r/w
+ 6    CDC — both TAP→SoC crossings verified ☐       req/ack handshakes; TRSTn sync
+ 7    GLS — scan chain + debug functional   ☐       SDF back-annotated
+ 8    Power — JTAG idle near zero            ☐       TCK tied low, leakage only
+ 9    Synthesis — WNS ≥ 0, IDCODE preserved ☐       set_dont_touch on IDCODE reg
+ 10   Formal equiv — IDCODE + DM registers  ☐
+──────────────────────────────────────────────────────────────────────────
+ JTAG pads use Schmitt-trigger IO cells          ☐
+ TRSTN pad has pull-up                           ☐
+ TRSTn deassert is synchronous in soc_clk domain ☐
+ Boot ROM regenerated from sw/bootcode/          ☐
+ Boot ROM contents match boot_code_asic.objdump  ☐
+ Boot vector 0x1A00_0080 in ROM not writable     ☐
+ Both IDCODE values match pulp_soc_defines.sv    ☐
+──────────────────────────────────────────────────────────────────────────
+```
+
+---
+
+*Document version 0.3 — Last updated: 2026-06-02*
 *To update: edit `doc/pulpissimo_asic_flow.md` and commit to the branch.*
